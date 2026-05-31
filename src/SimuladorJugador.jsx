@@ -1,15 +1,13 @@
 import { useState } from "react";
 
 /* ============================================================
-   LA CATA A CIEGAS — Симулятор игрока  /player  (v2)
+   LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
    La Ciudad de los Sentidos · лингвистический детектив
-   3 режима: Детектив · Свидетель Канона · Свидетель Фантасии
-   — Детектив: ДВА свидетеля (один Канон/правда, один Фантасия/ложь),
-     выбираешь кому задать вопрос. Кнопки 10 глаголов → история на
-     испанском для сверки. Глагол скрыт.
-   — Свидетели: тренировка ответов (правда / убедительная ложь).
-   Вопросы — официальная «Шпаргалка Детектива» (воронка L1→L2→L3)
-   + «Шеф делает это один?». Ответы сверены с Историей-маяк и досье.
+   ИЗМЕНЕНИЯ v2.1: система баллов + сессионный счёт
+   — Детектив: +5/+3/+1 по числу вопросов до угадывания
+   — Свидетель: раунд 18 вопросов (1-9 разогрев, 10-18 оценка)
+     0 ошибок→+5, 1-2→+3, 3-4→+1, 5+→0
+   — Сессионный счёт по трём ролям, живёт пока не вышел
    ============================================================ */
 
 const C = {
@@ -21,9 +19,7 @@ const C = {
 };
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 
-// ---- Банк вопросов (официальная Шпаргалка Детектива, по уровням-воронке) ----
 const QUESTIONS = [
-  // Уровень 1 — категория
   { id: "n11", lvl: 1, q: "¿El Jefe hace esto?", ru: "Шеф делает это?" },
   { id: "m1",  lvl: 1, q: "¿El Jefe hace esto solo?", ru: "Шеф делает это один?" },
   { id: "n12", lvl: 1, q: "¿Los ayudantes también hacen esto?", ru: "Помощники тоже делают это?" },
@@ -31,7 +27,6 @@ const QUESTIONS = [
   { id: "n14", lvl: 1, q: "¿Esto pasa fuera del palacio?", ru: "Это происходит вне дворца?" },
   { id: "n15", lvl: 1, q: "¿Esto pasa por la mañana?", ru: "Это происходит утром?" },
   { id: "n16", lvl: 1, q: "¿Esto ocurre todos los días?", ru: "Это происходит каждый день?" },
-  // Уровень 2 — сужение
   { id: "n21", lvl: 2, q: "¿Se necesitan las manos para esto?", ru: "Нужны руки?" },
   { id: "n22", lvl: 2, q: "¿Se necesitan los ojos para esto?", ru: "Нужны глаза?" },
   { id: "n23", lvl: 2, q: "¿Se necesitan los oídos para esto?", ru: "Нужны уши?" },
@@ -41,7 +36,6 @@ const QUESTIONS = [
   { id: "n27", lvl: 2, q: "¿Se necesita dinero para esto?", ru: "Нужны деньги?" },
   { id: "n28", lvl: 2, q: "¿Esto produce un sonido?", ru: "Это производит звук?" },
   { id: "n29", lvl: 2, q: "¿Después de esto llega una idea nueva?", ru: "После этого приходит новая идея?" },
-  // Уровень 3 — точное попадание
   { id: "n31", lvl: 3, q: "¿Esto dura menos de quince minutos?", ru: "Длится меньше 15 минут?" },
   { id: "n32", lvl: 3, q: "¿Esto ocurre en la cocina?", ru: "Происходит на кухне?" },
   { id: "n33", lvl: 3, q: "¿Esto ocurre en la terraza?", ru: "Происходит на террасе?" },
@@ -49,7 +43,6 @@ const QUESTIONS = [
   { id: "n35", lvl: 3, q: "¿Hay silencio durante esto?", ru: "Во время этого тишина?" },
 ];
 
-// ---- 10 глаголов: история (исп.) + досье (правда) + ответы Канона + маска Фантасии ----
 const VERBS = [
   {
     key: "desayunar", emoji: "☕", inf: "desayunar", ru: "завтракать",
@@ -173,18 +166,77 @@ function Footer({ onHome }) {
     </div>
   );
 }
+
+// ---- Бейдж сессионного счёта ----
+function ScoreBadge({ session }) {
+  const total = session.detective + session.canon + session.fantasia;
+  if (total === 0) return null;
+  return (
+    <div style={{
+      background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10,
+      padding: "9px 14px", marginBottom: 14,
+      display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
+    }}>
+      <span style={{ fontWeight: 700, color: C.goldDeep, fontSize: 13 }}>🏆 Сессия</span>
+      <span style={{ fontSize: 12, color: C.inkSoft }}>
+        🕵️ {session.detective} · 🟢 {session.canon} · 🔴 {session.fantasia}
+      </span>
+      <span style={{ fontWeight: 700, color: C.raspberry, fontSize: 18, minWidth: 28, textAlign: "right" }}>{total}</span>
+    </div>
+  );
+}
+
+// ---- Прогресс раунда (18 вопросов: 9 разогрев + 9 оценка) ----
+function RoundProgress({ roundQ, roundErrors }) {
+  const warmup = Math.min(roundQ, 9);
+  const zone = Math.max(0, roundQ - 9);
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.inkSoft, marginBottom: 5 }}>
+        <span>Разогрев (1–9)</span>
+        <span style={{ color: roundQ >= 9 ? C.goldDeep : C.inkSoft, fontWeight: roundQ >= 9 ? 700 : 400 }}>
+          {roundQ >= 9 ? "⚡ Оценка (10–18)" : `${roundQ}/9`}
+        </span>
+        <span style={{ color: C.raspberry }}>{roundQ >= 9 ? `Ошибок: ${roundErrors}` : ""}</span>
+      </div>
+      <div style={{ display: "flex", gap: 3 }}>
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div key={i} style={{ flex: 1, height: 8, borderRadius: 4, background: i < warmup ? C.goldSoft : C.line, border: `1px solid ${i < warmup ? C.gold : C.line}` }} />
+        ))}
+        <div style={{ width: 6 }} />
+        {Array.from({ length: 9 }).map((_, i) => {
+          const filled = i < zone;
+          const bg = filled ? (roundErrors > 0 && i >= (zone - roundErrors < 0 ? 0 : zone - roundErrors) ? C.raspberry : C.emerald) : C.line;
+          return <div key={i} style={{ flex: 1, height: 8, borderRadius: 4, background: bg, border: `1px solid ${filled ? bg : C.line}` }} />;
+        })}
+      </div>
+    </div>
+  );
+}
+
 const wrap = { minHeight: "100vh", background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, fontFamily: SERIF, color: C.ink, padding: "18px 14px 60px", boxSizing: "border-box" };
 const maxw = { maxWidth: 560, margin: "0 auto" };
 
 // ============================================================
+// ГЛАВНЫЙ КОМПОНЕНТ — хранит сессионный счёт
+// ============================================================
 export default function SimuladorJugador() {
   const [role, setRole] = useState(null);
-  if (!role) return <RolePicker onPick={setRole} />;
-  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} />;
-  return <WitnessMode role={role} onHome={() => setRole(null)} />;
+  const [session, setSession] = useState({ detective: 0, canon: 0, fantasia: 0 });
+
+  function addScore(roleKey, pts) {
+    if (pts > 0) setSession(s => ({ ...s, [roleKey]: s[roleKey] + pts }));
+  }
+
+  if (!role) return <RolePicker onPick={setRole} session={session} />;
+  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
+  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} />;
 }
 
-function RolePicker({ onPick }) {
+// ============================================================
+// ВЫБОР РОЛИ
+// ============================================================
+function RolePicker({ onPick, session }) {
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Dos testigos: uno dice la verdad, el otro miente. Pregunta, compara y adivina el verbo.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Conoces la verdad. Responde según la historia, sin equivocarte.", c: C.emerald },
@@ -193,6 +245,7 @@ function RolePicker({ onPick }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Elige tu rol para entrenar" />
+      <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
       {cards.map((c) => (
         <div key={c.id} onClick={() => onPick(c.id)} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
@@ -209,18 +262,17 @@ function RolePicker({ onPick }) {
 }
 
 // ============================================================
-//  ДЕТЕКТИВ — два свидетеля, выбор кому задать, кнопки глаголов с историей
+// ДЕТЕКТИВ — подсчёт баллов по числу вопросов
 // ============================================================
-function DetectiveMode({ onHome }) {
-  // загаданный глагол + случайное распределение ролей по свидетелям A/B
+function DetectiveMode({ onHome, onScore, session }) {
   function freshGame() {
     const verb = VERBS[rnd(VERBS.length)];
-    const canonIsA = Math.random() < 0.5; // кто из A/B — Канон (правда)
+    const canonIsA = Math.random() < 0.5;
     return { verb, canonIsA, deck: shuffle(QUESTIONS), idx: 0, log: [], result: null };
   }
   const [g, setG] = useState(freshGame);
   const [guessing, setGuessing] = useState(false);
-  const [storyKey, setStoryKey] = useState(null); // открытая история глагола
+  const [storyKey, setStoryKey] = useState(null);
 
   const current = g.deck[g.idx % g.deck.length];
   const canonAns = g.verb.answers[current.id];
@@ -233,7 +285,16 @@ function DetectiveMode({ onHome }) {
     setG((s) => ({ ...s, log: [...s.log, { q: current.q, w: witness, a }], idx: (s.idx + 1) % s.deck.length }));
   }
   function nextQ() { setG((s) => ({ ...s, idx: (s.idx + 1) % s.deck.length })); }
-  function guess(k) { setG((s) => ({ ...s, result: { ok: k === s.verb.key, picked: k } })); setGuessing(false); }
+
+  function guess(k) {
+    const ok = k === g.verb.key;
+    const qCount = g.log.length;
+    let pts = 0;
+    if (ok) pts = qCount <= 9 ? 5 : qCount <= 18 ? 3 : 1;
+    if (ok) onScore(pts);
+    setG((s) => ({ ...s, result: { ok, picked: k, pts, qCount } }));
+    setGuessing(false);
+  }
   function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); }
 
   const story = storyKey ? verbByKey(storyKey) : null;
@@ -241,23 +302,34 @@ function DetectiveMode({ onHome }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="🕵️ Modo Detective · un testigo miente" />
+      <ScoreBadge session={session} />
 
-      {/* РЕЗУЛЬТАТ */}
       {g.result && (
         <Block stripe={g.result.ok ? C.emerald : C.raspberry}>
-          <h2 style={{ ...h2, color: g.result.ok ? C.emeraldDeep : C.raspberryDeep }}>{g.result.ok ? "🎉 ¡Correcto!" : "❌ Casi..."}</h2>
+          <h2 style={{ ...h2, color: g.result.ok ? C.emeraldDeep : C.raspberryDeep }}>
+            {g.result.ok ? "🎉 ¡Correcto!" : "❌ Casi..."}
+          </h2>
           <p style={{ fontSize: 15, margin: "6px 0" }}>
             El verbo era <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
             {!g.result.ok && <> Seguiste al testigo equivocado: dijiste <strong>{verbByKey(g.result.picked).inf}</strong>.</>}
           </p>
+          {g.result.ok && (
+            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "10px 14px", display: "inline-block" }}>
+              <span style={{ fontSize: 13, color: C.goldDeep }}>Угадал за {g.result.qCount} вопросов · </span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: C.raspberry }}>+{g.result.pts}</span>
+              <span style={{ fontSize: 13, color: C.goldDeep }}> {g.result.pts === 5 ? "🔥 Молниеносно!" : g.result.pts === 3 ? "👍 Хорошо!" : "✓ Угадал"}</span>
+            </div>
+          )}
           <p style={pHint}>El testigo {g.canonIsA ? "A" : "B"} decía la verdad (Canon). El testigo {g.canonIsA ? "B" : "A"} mentía (Fantasía).</p>
           <Btn bg={C.gold} onClick={reset} style={{ marginTop: 10 }}>🔄 Otra ronda</Btn>
         </Block>
       )}
 
-      {/* ДИАЛОГ — СВЕРХУ */}
       <Block stripe={C.emerald}>
-        <h2 style={h2}>📋 Historia del interrogatorio</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h2 style={h2}>📋 Historia del interrogatorio</h2>
+          <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas</span>
+        </div>
         <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
           {g.log.length === 0 && <p style={pHint}>Aún no preguntas nada. Recuerda: un testigo miente. Compara sus respuestas.</p>}
           {g.log.map((e, i) => (
@@ -274,7 +346,6 @@ function DetectiveMode({ onHome }) {
 
       {!g.result && (
         <>
-          {/* ВОПРОС + ВЫБОР СВИДЕТЕЛЯ */}
           <Block stripe={C.goldDeep}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={tag}>{lvlName[current.lvl]}</div>
@@ -289,7 +360,6 @@ function DetectiveMode({ onHome }) {
             </div>
           </Block>
 
-          {/* КНОПКИ ГЛАГОЛОВ — сверка с историей */}
           <Block stripe={C.raspberry}>
             <h2 style={h2}>Verificar una hipótesis</h2>
             <p style={pHint}>Pulsa un verbo para leer su historia (en español) y comparar con las respuestas.</p>
@@ -307,6 +377,15 @@ function DetectiveMode({ onHome }) {
                 <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}><Highlighted text={story.storyEs} /></p>
               </div>
             )}
+
+            {/* Подсказка по баллам */}
+            <div style={{ marginTop: 12, padding: "8px 12px", background: C.cream, borderRadius: 8, border: `1px dashed ${C.line}` }}>
+              <span style={{ fontSize: 12.5, color: C.inkSoft }}>
+                Угадаешь за ≤9 вопросов → <strong style={{ color: C.raspberry }}>+5</strong> · за ≤18 → <strong>+3</strong> · позже → <strong>+1</strong>
+              </span>
+              <span style={{ fontSize: 12.5, color: C.goldDeep, marginLeft: 8 }}>сейчас: {g.log.length} вопр.</span>
+            </div>
+
             <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14 }}>🔍 Estoy listo · adivinar</Btn>
 
             {guessing && (
@@ -330,9 +409,9 @@ function DetectiveMode({ onHome }) {
 }
 
 // ============================================================
-//  СВИДЕТЕЛЬ (Канон / Фантасия)
+// СВИДЕТЕЛЬ — раунд 18 вопросов, система баллов
 // ============================================================
-function WitnessMode({ role, onHome }) {
+function WitnessMode({ role, onHome, onScore, session }) {
   const isCanon = role === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const accentDeep = isCanon ? C.emeraldDeep : C.raspberryDeep;
@@ -345,25 +424,93 @@ function WitnessMode({ role, onHome }) {
   const [showStory, setShowStory] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
 
+  // Система раундов
+  const [roundQ, setRoundQ] = useState(0);       // 0..17 (18 вопросов = 1 раунд)
+  const [roundErrors, setRoundErrors] = useState(0); // ошибки в зоне (вопросы 10-18)
+  const [roundDone, setRoundDone] = useState(false);
+  const [roundPts, setRoundPts] = useState(0);
+  const [showZoneBanner, setShowZoneBanner] = useState(false);
+
   const current = deck[idx % deck.length];
   const canonAns = verb.answers[current.id];
+  const isInZone = roundQ >= 9; // вопросы 10-18 (0-based: 9..17)
 
   function answer(my) {
     const ok = isCanon ? my === canonAns : my !== canonAns;
+    const newErrors = isInZone && !ok ? roundErrors + 1 : roundErrors;
+    const newRoundQ = roundQ + 1;
+
     setFeedback({ ok, my, canonAns });
-    setScore((s) => ({ good: s.good + (ok ? 1 : 0), total: s.total + 1 }));
+    setScore(s => ({ good: s.good + (ok ? 1 : 0), total: s.total + 1 }));
+
+    if (isInZone) setRoundErrors(newErrors);
+
+    if (newRoundQ >= 18) {
+      // Раунд завершён — считаем итог
+      const pts = newErrors === 0 ? 5 : newErrors <= 2 ? 3 : newErrors <= 4 ? 1 : 0;
+      setRoundPts(pts);
+      setRoundDone(true);
+      onScore(pts);
+    }
   }
+
   function next() {
+    if (roundDone) return;
     setFeedback(null);
-    if ((idx + 1) % deck.length === 0) { setDeck(shuffle(QUESTIONS)); setIdx(0); }
-    else setIdx((i) => i + 1);
+    const newIdx = idx + 1;
+    if (newIdx % deck.length === 0) { setDeck(shuffle(QUESTIONS)); setIdx(0); }
+    else setIdx(newIdx);
+    const newRoundQ = roundQ + 1;
+    setRoundQ(newRoundQ);
+    // Показать баннер при переходе к зоне оценки
+    if (newRoundQ === 9) setShowZoneBanner(true);
+    else setShowZoneBanner(false);
   }
-  function newVerb() { setVerb(VERBS[rnd(VERBS.length)]); setDeck(shuffle(QUESTIONS)); setIdx(0); setFeedback(null); setShowStory(false); setShowSheet(false); }
+
+  function startNextRound() {
+    // Новый глагол + сброс раунда
+    setVerb(VERBS[rnd(VERBS.length)]);
+    setDeck(shuffle(QUESTIONS));
+    setIdx(0);
+    setFeedback(null);
+    setShowStory(false);
+    setShowSheet(false);
+    setRoundQ(0);
+    setRoundErrors(0);
+    setRoundDone(false);
+    setRoundPts(0);
+    setShowZoneBanner(false);
+  }
+
+  function newVerb() { startNextRound(); }
 
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle={isCanon ? "🟢 Modo Testigo Canon · di la verdad" : "🔴 Modo Testigo Fantasía · miente con arte"} />
+      <ScoreBadge session={session} />
 
+      {/* ИТОГ РАУНДА */}
+      {roundDone && (
+        <Block stripe={roundPts >= 5 ? C.emerald : roundPts >= 3 ? C.gold : roundPts >= 1 ? C.goldDeep : C.raspberry}>
+          <h2 style={{ ...h2, color: roundPts >= 3 ? C.emeraldDeep : roundPts >= 1 ? C.goldDeep : C.raspberryDeep }}>
+            {roundPts >= 5 ? "🏆 Безупречно!" : roundPts >= 3 ? "👍 Хорошо!" : roundPts >= 1 ? "✓ Зачтено" : "❌ Попробуй ещё раз"}
+          </h2>
+          <p style={{ fontSize: 14, margin: "6px 0 10px", color: C.inkSoft }}>
+            Ошибок в зоне оценки (вопросы 10–18): <strong style={{ color: C.ink }}>{roundErrors}</strong> из 9
+          </p>
+          <div style={{ background: roundPts > 0 ? C.goldSoft : C.creamDeep, border: `1px solid ${roundPts > 0 ? C.gold : C.line}`, borderRadius: 10, padding: "10px 14px", display: "inline-block", marginBottom: 12 }}>
+            <span style={{ fontSize: 13, color: C.goldDeep }}>Глагол {verb.inf} · </span>
+            <span style={{ fontSize: 28, fontWeight: 700, color: C.raspberry }}>+{roundPts}</span>
+            <span style={{ fontSize: 13, color: C.goldDeep }}> {roundPts === 5 ? "идеально!" : roundPts === 3 ? "хорошая работа" : roundPts === 1 ? "можно лучше" : "без баллов"}</span>
+          </div>
+          <br />
+          <Btn bg={C.emerald} onClick={startNextRound} style={{ marginTop: 4 }}>
+            Следующий глагол →
+          </Btn>
+        </Block>
+      )}
+
+      {/* ГЛАГОЛ + ИСТОРИЯ */}
       <Block stripe={accent}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
@@ -371,11 +518,11 @@ function WitnessMode({ role, onHome }) {
             <div style={{ fontSize: 34, fontWeight: 700, lineHeight: 1.1, color: C.ink }}>{verb.emoji} {verb.inf}</div>
             <div style={{ color: C.inkSoft, fontSize: 15, fontStyle: "italic" }}>{verb.ru}</div>
           </div>
-          <Btn bg={C.gold} onClick={newVerb} style={{ padding: "8px 12px", fontSize: 13 }}>🔄 Otro</Btn>
+          {!roundDone && <Btn bg={C.gold} onClick={newVerb} style={{ padding: "8px 12px", fontSize: 13 }}>🔄 Otro</Btn>}
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-          <button onClick={() => setShowStory((s) => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showStory ? "▲ Ocultar historia" : "▼ Ver historia"}</button>
-          <button onClick={() => setShowSheet((s) => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showSheet ? "▲ Ocultar chuleta" : "▼ Ver chuleta (la verdad)"}</button>
+          <button onClick={() => setShowStory(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showStory ? "▲ Ocultar historia" : "▼ Ver historia"}</button>
+          <button onClick={() => setShowSheet(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showSheet ? "▲ Ocultar chuleta" : "▼ Ver chuleta (la verdad)"}</button>
         </div>
         {showStory && (
           <div style={{ marginTop: 10, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
@@ -397,36 +544,65 @@ function WitnessMode({ role, onHome }) {
         )}
       </Block>
 
-      <Block stripe={C.goldDeep}>
-        <h2 style={h2}>El detective pregunta:</h2>
-        <div style={tag}>{lvlName[current.lvl]}</div>
-        <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 4px" }}>{current.q}</div>
-        <div style={{ ...pHint, marginBottom: 14 }}>{current.ru}</div>
-        {!feedback ? (
-          <div style={{ display: "flex", gap: 12 }}>
-            <Btn bg={C.emerald} onClick={() => answer("sí")} style={{ flex: 1, fontSize: 17, padding: "13px" }}>SÍ</Btn>
-            <Btn bg={C.raspberry} onClick={() => answer("no")} style={{ flex: 1, fontSize: 17, padding: "13px" }}>NO</Btn>
-          </div>
-        ) : (
-          <div>
-            <div style={{ background: feedback.ok ? C.emerald : C.raspberry, color: "#fff", borderRadius: 10, padding: "12px 14px", fontWeight: 600, fontSize: 15 }}>
-              {isCanon
-                ? (feedback.ok ? "✓ ¡Correcto! Respondiste según el canon." : "✗ Cuidado: el canon dice otra cosa.")
-                : (feedback.ok ? "✓ ¡Bien mentido! Alejas al detective de la verdad." : "✗ Dijiste la verdad — el detective se acerca.")}
+      {/* ПРОГРЕСС РАУНДА */}
+      {!roundDone && (
+        <Block stripe={isInZone ? C.gold : C.line.replace("#E6D6B8", "#C9A24B")}>
+          <RoundProgress roundQ={roundQ} roundErrors={roundErrors} />
+          {showZoneBanner && (
+            <div style={{ background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 8, padding: "9px 12px", marginBottom: 10, fontWeight: 600, fontSize: 13.5, color: C.goldDeep }}>
+              ⚡ Зона оценки! Теперь каждая ошибка влияет на баллы — отвечай внимательно.
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, fontSize: 14, color: C.inkSoft }}>
-              <span>Tú: <SiNo v={feedback.my} /></span>
-              <span>· El canon: <SiNo v={feedback.canonAns} /></span>
-            </div>
-            <Btn bg={C.gold} onClick={next} style={{ marginTop: 14 }}>Siguiente pregunta →</Btn>
+          )}
+          <div style={{ fontSize: 12.5, color: C.inkSoft }}>
+            {isInZone
+              ? `Оцениваемых вопросов: ${roundQ - 9}/9 · ошибок: ${roundErrors}`
+              : `Разогрев: ${roundQ}/9 — просто привыкай к глаголу`}
           </div>
-        )}
-      </Block>
+        </Block>
+      )}
 
+      {/* ВОПРОС */}
+      {!roundDone && (
+        <Block stripe={C.goldDeep}>
+          <h2 style={h2}>El detective pregunta:</h2>
+          <div style={tag}>{lvlName[current.lvl]}</div>
+          <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 4px" }}>{current.q}</div>
+          <div style={{ ...pHint, marginBottom: 14 }}>{current.ru}</div>
+          {!feedback ? (
+            <div style={{ display: "flex", gap: 12 }}>
+              <Btn bg={C.emerald} onClick={() => answer("sí")} style={{ flex: 1, fontSize: 17, padding: "13px" }}>SÍ</Btn>
+              <Btn bg={C.raspberry} onClick={() => answer("no")} style={{ flex: 1, fontSize: 17, padding: "13px" }}>NO</Btn>
+            </div>
+          ) : (
+            <div>
+              <div style={{ background: feedback.ok ? C.emerald : C.raspberry, color: "#fff", borderRadius: 10, padding: "12px 14px", fontWeight: 600, fontSize: 15 }}>
+                {isCanon
+                  ? (feedback.ok ? "✓ ¡Correcto! Respondiste según el canon." : "✗ Cuidado: el canon dice otra cosa.")
+                  : (feedback.ok ? "✓ ¡Bien mentido! Alejas al detective de la verdad." : "✗ Dijiste la verdad — el detective se acerca.")}
+              </div>
+              {!feedback.ok && isInZone && (
+                <div style={{ marginTop: 6, fontSize: 12.5, color: C.raspberry, fontWeight: 600 }}>
+                  ⚠ Ошибка в зоне оценки — учитывается!
+                </div>
+              )}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, fontSize: 14, color: C.inkSoft }}>
+                <span>Tú: <SiNo v={feedback.my} /></span>
+                <span>· El canon: <SiNo v={feedback.canonAns} /></span>
+              </div>
+              <Btn bg={C.gold} onClick={next} style={{ marginTop: 14 }}>Siguiente pregunta →</Btn>
+            </div>
+          )}
+        </Block>
+      )}
+
+      {/* СЧЁТ СЕССИИ */}
       <Block stripe={C.emerald}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontWeight: 600 }}>{isCanon ? "Respuestas correctas" : "Mentiras logradas"}</span>
           <span style={{ fontWeight: 700, fontSize: 20, color: accentDeep }}>{score.good} / {score.total}</span>
+        </div>
+        <div style={{ ...pHint, marginTop: 6 }}>
+          Шкала баллов: 0 ошибок = <strong>+5</strong> · 1–2 = <strong>+3</strong> · 3–4 = <strong>+1</strong> · 5+ = <strong>0</strong>
         </div>
       </Block>
 
