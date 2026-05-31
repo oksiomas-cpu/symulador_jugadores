@@ -273,6 +273,7 @@ function DetectiveMode({ onHome, onScore, session }) {
   const [g, setG] = useState(freshGame);
   const [guessing, setGuessing] = useState(false);
   const [storyKey, setStoryKey] = useState(null);
+  const [askedInCurrent, setAskedInCurrent] = useState(new Set());
 
   const current = g.deck[g.idx % g.deck.length];
   const canonAns = g.verb.answers[current.id];
@@ -281,10 +282,15 @@ function DetectiveMode({ onHome, onScore, session }) {
   const ansB = g.canonIsA ? fantasyAns : canonAns;
 
   function ask(witness) {
+    if (askedInCurrent.has(witness)) return;
     const a = witness === "A" ? ansA : ansB;
-    setG((s) => ({ ...s, log: [...s.log, { q: current.q, w: witness, a }], idx: (s.idx + 1) % s.deck.length }));
+    setG(s => ({ ...s, log: [...s.log, { q: current.q, w: witness, a }] }));
+    setAskedInCurrent(s => new Set([...s, witness]));
   }
-  function nextQ() { setG((s) => ({ ...s, idx: (s.idx + 1) % s.deck.length })); }
+  function nextQ() {
+    setG(s => ({ ...s, idx: (s.idx + 1) % s.deck.length }));
+    setAskedInCurrent(new Set());
+  }
 
   function guess(k) {
     const ok = k === g.verb.key;
@@ -295,7 +301,7 @@ function DetectiveMode({ onHome, onScore, session }) {
     setG((s) => ({ ...s, result: { ok, picked: k, pts, qCount } }));
     setGuessing(false);
   }
-  function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); }
+  function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); setAskedInCurrent(new Set()); }
 
   const story = storyKey ? verbByKey(storyKey) : null;
 
@@ -332,15 +338,38 @@ function DetectiveMode({ onHome, onScore, session }) {
         </div>
         <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
           {g.log.length === 0 && <p style={pHint}>Aún no preguntas nada. Recuerda: un testigo miente. Compara sus respuestas.</p>}
-          {g.log.map((e, i) => (
-            <div key={i} style={{ marginBottom: 9, paddingBottom: 9, borderBottom: i < g.log.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-              <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 4 }}><span style={{ color: C.goldDeep, fontWeight: 700 }}>#{i + 1}</span> {e.q}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 9px", fontWeight: 600 }}>Testigo {e.w}</span>
-                <SiNo v={e.a} />
+          {(() => {
+            // Группируем по тексту вопроса — чтобы A и B на один вопрос шли рядом
+            const groups = [];
+            g.log.forEach(e => {
+              const last = groups[groups.length - 1];
+              if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
+                last.entries.push(e);
+              } else {
+                groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
+              }
+            });
+            return groups.map((grp, i) => (
+              <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
+                  <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {grp.entries.map((e, j) => (
+                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
+                      <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
+                        {e.w}
+                      </span>
+                      <SiNo v={e.a} />
+                    </div>
+                  ))}
+                  {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
+                    <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ));
+          })()}
         </div>
       </Block>
 
@@ -349,15 +378,34 @@ function DetectiveMode({ onHome, onScore, session }) {
           <Block stripe={C.goldDeep}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={tag}>{lvlName[current.lvl]}</div>
-              <button onClick={nextQ} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>↻ Otra pregunta</button>
+              <button onClick={nextQ} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>↻ Пропустить</button>
             </div>
             <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 6px" }}>{current.q}</div>
             <div style={{ ...pHint, marginBottom: 12 }}>{current.ru}</div>
-            <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 6 }}>¿A quién se lo preguntas?</div>
-            <div style={{ display: "flex", gap: 12 }}>
-              <Btn bg={C.goldDeep} onClick={() => ask("A")} style={{ flex: 1 }}>Preguntar a A</Btn>
-              <Btn bg={C.inkSoft} onClick={() => ask("B")} style={{ flex: 1 }}>Preguntar a B</Btn>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 8 }}>¿A quién se lo preguntas?</div>
+            <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+              <Btn
+                bg={askedInCurrent.has("A") ? "#B0A48C" : C.goldDeep}
+                onClick={() => ask("A")}
+                disabled={askedInCurrent.has("A")}
+                style={{ flex: 1 }}
+              >
+                {askedInCurrent.has("A") ? "✓ A ответил" : "Preguntar a A"}
+              </Btn>
+              <Btn
+                bg={askedInCurrent.has("B") ? "#B0A48C" : C.inkSoft}
+                onClick={() => ask("B")}
+                disabled={askedInCurrent.has("B")}
+                style={{ flex: 1 }}
+              >
+                {askedInCurrent.has("B") ? "✓ B ответил" : "Preguntar a B"}
+              </Btn>
             </div>
+            {askedInCurrent.size > 0 && (
+              <Btn bg={C.emerald} onClick={nextQ} style={{ width: "100%", marginTop: 2 }}>
+                {askedInCurrent.size === 2 ? "Следующий вопрос →" : "Следующий вопрос (без второго) →"}
+              </Btn>
+            )}
           </Block>
 
           <Block stripe={C.raspberry}>
@@ -610,3 +658,4 @@ function WitnessMode({ role, onHome, onScore, session }) {
     </div></div>
   );
 }
+
