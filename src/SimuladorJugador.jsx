@@ -221,6 +221,7 @@ const maxw = { maxWidth: 560, margin: "0 auto" };
 // ГЛАВНЫЙ КОМПОНЕНТ — хранит сессионный счёт
 // ============================================================
 export default function SimuladorJugador() {
+  const [entered, setEntered] = useState(false);
   const [role, setRole] = useState(null);
   const [session, setSession] = useState({ detective: 0, canon: 0, fantasia: 0 });
 
@@ -228,7 +229,8 @@ export default function SimuladorJugador() {
     if (pts > 0) setSession(s => ({ ...s, [roleKey]: s[roleKey] + pts }));
   }
 
-  if (!role) return <RolePicker onPick={setRole} session={session} />;
+  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} />;
+  if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} />;
   if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} />;
   return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} />;
@@ -237,7 +239,7 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР РОЛИ
 // ============================================================
-function RolePicker({ onPick, session }) {
+function RolePicker({ onPick, session, onBack }) {
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Dos testigos: uno dice la verdad, el otro miente. Pregunta, compara y adivina el verbo.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Conoces la verdad. Responde según la historia, sin equivocarte.", c: C.emerald },
@@ -247,6 +249,7 @@ function RolePicker({ onPick, session }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Elige tu rol para entrenar" />
+      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>📖 Volver a la historia</button></div>}
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
       {cards.map((c) => (
@@ -915,6 +918,90 @@ function DiarioMode({ onHome }) {
       </Btn>
 
       <Footer onHome={onHome} />
+    </div></div>
+  );
+}
+
+// ============================================================
+// BIENVENIDA — вход в приложение: правила + История-маяк (15 -AR глаголов)
+// ============================================================
+const MAYA = {
+  // 15 глаголов выделены **...** — подсвечиваются через <Highlighted/>
+  es: [
+    "Cuando en la Ciudad de los Sentidos llega la mañana, en el Palacio de Caramelo se enciende la luz dorada. El Gran Jefe Alcalde abre los ojos y comienza su día mágico.",
+    "Primero, él debe **desayunar**. Se sienta en su silla favorita y **toma** una taza de café solo fuerte con caramelo espeso y dorado. Luego se levanta y comienza a **caminar** por los pasillos brillantes del palacio.",
+    "El Jefe se detiene en la terraza para **mirar** atentamente la ciudad que despierta. Necesita **buscar** ideas frescas para el menú de hoy. De repente, **escucha** voces alegres — sus ayudantes ya **cantan** una canción de trabajo en la cocina.",
+    "El Jefe decide **llamar** a su fiel equipo. Él está acostumbrado a **hablar** mucho y dar órdenes claras. «¡Buenos días, amigos! Hoy vamos a **preparar** algo especial», dice con una sonrisa.",
+    "Los ayudantes **preguntan**: «¿Qué necesitamos hoy, Jefe?» Él responde: «Primero, debemos **comprar** ingredientes frescos en el mercado de caramelo. Luego vamos a **trabajar** juntos».",
+    "Pero antes de salir, el Jefe **estudia** su libro antiguo de recetas mágicas. Él **lleva** el libro consigo siempre — es su tesoro más valioso. Ahora es momento de crear nuevas palabras dulces y brillantes.",
+  ],
+  ru: [
+    "Когда в Городе Чувств наступает утро, в Карамельном Дворце зажигается золотой свет. Великий Шеф-Мэр открывает глаза и начинает свой волшебный день.",
+    "Сначала он должен позавтракать. Он садится на свой любимый стул и берёт чашку крепкого чёрного кофе с густой золотистой карамелью. Затем встаёт и начинает идти по сверкающим коридорам дворца.",
+    "Шеф останавливается на террасе, чтобы внимательно смотреть на просыпающийся город. Ему нужно искать свежие идеи для меню. Вдруг он слышит весёлые голоса — помощники уже поют рабочую песню на кухне.",
+    "Шеф решает позвать свою верную команду. Он привык много говорить и раздавать чёткие приказы. «Доброе утро, друзья! Сегодня мы будем готовить что-то особенное», — говорит он с улыбкой.",
+    "Помощники спрашивают: «Что нам нужно сегодня, Шеф?» Он отвечает: «Сначала мы должны купить свежие ингредиенты на карамельном рынке. Потом будем работать вместе».",
+    "Но перед выходом Шеф изучает свою древнюю книгу волшебных рецептов. Он всегда носит эту книгу с собой — это его самое ценное сокровище. Теперь пора создавать новые сладкие и сверкающие слова.",
+  ],
+  // 15 игровых глаголов: инфинитив + перевод
+  glos: [
+    ["desayunar", "завтракать"], ["tomar", "брать / пить"], ["caminar", "идти / гулять"],
+    ["mirar", "смотреть"], ["buscar", "искать"], ["escuchar", "слушать"],
+    ["cantar", "петь"], ["llamar", "звать / звонить"], ["hablar", "говорить"],
+    ["preparar", "готовить"], ["preguntar", "спрашивать"], ["comprar", "покупать"],
+    ["trabajar", "работать"], ["estudiar", "изучать"], ["llevar", "носить с собой"],
+  ],
+};
+
+function Welcome({ onEnter, onDiario }) {
+  const [ru, setRu] = useState(false);
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Bienvenido · добро пожаловать" />
+
+      {/* Правила игры — по-русски */}
+      <Block stripe={C.raspberry}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 16, marginBottom: 6 }}>🕵️ La Cata a Ciegas — лингвистический детектив</div>
+        <div style={{ ...pHint, fontSize: 13.5 }}>
+          В каждом раунде загадан один глагол. Два свидетеля знают правду: один говорит честно (<strong style={{ color: C.emerald }}>Canon</strong>), другой красиво выдумывает (<strong style={{ color: C.raspberry }}>Fantasía</strong>). Детективы задают вопросы «да / нет» и по ответам угадывают глагол. Все глаголы спрятаны в этой истории — прочитай её и познакомься с героями игры.
+        </div>
+      </Block>
+
+      {/* История-маяк */}
+      <Block stripe={C.gold}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <span style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 El día en el Palacio de Caramelo</span>
+          <button onClick={() => setRu((v) => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "5px 13px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
+            {ru ? "ES ✓" : "RU перевод"}
+          </button>
+        </div>
+        <div style={{ fontSize: 16, lineHeight: 1.85, color: C.ink }}>
+          {MAYA.es.map((p, i) => (
+            <div key={i} style={{ marginBottom: 12 }}>
+              <div><Highlighted text={p} /></div>
+              {ru && <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{MAYA.ru[i]}</div>}
+            </div>
+          ))}
+        </div>
+      </Block>
+
+      {/* Глоссарий 15 глаголов */}
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 8 }}>📖 Los 15 verbos · todos terminan en -AR</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {MAYA.glos.map(([v, r]) => (
+            <div key={v} style={{ background: C.creamDeep, borderRadius: 8, padding: "7px 10px", fontSize: 13.5 }}>
+              <strong style={{ color: C.raspberry }}>{v}</strong> <span style={{ color: C.inkSoft }}>— {r}</span>
+            </div>
+          ))}
+        </div>
+      </Block>
+
+      {/* Переходы */}
+      <Btn bg={C.gold} onClick={onEnter} style={{ width: "100%", fontSize: 16, padding: "14px", marginBottom: 10 }}>Empezar · выбрать роль →</Btn>
+      <Btn bg={C.emeraldDeep} onClick={onDiario} style={{ width: "100%", fontSize: 16, padding: "14px" }}>📔 Mi Diario · тренировать спряжение</Btn>
+
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬</div>
     </div></div>
   );
 }
