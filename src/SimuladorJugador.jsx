@@ -161,7 +161,7 @@ function Header({ subtitle }) {
 function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
-      {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Cambiar de rol</button>}
+      {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
       <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬</div>
     </div>
   );
@@ -241,15 +241,15 @@ export default function SimuladorJugador() {
 // ============================================================
 function RolePicker({ onPick, session, onBack }) {
   const cards = [
-    { id: "detective", emoji: "🕵️", t: "Detective", d: "Dos testigos: uno dice la verdad, el otro miente. Pregunta, compara y adivina el verbo.", c: C.goldDeep },
-    { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Conoces la verdad. Responde según la historia, sin equivocarte.", c: C.emerald },
-    { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Mientes con elegancia. Confunde al detective y aléjalo de la verdad.", c: C.raspberry },
-    { id: "diario", emoji: "📔", t: "Mi Diario", d: "Tu día en la Ciudad. Lee el diario y escribe cada verbo en la persona correcta. Entrena la conjugación.", c: C.emeraldDeep },
+    { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
+    { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
+    { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Ты врёшь красиво. Запутай детектива и уведи его от правды.", c: C.raspberry },
+    { id: "diario", emoji: "📔", t: "Mi Diario", d: "Твой день в Ciudad. Читай дневник и впиши каждый глагол в правильном лице. Тренировка спряжения.", c: C.emeraldDeep },
   ];
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Elige tu rol para entrenar" />
-      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>📖 Volver a la historia</button></div>}
+      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>📖 Вернуться к истории</button></div>}
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
       {cards.map((c) => (
@@ -312,17 +312,17 @@ function DetectiveMode({ onHome, onScore, session }) {
 
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="🕵️ Modo Detective · un testigo miente" />
+      <Header subtitle="🕵️ Детектив · один свидетель лжёт" />
       <ScoreBadge session={session} />
 
       {g.result && (
         <Block stripe={g.result.ok ? C.emerald : C.raspberry}>
           <h2 style={{ ...h2, color: g.result.ok ? C.emeraldDeep : C.raspberryDeep }}>
-            {g.result.ok ? "🎉 ¡Correcto!" : "❌ Casi..."}
+            {g.result.ok ? "🎉 Верно!" : "❌ Почти..."}
           </h2>
           <p style={{ fontSize: 15, margin: "6px 0" }}>
-            El verbo era <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
-            {!g.result.ok && <> Seguiste al testigo equivocado: dijiste <strong>{verbByKey(g.result.picked).inf}</strong>.</>}
+            Глагол был: <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
+            {!g.result.ok && <> Ты поверил не тому свидетелю. Назвал: <strong>{verbByKey(g.result.picked).inf}</strong> — {verbByKey(g.result.picked).ru}.</>}
           </p>
           {g.result.ok && (
             <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "10px 14px", display: "inline-block" }}>
@@ -331,18 +331,18 @@ function DetectiveMode({ onHome, onScore, session }) {
               <span style={{ fontSize: 13, color: C.goldDeep }}> {g.result.pts === 5 ? "🔥 Молниеносно!" : g.result.pts === 3 ? "👍 Хорошо!" : "✓ Угадал"}</span>
             </div>
           )}
-          <p style={pHint}>El testigo {g.canonIsA ? "A" : "B"} decía la verdad (Canon). El testigo {g.canonIsA ? "B" : "A"} mentía (Fantasía).</p>
-          <Btn bg={C.gold} onClick={reset} style={{ marginTop: 10 }}>🔄 Otra ronda</Btn>
+          <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
+          <Btn bg={C.gold} onClick={reset} style={{ marginTop: 10 }}>🔄 Новый раунд</Btn>
         </Block>
       )}
 
       <Block stripe={C.emerald}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={h2}>📋 Historia del interrogatorio</h2>
+          <h2 style={h2}>📋 История допроса</h2>
           <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas</span>
         </div>
         <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
-          {g.log.length === 0 && <p style={pHint}>Aún no preguntas nada. Recuerda: un testigo miente. Compara sus respuestas.</p>}
+          {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
           {(() => {
             // Группируем по тексту вопроса — чтобы A и B на один вопрос шли рядом
             const groups = [];
@@ -387,7 +387,7 @@ function DetectiveMode({ onHome, onScore, session }) {
             </div>
             <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 6px" }}>{current.q}</div>
             <div style={{ ...pHint, marginBottom: 12 }}>{current.ru}</div>
-            <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 8 }}>¿A quién se lo preguntas?</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 8 }}>Кому задать вопрос?</div>
             <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
               <Btn
                 bg={askedInCurrent.has("A") ? "#B0A48C" : C.goldDeep}
@@ -395,7 +395,7 @@ function DetectiveMode({ onHome, onScore, session }) {
                 disabled={askedInCurrent.has("A")}
                 style={{ flex: 1 }}
               >
-                {askedInCurrent.has("A") ? "✓ A ответил" : "Preguntar a A"}
+                {askedInCurrent.has("A") ? "✓ A ответил" : "Спросить у A"}
               </Btn>
               <Btn
                 bg={askedInCurrent.has("B") ? "#B0A48C" : C.inkSoft}
@@ -403,7 +403,7 @@ function DetectiveMode({ onHome, onScore, session }) {
                 disabled={askedInCurrent.has("B")}
                 style={{ flex: 1 }}
               >
-                {askedInCurrent.has("B") ? "✓ B ответил" : "Preguntar a B"}
+                {askedInCurrent.has("B") ? "✓ B ответил" : "Спросить у B"}
               </Btn>
             </div>
             {askedInCurrent.size > 0 && (
@@ -414,8 +414,8 @@ function DetectiveMode({ onHome, onScore, session }) {
           </Block>
 
           <Block stripe={C.raspberry}>
-            <h2 style={h2}>Verificar una hipótesis</h2>
-            <p style={pHint}>Pulsa un verbo para leer su historia (en español) y comparar con las respuestas.</p>
+            <h2 style={h2}>Проверь гипотезу</h2>
+            <p style={pHint}>Нажми на глагол — прочитай его историю и сравни с ответами свидетелей.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
               {VERBS.map((v) => (
                 <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${storyKey === v.key ? C.raspberry : C.line}`, background: storyKey === v.key ? C.raspberry : C.card, color: storyKey === v.key ? "#fff" : C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
@@ -442,11 +442,11 @@ function DetectiveMode({ onHome, onScore, session }) {
               <span style={{ fontSize: 12.5, color: C.goldDeep, marginLeft: 8 }}>сейчас: {g.log.length} вопр.</span>
             </div>
 
-            <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14 }}>🔍 Estoy listo · adivinar</Btn>
+            <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14 }}>🔍 Я готов · угадываю</Btn>
 
             {guessing && (
               <div style={{ marginTop: 14, background: C.card, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: 14 }}>
-                <div style={{ fontWeight: 700, marginBottom: 10 }}>Acusación final — ¿qué verbo es?</div>
+                <div style={{ fontWeight: 700, marginBottom: 10 }}>Твоя версия — какой это глагол?</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {VERBS.map((v) => (
                     <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
@@ -454,7 +454,7 @@ function DetectiveMode({ onHome, onScore, session }) {
                       <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
                     </button>
                   ))}
-                  <button onClick={() => setGuessing(false)} style={{ border: "none", background: "#B0A48C", color: "#fff", borderRadius: 999, padding: "8px 14px", fontSize: 14, fontFamily: SERIF, cursor: "pointer" }}>Cancelar</button>
+                  <button onClick={() => setGuessing(false)} style={{ border: "none", background: "#B0A48C", color: "#fff", borderRadius: 999, padding: "8px 14px", fontSize: 14, fontFamily: SERIF, cursor: "pointer" }}>Отмена</button>
                 </div>
               </div>
             )}
