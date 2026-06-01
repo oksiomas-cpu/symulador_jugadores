@@ -666,8 +666,12 @@ function WitnessMode({ role, onHome, onScore, session }) {
 
 // ============================================================
 // MI DIARIO — текст-дневник с пропусками + тренажёр спряжения
-// Данные на 10 игровых глаголах. 12 пропусков = 6 лиц × 2.
+// Умная проверка: принимаем ЛЮБОЙ подходящий по смыслу глагол
+// в ПРАВИЛЬНОМ лице. Отличаем ошибку спряжения от ошибки смысла.
+// 15 игровых глаголов -AR, все регулярные.
 // ============================================================
+const VERBS15 = ["desayunar", "tomar", "caminar", "mirar", "buscar", "escuchar", "cantar", "llamar", "hablar", "preparar", "preguntar", "comprar", "trabajar", "estudiar", "llevar"];
+
 const PRON = [
   { key: "yo",       label: "yo",                       end: "o" },
   { key: "tú",       label: "tú",                       end: "as" },
@@ -686,7 +690,6 @@ function normES(s) { return (s || "").trim().toLowerCase().replace(/\s+/g, " ");
 
 const DIARIO = {
   title: "Mi Diario · Una mañana en la Ciudad de los Sentidos",
-  // Текст разбит на сегменты; число в blank — индекс пропуска
   segments: [
     { t: "Por la mañana, yo " }, { blank: 0 },
     { t: " en la cocina con mucho gusto. Mi mamá " }, { blank: 1 },
@@ -702,21 +705,46 @@ const DIARIO = {
     { t: " también. Al final, todos ellos " }, { blank: 11 },
     { t: " y ríen todo el tiempo." },
   ],
+  // person — требуемое лицо; accept — подходящие по смыслу глаголы (любой принимается)
   blanks: [
-    { verb: "desayunar", person: "yo",       answer: "desayuno" },
-    { verb: "caminar",   person: "él",       answer: "camina" },
-    { verb: "mirar",     person: "tú",       answer: "miras" },
-    { verb: "comprar",   person: "nosotros", answer: "compramos" },
-    { verb: "hablar",    person: "él",       answer: "habla" },
-    { verb: "preparar",  person: "yo",       answer: "preparo" },
-    { verb: "buscar",    person: "tú",       answer: "buscas" },
-    { verb: "trabajar",  person: "nosotros", answer: "trabajamos" },
-    { verb: "cantar",    person: "ellos",    answer: "cantan" },
-    { verb: "escuchar",  person: "vosotros", answer: "escucháis" },
-    { verb: "cantar",    person: "vosotros", answer: "cantáis" },
-    { verb: "hablar",    person: "ellos",    answer: "hablan" },
+    { person: "yo",       accept: ["desayunar", "preparar", "trabajar", "cantar"] },
+    { person: "él",       accept: ["caminar", "trabajar", "cantar", "hablar"] },
+    { person: "tú",       accept: ["mirar", "escuchar"] },
+    { person: "nosotros", accept: ["comprar", "buscar", "tomar", "llevar"] },
+    { person: "él",       accept: ["hablar", "preguntar"] },
+    { person: "yo",       accept: ["tomar", "preparar", "comprar"] },
+    { person: "tú",       accept: ["buscar", "preparar", "estudiar"] },
+    { person: "nosotros", accept: ["trabajar", "cantar", "desayunar", "preparar"] },
+    { person: "ellos",    accept: ["cantar", "escuchar"] },
+    { person: "vosotros", accept: ["escuchar", "mirar", "estudiar", "trabajar", "buscar"] },
+    { person: "vosotros", accept: ["cantar", "escuchar", "trabajar"] },
+    { person: "ellos",    accept: ["hablar", "cantar", "trabajar"] },
   ],
 };
+
+// Анализ одного ввода → статус
+// ok    — подходящий глагол в правильном лице
+// conj  — подходящий глагол, НО не то лицо → на тренажёр (verb)
+// sense — реальный глагол из 15, но не подходит сюда по смыслу
+// bad   — не распознано
+// empty — пусто
+function analyzeBlank(input, b) {
+  const v = normES(input);
+  if (!v) return { st: "empty" };
+  const okForms = b.accept.map((k) => conjugate(k)[b.person]);
+  if (okForms.includes(v)) return { st: "ok" };
+  // верный глагол, неверное лицо?
+  for (const k of b.accept) {
+    const f = conjugate(k);
+    if (Object.values(f).includes(v)) return { st: "conj", verb: k };
+  }
+  // глагол из 15, не подходящий по смыслу?
+  for (const k of VERBS15) {
+    const f = conjugate(k);
+    if (Object.values(f).includes(v)) return { st: "sense", verb: k };
+  }
+  return { st: "bad" };
+}
 
 // ---- Подсказка: спряжение -AR (сворачивается) ----
 function ConjHint() {
@@ -747,8 +775,7 @@ function ConjHint() {
 
 // ---- Тренажёр спряжения конкретного глагола ----
 function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
-  const ALL = VERBS.map((v) => v.key);
-  const [verb, setVerb] = useState(startVerb || errorVerbs[0] || ALL[0]);
+  const [verb, setVerb] = useState(startVerb || errorVerbs[0] || VERBS15[0]);
   const [vals, setVals] = useState({});
   const [checked, setChecked] = useState(false);
   const correct = conjugate(verb);
@@ -761,9 +788,8 @@ function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
       <Header subtitle="📊 Entrenador de conjugación" />
       <div style={{ ...pHint, textAlign: "center", marginBottom: 12 }}>Заполни все 6 форм глагола. Так ты увидишь, как он спрягается, и вернёшься к тексту.</div>
 
-      {/* выбор глагола — ошибочные подсвечены */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, justifyContent: "center" }}>
-        {ALL.map((k) => {
+        {VERBS15.map((k) => {
           const isErr = errorVerbs.includes(k);
           const active = k === verb;
           return (
@@ -812,30 +838,33 @@ function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
 function DiarioMode({ onHome }) {
   const N = DIARIO.blanks.length;
   const [vals, setVals] = useState({});
-  const [status, setStatus] = useState({});       // i -> "ok" | "bad" | undefined
-  const [everFailed, setEverFailed] = useState({}); // i -> true если хоть раз ошибся
+  const [res, setRes] = useState({});          // i -> {st, verb?}
+  const [everFailed, setEverFailed] = useState({});
   const [checked, setChecked] = useState(false);
-  const [trainer, setTrainer] = useState(null);   // null | { startVerb }
+  const [trainer, setTrainer] = useState(null);
 
-  const allOk = checked && DIARIO.blanks.every((_, i) => status[i] === "ok");
+  const allOk = checked && DIARIO.blanks.every((_, i) => res[i] && res[i].st === "ok");
   const filledAll = DIARIO.blanks.every((_, i) => normES(vals[i]) !== "");
-  const errorVerbs = [...new Set(DIARIO.blanks.filter((_, i) => status[i] === "bad").map((b) => b.verb))];
+  // на тренажёр идут только ошибки спряжения (conj)
+  const errorVerbs = [...new Set(Object.values(res).filter((r) => r.st === "conj").map((r) => r.verb))];
+  const hasConj = Object.values(res).some((r) => r.st === "conj");
+  const hasSense = Object.values(res).some((r) => r.st === "sense");
+  const hasBad = Object.values(res).some((r) => r.st === "bad");
 
   function check() {
-    const st = {}; const ef = { ...everFailed };
+    const r = {}; const ef = { ...everFailed };
     DIARIO.blanks.forEach((b, i) => {
-      const ok = normES(vals[i]) === b.answer;
-      st[i] = ok ? "ok" : "bad";
-      if (!ok) ef[i] = true;
+      const a = analyzeBlank(vals[i], b);
+      r[i] = a;
+      if (a.st !== "ok") ef[i] = true;
     });
-    setStatus(st); setEverFailed(ef); setChecked(true);
+    setRes(r); setEverFailed(ef); setChecked(true);
   }
 
   if (trainer) {
     return <ConjTrainer startVerb={trainer.startVerb} errorVerbs={errorVerbs} onBack={() => { setTrainer(null); setChecked(false); }} />;
   }
 
-  // финальная оценка
   let scoreBlock = null;
   if (allOk) {
     const corrected = DIARIO.blanks.filter((_, i) => everFailed[i]).length;
@@ -846,26 +875,32 @@ function DiarioMode({ onHome }) {
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
           <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
-          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено через тренажёр: <strong>{corrected}</strong></div>
+          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено: <strong>{corrected}</strong></div>
         </div>
       </Block>
     );
   }
 
-  let bi = -1; // счётчик пропусков при рендере
+  // цвета по статусу
+  function blankStyle(st) {
+    if (st === "ok") return { bd: C.emerald, bg: "#EAF5F0", col: C.emeraldDeep };
+    if (st === "conj") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };       // спряжение → красный
+    if (st === "sense") return { bd: "#D98A2B", bg: "#FCF1E0", col: "#A85F12" };              // смысл → оранжевый
+    if (st === "bad") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };
+    return { bd: C.gold, bg: "#fff", col: C.ink };
+  }
+
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📔 Mi Diario · escribe los verbos" />
 
       <ConjHint />
 
-      {/* инструкция */}
       <Block stripe={C.emerald}>
         <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO.title}</div>
-        <div style={pHint}>Это твой день в Ciudad. Прочитай дневник и впиши каждый глагол в правильном лице. Текст в настоящем времени (<strong>presente</strong>). Сам реши: какой из 10 глаголов и какая форма. Подсказка со спряжением — сверху.</div>
+        <div style={pHint}>Это твой день в Ciudad. Впиши каждый глагол в правильном лице. Текст в настоящем времени (<strong>presente</strong>). Подходящих глаголов может быть несколько — выбирай любой по смыслу, главное — верное лицо. Подсказка со спряжением — сверху.</div>
       </Block>
 
-      {/* текст с пропусками */}
       <Block stripe={C.gold}>
         <div style={{ fontSize: 17, lineHeight: 2.1, color: C.ink }}>
           {DIARIO.segments.map((seg, idx) => {
@@ -874,36 +909,42 @@ function DiarioMode({ onHome }) {
                 <span key={idx + "_" + pi}>{para}{pi < arr.length - 1 ? <span style={{ display: "block", height: 10 }} /> : null}</span>
               ));
             }
-            bi = seg.blank;
             const i = seg.blank;
-            const stt = status[i];
-            const locked = stt === "ok";
+            const st = res[i] ? res[i].st : undefined;
+            const locked = st === "ok";
+            const s = blankStyle(st);
             return (
               <input key={"b" + i} value={vals[i] || ""} disabled={locked}
                 onChange={(e) => setVals((v) => ({ ...v, [i]: e.target.value }))}
-                placeholder="…" title={locked ? "" : "escribe el verbo"}
+                placeholder="…"
                 style={{
                   width: 120, margin: "0 2px", padding: "3px 8px", fontSize: 16, fontFamily: SERIF, textAlign: "center",
                   borderRadius: 7, outline: "none", verticalAlign: "middle",
-                  border: `2px solid ${stt === "ok" ? C.emerald : stt === "bad" ? C.raspberry : C.gold}`,
-                  background: stt === "ok" ? "#EAF5F0" : stt === "bad" ? "#FBEAEE" : "#fff",
-                  color: stt === "ok" ? C.emeraldDeep : stt === "bad" ? C.raspberryDeep : C.ink,
-                  fontWeight: stt ? 700 : 400,
+                  border: `2px solid ${s.bd}`, background: s.bg, color: s.col, fontWeight: st && st !== "empty" ? 700 : 400,
                 }} />
             );
           })}
         </div>
       </Block>
 
-      {/* проверка / статус ошибок (без показа правильного ответа) */}
+      {/* статус ошибок — без показа правильного ответа */}
       {checked && !allOk && (
         <Block stripe={C.raspberry}>
-          <div style={{ fontWeight: 700, color: C.raspberryDeep }}>Есть ошибки — они подсвечены красным 🔴</div>
-          <div style={{ ...pHint, marginTop: 4 }}>Правильный ответ не показываю. Иди в тренажёр, отработай спряжение этих глаголов, и вернись исправить. Продолжить можно только без ошибок.</div>
+          {hasConj && <div style={{ marginBottom: hasSense || hasBad ? 8 : 0 }}>
+            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Ошибка спряжения</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Глагол подходит, но лицо неверное. Иди в тренажёр внизу, отработай — и вернись исправить.</div>
+          </div>}
+          {hasSense && <div style={{ marginBottom: hasBad ? 8 : 0 }}>
+            <div style={{ fontWeight: 700, color: "#A85F12" }}>🟠 Не по смыслу</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Глагол спрягается верно, но в это место не подходит. Перечитай фразу и выбери другой.</div>
+          </div>}
+          {hasBad && <div>
+            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Незнакомое слово</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Это не один из 15 глаголов или есть опечатка. Проверь написание.</div>
+          </div>}
         </Block>
       )}
 
-      {/* кнопки */}
       {!allOk && (
         <Btn bg={filledAll ? C.gold : "#D8CBB4"} disabled={!filledAll} onClick={check} style={{ width: "100%", marginBottom: 12 }}>
           {filledAll ? "Comprobar el diario" : "Rellena todos los huecos…"}
@@ -912,7 +953,6 @@ function DiarioMode({ onHome }) {
 
       {scoreBlock}
 
-      {/* подвал: тренажёр спряжения */}
       <Btn bg={C.raspberry} onClick={() => setTrainer({ startVerb: errorVerbs[0] || null })} style={{ width: "100%", marginBottom: 14 }}>
         📊 Entrenador de conjugación{errorVerbs.length ? ` · ${errorVerbs.length} con errores` : ""}
       </Btn>
