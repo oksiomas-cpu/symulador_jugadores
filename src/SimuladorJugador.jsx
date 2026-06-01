@@ -760,12 +760,16 @@ function ConjHint() {
         <div style={{ marginTop: 10 }}>
           <div style={{ ...pHint, marginBottom: 9 }}>Ejemplo: <strong>hablar</strong> (говорить). Tiempo presente · окончания -o, -as, -a, -amos, -áis, -an.</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {PRON.map((p) => (
-              <div key={p.key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-                <span style={{ color: C.inkSoft }}>{p.label.split(" / ")[0]}</span>{" "}
-                <strong style={{ color: C.raspberry }}>{ex[p.key]}</strong>
+            {[[0,3],[1,4],[2,5]].flatMap(([a,b]) => [
+              <div key={PRON[a].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+                <span style={{ color: C.inkSoft }}>{PRON[a].label.split(" / ")[0]}</span>{" "}
+                <strong style={{ color: C.raspberry }}>{ex[PRON[a].key]}</strong>
+              </div>,
+              <div key={PRON[b].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+                <span style={{ color: C.inkSoft }}>{PRON[b].label.split(" / ")[0]}</span>{" "}
+                <strong style={{ color: C.raspberry }}>{ex[PRON[b].key]}</strong>
               </div>
-            ))}
+            ])}
           </div>
         </div>
       )}
