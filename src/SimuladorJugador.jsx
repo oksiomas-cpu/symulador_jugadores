@@ -161,8 +161,8 @@ function Header({ subtitle }) {
 function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
-      {onHome && <button onClick={onHome} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 13, textDecoration: "underline", cursor: "pointer", fontFamily: SERIF }}>← Cambiar de rol</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 8 }}>La Ciudad de los Sentidos 🍬</div>
+      {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Cambiar de rol</button>}
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬</div>
     </div>
   );
 }
@@ -230,6 +230,7 @@ export default function SimuladorJugador() {
 
   if (!role) return <RolePicker onPick={setRole} session={session} />;
   if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
+  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} />;
   return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} />;
 }
 
@@ -241,6 +242,7 @@ function RolePicker({ onPick, session }) {
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Dos testigos: uno dice la verdad, el otro miente. Pregunta, compara y adivina el verbo.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Conoces la verdad. Responde según la historia, sin equivocarte.", c: C.emerald },
     { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Mientes con elegancia. Confunde al detective y aléjalo de la verdad.", c: C.raspberry },
+    { id: "diario", emoji: "📔", t: "Mi Diario", d: "Tu día en la Ciudad. Lee el diario y escribe cada verbo en la persona correcta. Entrena la conjugación.", c: C.emeraldDeep },
   ];
   return (
     <div style={wrap}><div style={maxw}>
@@ -653,6 +655,264 @@ function WitnessMode({ role, onHome, onScore, session }) {
           Шкала баллов: 0 ошибок = <strong>+5</strong> · 1–2 = <strong>+3</strong> · 3–4 = <strong>+1</strong> · 5+ = <strong>0</strong>
         </div>
       </Block>
+
+      <Footer onHome={onHome} />
+    </div></div>
+  );
+}
+
+// ============================================================
+// MI DIARIO — текст-дневник с пропусками + тренажёр спряжения
+// Данные на 10 игровых глаголах. 12 пропусков = 6 лиц × 2.
+// ============================================================
+const PRON = [
+  { key: "yo",       label: "yo",                       end: "o" },
+  { key: "tú",       label: "tú",                       end: "as" },
+  { key: "él",       label: "él / ella / usted",        end: "a" },
+  { key: "nosotros", label: "nosotros / nosotras",      end: "amos" },
+  { key: "vosotros", label: "vosotros / vosotras",      end: "áis" },
+  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "an" },
+];
+function conjugate(inf) {
+  const stem = inf.slice(0, -2);            // -AR регулярные
+  const m = {};
+  PRON.forEach((p) => { m[p.key] = stem + p.end; });
+  return m;
+}
+function normES(s) { return (s || "").trim().toLowerCase().replace(/\s+/g, " "); }
+
+const DIARIO = {
+  title: "Mi Diario · Una mañana en la Ciudad de los Sentidos",
+  // Текст разбит на сегменты; число в blank — индекс пропуска
+  segments: [
+    { t: "Por la mañana, yo " }, { blank: 0 },
+    { t: " en la cocina con mucho gusto. Mi mamá " }, { blank: 1 },
+    { t: " despacio y prepara la mesa. Si tú vienes a visitarnos, tú " }, { blank: 2 },
+    { t: " la ciudad por la ventana. Después, nosotros " }, { blank: 3 },
+    { t: " ingredientes frescos en el mercado de caramelo.\n\nMi papá " }, { blank: 4 },
+    { t: " sobre el plan del día, y yo " }, { blank: 5 },
+    { t: " un café dorado. Tú " }, { blank: 6 },
+    { t: " ideas nuevas para hoy, mientras nosotros " }, { blank: 7 },
+    { t: " juntos en la cocina, como una familia feliz.\n\nDe repente, los amigos llegan muy alegres. Ellos " }, { blank: 8 },
+    { t: " una canción de trabajo. Vosotros " }, { blank: 9 },
+    { t: " con atención y luego vosotros " }, { blank: 10 },
+    { t: " también. Al final, todos ellos " }, { blank: 11 },
+    { t: " y ríen todo el tiempo." },
+  ],
+  blanks: [
+    { verb: "desayunar", person: "yo",       answer: "desayuno" },
+    { verb: "caminar",   person: "él",       answer: "camina" },
+    { verb: "mirar",     person: "tú",       answer: "miras" },
+    { verb: "comprar",   person: "nosotros", answer: "compramos" },
+    { verb: "hablar",    person: "él",       answer: "habla" },
+    { verb: "preparar",  person: "yo",       answer: "preparo" },
+    { verb: "buscar",    person: "tú",       answer: "buscas" },
+    { verb: "trabajar",  person: "nosotros", answer: "trabajamos" },
+    { verb: "cantar",    person: "ellos",    answer: "cantan" },
+    { verb: "escuchar",  person: "vosotros", answer: "escucháis" },
+    { verb: "cantar",    person: "vosotros", answer: "cantáis" },
+    { verb: "hablar",    person: "ellos",    answer: "hablan" },
+  ],
+};
+
+// ---- Подсказка: спряжение -AR (сворачивается) ----
+function ConjHint() {
+  const [open, setOpen] = useState(true);
+  const ex = conjugate("hablar");
+  return (
+    <Block stripe={C.gold}>
+      <div onClick={() => setOpen((o) => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Presente · verbos -AR</span>
+        <span style={{ color: C.goldDeep, fontSize: 13 }}>{open ? "ocultar ▲" : "mostrar ▼"}</span>
+      </div>
+      {open && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ ...pHint, marginBottom: 9 }}>Ejemplo: <strong>hablar</strong> (говорить). Tiempo presente · окончания -o, -as, -a, -amos, -áis, -an.</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            {PRON.map((p) => (
+              <div key={p.key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+                <span style={{ color: C.inkSoft }}>{p.label.split(" / ")[0]}</span>{" "}
+                <strong style={{ color: C.raspberry }}>{ex[p.key]}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Block>
+  );
+}
+
+// ---- Тренажёр спряжения конкретного глагола ----
+function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
+  const ALL = VERBS.map((v) => v.key);
+  const [verb, setVerb] = useState(startVerb || errorVerbs[0] || ALL[0]);
+  const [vals, setVals] = useState({});
+  const [checked, setChecked] = useState(false);
+  const correct = conjugate(verb);
+  const allOk = PRON.every((p) => normES(vals[p.key]) === correct[p.key]);
+
+  function pick(k) { setVerb(k); setVals({}); setChecked(false); }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📊 Entrenador de conjugación" />
+      <div style={{ ...pHint, textAlign: "center", marginBottom: 12 }}>Заполни все 6 форм глагола. Так ты увидишь, как он спрягается, и вернёшься к тексту.</div>
+
+      {/* выбор глагола — ошибочные подсвечены */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, justifyContent: "center" }}>
+        {ALL.map((k) => {
+          const isErr = errorVerbs.includes(k);
+          const active = k === verb;
+          return (
+            <button key={k} onClick={() => pick(k)} style={{
+              border: `1.5px solid ${active ? C.raspberry : isErr ? C.raspberry : C.line}`,
+              background: active ? C.raspberry : isErr ? "#FBEAEE" : C.card,
+              color: active ? "#fff" : isErr ? C.raspberryDeep : C.inkSoft,
+              borderRadius: 20, padding: "6px 13px", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF,
+            }}>{isErr && !active ? "⚠ " : ""}{k}</button>
+          );
+        })}
+      </div>
+
+      <Block stripe={C.raspberry}>
+        <div style={{ fontWeight: 700, fontSize: 19, color: C.ink }}>{verb} <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 14 }}>· presente</span></div>
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          {PRON.map((p) => {
+            const ok = checked && normES(vals[p.key]) === correct[p.key];
+            const bad = checked && normES(vals[p.key]) !== correct[p.key];
+            return (
+              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 150, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
+                <input value={vals[p.key] || ""} onChange={(e) => setVals((v) => ({ ...v, [p.key]: e.target.value }))}
+                  placeholder="…" style={{
+                    flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF,
+                    border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`,
+                    background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none",
+                  }} />
+                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{correct[p.key]}</span>}
+              </div>
+            );
+          })}
+        </div>
+        {!checked && <Btn bg={C.gold} onClick={() => setChecked(true)} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
+        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
+        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo.</div>}
+      </Block>
+
+      <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Volver al diario</Btn>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ---- Основной режим: Mi Diario ----
+function DiarioMode({ onHome }) {
+  const N = DIARIO.blanks.length;
+  const [vals, setVals] = useState({});
+  const [status, setStatus] = useState({});       // i -> "ok" | "bad" | undefined
+  const [everFailed, setEverFailed] = useState({}); // i -> true если хоть раз ошибся
+  const [checked, setChecked] = useState(false);
+  const [trainer, setTrainer] = useState(null);   // null | { startVerb }
+
+  const allOk = checked && DIARIO.blanks.every((_, i) => status[i] === "ok");
+  const filledAll = DIARIO.blanks.every((_, i) => normES(vals[i]) !== "");
+  const errorVerbs = [...new Set(DIARIO.blanks.filter((_, i) => status[i] === "bad").map((b) => b.verb))];
+
+  function check() {
+    const st = {}; const ef = { ...everFailed };
+    DIARIO.blanks.forEach((b, i) => {
+      const ok = normES(vals[i]) === b.answer;
+      st[i] = ok ? "ok" : "bad";
+      if (!ok) ef[i] = true;
+    });
+    setStatus(st); setEverFailed(ef); setChecked(true);
+  }
+
+  if (trainer) {
+    return <ConjTrainer startVerb={trainer.startVerb} errorVerbs={errorVerbs} onBack={() => { setTrainer(null); setChecked(false); }} />;
+  }
+
+  // финальная оценка
+  let scoreBlock = null;
+  if (allOk) {
+    const corrected = DIARIO.blanks.filter((_, i) => everFailed[i]).length;
+    const first = N - corrected;
+    const score10 = Math.round(((first + 0.5 * corrected) / N) * 10);
+    scoreBlock = (
+      <Block stripe={C.emerald}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
+          <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
+          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено через тренажёр: <strong>{corrected}</strong></div>
+        </div>
+      </Block>
+    );
+  }
+
+  let bi = -1; // счётчик пропусков при рендере
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📔 Mi Diario · escribe los verbos" />
+
+      <ConjHint />
+
+      {/* инструкция */}
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO.title}</div>
+        <div style={pHint}>Это твой день в Ciudad. Прочитай дневник и впиши каждый глагол в правильном лице. Текст в настоящем времени (<strong>presente</strong>). Сам реши: какой из 10 глаголов и какая форма. Подсказка со спряжением — сверху.</div>
+      </Block>
+
+      {/* текст с пропусками */}
+      <Block stripe={C.gold}>
+        <div style={{ fontSize: 17, lineHeight: 2.1, color: C.ink }}>
+          {DIARIO.segments.map((seg, idx) => {
+            if (seg.t !== undefined) {
+              return seg.t.split("\n\n").map((para, pi, arr) => (
+                <span key={idx + "_" + pi}>{para}{pi < arr.length - 1 ? <span style={{ display: "block", height: 10 }} /> : null}</span>
+              ));
+            }
+            bi = seg.blank;
+            const i = seg.blank;
+            const stt = status[i];
+            const locked = stt === "ok";
+            return (
+              <input key={"b" + i} value={vals[i] || ""} disabled={locked}
+                onChange={(e) => setVals((v) => ({ ...v, [i]: e.target.value }))}
+                placeholder="…" title={locked ? "" : "escribe el verbo"}
+                style={{
+                  width: 120, margin: "0 2px", padding: "3px 8px", fontSize: 16, fontFamily: SERIF, textAlign: "center",
+                  borderRadius: 7, outline: "none", verticalAlign: "middle",
+                  border: `2px solid ${stt === "ok" ? C.emerald : stt === "bad" ? C.raspberry : C.gold}`,
+                  background: stt === "ok" ? "#EAF5F0" : stt === "bad" ? "#FBEAEE" : "#fff",
+                  color: stt === "ok" ? C.emeraldDeep : stt === "bad" ? C.raspberryDeep : C.ink,
+                  fontWeight: stt ? 700 : 400,
+                }} />
+            );
+          })}
+        </div>
+      </Block>
+
+      {/* проверка / статус ошибок (без показа правильного ответа) */}
+      {checked && !allOk && (
+        <Block stripe={C.raspberry}>
+          <div style={{ fontWeight: 700, color: C.raspberryDeep }}>Есть ошибки — они подсвечены красным 🔴</div>
+          <div style={{ ...pHint, marginTop: 4 }}>Правильный ответ не показываю. Иди в тренажёр, отработай спряжение этих глаголов, и вернись исправить. Продолжить можно только без ошибок.</div>
+        </Block>
+      )}
+
+      {/* кнопки */}
+      {!allOk && (
+        <Btn bg={filledAll ? C.gold : "#D8CBB4"} disabled={!filledAll} onClick={check} style={{ width: "100%", marginBottom: 12 }}>
+          {filledAll ? "Comprobar el diario" : "Rellena todos los huecos…"}
+        </Btn>
+      )}
+
+      {scoreBlock}
+
+      {/* подвал: тренажёр спряжения */}
+      <Btn bg={C.raspberry} onClick={() => setTrainer({ startVerb: errorVerbs[0] || null })} style={{ width: "100%", marginBottom: 14 }}>
+        📊 Entrenador de conjugación{errorVerbs.length ? ` · ${errorVerbs.length} con errores` : ""}
+      </Btn>
 
       <Footer onHome={onHome} />
     </div></div>
