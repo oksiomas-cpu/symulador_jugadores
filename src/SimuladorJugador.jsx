@@ -886,7 +886,7 @@ function DiarioMode({ onHome }) {
     if (st === "ok") return { bd: C.emerald, bg: "#EAF5F0", col: C.emeraldDeep };
     if (st === "conj") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };       // спряжение → красный
     if (st === "sense") return { bd: "#D98A2B", bg: "#FCF1E0", col: "#A85F12" };              // смысл → оранжевый
-    if (st === "bad") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };
+    if (st === "bad") return { bd: "#3B7CB8", bg: "#E8F1F9", col: "#2C5F8A" };
     return { bd: C.gold, bg: "#fff", col: C.ink };
   }
 
@@ -899,6 +899,10 @@ function DiarioMode({ onHome }) {
       <Block stripe={C.emerald}>
         <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO.title}</div>
         <div style={pHint}>Это твой день в Ciudad. Впиши каждый глагол в правильном лице. Текст в настоящем времени (<strong>presente</strong>). Подходящих глаголов может быть несколько — выбирай любой по смыслу, главное — верное лицо. Подсказка со спряжением — сверху.</div>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
+          <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 5, fontWeight: 600 }}>Verbos disponibles · выбирай из этих 15:</div>
+          <div style={{ fontSize: 13, color: C.raspberry, lineHeight: 1.7, fontWeight: 600 }}>{VERBS15.join(" · ")}</div>
+        </div>
       </Block>
 
       <Block stripe={C.gold}>
@@ -939,8 +943,8 @@ function DiarioMode({ onHome }) {
             <div style={{ ...pHint, marginTop: 2 }}>Глагол спрягается верно, но в это место не подходит. Перечитай фразу и выбери другой.</div>
           </div>}
           {hasBad && <div>
-            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Незнакомое слово</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Это не один из 15 глаголов или есть опечатка. Проверь написание.</div>
+            <div style={{ fontWeight: 700, color: "#2C5F8A" }}>🔵 Незнакомое слово</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Это не один из 15 глаголов или есть опечатка. Посмотри список глаголов сверху и проверь написание.</div>
           </div>}
         </Block>
       )}
