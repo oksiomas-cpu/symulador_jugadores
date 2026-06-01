@@ -418,7 +418,10 @@ function DetectiveMode({ onHome, onScore, session }) {
             <p style={pHint}>Pulsa un verbo para leer su historia (en español) y comparar con las respuestas.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
               {VERBS.map((v) => (
-                <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${storyKey === v.key ? C.raspberry : C.line}`, background: storyKey === v.key ? C.raspberry : C.card, color: storyKey === v.key ? "#fff" : C.ink, borderRadius: 999, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600 }}>{v.emoji} {v.inf}</button>
+                <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${storyKey === v.key ? C.raspberry : C.line}`, background: storyKey === v.key ? C.raspberry : C.card, color: storyKey === v.key ? "#fff" : C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+                  <div>{v.emoji} {v.inf}</div>
+                  <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
+                </button>
               ))}
             </div>
             {story && (
@@ -446,7 +449,10 @@ function DetectiveMode({ onHome, onScore, session }) {
                 <div style={{ fontWeight: 700, marginBottom: 10 }}>Acusación final — ¿qué verbo es?</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {VERBS.map((v) => (
-                    <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 999, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600 }}>{v.emoji} {v.inf}</button>
+                    <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+                      <div>{v.emoji} {v.inf}</div>
+                      <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
+                    </button>
                   ))}
                   <button onClick={() => setGuessing(false)} style={{ border: "none", background: "#B0A48C", color: "#fff", borderRadius: 999, padding: "8px 14px", fontSize: 14, fontFamily: SERIF, cursor: "pointer" }}>Cancelar</button>
                 </div>
