@@ -20,27 +20,35 @@ const C = {
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 
 const QUESTIONS = [
-  { id: "n11", lvl: 1, q: "¿El Jefe hace esto?", ru: "Шеф делает это?" },
-  { id: "m1",  lvl: 1, q: "¿El Jefe hace esto solo?", ru: "Шеф делает это один?" },
-  { id: "n12", lvl: 1, q: "¿Los ayudantes también hacen esto?", ru: "Помощники тоже делают это?" },
-  { id: "n13", lvl: 1, q: "¿Esto pasa dentro del palacio?", ru: "Это происходит внутри дворца?" },
-  { id: "n14", lvl: 1, q: "¿Esto pasa fuera del palacio?", ru: "Это происходит вне дворца?" },
-  { id: "n15", lvl: 1, q: "¿Esto pasa por la mañana?", ru: "Это происходит утром?" },
-  { id: "n16", lvl: 1, q: "¿Esto ocurre todos los días?", ru: "Это происходит каждый день?" },
-  { id: "n21", lvl: 2, q: "¿Se necesitan las manos para esto?", ru: "Нужны руки?" },
-  { id: "n22", lvl: 2, q: "¿Se necesitan los ojos para esto?", ru: "Нужны глаза?" },
-  { id: "n23", lvl: 2, q: "¿Se necesitan los oídos para esto?", ru: "Нужны уши?" },
-  { id: "n24", lvl: 2, q: "¿Se necesita la voz para esto?", ru: "Нужен голос?" },
-  { id: "n25", lvl: 2, q: "¿Se necesitan las piernas para esto?", ru: "Нужны ноги?" },
-  { id: "n26", lvl: 2, q: "¿Se necesita un objeto o instrumento para esto?", ru: "Нужен предмет/инструмент?" },
-  { id: "n27", lvl: 2, q: "¿Se necesita dinero para esto?", ru: "Нужны деньги?" },
-  { id: "n28", lvl: 2, q: "¿Esto produce un sonido?", ru: "Это производит звук?" },
-  { id: "n29", lvl: 2, q: "¿Después de esto llega una idea nueva?", ru: "После этого приходит новая идея?" },
-  { id: "n31", lvl: 3, q: "¿Esto dura menos de quince minutos?", ru: "Длится меньше 15 минут?" },
-  { id: "n32", lvl: 3, q: "¿Esto ocurre en la cocina?", ru: "Происходит на кухне?" },
-  { id: "n33", lvl: 3, q: "¿Esto ocurre en la terraza?", ru: "Происходит на террасе?" },
-  { id: "n34", lvl: 3, q: "¿El Jefe come o bebe algo durante esto?", ru: "Шеф ест или пьёт во время этого?" },
-  { id: "n35", lvl: 3, q: "¿Hay silencio durante esto?", ru: "Во время этого тишина?" },
+  { id: "n11", lvl: 1, cat: "quien", q: "¿El Jefe hace esto?", ru: "Шеф делает это?" },
+  { id: "m1",  lvl: 1, cat: "quien", q: "¿El Jefe hace esto solo?", ru: "Шеф делает это один?" },
+  { id: "n12", lvl: 1, cat: "quien", q: "¿Los ayudantes también hacen esto?", ru: "Помощники тоже делают это?" },
+  { id: "n13", lvl: 1, cat: "donde", q: "¿Esto pasa dentro del palacio?", ru: "Это происходит внутри дворца?" },
+  { id: "n14", lvl: 1, cat: "donde", q: "¿Esto pasa fuera del palacio?", ru: "Это происходит вне дворца?" },
+  { id: "n32", lvl: 3, cat: "donde", q: "¿Esto ocurre en la cocina?", ru: "Происходит на кухне?" },
+  { id: "n33", lvl: 3, cat: "donde", q: "¿Esto ocurre en la terraza?", ru: "Происходит на террасе?" },
+  { id: "n15", lvl: 1, cat: "cuando", q: "¿Esto pasa por la mañana?", ru: "Это происходит утром?" },
+  { id: "n16", lvl: 1, cat: "cuando", q: "¿Esto ocurre todos los días?", ru: "Это происходит каждый день?" },
+  { id: "n31", lvl: 3, cat: "cuando", q: "¿Esto dura menos de quince minutos?", ru: "Длится меньше 15 минут?" },
+  { id: "n21", lvl: 2, cat: "como", q: "¿Se necesitan las manos para esto?", ru: "Нужны руки?" },
+  { id: "n22", lvl: 2, cat: "como", q: "¿Se necesitan los ojos para esto?", ru: "Нужны глаза?" },
+  { id: "n23", lvl: 2, cat: "como", q: "¿Se necesitan los oídos para esto?", ru: "Нужны уши?" },
+  { id: "n24", lvl: 2, cat: "como", q: "¿Se necesita la voz para esto?", ru: "Нужен голос?" },
+  { id: "n25", lvl: 2, cat: "como", q: "¿Se necesitan las piernas para esto?", ru: "Нужны ноги?" },
+  { id: "n26", lvl: 2, cat: "como", q: "¿Se necesita un objeto o instrumento para esto?", ru: "Нужен предмет/инструмент?" },
+  { id: "n27", lvl: 2, cat: "como", q: "¿Se necesita dinero para esto?", ru: "Нужны деньги?" },
+  { id: "n28", lvl: 2, cat: "detalles", q: "¿Esto produce un sonido?", ru: "Это производит звук?" },
+  { id: "n29", lvl: 2, cat: "detalles", q: "¿Después de esto llega una idea nueva?", ru: "После этого приходит новая идея?" },
+  { id: "n34", lvl: 3, cat: "detalles", q: "¿El Jefe come o bebe algo durante esto?", ru: "Шеф ест или пьёт во время этого?" },
+  { id: "n35", lvl: 3, cat: "detalles", q: "¿Hay silencio durante esto?", ru: "Во время этого тишина?" },
+];
+
+const CATS = [
+  { id: "quien",    icon: "👤", es: "¿QUIÉN?",    ru: "КТО" },
+  { id: "donde",    icon: "📍", es: "¿DÓNDE?",    ru: "ГДЕ" },
+  { id: "cuando",   icon: "🕐", es: "¿CUÁNDO?",   ru: "КОГДА" },
+  { id: "como",     icon: "✋", es: "¿CÓMO/CON QUÉ?", ru: "КАК / ЧЕМ" },
+  { id: "detalles", icon: "🔎", es: "DETALLES",   ru: "ДЕТАЛИ" },
 ];
 
 const VERBS = [
@@ -113,6 +121,61 @@ const VERBS = [
     dossier: [["¿Quién?", "El Jefe y los ayudantes"], ["¿Dónde?", "Cocina y sala de decoración"], ["¿Cuándo?", "De las 7 a las 3"], ["¿Con quién?", "Todos juntos"], ["¿En qué?", "El banquete del viernes"]],
     answers: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
     mask: "caminar",
+  },
+  {
+    key: "tomar", emoji: "✋", inf: "tomar", ru: "брать / поднимать",
+    storyEs: "Cada día, cuando todo está listo en la Cocina Mágica, el Gran Jefe Alcalde **toma** su varilla dorada con las dos manos, despacio, como un ritual. Nadie empieza a trabajar hasta que el Jefe **toma** la varilla. Hoy, como siempre, la **toma** y la levanta hacia la luz dorada.",
+    dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Toma la varilla dorada"], ["¿Dónde?", "Mesa central de la Cocina"], ["¿Cuándo?", "Cada día, cuando todo está listo"], ["¿Cómo?", "Con las dos manos, un ritual"]],
+    answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"sí" },
+    mask: "llevar",
+    canonVer: "Шеф берёт двумя руками золотой венчик на Волшебной Кухне. Каждый день когда всё готово. Торжественный ритуал, тишина, меньше минуты.",
+    fantVer: "Один помощник берёт не золотой венчик, а старый деревянный ковш. В подвале дворца, вечером, тайно, один, 2 минуты.",
+    fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
+    trap: { q: "¿Mueve los pies durante esto?", ru: "Двигает ногами?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "llamar", emoji: "📣", inf: "llamar", ru: "звать",
+    storyEs: "Al pie de la gran escalera dorada, el Gran Jefe Alcalde **llama** a su equipo con voz fuerte y clara: «¡Es hora de trabajar!» Su voz resuena por todos los corredores. **Llama** una vez, dos veces, siempre con energía. En menos de dos minutos los ayudantes llegan corriendo.",
+    dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Llama a su equipo"], ["¿Dónde?", "Al pie de la escalera, corredor"], ["¿Cuándo?", "Cada mañana, tras caminar"], ["¿Cómo?", "En voz muy alta, 1-2 veces"]],
+    answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
+    mask: "hablar",
+    canonVer: "Шеф зовёт команду громким голосом у подножия золотой лестницы. Каждое утро после прогулки. Эхо по коридорам. Меньше 2 минут.",
+    fantVer: "Помощник зовёт Шефа — не Шеф помощников. На кухне, вечером, тихим голосом, один помощник, 1 раз.",
+    fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Habla con los ayudantes durante esto?", ru: "Разговаривает во время этого?", canon: "no", fant: "no" },
+  },
+  {
+    key: "preguntar", emoji: "❓", inf: "preguntar", ru: "спрашивать",
+    storyEs: "Después de escuchar al Jefe, los tres ayudantes **preguntan** con voz clara y respetuosa: «¿Qué necesitamos hoy?» El Jefe responde con paciencia. Cada ayudante **pregunta** algo. Cuando ellos **preguntan**, el trabajo sale perfecto. Las preguntas duran cinco minutos.",
+    dossier: [["¿Quién?", "Los tres ayudantes"], ["¿A quién?", "Al Jefe — él responde"], ["¿Dónde?", "En el gran salón"], ["¿Cuándo?", "Tras la charla del Jefe, mañana"], ["¿Cuánto?", "Exactamente 5 minutos"]],
+    answers: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
+    mask: "hablar",
+    canonVer: "Спрашивают помощники (не Шеф — он отвечает). В большом зале, утром после речи Шефа. Голоса, 5 минут.",
+    fantVer: "Шеф — не помощники — спрашивает одного помощника. Вечером, на кухне, один вопрос, шёпотом, 1 минута.",
+    fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿El Jefe también pregunta?", ru: "Шеф тоже спрашивает?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "estudiar", emoji: "📚", inf: "estudiar", ru: "изучать",
+    storyEs: "Antes de salir de su despacho, el Gran Jefe Alcalde **estudia** una sola página de su libro antiguo de recetas. Hoy **estudia** la receta del caramelo de medianoche. **Estudia** cada palabra despacio, sin mover los ojos del libro, durante treinta minutos exactos. En silencio total.",
+    dossier: [["¿Quién?", "El Gran Jefe Alcalde, solo"], ["¿Qué?", "Una página del libro de recetas"], ["¿Dónde?", "En su despacho, en el sillón"], ["¿Cuándo?", "Cada mañana, antes de salir"], ["¿Cuánto?", "Exactamente 30 minutos"]],
+    answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
+    mask: "buscar",
+    canonVer: "Шеф изучает ОДНУ страницу древней книги рецептов. В кабинете, в кресле, перед выходом. 30 минут, глаза не движутся, полная тишина.",
+    fantVer: "Три помощника изучают новый рецепт вместе. На кухне, вечером, 10 минут, читают вслух.",
+    fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Pasa muchas páginas buscando?", ru: "Листает много страниц в поиске?", canon: "no", fant: "no" },
+  },
+  {
+    key: "llevar", emoji: "🎩", inf: "llevar", ru: "носить (на себе)",
+    storyEs: "El Gran Jefe Alcalde siempre **lleva** su gorro de chef blanco y alto. Sin el gorro, el día no empieza. También **lleva** su barba oscura con orgullo — es la firma del Jefe. Lo **lleva** todo el día, en cada salón y corredor. El gorro nunca descansa.",
+    dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Gorro blanco + barba"], ["¿Dónde?", "En todos lados, todo el palacio"], ["¿Cuándo?", "Todo el día, cada día"], ["¿Significa?", "Gorro + barba = el Jefe está aquí"]],
+    answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"sí", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"sí", n34:"no", n35:"no" },
+    mask: "tomar",
+    canonVer: "Шеф носит на себе высокий белый колпак и тёмную бороду. Везде во дворце, весь день, каждый день. Не берёт в руки — носит как часть образа.",
+    fantVer: "Помощники носят маленькие коричневые (карамельные) колпаки — не белые. Только по пятницам, не каждый день, без бороды.",
+    fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Lo toma en las manos?", ru: "Берёт это в руки?", canon: "no", fant: "no" },
   },
 ];
 
@@ -220,6 +283,270 @@ const maxw = { maxWidth: 560, margin: "0 auto" };
 // ============================================================
 // ГЛАВНЫЙ КОМПОНЕНТ — хранит сессионный счёт
 // ============================================================
+// ============ РЕЖИМ «ЖИВАЯ ИГРА» (LIVE) ============
+// Пульты для реальной игры в Zoom: детектив + свидетели (Канон / Фантазия)
+
+function liveFantVer(v) {
+  if (v.fantVer) return v.fantVer;
+  const m = verbByKey(v.mask);
+  return "Притворись, что Шеф делает «" + m.inf + "» (" + m.ru + "). Отвечай уверенно, как будто глагол именно такой — это твоя легенда.";
+}
+function liveFantAns(v) {
+  return v.fantAns || verbByKey(v.mask).answers;
+}
+function liveCanonVer(v) {
+  return v.canonVer || ("Правда: " + v.dossier.map(d => d[1]).slice(0,3).join(" · "));
+}
+
+// ----- Большой бейдж SÍ / NO -----
+function BigSiNo({ v }) {
+  const yes = v === "sí";
+  return <span style={{ background: yes ? C.emerald : C.raspberry, color: "#fff", borderRadius: 9, padding: "6px 16px", fontWeight: 800, fontSize: 17, letterSpacing: ".5px", minWidth: 56, textAlign: "center", display: "inline-block" }}>{yes ? "SÍ" : "NO"}</span>;
+}
+
+// ===== ПУЛЬТ ДЕТЕКТИВА =====
+function LiveDetective({ onBack }) {
+  const [open, setOpen] = useState("quien");
+  const [asked, setAsked] = useState({});   // { qid: {A:bool,B:bool} }
+  const [custom, setCustom] = useState([]);  // [{text,A,B}]
+  const [draft, setDraft] = useState("");
+
+  function toggle(qid, w) {
+    setAsked(prev => {
+      const cur = prev[qid] || { A: false, B: false };
+      return { ...prev, [qid]: { ...cur, [w]: !cur[w] } };
+    });
+  }
+  function toggleCustom(i, w) {
+    setCustom(prev => prev.map((c, j) => j === i ? { ...c, [w]: !c[w] } : c));
+  }
+  function addCustom() {
+    if (!draft.trim()) return;
+    setCustom(prev => [...prev, { text: draft.trim(), A: false, B: false }]);
+    setDraft("");
+  }
+  const totalAsked = Object.values(asked).reduce((s, x) => s + (x.A ? 1 : 0) + (x.B ? 1 : 0), 0)
+    + custom.reduce((s, c) => s + (c.A ? 1 : 0) + (c.B ? 1 : 0), 0);
+
+  function ChkRow({ es, ru, st, onA, onB }) {
+    return (
+      <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+        <div style={{ fontSize: 15.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{es}</div>
+        {ru && <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 8 }}>{ru}</div>}
+        <div style={{ display: "flex", gap: 8 }}>
+          {[["A", st.A, onA], ["B", st.B, onB]].map(([lab, on, fn]) => (
+            <button key={lab} onClick={fn} style={{ flex: 1, background: on ? C.goldDeep : "#fff", color: on ? "#fff" : C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 8, padding: "7px 0", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>
+              {on ? "✓ " : ""}Testigo {lab}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={wrap}>
+      <Header subtitle="🕵️ Пульт детектива · Живая игра" />
+      <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        <Block stripe={C.goldDeep}>
+          <div style={{ padding: "14px 16px" }}>
+            <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
+              Глагол скрыт — твоя задача его вычислить. Открывай категории, задавай вопросы свидетелям A и B, отмечай <b>кому уже задал</b>. Сравнивай ответы: один говорит правду, другой лжёт.
+            </div>
+            <div style={{ marginTop: 10, fontSize: 13, color: C.goldDeep, fontWeight: 700 }}>Задано вопросов: {totalAsked}</div>
+          </div>
+        </Block>
+
+        {CATS.map(cat => {
+          const qs = QUESTIONS.filter(q => q.cat === cat.id);
+          const catCount = qs.reduce((s, q) => { const a = asked[q.id] || {}; return s + (a.A ? 1 : 0) + (a.B ? 1 : 0); }, 0);
+          const isOpen = open === cat.id;
+          return (
+            <div key={cat.id} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 12, overflow: "hidden" }}>
+              <div onClick={() => setOpen(isOpen ? null : cat.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", cursor: "pointer", background: isOpen ? C.goldSoft : "#fff" }}>
+                <span style={{ fontSize: 22 }}>{cat.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: C.goldDeep }}>{cat.es}</div>
+                  <div style={{ fontSize: 12, color: C.inkSoft }}>{cat.ru}</div>
+                </div>
+                {catCount > 0 && <span style={{ background: C.emerald, color: "#fff", borderRadius: 99, padding: "2px 10px", fontSize: 12.5, fontWeight: 700 }}>{catCount}</span>}
+                <span style={{ fontSize: 18, color: C.gold, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              </div>
+              {isOpen && (
+                <div style={{ padding: "8px 14px 14px" }}>
+                  {qs.map(q => <ChkRow key={q.id} es={q.q} ru={q.ru} st={asked[q.id] || { A: false, B: false }} onA={() => toggle(q.id, "A")} onB={() => toggle(q.id, "B")} />)}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <div style={{ background: C.card, borderRadius: 14, border: `1px dashed ${C.gold}`, padding: "14px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: C.raspberry, marginBottom: 8 }}>✍️ Свой вопрос</div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+            <input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Напиши свой вопрос…" style={{ flex: 1, border: `1.5px solid ${C.line}`, borderRadius: 8, padding: "9px 12px", fontSize: 14.5, fontFamily: SERIF, color: C.ink, outline: "none" }} />
+            <button onClick={addCustom} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", fontSize: 20, fontWeight: 700, cursor: "pointer" }}>＋</button>
+          </div>
+          {custom.map((c, i) => <ChkRow key={i} es={c.text} ru="" st={c} onA={() => toggleCustom(i, "A")} onB={() => toggleCustom(i, "B")} />)}
+        </div>
+
+        <Footer onHome={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
+function LiveWitness({ mode, onBack }) {
+  const [vk, setVk] = useState(null);
+  const isCanon = mode === "canon";
+  const accent = isCanon ? C.emerald : C.raspberry;
+  const v = vk ? verbByKey(vk) : null;
+
+  if (!v) {
+    return (
+      <div style={wrap}>
+        <Header subtitle={isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра"} />
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <Block stripe={accent}>
+            <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
+              Тебе прислали глагол в личку. <b>Выбери его</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
+            </div>
+          </Block>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {VERBS.map(vv => (
+              <button key={vv.key} onClick={() => setVk(vv.key)} style={{ background: C.card, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 8px", cursor: "pointer", fontFamily: SERIF, textAlign: "center", boxShadow: "0 2px 8px rgba(61,43,31,0.06)" }}>
+                <div style={{ fontSize: 26 }}>{vv.emoji}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginTop: 4 }}>{vv.inf}</div>
+                <div style={{ fontSize: 11.5, color: C.inkSoft }}>{vv.ru}</div>
+              </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 16 }}><Footer onHome={onBack} /></div>
+        </div>
+      </div>
+    );
+  }
+
+  const ans = isCanon ? v.answers : liveFantAns(v);
+  const ver = isCanon ? liveCanonVer(v) : liveFantVer(v);
+  const rounds = [
+    { t: "Круг 1 — Категория", lvl: 1 },
+    { t: "Круг 2 — Сужение", lvl: 2 },
+    { t: "Круг 3 — Точное попадание", lvl: 3 },
+  ];
+
+  return (
+    <div style={wrap}>
+      <Header subtitle={isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра"} />
+      <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        <Block stripe={accent}>
+          <div style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 30 }}>{v.emoji}</span>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: accent }}>{v.inf}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft }}>{v.ru}</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12, background: isCanon ? "rgba(45,122,90,0.10)" : "rgba(178,42,75,0.10)", border: `1px solid ${accent}`, borderRadius: 10, padding: "11px 13px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: accent, letterSpacing: ".5px", marginBottom: 4 }}>{isCanon ? "🟢 ТВОЯ ПРАВДА — отвечай строго по ней" : "🔴 ТВОЯ ЛЕГЕНДА — держись её до конца"}</div>
+              <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.45 }}>{ver}</div>
+            </div>
+          </div>
+        </Block>
+
+        {isCanon && (
+          <Block stripe={C.gold}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.goldDeep, marginBottom: 6 }}>📖 История (правда)</div>
+              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}><Highlighted text={v.storyEs} /></div>
+              <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {v.dossier.map((d, i) => (
+                  <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
+                    <span style={{ color: C.inkSoft }}>{d[0]} </span><span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Block>
+        )}
+
+        {rounds.map(r => (
+          <Block key={r.lvl} stripe={accent}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: accent, marginBottom: 10 }}>{r.t}</div>
+              {QUESTIONS.filter(q => q.lvl === r.lvl).map(q => (
+                <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}` }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
+                    <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
+                  </div>
+                  <BigSiNo v={ans[q.id]} />
+                </div>
+              ))}
+            </div>
+          </Block>
+        ))}
+
+        {v.trap && (
+          <Block stripe={C.raspberry}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: C.raspberry, marginBottom: 8 }}>⚡ Вопрос-ловушка (детектив может подловить)</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600 }}>{v.trap.q}</div>
+                  <div style={{ fontSize: 11.5, color: C.inkSoft }}>{v.trap.ru}</div>
+                </div>
+                <BigSiNo v={isCanon ? v.trap.canon : v.trap.fant} />
+              </div>
+            </div>
+          </Block>
+        )}
+
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button onClick={() => setVk(null)} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
+        </div>
+        <Footer onHome={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ===== ОБЁРТКА LIVE: выбор роли =====
+function LiveGame({ onHome }) {
+  const [r, setR] = useState(null);
+  if (r === "detective") return <LiveDetective onBack={() => setR(null)} />;
+  if (r === "canon") return <LiveWitness mode="canon" onBack={() => setR(null)} />;
+  if (r === "fantasia") return <LiveWitness mode="fantasia" onBack={() => setR(null)} />;
+
+  const roles = [
+    { id: "detective", emoji: "🕵️", t: "Детектив", d: "Глагол скрыт. Вопросы по категориям + отметки кому задал.", c: C.goldDeep },
+    { id: "canon", emoji: "🟢", t: "Свидетель Канон", d: "Знаешь правду. История, досье и ответы Sí/No по всем вопросам.", c: C.emerald },
+    { id: "fantasia", emoji: "🔴", t: "Свидетель Фантазия", d: "Твоя легенда. Ответы Sí/No по версии — держись её до конца.", c: C.raspberry },
+  ];
+  return (
+    <div style={wrap}>
+      <Header subtitle="🎮 Живая игра · выбор роли" />
+      <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", fontSize: 14.5, color: C.inkSoft, marginBottom: 14, lineHeight: 1.5 }}>
+          Открой свою роль — тебе её назвал ведущий. Пульт держит всё перед глазами, ничего не нужно искать.
+        </div>
+        {roles.map(c => (
+          <div key={c.id} onClick={() => setR(c.id)} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+            <div style={{ width: 7, background: c.c, flexShrink: 0 }} />
+            <div style={{ padding: "16px 18px" }}>
+              <div style={{ fontSize: 19, fontWeight: 800, color: c.c }}>{c.emoji} {c.t}</div>
+              <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{c.d}</div>
+            </div>
+          </div>
+        ))}
+        <Footer onHome={onHome} />
+      </div>
+    </div>
+  );
+}
+
 export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
   const [role, setRole] = useState(null);
@@ -229,7 +556,8 @@ export default function SimuladorJugador() {
     if (pts > 0) setSession(s => ({ ...s, [roleKey]: s[roleKey] + pts }));
   }
 
-  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} />;
+  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} onLive={() => { setRole("live"); setEntered(true); }} />;
+  if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} />;
   if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} />;
@@ -1007,7 +1335,7 @@ const MAYA = {
   ],
 };
 
-function Welcome({ onEnter, onDiario }) {
+function Welcome({ onEnter, onDiario, onLive }) {
   const [ru, setRu] = useState(false);
   return (
     <div style={wrap}><div style={maxw}>
@@ -1053,7 +1381,8 @@ function Welcome({ onEnter, onDiario }) {
 
       {/* Переходы */}
       <Btn bg={C.gold} onClick={onEnter} style={{ width: "100%", fontSize: 16, padding: "14px", marginBottom: 10 }}>Empezar · выбрать роль →</Btn>
-      <Btn bg={C.emeraldDeep} onClick={onDiario} style={{ width: "100%", fontSize: 16, padding: "14px" }}>📔 Mi Diario · тренировать спряжение</Btn>
+      <Btn bg={C.emeraldDeep} onClick={onDiario} style={{ width: "100%", fontSize: 16, padding: "14px", marginBottom: 10 }}>📔 Mi Diario · тренировать спряжение</Btn>
+      <Btn bg={C.raspberry} onClick={onLive} style={{ width: "100%", fontSize: 16, padding: "14px" }}>🎮 Живая игра · пульт для Zoom-сессии</Btn>
 
       <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬</div>
     </div></div>
