@@ -310,6 +310,7 @@ function LiveDetective({ onBack }) {
   const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
   const [custom, setCustom] = useState([]);  // [{text, A, B}]
   const [draft, setDraft] = useState("");
+  const [storyView, setStoryView] = useState(null); // key глагола или null
 
   function setAns(qid, w, val) {
     setAsked(prev => {
@@ -402,6 +403,57 @@ function LiveDetective({ onBack }) {
             <button onClick={addCustom} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", fontSize: 20, fontWeight: 700, cursor: "pointer" }}>＋</button>
           </div>
           {custom.map((c, i) => <AnsRow key={i} es={c.text} ru="" st={c} onSet={(w, val) => setCustomAns(i, w, val)} />)}
+        </div>
+
+        <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
+          <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.line}`, cursor: "pointer", background: C.goldSoft, display: "flex", justifyContent: "space-between", alignItems: "center" }}
+               onClick={() => setStoryView(storyView === "__open__" ? null : "__open__")}>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.goldDeep }}>🔍 Проверь гипотезу</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Выбери глагол — проверь свою версию</div>
+            </div>
+            <span style={{ fontSize: 18, color: C.gold, transform: (storyView !== null) ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+          </div>
+          {storyView !== null && (
+            <div style={{ padding: "12px 14px" }}>
+              {storyView && storyView !== "__open__" ? (() => {
+                const sv = verbByKey(storyView);
+                return (
+                  <div>
+                    <button onClick={() => setStoryView("__open__")} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все глаголы</button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                      <span style={{ fontSize: 32 }}>{sv.emoji}</span>
+                      <div>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: C.goldDeep }}>{sv.inf}</div>
+                        <div style={{ fontSize: 13, color: C.inkSoft }}>{sv.ru}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.6, marginBottom: 12 }}>
+                      <Highlighted text={sv.storyEs} />
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {sv.dossier.map((d, i) => (
+                        <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
+                          <span style={{ color: C.inkSoft }}>{d[0]} </span>
+                          <span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })() : (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  {VERBS.map(vv => (
+                    <button key={vv.key} onClick={() => setStoryView(vv.key)} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
+                      <div style={{ fontSize: 22 }}>{vv.emoji}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
+                      <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <Footer onHome={onBack} />
