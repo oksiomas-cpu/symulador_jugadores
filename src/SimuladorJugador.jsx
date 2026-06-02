@@ -307,39 +307,50 @@ function BigSiNo({ v }) {
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
 function LiveDetective({ onBack }) {
   const [open, setOpen] = useState("quien");
-  const [asked, setAsked] = useState({});   // { qid: {A:bool,B:bool} }
-  const [custom, setCustom] = useState([]);  // [{text,A,B}]
+  const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
+  const [custom, setCustom] = useState([]);  // [{text, A, B}]
   const [draft, setDraft] = useState("");
 
-  function toggle(qid, w) {
+  function setAns(qid, w, val) {
     setAsked(prev => {
-      const cur = prev[qid] || { A: false, B: false };
-      return { ...prev, [qid]: { ...cur, [w]: !cur[w] } };
+      const cur = prev[qid] || { A: null, B: null };
+      const next = cur[w] === val ? null : val; // повторный клик снимает
+      return { ...prev, [qid]: { ...cur, [w]: next } };
     });
   }
-  function toggleCustom(i, w) {
-    setCustom(prev => prev.map((c, j) => j === i ? { ...c, [w]: !c[w] } : c));
+  function setCustomAns(i, w, val) {
+    setCustom(prev => prev.map((c, j) => j === i ? { ...c, [w]: (c[w] === val ? null : val) } : c));
   }
   function addCustom() {
     if (!draft.trim()) return;
-    setCustom(prev => [...prev, { text: draft.trim(), A: false, B: false }]);
+    setCustom(prev => [...prev, { text: draft.trim(), A: null, B: null }]);
     setDraft("");
   }
-  const totalAsked = Object.values(asked).reduce((s, x) => s + (x.A ? 1 : 0) + (x.B ? 1 : 0), 0)
-    + custom.reduce((s, c) => s + (c.A ? 1 : 0) + (c.B ? 1 : 0), 0);
+  const answeredCount = Object.values(asked).filter(x => x.A || x.B).length
+    + custom.filter(c => c.A || c.B).length;
+  const conflictCount = Object.values(asked).filter(x => x.A && x.B && x.A !== x.B).length
+    + custom.filter(c => c.A && c.B && c.A !== c.B).length;
 
-  function ChkRow({ es, ru, st, onA, onB }) {
+  function AnsRow({ es, ru, st, onSet }) {
+    const conflict = st.A && st.B && st.A !== st.B;
     return (
-      <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
-        <div style={{ fontSize: 15.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{es}</div>
-        {ru && <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 8 }}>{ru}</div>}
-        <div style={{ display: "flex", gap: 8 }}>
-          {[["A", st.A, onA], ["B", st.B, onB]].map(([lab, on, fn]) => (
-            <button key={lab} onClick={fn} style={{ flex: 1, background: on ? C.goldDeep : "#fff", color: on ? "#fff" : C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 8, padding: "7px 0", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>
-              {on ? "✓ " : ""}Testigo {lab}
-            </button>
-          ))}
-        </div>
+      <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
+        {ru && <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 8 }}>{ru}</div>}
+        {["A", "B"].map(w => (
+          <div key={w} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+            <span style={{ width: 78, fontSize: 13, fontWeight: 700, color: C.inkSoft }}>Testigo {w}:</span>
+            {[["sí", "SÍ", C.emerald], ["no", "NO", C.raspberry]].map(([val, lab, col]) => {
+              const on = st[w] === val;
+              return (
+                <button key={val} onClick={() => onSet(w, val)} style={{ flex: 1, background: on ? col : "#fff", color: on ? "#fff" : col, border: `1.5px solid ${col}`, borderRadius: 8, padding: "6px 0", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
+                  {on ? "✓ " : ""}{lab}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+        {conflict && <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: C.raspberry }}>⚡ Расхождение — здесь один из них лжёт</div>}
       </div>
     );
   }
@@ -351,15 +362,18 @@ function LiveDetective({ onBack }) {
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              Глагол скрыт — твоя задача его вычислить. Открывай категории, задавай вопросы свидетелям A и B, отмечай <b>кому уже задал</b>. Сравнивай ответы: один говорит правду, другой лжёт.
+              Глагол скрыт. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
             </div>
-            <div style={{ marginTop: 10, fontSize: 13, color: C.goldDeep, fontWeight: 700 }}>Задано вопросов: {totalAsked}</div>
+            <div style={{ marginTop: 10, display: "flex", gap: 14, fontSize: 13, fontWeight: 700 }}>
+              <span style={{ color: C.goldDeep }}>Отвечено: {answeredCount}</span>
+              {conflictCount > 0 && <span style={{ color: C.raspberry }}>⚡ Расхождений: {conflictCount}</span>}
+            </div>
           </div>
         </Block>
 
         {CATS.map(cat => {
           const qs = QUESTIONS.filter(q => q.cat === cat.id);
-          const catCount = qs.reduce((s, q) => { const a = asked[q.id] || {}; return s + (a.A ? 1 : 0) + (a.B ? 1 : 0); }, 0);
+          const catConflicts = qs.reduce((s, q) => { const a = asked[q.id] || {}; return s + (a.A && a.B && a.A !== a.B ? 1 : 0); }, 0);
           const isOpen = open === cat.id;
           return (
             <div key={cat.id} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 12, overflow: "hidden" }}>
@@ -369,12 +383,12 @@ function LiveDetective({ onBack }) {
                   <div style={{ fontSize: 16, fontWeight: 700, color: C.goldDeep }}>{cat.es}</div>
                   <div style={{ fontSize: 12, color: C.inkSoft }}>{cat.ru}</div>
                 </div>
-                {catCount > 0 && <span style={{ background: C.emerald, color: "#fff", borderRadius: 99, padding: "2px 10px", fontSize: 12.5, fontWeight: 700 }}>{catCount}</span>}
+                {catConflicts > 0 && <span style={{ background: C.raspberry, color: "#fff", borderRadius: 99, padding: "2px 10px", fontSize: 12.5, fontWeight: 700 }}>⚡{catConflicts}</span>}
                 <span style={{ fontSize: 18, color: C.gold, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
               </div>
               {isOpen && (
                 <div style={{ padding: "8px 14px 14px" }}>
-                  {qs.map(q => <ChkRow key={q.id} es={q.q} ru={q.ru} st={asked[q.id] || { A: false, B: false }} onA={() => toggle(q.id, "A")} onB={() => toggle(q.id, "B")} />)}
+                  {qs.map(q => <AnsRow key={q.id} es={q.q} ru={q.ru} st={asked[q.id] || { A: null, B: null }} onSet={(w, val) => setAns(q.id, w, val)} />)}
                 </div>
               )}
             </div>
@@ -387,7 +401,7 @@ function LiveDetective({ onBack }) {
             <input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Напиши свой вопрос…" style={{ flex: 1, border: `1.5px solid ${C.line}`, borderRadius: 8, padding: "9px 12px", fontSize: 14.5, fontFamily: SERIF, color: C.ink, outline: "none" }} />
             <button onClick={addCustom} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", fontSize: 20, fontWeight: 700, cursor: "pointer" }}>＋</button>
           </div>
-          {custom.map((c, i) => <ChkRow key={i} es={c.text} ru="" st={c} onA={() => toggleCustom(i, "A")} onB={() => toggleCustom(i, "B")} />)}
+          {custom.map((c, i) => <AnsRow key={i} es={c.text} ru="" st={c} onSet={(w, val) => setCustomAns(i, w, val)} />)}
         </div>
 
         <Footer onHome={onBack} />
@@ -430,12 +444,6 @@ function LiveWitness({ mode, onBack }) {
 
   const ans = isCanon ? v.answers : liveFantAns(v);
   const ver = isCanon ? liveCanonVer(v) : liveFantVer(v);
-  const rounds = [
-    { t: "Круг 1 — Категория", lvl: 1 },
-    { t: "Круг 2 — Сужение", lvl: 2 },
-    { t: "Круг 3 — Точное попадание", lvl: 3 },
-  ];
-
   return (
     <div style={wrap}>
       <Header subtitle={isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра"} />
@@ -472,11 +480,15 @@ function LiveWitness({ mode, onBack }) {
           </Block>
         )}
 
-        {rounds.map(r => (
-          <Block key={r.lvl} stripe={accent}>
+        {CATS.map(cat => (
+          <Block key={cat.id} stripe={accent}>
             <div style={{ padding: "12px 16px" }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: accent, marginBottom: 10 }}>{r.t}</div>
-              {QUESTIONS.filter(q => q.lvl === r.lvl).map(q => (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: accent }}>{cat.es}</span>
+                <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
+              </div>
+              {QUESTIONS.filter(q => q.cat === cat.id).map(q => (
                 <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}` }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
