@@ -58,6 +58,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su terraza favorita"], ["¿Cuándo?", "Cada mañana"], ["¿Con quién?", "Solo"], ["¿Qué?", "Café negro y tostadas con caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"sí", n34:"sí", n35:"sí" },
     mask: "preparar",
+    fantVer: "Шеф завтракает внутри дворца вечером — вместе с помощниками, в главном зале. Суп и хлеб. Только по пятницам.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"sí", n35:"no" },
+    trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
   },
   {
     key: "caminar", emoji: "🚶", inf: "caminar", ru: "идти / гулять",
@@ -65,6 +68,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Por los pasillos del palacio"], ["¿Cuándo?", "Cada mañana, 20 minutos"], ["¿Con quién?", "Solo"], ["¿Cómo?", "Despacio, manos en la espalda"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"sí", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "trabajar",
+    fantVer: "Шеф идёт вне дворца, вечером, вместе с помощниками — по саду, разговаривают на ходу, 5 минут.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"sí", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Camina en silencio?", ru: "Идёт в тишине?", canon: "sí", fant: "no" },
   },
   {
     key: "cantar", emoji: "🎵", inf: "cantar", ru: "петь",
@@ -79,6 +85,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Desde la terraza"], ["¿Cuándo?", "Cada mañana"], ["¿Con quién?", "Solo, en silencio"], ["¿Qué?", "Las nubes, el río de caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"sí", n34:"no", n35:"sí" },
     mask: "escuchar",
+    fantVer: "Шеф смотрит в зеркало внутри дворца, вечером, вместе с помощниками — в зеркальном зале. Обсуждают. Только по субботам.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
   },
   {
     key: "buscar", emoji: "🔍", inf: "buscar", ru: "искать",
@@ -86,6 +95,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Un ingrediente especial nuevo"], ["¿Dónde?", "Armarios, cajas del sótano"], ["¿Cuándo?", "Cada mañana"], ["¿Con quién?", "Solo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "comprar",
+    fantVer: "Шеф ищет снаружи дворца, ночью, вместе с одним помощником — в саду, с фонарём в руках. Шепчут.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"sí", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Busca dentro del palacio?", ru: "Ищет внутри дворца?", canon: "sí", fant: "no" },
   },
   {
     key: "escuchar", emoji: "🎧", inf: "escuchar", ru: "слушать",
@@ -93,6 +105,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su sillón favorito"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo, en silencio absoluto"], ["¿Qué?", "El caramelo, el viento, los pasos"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "mirar",
+    fantVer: "Шеф слушает живую музыку снаружи дворца, вечером, вместе с помощниками — в саду, 30 минут.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
   },
   {
     key: "hablar", emoji: "🗣", inf: "hablar", ru: "говорить",
@@ -100,6 +115,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En la gran sala"], ["¿Cuándo?", "Cada mañana, 15 minutos"], ["¿Con quién?", "Con sus ayudantes"], ["¿De qué?", "Del menú especial del día"]],
     answers: { n11:"sí", m1:"no", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "cantar",
+    fantVer: "Шеф говорит по телефону — один, вечером, в кабинете, тихим голосом, 2 минуты.",
+    fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
+    trap: { q: "¿Hay alguien escuchando?", ru: "Есть ли слушатели рядом?", canon: "sí", fant: "no" },
   },
   {
     key: "preparar", emoji: "👨‍🍳", inf: "preparar", ru: "готовить",
@@ -107,6 +125,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Una tarta de caramelo"], ["¿Dónde?", "En la cocina, mesa de mármol"], ["¿Con quién?", "Solo"], ["¿Con qué?", "Cucharón de oro, varilla de cristal"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"sí" },
     mask: "desayunar",
+    fantVer: "Шеф готовит снаружи дворца, вечером, вместе с помощниками — в саду. Поёт в процессе. 30 минут.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
+    trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
   },
   {
     key: "comprar", emoji: "🛒", inf: "comprar", ru: "покупать",
@@ -114,6 +135,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En el mercado de caramelo"], ["¿Cuándo?", "Una vez a la semana"], ["¿Con quién?", "Solo"], ["¿Qué?", "Caramelo, azúcar, especias"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"no", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"sí", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "buscar",
+    fantVer: "Шеф получает товары у помощника внутри дворца, в кладовой — без денег, внутренний обмен, каждый день.",
+    fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
+    trap: { q: "¿Va al mercado?", ru: "Идёт на рынок?", canon: "sí", fant: "no" },
   },
   {
     key: "trabajar", emoji: "⚙️", inf: "trabajar", ru: "работать",
@@ -121,6 +145,9 @@ const VERBS = [
     dossier: [["¿Quién?", "El Jefe y los ayudantes"], ["¿Dónde?", "Cocina y sala de decoración"], ["¿Cuándo?", "De las 7 a las 3"], ["¿Con quién?", "Todos juntos"], ["¿En qué?", "El banquete del viernes"]],
     answers: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
     mask: "caminar",
+    fantVer: "Только Шеф — без помощников — работает снаружи дворца, в саду, вечером, час, в полной тишине.",
+    fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
+    trap: { q: "¿Trabajan varias personas?", ru: "Работают несколько человек?", canon: "sí", fant: "no" },
   },
   {
     key: "tomar", emoji: "✋", inf: "tomar", ru: "брать / поднимать",
