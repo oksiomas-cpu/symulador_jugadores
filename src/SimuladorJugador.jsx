@@ -56,7 +56,7 @@ const VERBS = [
     key: "desayunar", emoji: "☕", inf: "desayunar", ru: "завтракать",
     storyEs: "Cada mañana, antes de que el Palacio de Caramelo despierte, el Gran Jefe Alcalde **desayuna** solo en su terraza favorita. Hoy **desayuna** con una taza de café negro y una torre de tostadas con caramelo dorado. Mientras **desayuna**, mira la ciudad que lentamente abre los ojos.",
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su terraza favorita"], ["¿Cuándo?", "Cada mañana"], ["¿Con quién?", "Solo"], ["¿Qué?", "Café negro y tostadas con caramelo"]],
-    answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"sí", n34:"sí", n35:"sí" },
+    answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"sí", n34:"sí", n35:"sí" },
     mask: "preparar",
   },
   {
@@ -884,14 +884,16 @@ function WitnessMode({ role, onHome, onScore, session }) {
 
   const current = deck[idx % deck.length];
   const canonAns = verb.answers[current.id];
+  const fantAns = liveFantAns(verb)[current.id]; // жёсткий ответ по легенде
   const isInZone = roundQ >= 9; // вопросы 10-18 (0-based: 9..17)
 
   function answer(my) {
-    const ok = isCanon ? my === canonAns : my !== canonAns;
+    const correctAns = isCanon ? canonAns : fantAns;
+    const ok = my === correctAns;
     const newErrors = isInZone && !ok ? roundErrors + 1 : roundErrors;
     const newRoundQ = roundQ + 1;
 
-    setFeedback({ ok, my, canonAns });
+    setFeedback({ ok, my, correctAns, canonAns });
     setScore(s => ({ good: s.good + (ok ? 1 : 0), total: s.total + 1 }));
 
     if (isInZone) setRoundErrors(newErrors);
@@ -971,9 +973,19 @@ function WitnessMode({ role, onHome, onScore, session }) {
           </div>
           {!roundDone && <Btn bg={C.gold} onClick={newVerb} style={{ padding: "8px 12px", fontSize: 13 }}>🔄 Otro</Btn>}
         </div>
+
+        {/* Легенда Фантазии — всегда видна, главный ориентир игрока */}
+        {!isCanon && (
+          <div style={{ marginTop: 12, background: "rgba(168,27,62,0.10)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "11px 13px" }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberry, letterSpacing: ".5px", marginBottom: 5 }}>🔴 ТВОЯ ЛЕГЕНДА — держись её до конца</div>
+            <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.45 }}>{liveFantVer(verb)}</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: C.inkSoft }}>Отвечай строго по этой версии. Каждое отклонение = ошибка.</div>
+          </div>
+        )}
+
         <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
           <button onClick={() => setShowStory(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showStory ? "▲ Ocultar historia" : "▼ Ver historia"}</button>
-          <button onClick={() => setShowSheet(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showSheet ? "▲ Ocultar chuleta" : "▼ Ver chuleta (la verdad)"}</button>
+          <button onClick={() => setShowSheet(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showSheet ? "▲ Скрыть шпаргалку" : isCanon ? "▼ Шпаргалка Канона" : "▼ Ответы по легенде"}</button>
         </div>
         {showStory && (
           <div style={{ marginTop: 10, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
@@ -983,14 +995,31 @@ function WitnessMode({ role, onHome, onScore, session }) {
         )}
         {showSheet && (
           <div style={{ marginTop: 10 }}>
-            <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>● CANON — solo esto es verdad</div>
-            {verb.dossier.map(([q, a], i) => (
-              <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-                <div style={{ width: 110, flexShrink: 0, color: C.raspberry, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
-                <div style={{ fontSize: 13.5 }}>{a}</div>
-              </div>
-            ))}
-            {!isCanon && <p style={{ ...pHint, marginTop: 8, color: C.raspberryDeep }}>Это правда. Твоя задача — увести детектива в сторону, отвечая иначе на «опознавательные» вопросы.</p>}
+            {isCanon ? (
+              <>
+                <div style={{ background: C.emerald, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🟢 CANON — solo esto es verdad</div>
+                {verb.dossier.map(([q, a], i) => (
+                  <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                    <div style={{ width: 110, flexShrink: 0, color: C.emeraldDeep, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
+                    <div style={{ fontSize: 13.5 }}>{a}</div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <>
+                <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🔴 ОТВЕТЫ ПО ТВОЕЙ ЛЕГЕНДЕ</div>
+                {QUESTIONS.map((q) => {
+                  const fa = liveFantAns(verb)[q.id];
+                  return (
+                    <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
+                      <div style={{ flex: 1, fontSize: 13, color: C.ink }}>{q.q}</div>
+                      <BigSiNo v={fa} />
+                    </div>
+                  );
+                })}
+                <p style={{ ...pHint, marginTop: 8, color: C.raspberryDeep }}>Это ответы твоей версии. Тренируй их — не пытайся угадать "противоположность правды".</p>
+              </>
+            )}
           </div>
         )}
       </Block>
@@ -1029,7 +1058,7 @@ function WitnessMode({ role, onHome, onScore, session }) {
               <div style={{ background: feedback.ok ? C.emerald : C.raspberry, color: "#fff", borderRadius: 10, padding: "12px 14px", fontWeight: 600, fontSize: 15 }}>
                 {isCanon
                   ? (feedback.ok ? "✓ ¡Correcto! Respondiste según el canon." : "✗ Cuidado: el canon dice otra cosa.")
-                  : (feedback.ok ? "✓ ¡Bien mentido! Alejas al detective de la verdad." : "✗ Dijiste la verdad — el detective se acerca.")}
+                  : (feedback.ok ? "✓ Верно по легенде — держишь версию!" : "✗ Ошибка — твоя легенда говорит иначе.")}
               </div>
               {!feedback.ok && isInZone && (
                 <div style={{ marginTop: 6, fontSize: 12.5, color: C.raspberry, fontWeight: 600 }}>
@@ -1038,7 +1067,7 @@ function WitnessMode({ role, onHome, onScore, session }) {
               )}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, fontSize: 14, color: C.inkSoft }}>
                 <span>Tú: <SiNo v={feedback.my} /></span>
-                <span>· El canon: <SiNo v={feedback.canonAns} /></span>
+                <span>· {isCanon ? "Канон" : "Легенда"}: <SiNo v={feedback.correctAns} /></span>
               </div>
               <Btn bg={C.gold} onClick={next} style={{ marginTop: 14 }}>Siguiente pregunta →</Btn>
             </div>
