@@ -115,11 +115,17 @@ export default async function handler(req, res) {
         startedAt: new Date().toISOString(),
       };
       g.round.turnIdx = 0; // чей ход: индекс в массиве detectives
-      // Кто из свидетелей «A», кто «B» — случайно, чтобы буква не выдавала роль
-      const wits = [g.round.roles.canon, g.round.roles.fantasy].filter(Boolean);
+      // Кто из свидетелей «A», кто «B» — случайно, чтобы буква не выдавала роль.
+      // Имена приходят с пульта ведущей — работают и для игроков без пульта.
+      const wits = [
+        { id: g.round.roles.canon || null, name: String(roles.canonName || "Свидетель 1").slice(0, 24) },
+        { id: g.round.roles.fantasy || null, name: String(roles.fantasyName || "Свидетель 2").slice(0, 24) },
+      ];
       if (Math.random() < 0.5) wits.reverse();
-      g.round.witA = wits[0] || null;
-      g.round.witB = wits[1] || null;
+      g.round.witA = wits[0].id;
+      g.round.witAName = wits[0].name;
+      g.round.witB = wits[1].id;
+      g.round.witBName = wits[1].name;
       g.round.asked = []; // лента вопросов раунда: {by, byName, to, qid, text, ts}
       g.v++;
       await setGame(g);
