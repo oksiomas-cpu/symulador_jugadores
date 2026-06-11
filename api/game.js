@@ -3,6 +3,7 @@
 // Общий файл для пульта /host и симулятора /player.
 // База: ciudad-game (Upstash Redis через Vercel Storage).
 // Этап 1: комната + вход игроков + состояние (лобби).
+// Этап 2, шаг 3: адресные вопросы детективов (action=ask).
 // ============================================================
 
 const TTL = String(60 * 60 * 12); // игра живёт в базе 12 часов
@@ -114,6 +115,12 @@ export default async function handler(req, res) {
         startedAt: new Date().toISOString(),
       };
       g.round.turnIdx = 0; // чей ход: индекс в массиве detectives
+      // Кто из свидетелей «A», кто «B» — случайно, чтобы буква не выдавала роль
+      const wits = [g.round.roles.canon, g.round.roles.fantasy].filter(Boolean);
+      if (Math.random() < 0.5) wits.reverse();
+      g.round.witA = wits[0] || null;
+      g.round.witB = wits[1] || null;
+      g.round.asked = []; // лента вопросов раунда: {by, byName, to, qid, text, ts}
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: g });
@@ -123,6 +130,43 @@ export default async function handler(req, res) {
     if (action === "set_turn") {
       if (!g.round) return res.status(200).json({ ok: false, error: "Раунд ещё не начался" });
       g.round.turnIdx = Number(body.turnIdx || 0);
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: g });
+    }
+
+    // --- Детектив задаёт адресный вопрос (или ведущая фиксирует вопрос голосом) ---
+    if (action === "ask") {
+      if (!g.round) return res.status(200).json({ ok: false, error: "Раунд ещё не начался" });
+      g.round.asked = g.round.asked || [];
+      if (g.round.asked.length >= 27) {
+        return res.status(200).json({ ok: false, error: "Лимит 27 вопросов исчерпан" });
+      }
+      const dets = g.round.roles.detectives || [];
+      const manual = !!body.manual; // ведущая фиксирует вопрос, заданный голосом
+      const pid = manual ? null : String(body.playerId || "");
+      let byName = "ведущая";
+      if (!manual) {
+        if (!dets.includes(pid)) {
+          return res.status(200).json({ ok: false, error: "Ты не детектив этого раунда" });
+        }
+        const activeId = dets[(g.round.turnIdx || 0) % dets.length];
+        if (pid !== activeId) {
+          return res.status(200).json({ ok: false, error: "Сейчас не твой ход" });
+        }
+        const p = g.players.find((x) => x.id === pid);
+        byName = p ? p.name : "детектив";
+      }
+      const target = body.target === "A" || body.target === "B" ? body.target : null;
+      g.round.asked.push({
+        by: pid,
+        byName,
+        to: target, // "A" | "B" | null (вопрос голосом без адреса)
+        qid: body.qid ? String(body.qid) : null, // id вопроса из списка или null (свой/голосом)
+        text: String(body.text || "").slice(0, 200),
+        ts: Date.now(),
+      });
+      if (dets.length) g.round.turnIdx = ((g.round.turnIdx || 0) + 1) % dets.length;
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: g });
