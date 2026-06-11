@@ -113,6 +113,16 @@ export default async function handler(req, res) {
         },
         startedAt: new Date().toISOString(),
       };
+      g.round.turnIdx = 0; // чей ход: индекс в массиве detectives
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: g });
+    }
+
+    // --- Ведущий передаёт ход следующему детективу ---
+    if (action === "set_turn") {
+      if (!g.round) return res.status(200).json({ ok: false, error: "Раунд ещё не начался" });
+      g.round.turnIdx = Number(body.turnIdx || 0);
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: g });
