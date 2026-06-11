@@ -252,7 +252,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.3</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.4</div>
     </div>
   );
 }
@@ -774,8 +774,8 @@ function LiveGame({ onHome }) {
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
   const rdLive = game && game.round;
-  const liveDet = conn && rdLive && rdLive.witA && rdLive.witB ? {
-    witNames: { A: nameOf(rdLive.witA), B: nameOf(rdLive.witB) },
+  const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
+    witNames: { A: rdLive.witAName, B: rdLive.witBName },
     asked: rdLive.asked || [],
     onAsk: sendAsk,
   } : null;
@@ -1824,7 +1824,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.3</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.4</div>
     </div></div>
   );
 }
@@ -1922,7 +1922,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.3</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.4</div>
     </div></div>
   );
 }
