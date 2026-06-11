@@ -96,6 +96,28 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, playerId: p.id, game: g });
     }
 
+    // --- Ведущий стартует раунд: роли и глагол уезжают на пульты игроков ---
+    if (action === "start_round") {
+      const n = Number(body.round || 0);
+      const verbKey = String(body.verbKey || "");
+      const roles = body.roles || {};
+      if (!n || !verbKey) return res.status(200).json({ ok: false, error: "Нет номера раунда или глагола" });
+      g.phase = "round";
+      g.round = {
+        n, // номер раунда 1..5
+        verbKey, // глагол раунда (его шпаргалку откроют свидетели)
+        roles: {
+          canon: roles.canon || null, // playerId Свидетеля Канона
+          fantasy: roles.fantasy || null, // playerId Свидетеля Фантазии
+          detectives: Array.isArray(roles.detectives) ? roles.detectives : [],
+        },
+        startedAt: new Date().toISOString(),
+      };
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: g });
+    }
+
     // --- Ведущий убирает игрока из лобби (опечатка в имени и т.п.) ---
     if (action === "kick") {
       const pid = String(body.playerId || "");
