@@ -360,12 +360,21 @@ function BigSiNo({ v }) {
 }
 
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
-function LiveDetective({ onBack, roundN, turn }) {
+function LiveDetective({ onBack, roundN, turn, live }) {
   const [open, setOpen] = useState("quien");
   const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
   const [custom, setCustom] = useState([]);  // [{text, A, B}]
   const [draft, setDraft] = useState("");
   const [storyView, setStoryView] = useState(null); // key глагола или null
+  const [askBusy, setAskBusy] = useState(false);
+  const [askErr, setAskErr] = useState("");
+  async function doAsk(qid, text, target) {
+    if (!live || askBusy) return;
+    setAskBusy(true); setAskErr("");
+    const err = await live.onAsk(qid, text, target);
+    if (err) setAskErr(err);
+    setAskBusy(false);
+  }
 
   function setAns(qid, w, val) {
     setAsked(prev => {
@@ -387,12 +396,25 @@ function LiveDetective({ onBack, roundN, turn }) {
   const conflictCount = Object.values(asked).filter(x => x.A && x.B && x.A !== x.B).length
     + custom.filter(c => c.A && c.B && c.A !== c.B).length;
 
-  function AnsRow({ es, ru, st, onSet }) {
+  function AnsRow({ es, ru, st, onSet, qid }) {
     const conflict = st.A && st.B && st.A !== st.B;
+    const canAsk = !!(live && qid && turn && turn.mine && !askBusy);
     return (
       <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
         {ru && <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 8 }}>{ru}</div>}
+        {live && qid && (
+          <div style={{ display: "flex", gap: 6, margin: "2px 0 6px" }}>
+            {["A", "B"].map(w => {
+              const was = live.asked.some(a => a.qid === qid && a.to === w);
+              return (
+                <button key={w} disabled={!canAsk} onClick={() => doAsk(qid, es, w)} style={{ flex: 1, background: was ? C.creamDeep : canAsk ? C.gold : "#EFE7D6", color: was ? C.inkSoft : canAsk ? "#fff" : "#B5A88F", border: `1.5px solid ${was ? C.line : canAsk ? C.goldDeep : C.line}`, borderRadius: 8, padding: "7px 4px", fontSize: 12.5, fontWeight: 700, cursor: canAsk ? "pointer" : "default", fontFamily: SERIF }}>
+                  {was ? "✓ задан · " : "📨 "}{w} · {live.witNames[w]}
+                </button>
+              );
+            })}
+          </div>
+        )}
         {["A", "B"].map(w => (
           <div key={w} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
             <span style={{ width: 78, fontSize: 13, fontWeight: 700, color: C.inkSoft }}>Testigo {w}:</span>
@@ -424,10 +446,16 @@ function LiveDetective({ onBack, roundN, turn }) {
             {turn.mine ? "🎤 Спрашивай!" : "⏳ Жди своей очереди"}
           </div>
         )}
+        {askErr && (
+          <div style={{ background: "rgba(178,42,75,0.10)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "9px 12px", marginBottom: 12, fontSize: 13.5, fontWeight: 700, color: C.raspberry, textAlign: "center" }}>
+            ⚠️ {askErr}
+          </div>
+        )}
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
               Глагол скрыт. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
+              {live && <span> В свой ход нажми <b>📨</b> под вопросом — ведущая и свидетель увидят его сами.</span>}
             </div>
             <div style={{ marginTop: 10, display: "flex", gap: 14, fontSize: 13, fontWeight: 700 }}>
               <span style={{ color: C.goldDeep }}>Отвечено: {answeredCount}</span>
@@ -453,7 +481,7 @@ function LiveDetective({ onBack, roundN, turn }) {
               </div>
               {isOpen && (
                 <div style={{ padding: "8px 14px 14px" }}>
-                  {qs.map(q => <AnsRow key={q.id} es={q.q} ru={q.ru} st={asked[q.id] || { A: null, B: null }} onSet={(w, val) => setAns(q.id, w, val)} />)}
+                  {qs.map(q => <AnsRow key={q.id} qid={q.id} es={q.q} ru={q.ru} st={asked[q.id] || { A: null, B: null }} onSet={(w, val) => setAns(q.id, w, val)} />)}
                 </div>
               )}
             </div>
@@ -527,7 +555,7 @@ function LiveDetective({ onBack, roundN, turn }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
+function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter }) {
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
   const [cat, setCat] = useState("all"); // фильтр категорий — против скролла на живой игре
@@ -536,6 +564,8 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
   const v = vk ? verbByKey(vk) : null;
   function pickVerb(k) { setVk(k); setDone(new Set()); setCat("all"); }
   function toggleDone(id) { setDone(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; }); }
+  // вопросы, заданные мне с пультов детективов, гаснут сами (ручные отметки остаются)
+  const effDone = liveAsked && liveAsked.size ? new Set([...done, ...liveAsked]) : done;
 
   if (!v) {
     return (
@@ -566,7 +596,7 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
   const ver = isCanon ? liveCanonVer(v) : liveFantVer(v);
   return (
     <div style={wrap}>
-      <Header subtitle={isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра"} />
+      <Header subtitle={(isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра") + (myLetter ? " · Ты — Свидетель " + myLetter : "")} />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <Block stripe={accent}>
           <div style={{ padding: "14px 16px" }}>
@@ -588,13 +618,13 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
         <Block stripe={C.gold}>
           <div style={{ padding: "11px 16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {done.size} из {QUESTIONS.length}</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {effDone.size} из {QUESTIONS.length}</span>
               {done.size > 0 && (
                 <button onClick={() => setDone(new Set())} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>🔄 Сбросить ответы</button>
               )}
             </div>
             <div style={{ height: 8, background: C.creamDeep, borderRadius: 4, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${(done.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
+              <div style={{ height: "100%", width: `${(effDone.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
             </div>
             <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}>Ответил вслух → нажми вопрос, он погаснет. Случайно нажал — нажми ещё раз, вернётся.</div>
           </div>
@@ -620,7 +650,7 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
         <div style={{ position: "sticky", top: 0, zIndex: 20, background: C.cream, borderRadius: 12, border: `1px solid ${C.line}`, boxShadow: "0 4px 14px rgba(61,43,31,0.14)", padding: "8px", marginBottom: 14, display: "flex", gap: 6 }}>
           <button onClick={() => setCat("all")} style={{ flex: 1, background: cat === "all" ? accent : C.card, color: cat === "all" ? "#fff" : C.inkSoft, border: `1.5px solid ${cat === "all" ? accent : C.line}`, borderRadius: 9, padding: "8px 2px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Все</button>
           {CATS.map(c => {
-            const left = QUESTIONS.filter(q => q.cat === c.id && !done.has(q.id)).length;
+            const left = QUESTIONS.filter(q => q.cat === c.id && !effDone.has(q.id)).length;
             const active = cat === c.id;
             return (
               <button key={c.id} onClick={() => setCat(active ? "all" : c.id)} style={{ flex: 1, background: active ? accent : left === 0 ? C.creamDeep : C.card, border: `1.5px solid ${active ? accent : C.line}`, borderRadius: 9, padding: "5px 2px", cursor: "pointer", fontFamily: SERIF, opacity: left === 0 && !active ? 0.5 : 1 }}>
@@ -640,7 +670,7 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
                 <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
               </div>
               {QUESTIONS.filter(q => q.cat === cat.id).map(q => {
-                const isDone = done.has(q.id);
+                const isDone = effDone.has(q.id);
                 if (isDone) return (
                   <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.45 }}>
                     <span style={{ color: C.emeraldDeep, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
@@ -734,6 +764,23 @@ function LiveGame({ onHome }) {
     const ap = (game.players || []).find((x) => x.id === activeId);
     return { mine: activeId === conn.playerId, name: ap ? ap.name : "—" };
   }
+  function nameOf(pid) { const p = ((game && game.players) || []).find((x) => x.id === pid); return p ? p.name : "?"; }
+  async function sendAsk(qid, text, target) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "ask", code: conn.code, playerId: conn.playerId, qid, text, target }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось отправить вопрос";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
+  const rdLive = game && game.round;
+  const liveDet = conn && rdLive && rdLive.witA && rdLive.witB ? {
+    witNames: { A: nameOf(rdLive.witA), B: nameOf(rdLive.witB) },
+    asked: rdLive.asked || [],
+    onAsk: sendAsk,
+  } : null;
+  const myLetter = conn && rdLive ? (rdLive.witA === conn.playerId ? "A" : rdLive.witB === conn.playerId ? "B" : null) : null;
+  const liveAskedForMe = myLetter && rdLive ? new Set((rdLive.asked || []).filter((a) => a.to === myLetter && a.qid).map((a) => a.qid)) : null;
   useEffect(() => {
     if (!conn || !game || !game.round) return;
     const rd = game.round;
@@ -763,9 +810,9 @@ function LiveGame({ onHome }) {
   }, [conn && conn.code]);
 
   const roundKey = game && game.round ? game.round.n : "manual";
-  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} />;
-  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
-  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} />;
 
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
