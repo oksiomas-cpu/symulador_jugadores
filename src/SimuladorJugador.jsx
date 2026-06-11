@@ -520,9 +520,12 @@ function LiveDetective({ onBack }) {
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
 function LiveWitness({ mode, onBack }) {
   const [vk, setVk] = useState(null);
+  const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
   const isCanon = mode === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const v = vk ? verbByKey(vk) : null;
+  function pickVerb(k) { setVk(k); setDone(new Set()); }
+  function toggleDone(id) { setDone(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; }); }
 
   if (!v) {
     return (
@@ -536,7 +539,7 @@ function LiveWitness({ mode, onBack }) {
           </Block>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {VERBS.map(vv => (
-              <button key={vv.key} onClick={() => setVk(vv.key)} style={{ background: C.card, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 8px", cursor: "pointer", fontFamily: SERIF, textAlign: "center", boxShadow: "0 2px 8px rgba(61,43,31,0.06)" }}>
+              <button key={vv.key} onClick={() => pickVerb(vv.key)} style={{ background: C.card, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 8px", cursor: "pointer", fontFamily: SERIF, textAlign: "center", boxShadow: "0 2px 8px rgba(61,43,31,0.06)" }}>
                 <div style={{ fontSize: 26 }}>{vv.emoji}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginTop: 4 }}>{vv.inf}</div>
                 <div style={{ fontSize: 11.5, color: C.inkSoft }}>{vv.ru}</div>
@@ -571,6 +574,22 @@ function LiveWitness({ mode, onBack }) {
           </div>
         </Block>
 
+        {/* Прогресс допроса */}
+        <Block stripe={C.gold}>
+          <div style={{ padding: "11px 16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {done.size} из {QUESTIONS.length}</span>
+              {done.size > 0 && (
+                <button onClick={() => setDone(new Set())} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>🔄 Сбросить ответы</button>
+              )}
+            </div>
+            <div style={{ height: 8, background: C.creamDeep, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${(done.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
+            </div>
+            <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}>Ответил вслух → нажми вопрос, он погаснет. Случайно нажал — нажми ещё раз, вернётся.</div>
+          </div>
+        </Block>
+
         {isCanon && (
           <Block stripe={C.gold}>
             <div style={{ padding: "12px 16px" }}>
@@ -595,15 +614,25 @@ function LiveWitness({ mode, onBack }) {
                 <span style={{ fontSize: 14, fontWeight: 800, color: accent }}>{cat.es}</span>
                 <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
               </div>
-              {QUESTIONS.filter(q => q.cat === cat.id).map(q => (
-                <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}` }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
-                    <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
+              {QUESTIONS.filter(q => q.cat === cat.id).map(q => {
+                const isDone = done.has(q.id);
+                if (isDone) return (
+                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.45 }}>
+                    <span style={{ color: C.emeraldDeep, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
+                    <div style={{ flex: 1, fontSize: 12, color: C.inkSoft, textDecoration: "line-through", lineHeight: 1.3 }}>{q.q}</div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: ans[q.id] === "sí" ? C.emeraldDeep : C.raspberryDeep, flexShrink: 0 }}>{ans[q.id] === "sí" ? "SÍ" : "NO"}</span>
                   </div>
-                  <BigSiNo v={ans[q.id]} />
-                </div>
-              ))}
+                );
+                return (
+                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
+                      <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
+                    </div>
+                    <BigSiNo v={ans[q.id]} />
+                  </div>
+                );
+              })}
             </div>
           </Block>
         ))}
@@ -624,7 +653,7 @@ function LiveWitness({ mode, onBack }) {
         )}
 
         <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <button onClick={() => setVk(null)} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
+          <button onClick={() => { setVk(null); setDone(new Set()); }} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
         </div>
         <Footer onHome={onBack} />
       </div>
