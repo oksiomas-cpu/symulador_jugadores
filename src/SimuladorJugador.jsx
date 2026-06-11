@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -360,7 +360,7 @@ function BigSiNo({ v }) {
 }
 
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
-function LiveDetective({ onBack }) {
+function LiveDetective({ onBack, roundN }) {
   const [open, setOpen] = useState("quien");
   const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
   const [custom, setCustom] = useState([]);  // [{text, A, B}]
@@ -413,7 +413,7 @@ function LiveDetective({ onBack }) {
 
   return (
     <div style={wrap}>
-      <Header subtitle="🕵️ Пульт детектива · Живая игра" />
+      <Header subtitle={"🕵️ Пульт детектива · Живая игра" + (roundN ? " · Раунд " + roundN : "")} />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
@@ -518,8 +518,8 @@ function LiveDetective({ onBack }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-function LiveWitness({ mode, onBack }) {
-  const [vk, setVk] = useState(null);
+function LiveWitness({ mode, onBack, initialVerbKey, roundN }) {
+  const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
   const [cat, setCat] = useState("all"); // фильтр категорий — против скролла на живой игре
   const isCanon = mode === "canon";
@@ -704,7 +704,28 @@ function LiveGame({ onHome }) {
     } catch (e) { setJoinErr("Сеть недоступна, попробуй ещё раз"); }
     setJoinBusy(false);
   }
-  function leaveRoom() { setConn(null); setGame(null); saveConn(null); }
+  function leaveRoom() { setConn(null); setGame(null); saveConn(null); lastRound.current = 0; }
+
+  // --- Автооткрытие роли: ведущий стартовал раунд → пульт сам открывает твою роль ---
+  const lastRound = useRef(0);
+  const [liveVerb, setLiveVerb] = useState(null); // глагол раунда (только для свидетелей)
+  function myRoleIn(rd) {
+    if (!rd || !rd.roles || !conn) return null;
+    if (rd.roles.canon === conn.playerId) return "canon";
+    if (rd.roles.fantasy === conn.playerId) return "fantasia";
+    if ((rd.roles.detectives || []).includes(conn.playerId)) return "detective";
+    return null;
+  }
+  useEffect(() => {
+    if (!conn || !game || !game.round) return;
+    const rd = game.round;
+    if (rd.n === lastRound.current) return;
+    const my = myRoleIn(rd);
+    if (!my) return; // ведущий не нашёл это имя в комнате — открой роль вручную
+    lastRound.current = rd.n;
+    setLiveVerb(my === "detective" ? null : rd.verbKey);
+    setR(my);
+  }, [conn && conn.playerId, game && game.round && game.round.n]);
 
   // опрос состояния игры раз в 2 сек
   useEffect(() => {
@@ -723,9 +744,10 @@ function LiveGame({ onHome }) {
     return () => { dead = true; clearInterval(t); };
   }, [conn && conn.code]);
 
-  if (r === "detective") return <LiveDetective onBack={() => setR(null)} />;
-  if (r === "canon") return <LiveWitness mode="canon" onBack={() => setR(null)} />;
-  if (r === "fantasia") return <LiveWitness mode="fantasia" onBack={() => setR(null)} />;
+  const roundKey = game && game.round ? game.round.n : "manual";
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
 
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
@@ -774,6 +796,11 @@ function LiveGame({ onHome }) {
             {game && (
               <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 5 }}>
                 В комнате ({(game.players || []).length}/5): {(game.players || []).map((p) => p.name).join(", ") || "—"}
+              </div>
+            )}
+            {game && game.round && myRoleIn(game.round) && (
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: C.raspberry, marginTop: 6 }}>
+                🎬 Раунд {game.round.n}: твоя роль — {myRoleIn(game.round) === "detective" ? "🕵️ Детектив" : myRoleIn(game.round) === "canon" ? "🟢 Свидетель Канон" : "🔴 Свидетель Фантазия"}
               </div>
             )}
           </div>
