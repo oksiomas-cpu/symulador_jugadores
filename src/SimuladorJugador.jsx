@@ -276,6 +276,24 @@ function ScoreBadge({ session }) {
   );
 }
 
+// ---- Всплывающее окно снизу (bottom sheet) ----
+function Sheet({ open, onClose, title, children }) {
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(61,43,31,0.45)", zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <style>{"@keyframes ciuSlideUp { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }"}</style>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: "18px 18px 0 0", width: "100%", maxWidth: 560, maxHeight: "78vh", overflowY: "auto", padding: "14px 18px 28px", boxShadow: "0 -8px 30px rgba(61,43,31,.25)", animation: "ciuSlideUp .22s ease both", fontFamily: SERIF, boxSizing: "border-box" }}>
+        <div style={{ width: 44, height: 5, borderRadius: 3, background: C.line, margin: "0 auto 12px" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
+          <strong style={{ fontSize: 16.5, color: C.ink }}>{title}</strong>
+          <button onClick={onClose} style={{ background: C.creamDeep, border: "none", borderRadius: 99, width: 30, height: 30, color: C.inkSoft, fontSize: 15, cursor: "pointer", lineHeight: 1, flexShrink: 0 }}>✕</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // ---- Прогресс раунда (18 вопросов: 9 разогрев + 9 оценка) ----
 function RoundProgress({ roundQ, roundErrors }) {
   const warmup = Math.min(roundQ, 9);
@@ -665,7 +683,6 @@ function RolePicker({ onPick, session, onBack }) {
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
     { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Ты врёшь красиво. Запутай детектива и уведи его от правды.", c: C.raspberry },
-    { id: "diario", emoji: "📔", t: "Mi Diario", d: "Твой день в Ciudad. Читай дневник и впиши каждый глагол в правильном лице. Тренировка спряжения.", c: C.emeraldDeep },
   ];
   return (
     <div style={wrap}><div style={maxw}>
@@ -757,57 +774,21 @@ function DetectiveMode({ onHome, onScore, session }) {
         </Block>
       )}
 
-      <Block stripe={C.emerald}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2 style={h2}>📋 История допроса</h2>
-          <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas</span>
-        </div>
-        <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
-          {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
-          {(() => {
-            // Группируем по тексту вопроса — чтобы A и B на один вопрос шли рядом
-            const groups = [];
-            g.log.forEach(e => {
-              const last = groups[groups.length - 1];
-              if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
-                last.entries.push(e);
-              } else {
-                groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
-              }
-            });
-            return groups.map((grp, i) => (
-              <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-                <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
-                  <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
-                </div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {grp.entries.map((e, j) => (
-                    <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
-                      <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
-                        {e.w}
-                      </span>
-                      <SiNo v={e.a} />
-                    </div>
-                  ))}
-                  {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
-                    <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
-                  )}
-                </div>
-              </div>
-            ));
-          })()}
-        </div>
-      </Block>
-
       {!g.result && (
         <>
+          {/* ВОПРОС — главное действие, всегда первым */}
           <Block stripe={C.goldDeep}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={tag}>{lvlName[current.lvl]}</div>
               <button onClick={nextQ} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>↻ Пропустить</button>
             </div>
             <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 6px" }}>{current.q}</div>
-            <div style={{ ...pHint, marginBottom: 12 }}>{current.ru}</div>
+            <div style={{ ...pHint, marginBottom: 8 }}>{current.ru}</div>
+            {/* Счёт и правила баллов — сразу на виду */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: C.cream, borderRadius: 8, border: `1px dashed ${C.line}`, padding: "6px 11px", marginBottom: 12 }}>
+              <span style={{ fontSize: 12.5, color: C.goldDeep, fontWeight: 700 }}>Задано: {g.log.length}</span>
+              <span style={{ fontSize: 12, color: C.inkSoft }}>до 9 → <strong style={{ color: C.raspberry }}>+5</strong> · до 18 → <strong>+3</strong> · позже → <strong>+1</strong></span>
+            </div>
             <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 8 }}>Кому задать вопрос?</div>
             <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
               <Btn
@@ -834,56 +815,83 @@ function DetectiveMode({ onHome, onScore, session }) {
             )}
           </Block>
 
+          {/* ИСТОРИЯ ДОПРОСА */}
+          <Block stripe={C.emerald}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={h2}>📋 История допроса</h2>
+              <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas</span>
+            </div>
+            <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
+              {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
+              {(() => {
+                const groups = [];
+                g.log.forEach(e => {
+                  const last = groups[groups.length - 1];
+                  if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
+                    last.entries.push(e);
+                  } else {
+                    groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
+                  }
+                });
+                return groups.map((grp, i) => (
+                  <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                    <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
+                      <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {grp.entries.map((e, j) => (
+                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
+                          <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
+                            {e.w}
+                          </span>
+                          <SiNo v={e.a} />
+                        </div>
+                      ))}
+                      {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
+                        <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
+                      )}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </Block>
+
+          {/* ПРОВЕРЬ ГИПОТЕЗУ */}
           <Block stripe={C.raspberry}>
             <h2 style={h2}>Проверь гипотезу</h2>
-            <p style={pHint}>Нажми на глагол — прочитай его историю и сравни с ответами свидетелей.</p>
+            <p style={pHint}>Нажми на глагол — его история откроется поверх экрана. Сравни с ответами свидетелей.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
               {VERBS.map((v) => (
-                <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${storyKey === v.key ? C.raspberry : C.line}`, background: storyKey === v.key ? C.raspberry : C.card, color: storyKey === v.key ? "#fff" : C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+                <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
                   <div>{v.emoji} {v.inf}</div>
                   <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
                 </button>
               ))}
             </div>
-            {story && (
-              <div style={{ marginTop: 14, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <strong style={{ fontSize: 15, color: C.raspberry }}>{story.emoji} Historia</strong>
-                  <button onClick={() => setStoryKey(null)} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 18, cursor: "pointer", lineHeight: 1 }}>×</button>
-                </div>
-                <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: 0 }}><Highlighted text={story.storyEs} /></p>
-              </div>
-            )}
-
-            {/* Подсказка по баллам */}
-            <div style={{ marginTop: 12, padding: "8px 12px", background: C.cream, borderRadius: 8, border: `1px dashed ${C.line}` }}>
-              <span style={{ fontSize: 12.5, color: C.inkSoft }}>
-                Угадаешь за ≤9 вопросов → <strong style={{ color: C.raspberry }}>+5</strong> · за ≤18 → <strong>+3</strong> · позже → <strong>+1</strong>
-              </span>
-              <span style={{ fontSize: 12.5, color: C.goldDeep, marginLeft: 8 }}>сейчас: {g.log.length} вопр.</span>
-            </div>
-
-            <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14 }}>🔍 Я готов · угадываю</Btn>
-
-            {guessing && (
-              <div style={{ marginTop: 14, background: C.card, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: 14 }}>
-                <div style={{ fontWeight: 700, marginBottom: 10 }}>Твоя версия — какой это глагол?</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {VERBS.map((v) => (
-                    <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
-                      <div>{v.emoji} {v.inf}</div>
-                      <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
-                    </button>
-                  ))}
-                  <button onClick={() => setGuessing(false)} style={{ border: "none", background: "#B0A48C", color: "#fff", borderRadius: 999, padding: "8px 14px", fontSize: 14, fontFamily: SERIF, cursor: "pointer" }}>Отмена</button>
-                </div>
-              </div>
-            )}
+            <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14, width: "100%", fontSize: 16, padding: "13px" }}>🔍 Я готов · угадываю</Btn>
           </Block>
         </>
       )}
 
       <Footer onHome={onHome} />
+
+      {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана */}
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
+
+      {/* УГАДЫВАНИЕ — всплывает поверх экрана */}
+      <Sheet open={guessing && !g.result} onClose={() => setGuessing(false)} title="Твоя версия — какой это глагол?">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {VERBS.map((v) => (
+            <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+              <div>{v.emoji} {v.inf}</div>
+              <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
+            </button>
+          ))}
+        </div>
+      </Sheet>
     </div></div>
   );
 }
@@ -1013,44 +1021,9 @@ function WitnessMode({ role, onHome, onScore, session }) {
         )}
 
         <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-          <button onClick={() => setShowStory(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showStory ? "▲ Ocultar historia" : "▼ Ver historia"}</button>
-          <button onClick={() => setShowSheet(s => !s)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{showSheet ? "▲ Скрыть шпаргалку" : isCanon ? "▼ Шпаргалка Канона" : "▼ Ответы по легенде"}</button>
+          <button onClick={() => setShowStory(true)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>📖 Ver historia</button>
+          <button onClick={() => setShowSheet(true)} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "6px 14px", color: accentDeep, fontSize: 13, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>{isCanon ? "📋 Шпаргалка Канона" : "📋 Ответы по легенде"}</button>
         </div>
-        {showStory && (
-          <div style={{ marginTop: 10, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: 14 }}>
-            <strong style={{ fontSize: 14, color: accentDeep }}>📖 Historia</strong>
-            <p style={{ fontSize: 14.5, lineHeight: 1.7, margin: "8px 0 0" }}><Highlighted text={verb.storyEs} /></p>
-          </div>
-        )}
-        {showSheet && (
-          <div style={{ marginTop: 10 }}>
-            {isCanon ? (
-              <>
-                <div style={{ background: C.emerald, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🟢 CANON — solo esto es verdad</div>
-                {verb.dossier.map(([q, a], i) => (
-                  <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-                    <div style={{ width: 110, flexShrink: 0, color: C.emeraldDeep, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
-                    <div style={{ fontSize: 13.5 }}>{a}</div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
-                <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🔴 ОТВЕТЫ ПО ТВОЕЙ ЛЕГЕНДЕ</div>
-                {QUESTIONS.map((q) => {
-                  const fa = liveFantAns(verb)[q.id];
-                  return (
-                    <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
-                      <div style={{ flex: 1, fontSize: 13, color: C.ink }}>{q.q}</div>
-                      <BigSiNo v={fa} />
-                    </div>
-                  );
-                })}
-                <p style={{ ...pHint, marginTop: 8, color: C.raspberryDeep }}>Это ответы твоей версии. Тренируй их — не пытайся угадать "противоположность правды".</p>
-              </>
-            )}
-          </div>
-        )}
       </Block>
 
       {/* ПРОГРЕСС РАУНДА */}
@@ -1116,6 +1089,40 @@ function WitnessMode({ role, onHome, onScore, session }) {
       </Block>
 
       <Footer onHome={onHome} />
+
+      {/* ИСТОРИЯ — поверх экрана */}
+      <Sheet open={showStory} onClose={() => setShowStory(false)} title={`📖 ${verb.emoji} ${verb.inf} — historia`}>
+        <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={verb.storyEs} /></p>
+      </Sheet>
+
+      {/* ШПАРГАЛКА — поверх экрана */}
+      <Sheet open={showSheet} onClose={() => setShowSheet(false)} title={isCanon ? "🟢 Шпаргалка Канона" : "🔴 Ответы по легенде"}>
+        {isCanon ? (
+          <>
+            <div style={{ background: C.emerald, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🟢 CANON — solo esto es verdad</div>
+            {verb.dossier.map(([q, a], i) => (
+              <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                <div style={{ width: 110, flexShrink: 0, color: C.emeraldDeep, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
+                <div style={{ fontSize: 13.5 }}>{a}</div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🔴 ОТВЕТЫ ПО ТВОЕЙ ЛЕГЕНДЕ</div>
+            {QUESTIONS.map((q) => {
+              const fa = liveFantAns(verb)[q.id];
+              return (
+                <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
+                  <div style={{ flex: 1, fontSize: 13, color: C.ink }}>{q.q}</div>
+                  <BigSiNo v={fa} />
+                </div>
+              );
+            })}
+            <p style={{ ...pHint, marginTop: 8, color: C.raspberryDeep }}>Это ответы твоей версии. Тренируй их — не пытайся угадать "противоположность правды".</p>
+          </>
+        )}
+      </Sheet>
     </div></div>
   );
 }
