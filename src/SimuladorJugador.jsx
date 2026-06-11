@@ -252,7 +252,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
     </div>
   );
 }
@@ -397,6 +397,27 @@ function LiveDetective({ onBack, roundN, turn, live }) {
     if (err) setAskErr(err);
     setAskBusy(false);
   }
+  // --- Шаг 5: рука и тайный голос ---
+  const myElim = !!(live && (live.eliminated || []).includes(live.myId));
+  const myHand = !!(live && (live.hands || []).some(h => h.by === live.myId));
+  const myVoted = !!(live && (live.votedIds || []).includes(live.myId));
+  const guess = live ? live.guess : null;
+  const revealed = live ? live.revealed : null;
+  const gamePaused = !!(guess || revealed || myElim); // вопросы на паузе
+  async function doHand() {
+    if (!live || askBusy) return;
+    setAskBusy(true); setAskErr("");
+    const err = await live.onHand(myHand); // повторное нажатие опускает руку
+    if (err) setAskErr(err);
+    setAskBusy(false);
+  }
+  async function doVote(w) {
+    if (!live || askBusy) return;
+    setAskBusy(true); setAskErr("");
+    const err = await live.onVote(w);
+    if (err) setAskErr(err);
+    setAskBusy(false);
+  }
 
   function setAns(qid, w, val) {
     setAsked(prev => {
@@ -420,7 +441,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 
   function AnsRow({ es, ru, st, onSet, qid }) {
     const conflict = st.A && st.B && st.A !== st.B;
-    const canAsk = !!(live && qid && turn && turn.mine && !askBusy && !live.pendingOwn);
+    const canAsk = !!(live && qid && turn && turn.mine && !askBusy && !live.pendingOwn && !gamePaused);
     return (
       <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
@@ -459,7 +480,75 @@ function LiveDetective({ onBack, roundN, turn, live }) {
     <div style={wrap}>
       <Header subtitle={"🕵️ Пульт детектива · Живая игра" + (roundN ? " · Раунд " + roundN : "")} />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
-        {turn && (
+        {live && revealed && (() => {
+          const rv = verbByKey(revealed.verbKey);
+          return (
+            <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(61,43,31,0.12)" }}>
+              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — глагол вскрыт!</div>
+              <div style={{ textAlign: "center", fontSize: 24, fontWeight: 800, color: C.ink }}>{rv ? `${rv.emoji} ${rv.inf}` : revealed.verbKey}{rv ? <span style={{ fontSize: 14, color: C.inkSoft, fontWeight: 600 }}> · {rv.ru}</span> : null}</div>
+              <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 700, marginTop: 8, color: revealed.ok ? C.emeraldDeep : C.inkSoft }}>
+                {revealed.ok ? `🎉 ${revealed.byName} угадал(а): +${revealed.detPts} (круг ${revealed.circle})` : "Никто не угадал глагол"}
+              </div>
+              <div style={{ textAlign: "center", fontSize: 13.5, marginTop: 6, color: C.ink }}>
+                🟢 Правду говорил(а): <b>{revealed.canonName}</b> · 🔴 Выдумывал(а): <b>{revealed.fantasyName}</b>
+              </div>
+              <div style={{ textAlign: "center", fontSize: 12.5, color: C.inkSoft, marginTop: 6 }}>Жди следующий раунд — пульт сам откроет твою новую роль.</div>
+            </div>
+          );
+        })()}
+        {live && !revealed && myElim && (
+          <div style={{ background: C.creamDeep, border: `2px solid ${C.line}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
+            ❌ Глагол был неверный — ты выбыл до конца раунда. Следи за игрой: в новом раунде ты снова в деле.
+          </div>
+        )}
+        {live && !revealed && !myElim && live.lastElim && Date.now() - live.lastElim.ts < 12000 && (
+          <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "10px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14, color: C.inkSoft }}>
+            ❌ {live.lastElim.byName} назвал(а) неверный глагол и выбыл(а) из раунда
+          </div>
+        )}
+        {live && !revealed && guess && guess.stage === "voting" && (
+          <div style={{ background: C.card, border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12 }}>
+            <div style={{ textAlign: "center", fontWeight: 800, fontSize: 16, color: C.raspberry }}>🗳 Тайное голосование</div>
+            <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, margin: "4px 0 10px", lineHeight: 1.45 }}>
+              {guess.byName ? `${guess.byName} готов назвать глагол. ` : "Раунд завершается. "}Кому из свидетелей ты веришь? Твой выбор никто не видит.
+            </div>
+            {!myVoted ? (
+              <div style={{ display: "flex", gap: 8 }}>
+                {["A", "B"].map(w => (
+                  <button key={w} disabled={askBusy} onClick={() => doVote(w)} style={{ flex: 1, background: C.gold, color: "#fff", border: `1.5px solid ${C.goldDeep}`, borderRadius: 10, padding: "12px 4px", fontSize: 14.5, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
+                    🤝 Верю {w} · {live.witNames[w]}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: "center", fontWeight: 700, color: C.emeraldDeep, fontSize: 14.5 }}>
+                ✓ Голос принят · ждём остальных ({(live.votedIds || []).length}/{live.votersNeeded})
+              </div>
+            )}
+          </div>
+        )}
+        {live && !revealed && guess && guess.stage === "naming" && (
+          guess.by === live.myId ? (
+            <div style={{ background: C.raspberry, color: "#fff", border: `2px solid ${C.raspberryDeep}`, borderRadius: 12, padding: "13px 16px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 16 }}>
+              🎤 Назови глагол голосом в Zoom! Ведущая решит: верный или нет.
+            </div>
+          ) : (
+            <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "11px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
+              🔍 {guess.byName} называет глагол — слушаем…
+            </div>
+          )
+        )}
+        {live && !revealed && !myElim && !(guess && (guess.stage === "voting" || guess.by === live.myId)) && (
+          <div style={{ marginBottom: 12 }}>
+            <button disabled={askBusy} onClick={doHand} style={{ width: "100%", border: myHand ? `2px solid ${C.emerald}` : "none", borderRadius: 12, padding: "12px", fontSize: 15.5, fontWeight: 800, fontFamily: SERIF, background: myHand ? C.card : C.emerald, color: myHand ? C.emeraldDeep : "#fff", cursor: "pointer", boxSizing: "border-box" }}>
+              {myHand ? "🖐 Рука поднята — ведущая видит · нажми, чтобы убрать" : "🖐 Готов назвать глагол (поднять руку)"}
+            </button>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 5, lineHeight: 1.45, textAlign: "center" }}>
+              Первым называет тот, кто задал вопрос. Молчит — ведущая даёт слово первой руке.
+            </div>
+          </div>
+        )}
+        {turn && !gamePaused && (
           <div style={{
             background: turn.mine ? C.gold : C.card, border: `2px solid ${turn.mine ? C.goldDeep : C.line}`,
             borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center",
@@ -535,14 +624,14 @@ function LiveDetective({ onBack, roundN, turn, live }) {
           {live && (
             <div style={{ marginBottom: 12 }}>
               <button
-                disabled={!(turn && turn.mine) || !!live.pendingOwn || askBusy}
+                disabled={!(turn && turn.mine) || !!live.pendingOwn || askBusy || gamePaused}
                 onClick={doOwn}
                 style={{
                   width: "100%", border: "none", borderRadius: 12, padding: "13px",
                   fontSize: 16, fontWeight: 800, fontFamily: SERIF,
-                  background: (turn && turn.mine && !live.pendingOwn && !askBusy) ? C.raspberry : "#EFE7D6",
-                  color: (turn && turn.mine && !live.pendingOwn && !askBusy) ? "#fff" : "#B5A88F",
-                  cursor: (turn && turn.mine && !live.pendingOwn && !askBusy) ? "pointer" : "default",
+                  background: (turn && turn.mine && !live.pendingOwn && !askBusy && !gamePaused) ? C.raspberry : "#EFE7D6",
+                  color: (turn && turn.mine && !live.pendingOwn && !askBusy && !gamePaused) ? "#fff" : "#B5A88F",
+                  cursor: (turn && turn.mine && !live.pendingOwn && !askBusy && !gamePaused) ? "pointer" : "default",
                 }}>
                 🎙 Задать свой вопрос (✅ ведущей = +2)
               </button>
@@ -616,7 +705,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter }) {
+function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
   const [cat, setCat] = useState("all"); // фильтр категорий — против скролла на живой игре
@@ -659,6 +748,34 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
     <div style={wrap}>
       <Header subtitle={(isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра") + (myLetter ? " · Ты — Свидетель " + myLetter : "")} />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        {liveExtra && liveExtra.revealed && (() => {
+          const rev = liveExtra.revealed;
+          const rv = verbByKey(rev.verbKey);
+          return (
+            <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(61,43,31,0.12)" }}>
+              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — глагол вскрыт!</div>
+              <div style={{ textAlign: "center", fontSize: 22, fontWeight: 800, color: C.ink }}>{rv ? `${rv.emoji} ${rv.inf}` : rev.verbKey}</div>
+              <div style={{ textAlign: "center", fontSize: 14, fontWeight: 700, marginTop: 6, color: rev.ok ? C.emeraldDeep : C.inkSoft }}>
+                {rev.ok ? `🎉 ${rev.byName} угадал(а) глагол` : "Никто не угадал"}
+              </div>
+              <div style={{ textAlign: "center", fontSize: 13.5, marginTop: 4 }}>
+                🟢 Правду говорил(а): <b>{rev.canonName}</b> · 🔴 Выдумывал(а): <b>{rev.fantasyName}</b>
+              </div>
+              {liveExtra.myScore && (
+                <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 700, marginTop: 8, color: C.goldDeep }}>
+                  ⭐ Твои очки — раунд: {liveExtra.myScore.r} · игра: {liveExtra.myScore.g}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+        {liveExtra && !liveExtra.revealed && liveExtra.guess && (
+          <div style={{ background: liveExtra.guess.stage === "naming" ? C.raspberry : C.card, color: liveExtra.guess.stage === "naming" ? "#fff" : C.ink, border: `2px solid ${C.raspberry}`, borderRadius: 12, padding: "12px 15px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 15 }}>
+            {liveExtra.guess.stage === "voting"
+              ? "🗳 Детективы тайно голосуют, кому из вас верят…"
+              : `🔍 ${liveExtra.guess.byName} называет глагол!`}
+          </div>
+        )}
         <Block stripe={accent}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -843,6 +960,23 @@ function LiveGame({ onHome }) {
       return d.error || "Не получилось заявить свой вопрос";
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
+  // Шаг 5: рука «готов назвать глагол» и тайный голос «Верю A/B»
+  async function sendHand(down) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "hand", code: conn.code, playerId: conn.playerId, down: !!down }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось поднять руку";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
+  async function sendVote(choice) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "vote", code: conn.code, playerId: conn.playerId, choice }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось проголосовать";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
   const rdLive = game && game.round;
   const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
     witNames: { A: rdLive.witAName, B: rdLive.witBName },
@@ -851,6 +985,22 @@ function LiveGame({ onHome }) {
     onOwn: sendOwn,
     pendingOwn: rdLive.pendingOwn || null,
     myId: conn.playerId,
+    myScore: (game.scores || {})[conn.playerId] || null,
+    // Шаг 5
+    hands: rdLive.hands || [],
+    guess: rdLive.guess || null,
+    votedIds: rdLive.votedIds || [],
+    votersNeeded: ((rdLive.roles && rdLive.roles.detectives) || []).length,
+    eliminated: rdLive.eliminated || [],
+    revealed: rdLive.revealed || null,
+    lastElim: rdLive.lastElim || null,
+    onHand: sendHand,
+    onVote: sendVote,
+  } : null;
+  // Шаг 5: что видит свидетель (голосование / называние / вскрытие)
+  const liveWitExtra = conn && rdLive ? {
+    guess: rdLive.guess || null,
+    revealed: rdLive.revealed || null,
     myScore: (game.scores || {})[conn.playerId] || null,
   } : null;
   const myLetter = conn && rdLive ? (rdLive.witA === conn.playerId ? "A" : rdLive.witB === conn.playerId ? "B" : null) : null;
@@ -885,8 +1035,8 @@ function LiveGame({ onHome }) {
 
   const roundKey = game && game.round ? game.round.n : "manual";
   if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
-  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} />;
-  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
 
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
@@ -1898,7 +2048,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
     </div></div>
   );
 }
@@ -1996,7 +2146,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
     </div></div>
   );
 }
