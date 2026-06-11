@@ -252,7 +252,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.5</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
     </div>
   );
 }
@@ -368,10 +368,32 @@ function LiveDetective({ onBack, roundN, turn, live }) {
   const [storyView, setStoryView] = useState(null); // key глагола или null
   const [askBusy, setAskBusy] = useState(false);
   const [askErr, setAskErr] = useState("");
+  const [ownResult, setOwnResult] = useState(null); // {approved} — итог моего своего вопроса
+  const prevOwn = useRef(null);
+  // ведущая решила судьбу МОЕГО своего вопроса → показать итог
+  useEffect(() => {
+    const cur = live ? live.pendingOwn : null;
+    const was = prevOwn.current;
+    if (was && !cur && live && was.by === live.myId) {
+      const verdict = [...live.asked].reverse().find(a => a.own && a.by === live.myId && a.ts >= was.ts);
+      if (verdict) {
+        setOwnResult({ approved: !!verdict.approved });
+        setTimeout(() => setOwnResult(null), 7000);
+      }
+    }
+    prevOwn.current = cur;
+  }, [live && live.pendingOwn, live && live.asked.length]);
   async function doAsk(qid, text, target) {
     if (!live || askBusy) return;
     setAskBusy(true); setAskErr("");
     const err = await live.onAsk(qid, text, target);
+    if (err) setAskErr(err);
+    setAskBusy(false);
+  }
+  async function doOwn() {
+    if (!live || askBusy) return;
+    setAskBusy(true); setAskErr(""); setOwnResult(null);
+    const err = await live.onOwn();
     if (err) setAskErr(err);
     setAskBusy(false);
   }
@@ -398,7 +420,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 
   function AnsRow({ es, ru, st, onSet, qid }) {
     const conflict = st.A && st.B && st.A !== st.B;
-    const canAsk = !!(live && qid && turn && turn.mine && !askBusy);
+    const canAsk = !!(live && qid && turn && turn.mine && !askBusy && !live.pendingOwn);
     return (
       <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
@@ -446,6 +468,26 @@ function LiveDetective({ onBack, roundN, turn, live }) {
             {turn.mine ? "🎤 Спрашивай!" : "⏳ Жди своей очереди"}
           </div>
         )}
+        {live && live.myScore && (
+          <div style={{ background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "8px 14px", marginBottom: 12, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: C.goldDeep }}>
+            ⭐ Твои очки — раунд: {live.myScore.r} · игра: {live.myScore.g}
+          </div>
+        )}
+        {live && live.pendingOwn && live.pendingOwn.by === live.myId && (
+          <div style={{ background: C.raspberry, color: "#fff", border: `2px solid ${C.raspberryDeep}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 16 }}>
+            🎙 Говори! Задай свой вопрос голосом в Zoom — ведущая оценит (✅ = +2)
+          </div>
+        )}
+        {live && live.pendingOwn && live.pendingOwn.by !== live.myId && (
+          <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "10px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14, color: C.inkSoft }}>
+            ✍️ {live.pendingOwn.byName} задаёт свой вопрос — ведущая оценивает…
+          </div>
+        )}
+        {ownResult && (
+          <div style={{ background: ownResult.approved ? C.emerald : C.creamDeep, color: ownResult.approved ? "#fff" : C.inkSoft, border: `2px solid ${ownResult.approved ? C.emeraldDeep : C.line}`, borderRadius: 12, padding: "11px 15px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 15.5 }}>
+            {ownResult.approved ? "✅ Вопрос принят: +2 очка!" : "❌ Вопрос не засчитан (0, без штрафа)"}
+          </div>
+        )}
         {askErr && (
           <div style={{ background: "rgba(178,42,75,0.10)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "9px 12px", marginBottom: 12, fontSize: 13.5, fontWeight: 700, color: C.raspberry, textAlign: "center" }}>
             ⚠️ {askErr}
@@ -490,6 +532,25 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 
         <div style={{ background: C.card, borderRadius: 14, border: `1px dashed ${C.gold}`, padding: "14px 16px", marginBottom: 16 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: C.raspberry, marginBottom: 8 }}>✍️ Свой вопрос</div>
+          {live && (
+            <div style={{ marginBottom: 12 }}>
+              <button
+                disabled={!(turn && turn.mine) || !!live.pendingOwn || askBusy}
+                onClick={doOwn}
+                style={{
+                  width: "100%", border: "none", borderRadius: 12, padding: "13px",
+                  fontSize: 16, fontWeight: 800, fontFamily: SERIF,
+                  background: (turn && turn.mine && !live.pendingOwn && !askBusy) ? C.raspberry : "#EFE7D6",
+                  color: (turn && turn.mine && !live.pendingOwn && !askBusy) ? "#fff" : "#B5A88F",
+                  cursor: (turn && turn.mine && !live.pendingOwn && !askBusy) ? "pointer" : "default",
+                }}>
+                🎙 Задать свой вопрос (✅ ведущей = +2)
+              </button>
+              <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 6, lineHeight: 1.45 }}>
+                Жми в свой ход → задай вопрос <b>голосом в Zoom</b> → ведущая решит ✅/❌. Поле ниже — твой личный блокнот, на сервер не идёт.
+              </div>
+            </div>
+          )}
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             <input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Напиши свой вопрос…" style={{ flex: 1, border: `1.5px solid ${C.line}`, borderRadius: 8, padding: "9px 12px", fontSize: 14.5, fontFamily: SERIF, color: C.ink, outline: "none" }} />
             <button onClick={addCustom} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", fontSize: 20, fontWeight: 700, cursor: "pointer" }}>＋</button>
@@ -773,11 +834,24 @@ function LiveGame({ onHome }) {
       return d.error || "Не получилось отправить вопрос";
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
+  // детектив заявляет СВОЙ вопрос: задаёт голосом в Zoom, ведущая оценивает ✅/❌
+  async function sendOwn() {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "own", code: conn.code, playerId: conn.playerId }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось заявить свой вопрос";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
   const rdLive = game && game.round;
   const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
     witNames: { A: rdLive.witAName, B: rdLive.witBName },
     asked: rdLive.asked || [],
     onAsk: sendAsk,
+    onOwn: sendOwn,
+    pendingOwn: rdLive.pendingOwn || null,
+    myId: conn.playerId,
+    myScore: (game.scores || {})[conn.playerId] || null,
   } : null;
   const myLetter = conn && rdLive ? (rdLive.witA === conn.playerId ? "A" : rdLive.witB === conn.playerId ? "B" : null) : null;
   const liveAskedForMe = myLetter && rdLive ? new Set((rdLive.asked || []).filter((a) => a.to === myLetter && a.qid).map((a) => a.qid)) : null;
@@ -1824,7 +1898,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.5</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
     </div></div>
   );
 }
@@ -1922,7 +1996,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.5</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.6</div>
     </div></div>
   );
 }
