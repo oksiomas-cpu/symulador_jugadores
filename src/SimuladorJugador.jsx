@@ -360,7 +360,7 @@ function BigSiNo({ v }) {
 }
 
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
-function LiveDetective({ onBack, roundN }) {
+function LiveDetective({ onBack, roundN, turn }) {
   const [open, setOpen] = useState("quien");
   const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
   const [custom, setCustom] = useState([]);  // [{text, A, B}]
@@ -415,6 +415,15 @@ function LiveDetective({ onBack, roundN }) {
     <div style={wrap}>
       <Header subtitle={"🕵️ Пульт детектива · Живая игра" + (roundN ? " · Раунд " + roundN : "")} />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        {turn && (
+          <div style={{
+            background: turn.mine ? C.gold : C.card, border: `2px solid ${turn.mine ? C.goldDeep : C.line}`,
+            borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center",
+            fontWeight: 800, fontSize: 17, color: turn.mine ? "#fff" : C.inkSoft,
+          }}>
+            {turn.mine ? "🎯 Твой ход — задавай вопрос" : `⏳ Ждёт хода: ${turn.name}`}
+          </div>
+        )}
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
@@ -716,6 +725,15 @@ function LiveGame({ onHome }) {
     if ((rd.roles.detectives || []).includes(conn.playerId)) return "detective";
     return null;
   }
+  // чей сейчас ход (для плашки на пульте детектива)
+  function turnInfo() {
+    if (!conn || !game || !game.round || !game.round.roles) return null;
+    const dets = game.round.roles.detectives || [];
+    if (!dets.length || !dets.includes(conn.playerId)) return null;
+    const activeId = dets[(game.round.turnIdx || 0) % dets.length];
+    const ap = (game.players || []).find((x) => x.id === activeId);
+    return { mine: activeId === conn.playerId, name: ap ? ap.name : "—" };
+  }
   useEffect(() => {
     if (!conn || !game || !game.round) return;
     const rd = game.round;
@@ -745,7 +763,7 @@ function LiveGame({ onHome }) {
   }, [conn && conn.code]);
 
   const roundKey = game && game.round ? game.round.n : "manual";
-  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} />;
   if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
   if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} />;
 
