@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
     </div>
   );
 }
@@ -1180,6 +1180,10 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
   const [guessing, setGuessing] = useState(false);
   const [storyKey, setStoryKey] = useState(null);
   const [askedInCurrent, setAskedInCurrent] = useState(new Set());
+  const [ruledOut, setRuledOut] = useState(new Set()); // отметённые детективом глаголы (гашение вручную)
+  function toggleRuled(k) {
+    setRuledOut((prev) => { const s = new Set(prev); s.has(k) ? s.delete(k) : s.add(k); return s; });
+  }
 
   const current = g.deck[g.idx % g.deck.length];
   const canonAns = g.verb.answers[current.id];
@@ -1207,7 +1211,7 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
     setG((s) => ({ ...s, result: { ok, picked: k, pts, qCount } }));
     setGuessing(false);
   }
-  function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); setAskedInCurrent(new Set()); }
+  function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); setAskedInCurrent(new Set()); setRuledOut(new Set()); }
 
   const story = storyKey ? verbByKey(storyKey) : null;
 
@@ -1326,15 +1330,30 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
 
           {/* ПРОВЕРЬ ГИПОТЕЗУ */}
           <Block stripe={C.raspberry}>
-            <h2 style={h2}>Проверь гипотезу</h2>
-            <p style={pHint}>Нажми на глагол — его история откроется поверх экрана. Сравни с ответами свидетелей.</p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6 }}>
+              <h2 style={h2}>Проверь гипотезу</h2>
+              <span style={{ fontSize: 13.5, fontWeight: 700, color: ruledOut.size ? C.emeraldDeep : C.inkSoft }}>
+                Осталось {VERBS.length - ruledOut.size} из {VERBS.length}
+              </span>
+            </div>
+            <p style={pHint}>Тап по глаголу — его история поверх экрана. Тап по ✕ — отмести глагол (погасить). Погашенные тускнеют, держать их в голове не нужно.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-              {VERBS.map((v) => (
-                <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
-                  <div>{v.emoji} {v.inf}</div>
-                  <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
-                </button>
-              ))}
+              {VERBS.map((v) => {
+                const out = ruledOut.has(v.key);
+                return (
+                  <div key={v.key} style={{ position: "relative", opacity: out ? 0.35 : 1 }}>
+                    <button onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 26px 8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3, textDecoration: out ? "line-through" : "none" }}>
+                      <div>{v.emoji} {v.inf}</div>
+                      <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); toggleRuled(v.key); }}
+                      title={out ? "Вернуть глагол" : "Отмести глагол"}
+                      style={{ position: "absolute", top: 3, right: 3, width: 22, height: 22, borderRadius: "50%", border: `1px solid ${out ? C.emerald : C.line}`, background: out ? C.emerald : C.cream, color: out ? "#fff" : C.inkSoft, fontSize: 11, fontWeight: 800, cursor: "pointer", lineHeight: 1, padding: 0 }}>
+                      {out ? "↺" : "✕"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
             <Btn bg={C.raspberry} onClick={() => setGuessing(true)} style={{ marginTop: 14, width: "100%", fontSize: 16, padding: "13px" }}>🔍 Я готов · угадываю</Btn>
           </Block>
@@ -1351,12 +1370,15 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
       {/* УГАДЫВАНИЕ — всплывает поверх экрана */}
       <Sheet open={guessing && !g.result} onClose={() => setGuessing(false)} title="Твоя версия — какой это глагол?">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {VERBS.map((v) => (
-            <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
-              <div>{v.emoji} {v.inf}</div>
-              <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
-            </button>
-          ))}
+          {VERBS.map((v) => {
+            const out = ruledOut.has(v.key);
+            return (
+              <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3, opacity: out ? 0.35 : 1, textDecoration: out ? "line-through" : "none" }}>
+                <div>{v.emoji} {v.inf}</div>
+                <div style={{ fontSize: 11, color: C.inkSoft, fontWeight: 400 }}>{v.ru}</div>
+              </button>
+            );
+          })}
         </div>
       </Sheet>
     </div></div>
@@ -2049,7 +2071,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
     </div></div>
   );
 }
@@ -2147,7 +2169,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
     </div></div>
   );
 }
