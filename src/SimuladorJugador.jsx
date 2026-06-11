@@ -421,7 +421,7 @@ function LiveDetective({ onBack, roundN, turn }) {
             borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center",
             fontWeight: 800, fontSize: 17, color: turn.mine ? "#fff" : C.inkSoft,
           }}>
-            {turn.mine ? "🎯 Твой ход — задавай вопрос" : `🎤 Сейчас спрашивает: ${turn.name} — жди своей очереди`}
+            {turn.mine ? "🎤 Спрашивай!" : "⏳ Жди своей очереди"}
           </div>
         )}
         <Block stripe={C.goldDeep}>
