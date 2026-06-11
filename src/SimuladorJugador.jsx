@@ -678,11 +678,83 @@ function LiveWitness({ mode, onBack }) {
 }
 
 // ===== ОБЁРТКА LIVE: выбор роли =====
+function loadConn() { try { return JSON.parse(localStorage.getItem("ciudad_live_v1")) || null; } catch (e) { return null; } }
+function saveConn(c) { try { c ? localStorage.setItem("ciudad_live_v1", JSON.stringify(c)) : localStorage.removeItem("ciudad_live_v1"); } catch (e) {} }
+
 function LiveGame({ onHome }) {
   const [r, setR] = useState(null);
+  // --- Подключение к комнате ведущего ---
+  const [conn, setConn] = useState(loadConn);       // {code, playerId, name}
+  const [game, setGame] = useState(null);            // живое состояние из базы
+  const [codeIn, setCodeIn] = useState("");
+  const [nameIn, setNameIn] = useState(() => (loadConn() || {}).name || "");
+  const [joinBusy, setJoinBusy] = useState(false);
+  const [joinErr, setJoinErr] = useState("");
+  const [skipConn, setSkipConn] = useState(false);   // старый режим без комнаты
+
+  async function joinRoom() {
+    const code = codeIn.trim(); const name = nameIn.trim();
+    if (!code || !name) { setJoinErr("Введи код игры и своё имя"); return; }
+    setJoinBusy(true); setJoinErr("");
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "join", code, name }) });
+      const d = await resp.json();
+      if (d.ok) { const c = { code, playerId: d.playerId, name }; setConn(c); saveConn(c); setGame(d.game); }
+      else setJoinErr(d.error || "Не получилось войти");
+    } catch (e) { setJoinErr("Сеть недоступна, попробуй ещё раз"); }
+    setJoinBusy(false);
+  }
+  function leaveRoom() { setConn(null); setGame(null); saveConn(null); }
+
+  // опрос состояния игры раз в 2 сек
+  useEffect(() => {
+    if (!conn) return;
+    let dead = false;
+    const tick = async () => {
+      try {
+        const resp = await fetch(`/api/game?code=${conn.code}`);
+        const d = await resp.json();
+        if (!dead && d.ok) setGame(d.game);
+        if (!dead && !d.ok && /не найдена/.test(d.error || "")) leaveRoom();
+      } catch (e) { /* временный сбой — переживём */ }
+    };
+    tick();
+    const t = setInterval(tick, 2000);
+    return () => { dead = true; clearInterval(t); };
+  }, [conn && conn.code]);
+
   if (r === "detective") return <LiveDetective onBack={() => setR(null)} />;
   if (r === "canon") return <LiveWitness mode="canon" onBack={() => setR(null)} />;
   if (r === "fantasia") return <LiveWitness mode="fantasia" onBack={() => setR(null)} />;
+
+  // --- Экран входа в комнату ---
+  if (!conn && !skipConn) {
+    return (
+      <div style={wrap}>
+        <Header subtitle="🎮 Живая игра · вход" />
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "18px 18px 16px" }}>
+            <div style={{ fontSize: 17, fontWeight: 800, color: C.raspberry, marginBottom: 6 }}>Код игры</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.5, marginBottom: 12 }}>Ведущий назовёт 4 цифры в Zoom — введи их и своё имя.</div>
+            <input value={codeIn} onChange={(e) => setCodeIn(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="0000" inputMode="numeric"
+              style={{ width: "100%", boxSizing: "border-box", fontSize: 30, fontWeight: 800, letterSpacing: 10, textAlign: "center", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${C.gold}`, fontFamily: SERIF, color: C.ink, marginBottom: 10 }} />
+            <input value={nameIn} onChange={(e) => setNameIn(e.target.value)} placeholder="Твоё имя"
+              style={{ width: "100%", boxSizing: "border-box", fontSize: 17, padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${C.line}`, fontFamily: SERIF, color: C.ink, marginBottom: 12 }} />
+            <button onClick={joinRoom} disabled={joinBusy} style={{ width: "100%", background: joinBusy ? "#D8CBB4" : C.raspberry, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 17, fontWeight: 700, fontFamily: SERIF, cursor: joinBusy ? "default" : "pointer" }}>
+              {joinBusy ? "Вхожу..." : "Войти в игру"}
+            </button>
+            {joinErr && <div style={{ color: C.raspberry, fontSize: 13.5, fontWeight: 600, marginTop: 8, textAlign: "center" }}>{joinErr}</div>}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <button onClick={() => setSkipConn(true)} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+              Открыть пульт без кода
+            </button>
+          </div>
+          <Footer onHome={onHome} />
+        </div>
+      </div>
+    );
+  }
 
   const roles = [
     { id: "detective", emoji: "🕵️", t: "Детектив", d: "Глагол скрыт. Вопросы по категориям + отметки кому задал.", c: C.goldDeep },
@@ -693,6 +765,19 @@ function LiveGame({ onHome }) {
     <div style={wrap}>
       <Header subtitle="🎮 Живая игра · выбор роли" />
       <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        {conn && (
+          <div style={{ background: C.card, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "11px 14px", marginBottom: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+              <span style={{ fontWeight: 800, color: C.emeraldDeep, fontSize: 15 }}>✅ Ты в игре {conn.code} как {conn.name}</span>
+              <button onClick={leaveRoom} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>выйти</button>
+            </div>
+            {game && (
+              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 5 }}>
+                В комнате ({(game.players || []).length}/5): {(game.players || []).map((p) => p.name).join(", ") || "—"}
+              </div>
+            )}
+          </div>
+        )}
         <div style={{ textAlign: "center", fontSize: 14.5, color: C.inkSoft, marginBottom: 14, lineHeight: 1.5 }}>
           Открой свою роль — тебе её назвал ведущий. Пульт держит всё перед глазами, ничего не нужно искать.
         </div>
