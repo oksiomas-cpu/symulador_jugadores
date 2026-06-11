@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-// v2.7 — шаг 5: руки, голосование, вердикт, вскрытие
+// v2.9 — история допроса над вопросом (новые ответы сверху)
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
     </div>
   );
 }
@@ -1243,7 +1243,49 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
 
       {!g.result && (
         <>
-          {/* ВОПРОС — главное действие, всегда первым */}
+          {/* ИСТОРИЯ ДОПРОСА */}
+          <Block stripe={C.emerald}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={h2}>📋 История допроса</h2>
+              <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas · новые сверху</span>
+            </div>
+            <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
+              {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
+              {(() => {
+                const groups = [];
+                g.log.forEach(e => {
+                  const last = groups[groups.length - 1];
+                  if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
+                    last.entries.push(e);
+                  } else {
+                    groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
+                  }
+                });
+                return groups.slice().reverse().map((grp, i) => (
+                  <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                    <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
+                      <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {grp.entries.map((e, j) => (
+                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
+                          <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
+                            {e.w}
+                          </span>
+                          <SiNo v={e.a} />
+                        </div>
+                      ))}
+                      {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
+                        <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
+                      )}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </Block>
+
+          {/* ВОПРОС — главное действие, сразу под историей допроса */}
           <Block stripe={C.goldDeep}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={tag}>{lvlName[current.lvl]}</div>
@@ -1280,48 +1322,6 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
                 {askedInCurrent.size === 2 ? "Следующий вопрос →" : "Следующий вопрос (без второго) →"}
               </Btn>
             )}
-          </Block>
-
-          {/* ИСТОРИЯ ДОПРОСА */}
-          <Block stripe={C.emerald}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={h2}>📋 История допроса</h2>
-              <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas</span>
-            </div>
-            <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
-              {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
-              {(() => {
-                const groups = [];
-                g.log.forEach(e => {
-                  const last = groups[groups.length - 1];
-                  if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
-                    last.entries.push(e);
-                  } else {
-                    groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
-                  }
-                });
-                return groups.map((grp, i) => (
-                  <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-                    <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
-                      <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {grp.entries.map((e, j) => (
-                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
-                          <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
-                            {e.w}
-                          </span>
-                          <SiNo v={e.a} />
-                        </div>
-                      ))}
-                      {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
-                        <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
-                      )}
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
           </Block>
 
           {/* ПРОВЕРЬ ГИПОТЕЗУ */}
@@ -2049,7 +2049,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
     </div></div>
   );
 }
@@ -2147,7 +2147,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.7</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.9</div>
     </div></div>
   );
 }
