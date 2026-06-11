@@ -642,12 +642,14 @@ export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
   const [role, setRole] = useState(null);
   const [session, setSession] = useState({ detective: 0, canon: 0, fantasia: 0 });
+  const [showTour, setShowTour] = useState(() => !tourSeen());
 
   function addScore(roleKey, pts) {
     if (pts > 0) setSession(s => ({ ...s, [roleKey]: s[roleKey] + pts }));
   }
 
-  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} onLive={() => { setRole("live"); setEntered(true); }} />;
+  if (showTour) return <Tour onDone={() => setShowTour(false)} />;
+  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} />;
   if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
@@ -1455,57 +1457,196 @@ const MAYA = {
   ],
 };
 
-function Welcome({ onEnter, onDiario, onLive }) {
-  const [ru, setRu] = useState(false);
+// ============================================================
+// ТУР-ЗНАКОМСТВО — показывается при первом входе
+// ============================================================
+const TOUR_IMG = "https://i.ibb.co/LXwycrSh/Detective-game-app-characters-202606011428.jpg";
+
+function tourSeen() {
+  try { return localStorage.getItem("ciudad_tour_v1") === "1"; } catch { return false; }
+}
+function markTourSeen() {
+  try { localStorage.setItem("ciudad_tour_v1", "1"); } catch { /* приватный режим — просто покажем тур снова */ }
+}
+
+const tourH = { fontSize: 21, fontWeight: 800, color: C.ink, fontFamily: SERIF, textAlign: "center", marginBottom: 4 };
+const tourSub = { fontSize: 13, color: C.goldDeep, fontWeight: 600, textAlign: "center", letterSpacing: ".5px", marginBottom: 12 };
+const tourP = { fontSize: 14.5, color: C.inkSoft, lineHeight: 1.65, textAlign: "center", margin: "0 0 6px" };
+const tourEmoji = { fontSize: 46, textAlign: "center", marginBottom: 8, filter: "drop-shadow(0 4px 8px rgba(61,43,31,.18))" };
+
+function TourRow({ icon, color, title, when, text }) {
   return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="Bienvenido · добро пожаловать" />
+    <div style={{ display: "flex", gap: 12, alignItems: "flex-start", background: C.cream, border: `1px solid ${C.line}`, borderLeft: `5px solid ${color}`, borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
+      <div style={{ fontSize: 24, lineHeight: 1 }}>{icon}</div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color }}>{title}</div>
+        {when && <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase", margin: "1px 0 2px" }}>{when}</div>}
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.45 }}>{text}</div>
+      </div>
+    </div>
+  );
+}
 
-      {/* Правила игры — по-русски */}
-      <Block stripe={C.raspberry}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 16, marginBottom: 6 }}>🕵️ La Cata a Ciegas — лингвистический детектив</div>
-        <div style={{ ...pHint, fontSize: 13.5 }}>
-          В каждом раунде загадан один глагол. Два свидетеля знают правду: один говорит честно (<strong style={{ color: C.emerald }}>Canon</strong>), другой красиво выдумывает (<strong style={{ color: C.raspberry }}>Fantasía</strong>). Детективы задают вопросы «да / нет» и по ответам угадывают глагол. Все глаголы спрятаны в этой истории — прочитай её и познакомься с героями игры.
-        </div>
-      </Block>
+function Tour({ onDone }) {
+  const [i, setI] = useState(0);
+  const LAST = 3;
+  function finish() { markTourSeen(); onDone(); }
 
-      {/* История-маяк */}
-      <Block stripe={C.gold}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-          <span style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 El día en el Palacio de Caramelo</span>
-          <button onClick={() => setRu((v) => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "5px 13px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
-            {ru ? "ES ✓" : "RU перевод"}
-          </button>
-        </div>
-        <div style={{ fontSize: 16, lineHeight: 1.85, color: C.ink }}>
-          {MAYA.es.map((p, i) => (
-            <div key={i} style={{ marginBottom: 12 }}>
-              <div><Highlighted text={p} /></div>
-              {ru && <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{MAYA.ru[i]}</div>}
-            </div>
-          ))}
-        </div>
-      </Block>
+  const slides = [
+    /* 0 — что это */
+    <div key="s0">
+      <img src={TOUR_IMG} alt="La Cata a Ciegas" style={{ width: "100%", borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 8px 26px rgba(61,43,31,.20)", marginBottom: 16, display: "block" }} />
+      <div style={tourH}>🕵️ La Cata a Ciegas</div>
+      <div style={tourSub}>ЛИНГВИСТИЧЕСКИЙ ДЕТЕКТИВ НА ИСПАНСКОМ</div>
+      <p style={tourP}>В каждом раунде загадан один глагол. Один свидетель говорит правду, другой — красиво выдумывает. Детектив задаёт вопросы «да / нет» и вычисляет истину.</p>
+    </div>,
+    /* 1 — как проходит игра */
+    <div key="s1">
+      <div style={tourEmoji}>🎮</div>
+      <div style={tourH}>Как проходит игра</div>
+      <div style={tourSub}>ВЖИВУЮ · В ZOOM · ВСЕЙ КОМПАНИЕЙ</div>
+      <p style={{ ...tourP, marginBottom: 14 }}>Встречаемся в Zoom и играем по ролям:</p>
+      <TourRow icon="🕵️" color={C.goldDeep} title="Detective" text="Задаёт вопросы «да / нет», сравнивает ответы свидетелей и угадывает глагол." />
+      <TourRow icon="🟢" color={C.emerald} title="Testigo Canon" text="Знает правду и отвечает строго по истории." />
+      <TourRow icon="🔴" color={C.raspberry} title="Testigo Fantasía" text="Красиво врёт и уводит детектива от правды." />
+    </div>,
+    /* 2 — что внутри тренажёра и когда чем пользоваться */
+    <div key="s2">
+      <div style={tourEmoji}>🧭</div>
+      <div style={tourH}>Что внутри тренажёра</div>
+      <div style={tourSub}>И КОГДА ЧЕМ ПОЛЬЗОВАТЬСЯ</div>
+      <TourRow icon="📖" color={C.gold} title="История и 15 глаголов" when="Начни отсюда" text="Все глаголы игры спрятаны в истории Карамельного дворца — прочитай её первой." />
+      <TourRow icon="🕵️" color={C.goldDeep} title="Тренировка ролей" when="Между играми" text="Прокачай Детектива и обоих Свидетелей, зарабатывай очки." />
+      <TourRow icon="📔" color={C.emeraldDeep} title="Mi Diario" when="Между играми" text="Дневник дня в Ciudad: впиши глаголы в правильной форме — тренировка спряжения." />
+      <TourRow icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры" text="Твой экран на самой игре. До игры сюда заходить не нужно." />
+    </div>,
+    /* 3 — старт */
+    <div key="s3">
+      <div style={tourEmoji}>✨</div>
+      <div style={tourH}>¿Listo? · Готов начать?</div>
+      <p style={{ ...tourP, marginTop: 10 }}>Начни с истории Карамельного дворца — в ней спрятаны все 15 глаголов игры. Потом выбирай роль и тренируйся.</p>
+      <p style={{ ...tourP, fontWeight: 700, color: C.raspberry }}>Увидимся на игре 🍬</p>
+    </div>,
+  ];
 
-      {/* Глоссарий 15 глаголов */}
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 8 }}>📖 Los 15 verbos · todos terminan en -AR</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-          {MAYA.glos.map(([v, r]) => (
-            <div key={v} style={{ background: C.creamDeep, borderRadius: 8, padding: "7px 10px", fontSize: 13.5 }}>
-              <strong style={{ color: C.raspberry }}>{v}</strong> <span style={{ color: C.inkSoft }}>— {r}</span>
-            </div>
-          ))}
-        </div>
-      </Block>
-
-      {/* Переходы */}
-      <Btn bg={C.gold} onClick={onEnter} style={{ width: "100%", fontSize: 16, padding: "14px", marginBottom: 10 }}>Empezar · выбрать роль →</Btn>
-      <Btn bg={C.emeraldDeep} onClick={onDiario} style={{ width: "100%", fontSize: 16, padding: "14px", marginBottom: 10 }}>📔 Mi Diario · тренировать спряжение</Btn>
-      <Btn bg={C.raspberry} onClick={onLive} style={{ width: "100%", fontSize: 16, padding: "14px" }}>🎮 Живая игра · пульт для Zoom-сессии</Btn>
-
+  return (
+    <div style={wrap}><div style={{ ...maxw, maxWidth: 480 }}>
+      <style>{"@keyframes ciuFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }"}</style>
+      <Header subtitle="Знакомство с тренажёром" />
+      <div key={i} style={{ background: C.card, borderRadius: 18, border: `1px solid ${C.line}`, boxShadow: "0 6px 22px rgba(61,43,31,.12)", padding: "22px 20px", animation: "ciuFadeUp .45s ease both" }}>
+        {slides[i]}
+      </div>
+      {/* точки прогресса */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, margin: "16px 0" }}>
+        {slides.map((_, d) => (
+          <div key={d} onClick={() => setI(d)} style={{ width: d === i ? 26 : 9, height: 9, borderRadius: 5, background: d === i ? C.gold : C.line, border: `1px solid ${d === i ? C.goldDeep : C.line}`, cursor: "pointer", transition: "all .25s" }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={finish} style={{ flex: 1, background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>Пропустить</button>
+        <Btn bg={i === LAST ? C.raspberry : C.gold} onClick={() => (i === LAST ? finish() : setI(i + 1))} style={{ flex: 2, fontSize: 16, padding: "13px" }}>
+          {i === LAST ? "Empezar · начать →" : "Дальше →"}
+        </Btn>
+      </div>
       <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬</div>
     </div></div>
   );
 }
 
+// ============================================================
+// ГЛАВНАЯ СТРАНИЦА (Bienvenida)
+// ============================================================
+function NavCard({ icon, color, title, when, text, onClick }) {
+  return (
+    <div onClick={onClick} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 12, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+      <div style={{ width: 7, background: color, flexShrink: 0 }} />
+      <div style={{ padding: "14px 16px", display: "flex", gap: 13, alignItems: "center", flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 28, lineHeight: 1 }}>{icon}</div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 16.5, fontWeight: 700, color }}>{title}</div>
+          {when && <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase", margin: "1px 0 2px" }}>{when}</div>}
+          <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.45 }}>{text}</div>
+        </div>
+        <div style={{ fontSize: 20, color: C.gold }}>›</div>
+      </div>
+    </div>
+  );
+}
+
+function Welcome({ onEnter, onDiario, onLive, onTour }) {
+  const [ru, setRu] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [glosOpen, setGlosOpen] = useState(false);
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Bienvenido · добро пожаловать" />
+
+      {/* Краткое напоминание сути + ссылка на тур */}
+      <Block stripe={C.raspberry}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 16, marginBottom: 6 }}>🕵️ La Cata a Ciegas — лингвистический детектив</div>
+        <div style={{ ...pHint, fontSize: 13.5 }}>
+          Один свидетель говорит правду (<strong style={{ color: C.emerald }}>Canon</strong>), другой красиво выдумывает (<strong style={{ color: C.raspberry }}>Fantasía</strong>). Детектив вопросами «да / нет» угадывает загаданный глагол. Здесь ты готовишься к живой игре в Zoom.
+        </div>
+        <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13, fontWeight: 700, cursor: "pointer", padding: 0, marginTop: 8, fontFamily: SERIF, textDecoration: "underline" }}>❓ Как это работает — посмотреть знакомство</button>
+      </Block>
+
+      {/* История-маяк — раскрывашка */}
+      <Block stripe={C.gold}>
+        <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div>
+            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 El día en el Palacio de Caramelo</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Прочитай историю — все 15 глаголов игры спрятаны в ней</div>
+          </div>
+          <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {storyOpen && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ textAlign: "right", marginBottom: 8 }}>
+              <button onClick={() => setRu(v => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "5px 13px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
+                {ru ? "ES ✓" : "RU перевод"}
+              </button>
+            </div>
+            <div style={{ fontSize: 16, lineHeight: 1.85, color: C.ink }}>
+              {MAYA.es.map((p, i) => (
+                <div key={i} style={{ marginBottom: 12 }}>
+                  <div><Highlighted text={p} /></div>
+                  {ru && <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{MAYA.ru[i]}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Block>
+
+      {/* Глоссарий — раскрывашка */}
+      <Block stripe={C.emerald}>
+        <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 Los 15 verbos · todos terminan en -AR</div>
+          <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {glosOpen && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 12 }}>
+            {MAYA.glos.map(([v, r]) => (
+              <div key={v} style={{ background: C.creamDeep, borderRadius: 8, padding: "7px 10px", fontSize: 13.5 }}>
+                <strong style={{ color: C.raspberry }}>{v}</strong> <span style={{ color: C.inkSoft }}>— {r}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Block>
+
+      {/* Навигация */}
+      <NavCard icon="🕵️" color={C.goldDeep} title="Тренировка ролей" when="Между играми"
+        text="Detective · Canon · Fantasía. Прокачай роль и заработай очки перед игрой." onClick={onEnter} />
+      <NavCard icon="📔" color={C.emeraldDeep} title="Mi Diario" when="Между играми"
+        text="Впиши глаголы дня в правильной форме — тренировка спряжения." onClick={onDiario} />
+
+      {/* Пульт — визуально отделён */}
+      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "16px 0 12px" }} />
+      <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
+        text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
+
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬</div>
+    </div></div>
+  );
+}
