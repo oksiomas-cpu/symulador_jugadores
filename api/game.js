@@ -4,6 +4,7 @@
 // База: ciudad-game (Upstash Redis через Vercel Storage).
 // Этап 1: комната + вход игроков + состояние (лобби).
 // Этап 2, шаг 3: адресные вопросы детективов (action=ask).
+// Этап 2, шаг 4: свой вопрос (action=own / approve) + персональные очки g.scores.
 // ============================================================
 
 const TTL = String(60 * 60 * 12); // игра живёт в базе 12 часов
@@ -130,6 +131,13 @@ export default async function handler(req, res) {
         startedAt: new Date().toISOString(),
       };
       g.round.turnIdx = 0; // чей ход: индекс в массиве detectives
+      g.round.pendingOwn = null; // свой вопрос на оценке у ведущей: {by, byName, ts}
+      // Персональные очки игроков: r — за раунд, g — за игру. Новый раунд обнуляет r.
+      g.scores = g.scores || {};
+      (g.players || []).forEach((p) => {
+        g.scores[p.id] = g.scores[p.id] || { r: 0, g: 0 };
+        g.scores[p.id].r = 0;
+      });
       // Кто из свидетелей «A», кто «B» — случайно, чтобы буква не выдавала роль.
       // Имена приходят с пульта ведущей — работают и для игроков без пульта.
       const wits = [
@@ -168,6 +176,9 @@ export default async function handler(req, res) {
       const pid = manual ? null : String(body.playerId || "");
       let byName = "ведущая";
       if (!manual) {
+        if (g.round.pendingOwn) {
+          return res.status(200).json({ ok: false, error: "Сначала ведущая оценит свой вопрос" });
+        }
         if (!dets.includes(pid)) {
           return res.status(200).json({ ok: false, error: "Ты не детектив этого раунда" });
         }
@@ -187,6 +198,64 @@ export default async function handler(req, res) {
         text: String(body.text || "").slice(0, 200),
         ts: Date.now(),
       });
+      if (dets.length) g.round.turnIdx = ((g.round.turnIdx || 0) + 1) % dets.length;
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: g });
+    }
+
+    // --- Детектив заявляет СВОЙ вопрос (задаёт голосом, ведущая оценит ✅/❌) ---
+    if (action === "own") {
+      if (!g.round) return res.status(200).json({ ok: false, error: "Раунд ещё не начался" });
+      g.round.asked = g.round.asked || [];
+      if (g.round.asked.length >= 27) {
+        return res.status(200).json({ ok: false, error: "Лимит 27 вопросов исчерпан" });
+      }
+      if (g.round.pendingOwn) {
+        return res.status(200).json({ ok: false, error: "Ведущая ещё оценивает предыдущий свой вопрос" });
+      }
+      const dets = g.round.roles.detectives || [];
+      const pid = String(body.playerId || "");
+      if (!dets.includes(pid)) {
+        return res.status(200).json({ ok: false, error: "Ты не детектив этого раунда" });
+      }
+      const activeId = dets[(g.round.turnIdx || 0) % dets.length];
+      if (pid !== activeId) {
+        return res.status(200).json({ ok: false, error: "Сейчас не твой ход" });
+      }
+      const p = g.players.find((x) => x.id === pid);
+      g.round.pendingOwn = { by: pid, byName: p ? p.name : "детектив", ts: Date.now() };
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: g });
+    }
+
+    // --- Ведущая оценивает свой вопрос: ✅ = +2 детективу, ❌ = 0 без штрафа; ход переходит ---
+    if (action === "approve") {
+      if (!g.round || !g.round.pendingOwn) {
+        return res.status(200).json({ ok: false, error: "Нет своего вопроса на оценке" });
+      }
+      const po = g.round.pendingOwn;
+      const approved = !!body.approved;
+      if (approved && po.by) {
+        g.scores = g.scores || {};
+        g.scores[po.by] = g.scores[po.by] || { r: 0, g: 0 };
+        g.scores[po.by].r += 2;
+        g.scores[po.by].g += 2;
+      }
+      g.round.asked = g.round.asked || [];
+      g.round.asked.push({
+        by: po.by,
+        byName: po.byName,
+        to: null,
+        qid: null,
+        own: true,
+        approved,
+        text: approved ? "✍️ свой вопрос · ✅ принят (+2)" : "✍️ свой вопрос · ❌ не засчитан",
+        ts: Date.now(),
+      });
+      g.round.pendingOwn = null;
+      const dets = g.round.roles.detectives || [];
       if (dets.length) g.round.turnIdx = ((g.round.turnIdx || 0) + 1) % dets.length;
       g.v++;
       await setGame(g);
