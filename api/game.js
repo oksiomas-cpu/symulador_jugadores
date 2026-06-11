@@ -103,6 +103,21 @@ export default async function handler(req, res) {
       const verbKey = String(body.verbKey || "");
       const roles = body.roles || {};
       if (!n || !verbKey) return res.status(200).json({ ok: false, error: "Нет номера раунда или глагола" });
+      // Повторная отправка того же раунда («↻ Отправить ещё раз», игрок вошёл посреди игры):
+      // обновляем только роли, лента вопросов и очередь остаются как были
+      if (g.round && g.round.n === n && g.round.verbKey === verbKey) {
+        g.round.roles = {
+          canon: roles.canon || null,
+          fantasy: roles.fantasy || null,
+          detectives: Array.isArray(roles.detectives) ? roles.detectives : [],
+        };
+        const cn = String(roles.canonName || "");
+        if (g.round.witAName === cn) { g.round.witA = roles.canon || null; g.round.witB = roles.fantasy || null; }
+        else { g.round.witA = roles.fantasy || null; g.round.witB = roles.canon || null; }
+        g.v++;
+        await setGame(g);
+        return res.status(200).json({ ok: true, game: g });
+      }
       g.phase = "round";
       g.round = {
         n, // номер раунда 1..5
