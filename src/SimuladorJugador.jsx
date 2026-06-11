@@ -521,10 +521,11 @@ function LiveDetective({ onBack }) {
 function LiveWitness({ mode, onBack }) {
   const [vk, setVk] = useState(null);
   const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
+  const [cat, setCat] = useState("all"); // фильтр категорий — против скролла на живой игре
   const isCanon = mode === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const v = vk ? verbByKey(vk) : null;
-  function pickVerb(k) { setVk(k); setDone(new Set()); }
+  function pickVerb(k) { setVk(k); setDone(new Set()); setCat("all"); }
   function toggleDone(id) { setDone(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; }); }
 
   if (!v) {
@@ -606,7 +607,22 @@ function LiveWitness({ mode, onBack }) {
           </Block>
         )}
 
-        {CATS.map(cat => (
+        {/* ЛИПКАЯ ПАНЕЛЬ КАТЕГОРИЙ — мгновенный прыжок без скролла */}
+        <div style={{ position: "sticky", top: 0, zIndex: 20, background: C.cream, borderRadius: 12, border: `1px solid ${C.line}`, boxShadow: "0 4px 14px rgba(61,43,31,0.14)", padding: "8px", marginBottom: 14, display: "flex", gap: 6 }}>
+          <button onClick={() => setCat("all")} style={{ flex: 1, background: cat === "all" ? accent : C.card, color: cat === "all" ? "#fff" : C.inkSoft, border: `1.5px solid ${cat === "all" ? accent : C.line}`, borderRadius: 9, padding: "8px 2px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Все</button>
+          {CATS.map(c => {
+            const left = QUESTIONS.filter(q => q.cat === c.id && !done.has(q.id)).length;
+            const active = cat === c.id;
+            return (
+              <button key={c.id} onClick={() => setCat(active ? "all" : c.id)} style={{ flex: 1, background: active ? accent : left === 0 ? C.creamDeep : C.card, border: `1.5px solid ${active ? accent : C.line}`, borderRadius: 9, padding: "5px 2px", cursor: "pointer", fontFamily: SERIF, opacity: left === 0 && !active ? 0.5 : 1 }}>
+                <div style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</div>
+                <div style={{ fontSize: 10.5, fontWeight: 800, color: active ? "#fff" : left === 0 ? C.inkSoft : accent, marginTop: 2 }}>{left}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {CATS.filter(c => cat === "all" || c.id === cat).map(cat => (
           <Block key={cat.id} stripe={accent}>
             <div style={{ padding: "12px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
