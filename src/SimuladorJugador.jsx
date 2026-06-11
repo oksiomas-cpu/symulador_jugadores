@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.11</div>
     </div>
   );
 }
@@ -363,6 +363,10 @@ function BigSiNo({ v }) {
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
 function LiveDetective({ onBack, roundN, turn, live }) {
   const [open, setOpen] = useState("quien");
+  const [ruledOut, setRuledOut] = useState(new Set()); // отметённые глаголы — личный блокнот, на сервер не идёт
+  function toggleRuled(k) {
+    setRuledOut((prev) => { const s = new Set(prev); s.has(k) ? s.delete(k) : s.add(k); return s; });
+  }
   const [asked, setAsked] = useState({});   // { qid: { A: null|"sí"|"no", B: null|"sí"|"no" } }
   const [custom, setCustom] = useState([]);  // [{text, A, B}]
   const [draft, setDraft] = useState("");
@@ -652,8 +656,8 @@ function LiveDetective({ onBack, roundN, turn, live }) {
           <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.line}`, cursor: "pointer", background: C.goldSoft, display: "flex", justifyContent: "space-between", alignItems: "center" }}
                onClick={() => setStoryView(storyView === "__open__" ? null : "__open__")}>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: C.goldDeep }}>🔍 Проверь гипотезу</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Выбери глагол — проверь свою версию</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.goldDeep }}>🔍 Проверь гипотезу{ruledOut.size > 0 && <span style={{ color: C.emeraldDeep }}> · осталось {VERBS.length - ruledOut.size} из {VERBS.length}</span>}</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Тап — история глагола · ✕ — отмести (твой личный блокнот)</div>
             </div>
             <span style={{ fontSize: 18, color: C.gold, transform: (storyView !== null) ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
           </div>
@@ -686,13 +690,23 @@ function LiveDetective({ onBack, roundN, turn, live }) {
                 );
               })() : (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                  {VERBS.map(vv => (
-                    <button key={vv.key} onClick={() => setStoryView(vv.key)} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
-                      <div style={{ fontSize: 22 }}>{vv.emoji}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
-                      <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
-                    </button>
-                  ))}
+                  {VERBS.map(vv => {
+                    const out = ruledOut.has(vv.key);
+                    return (
+                      <div key={vv.key} style={{ position: "relative", opacity: out ? 0.35 : 1 }}>
+                        <button onClick={() => setStoryView(vv.key)} style={{ width: "100%", background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center", textDecoration: out ? "line-through" : "none" }}>
+                          <div style={{ fontSize: 22 }}>{vv.emoji}</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
+                          <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); toggleRuled(vv.key); }}
+                          title={out ? "Вернуть глагол" : "Отмести глагол"}
+                          style={{ position: "absolute", top: 3, right: 3, width: 22, height: 22, borderRadius: "50%", border: `1px solid ${out ? C.emerald : C.line}`, background: out ? C.emerald : C.card, color: out ? "#fff" : C.inkSoft, fontSize: 11, fontWeight: 800, cursor: "pointer", lineHeight: 1, padding: 0 }}>
+                          {out ? "↺" : "✕"}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -2071,7 +2085,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.11</div>
     </div></div>
   );
 }
@@ -2169,7 +2183,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.10</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.11</div>
     </div></div>
   );
 }
