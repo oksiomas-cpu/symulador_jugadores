@@ -257,9 +257,19 @@ function Footer({ onHome }) {
   );
 }
 
-// ---- Бейдж сессионного счёта ----
+// ---- Копилка очков: сохраняется между визитами ----
+const SCORE_KEY = "ciudad_score_v1";
+function loadScore() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SCORE_KEY) || "{}");
+    return { detective: s.detective || 0, canon: s.canon || 0, fantasia: s.fantasia || 0, diario: s.diario || 0 };
+  } catch { return { detective: 0, canon: 0, fantasia: 0, diario: 0 }; }
+}
+function saveScore(s) { try { localStorage.setItem(SCORE_KEY, JSON.stringify(s)); } catch { /* приватный режим */ } }
+
+// ---- Бейдж копилки ----
 function ScoreBadge({ session }) {
-  const total = session.detective + session.canon + session.fantasia;
+  const total = session.detective + session.canon + session.fantasia + (session.diario || 0);
   if (total === 0) return null;
   return (
     <div style={{
@@ -267,11 +277,11 @@ function ScoreBadge({ session }) {
       padding: "9px 14px", marginBottom: 14,
       display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8,
     }}>
-      <span style={{ fontWeight: 700, color: C.goldDeep, fontSize: 13 }}>🏆 Сессия</span>
+      <span style={{ fontWeight: 700, color: C.goldDeep, fontSize: 13, flexShrink: 0 }}>🏆 Мои очки</span>
       <span style={{ fontSize: 12, color: C.inkSoft }}>
-        🕵️ {session.detective} · 🟢 {session.canon} · 🔴 {session.fantasia}
+        🕵️ {session.detective} · 🟢 {session.canon} · 🔴 {session.fantasia} · 📔 {session.diario || 0}
       </span>
-      <span style={{ fontWeight: 700, color: C.raspberry, fontSize: 18, minWidth: 28, textAlign: "right" }}>{total}</span>
+      <span style={{ fontWeight: 700, color: C.raspberry, fontSize: 18, minWidth: 28, textAlign: "right", flexShrink: 0 }}>{total}</span>
     </div>
   );
 }
@@ -659,26 +669,27 @@ function LiveGame({ onHome }) {
 export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
   const [role, setRole] = useState(null);
-  const [session, setSession] = useState({ detective: 0, canon: 0, fantasia: 0 });
+  const [session, setSession] = useState(loadScore);
   const [showTour, setShowTour] = useState(() => !tourSeen());
 
   function addScore(roleKey, pts) {
-    if (pts > 0) setSession(s => ({ ...s, [roleKey]: s[roleKey] + pts }));
+    if (pts > 0) setSession(s => { const n = { ...s, [roleKey]: (s[roleKey] || 0) + pts }; saveScore(n); return n; });
   }
+  const goDiario = () => { setRole("diario"); setEntered(true); };
 
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
-  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={() => { setRole("diario"); setEntered(true); }} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
+  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={goDiario} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
-  if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} />;
-  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} />;
-  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} />;
-  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} />;
+  if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} onDiario={goDiario} />;
+  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} onDiario={goDiario} />;
+  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={session} />;
+  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} onDiario={goDiario} />;
 }
 
 // ============================================================
 // ВЫБОР РОЛИ
 // ============================================================
-function RolePicker({ onPick, session, onBack }) {
+function RolePicker({ onPick, session, onBack, onDiario }) {
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
@@ -699,6 +710,11 @@ function RolePicker({ onPick, session, onBack }) {
           </div>
         </div>
       ))}
+      <div style={{ textAlign: "center", marginTop: 6 }}>
+        <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          📔 Не играешь, а тренируешь грамматику? Mi Diario →
+        </button>
+      </div>
       <Footer />
     </div></div>
   );
@@ -707,7 +723,7 @@ function RolePicker({ onPick, session, onBack }) {
 // ============================================================
 // ДЕТЕКТИВ — подсчёт баллов по числу вопросов
 // ============================================================
-function DetectiveMode({ onHome, onScore, session }) {
+function DetectiveMode({ onHome, onScore, session, onDiario }) {
   function freshGame() {
     const verb = VERBS[rnd(VERBS.length)];
     const canonIsA = Math.random() < 0.5;
@@ -770,7 +786,11 @@ function DetectiveMode({ onHome, onScore, session }) {
             </div>
           )}
           <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
-          <Btn bg={C.gold} onClick={reset} style={{ marginTop: 10 }}>🔄 Новый раунд</Btn>
+          <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+            <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>📔 Закрепи глаголы в Mi Diario →</Btn>
+          </div>
+          {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
         </Block>
       )}
 
@@ -899,7 +919,7 @@ function DetectiveMode({ onHome, onScore, session }) {
 // ============================================================
 // СВИДЕТЕЛЬ — раунд 18 вопросов, система баллов
 // ============================================================
-function WitnessMode({ role, onHome, onScore, session }) {
+function WitnessMode({ role, onHome, onScore, session, onDiario }) {
   const isCanon = role === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const accentDeep = isCanon ? C.emeraldDeep : C.raspberryDeep;
@@ -994,9 +1014,11 @@ function WitnessMode({ role, onHome, onScore, session }) {
             <span style={{ fontSize: 13, color: C.goldDeep }}> {roundPts === 5 ? "идеально!" : roundPts === 3 ? "хорошая работа" : roundPts === 1 ? "можно лучше" : "без баллов"}</span>
           </div>
           <br />
-          <Btn bg={C.emerald} onClick={startNextRound} style={{ marginTop: 4 }}>
-            Следующий глагол →
-          </Btn>
+          <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
+            <Btn bg={C.emerald} onClick={startNextRound}>Следующий глагол →</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>📔 Спряжение в Mi Diario →</Btn>
+          </div>
+          {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
         </Block>
       )}
 
@@ -1241,14 +1263,23 @@ function ConjHint() {
 }
 
 // ---- Тренажёр спряжения конкретного глагола ----
-function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
+function ConjTrainer({ startVerb, errorVerbs = [], onBack, onScore }) {
   const [verb, setVerb] = useState(startVerb || errorVerbs[0] || VERBS15[0]);
   const [vals, setVals] = useState({});
   const [checked, setChecked] = useState(false);
+  const [awardedVerbs, setAwardedVerbs] = useState(() => new Set());
   const correct = conjugate(verb);
   const allOk = PRON.every((p) => normES(vals[p.key]) === correct[p.key]);
 
   function pick(k) { setVerb(k); setVals({}); setChecked(false); }
+  function comprobar() {
+    setChecked(true);
+    // +1 в копилку за идеально заполненную таблицу (один раз на глагол за визит)
+    if (allOk && !awardedVerbs.has(verb)) {
+      setAwardedVerbs(s => new Set([...s, verb]));
+      if (onScore) onScore(1);
+    }
+  }
 
   return (
     <div style={wrap}><div style={maxw}>
@@ -1290,9 +1321,9 @@ function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
             );
           })}
         </div>
-        {!checked && <Btn bg={C.gold} onClick={() => setChecked(true)} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
+        {!checked && <Btn bg={C.gold} onClick={comprobar} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
         {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
-        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo.</div>}
+        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo. <span style={{ color: C.raspberry }}>+1 📔 в копилку</span></div>}
       </Block>
 
       <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Volver al diario</Btn>
@@ -1302,13 +1333,14 @@ function ConjTrainer({ startVerb, errorVerbs = [], onBack }) {
 }
 
 // ---- Основной режим: Mi Diario ----
-function DiarioMode({ onHome }) {
+function DiarioMode({ onHome, onScore, session }) {
   const N = DIARIO.blanks.length;
   const [vals, setVals] = useState({});
   const [res, setRes] = useState({});          // i -> {st, verb?}
   const [everFailed, setEverFailed] = useState({});
   const [checked, setChecked] = useState(false);
   const [trainer, setTrainer] = useState(null);
+  const [awardedPts, setAwardedPts] = useState(null); // очки за этот дневник (начисляются один раз)
 
   const allOk = checked && DIARIO.blanks.every((_, i) => res[i] && res[i].st === "ok");
   const filledAll = DIARIO.blanks.every((_, i) => normES(vals[i]) !== "");
@@ -1326,10 +1358,18 @@ function DiarioMode({ onHome }) {
       if (a.st !== "ok") ef[i] = true;
     });
     setRes(r); setEverFailed(ef); setChecked(true);
+    // Начисление очков в копилку — один раз за заполненный дневник
+    const allNowOk = DIARIO.blanks.every((_, i) => r[i] && r[i].st === "ok");
+    if (allNowOk && awardedPts === null) {
+      const corrected = DIARIO.blanks.filter((_, i) => ef[i]).length;
+      const pts = corrected === 0 ? 5 : corrected <= 2 ? 3 : 1;
+      setAwardedPts(pts);
+      if (onScore) onScore(pts);
+    }
   }
 
   if (trainer) {
-    return <ConjTrainer startVerb={trainer.startVerb} errorVerbs={errorVerbs} onBack={() => { setTrainer(null); setChecked(false); }} />;
+    return <ConjTrainer startVerb={trainer.startVerb} errorVerbs={errorVerbs} onScore={onScore} onBack={() => { setTrainer(null); setChecked(false); }} />;
   }
 
   let scoreBlock = null;
@@ -1343,6 +1383,12 @@ function DiarioMode({ onHome }) {
           <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
           <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
           <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено: <strong>{corrected}</strong></div>
+          {awardedPts !== null && (
+            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "8px 16px", display: "inline-block" }}>
+              <span style={{ fontSize: 20, fontWeight: 800, color: C.raspberry }}>+{awardedPts}</span>
+              <span style={{ fontSize: 13, color: C.goldDeep }}> 📔 в копилку!</span>
+            </div>
+          )}
         </div>
       </Block>
     );
@@ -1360,6 +1406,7 @@ function DiarioMode({ onHome }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📔 Mi Diario · escribe los verbos" />
+      <ScoreBadge session={session} />
 
       <ConjHint />
 
