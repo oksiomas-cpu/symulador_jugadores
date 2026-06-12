@@ -1132,12 +1132,20 @@ export default function SimuladorJugador() {
   const [role, setRole] = useState(null);
   const [session, setSession] = useState(loadScore);
   const [showTour, setShowTour] = useState(() => !tourSeen());
+  // Deep-link из бота Don Verbo: ?verbo=preguntar открывает тренажёр спряжения сразу на этом глаголе
+  const [deepVerb, setDeepVerb] = useState(() => {
+    try {
+      const v = new URLSearchParams(window.location.search).get("verbo");
+      return v && VERBS15.includes(v) ? v : null;
+    } catch { return null; }
+  });
 
   function addScore(roleKey, pts) {
     if (pts > 0) setSession(s => { const n = { ...s, [roleKey]: (s[roleKey] || 0) + pts }; saveScore(n); return n; });
   }
   const goDiario = () => { setRole("diario"); setEntered(true); };
 
+  if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={goDiario} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
