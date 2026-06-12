@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.12</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.13</div>
     </div>
   );
 }
@@ -268,9 +268,28 @@ function loadScore() {
 }
 function saveScore(s) { try { localStorage.setItem(SCORE_KEY, JSON.stringify(s)); } catch { /* приватный режим */ } }
 
+// ---- Облачный счёт (Mini App ↔ бот Don Verbo) ----
+// Если тренажёр открыт из Telegram, у нас есть tgId человека —
+// очки уезжают в общую копилку score:{tgId} (Redis), та же, куда пишет Don Verbo.
+// localStorage остаётся мгновенным кэшем; вне Telegram всё работает как раньше.
+const CLOUD_SYNC_KEY = "ciudad_cloud_v1"; // флаг: копилка уже переехала в облако
+function getTg() {
+  try {
+    const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    return u && u.id ? { id: u.id, name: [u.first_name, u.last_name].filter(Boolean).join(" ") } : null;
+  } catch { return null; }
+}
+async function cloudCall(payload) {
+  const resp = await fetch("/api/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const d = await resp.json();
+  if (!resp.ok || !d.ok) throw new Error(d.error || "score api error");
+  return d.score;
+}
+
 // ---- Бейдж копилки ----
 function ScoreBadge({ session }) {
-  const total = session.detective + session.canon + session.fantasia + (session.diario || 0);
+  const warmup = session.warmup || 0;
+  const total = session.detective + session.canon + session.fantasia + (session.diario || 0) + warmup;
   if (total === 0) return null;
   return (
     <div style={{
@@ -280,7 +299,7 @@ function ScoreBadge({ session }) {
     }}>
       <span style={{ fontWeight: 700, color: C.goldDeep, fontSize: 13, flexShrink: 0 }}>🏆 Мои очки</span>
       <span style={{ fontSize: 12, color: C.inkSoft }}>
-        🕵️ {session.detective} · 🟢 {session.canon} · 🔴 {session.fantasia} · 📔 {session.diario || 0}
+        🕵️ {session.detective} · 🟢 {session.canon} · 🔴 {session.fantasia} · 📔 {session.diario || 0}{warmup > 0 ? ` · 🎩 ${warmup}` : ""}
       </span>
       <span style={{ fontWeight: 700, color: C.raspberry, fontSize: 18, minWidth: 28, textAlign: "right", flexShrink: 0 }}>{total}</span>
     </div>
@@ -1131,6 +1150,49 @@ export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
   const [role, setRole] = useState(null);
   const [session, setSession] = useState(loadScore);
+  // Облачный счёт: warmup — очки разминки Don Verbo, total — общий (тренажёр + разминка)
+  const [cloud, setCloud] = useState(null);
+  const tg = useRef(getTg());
+
+  useEffect(() => {
+    const t = tg.current;
+    if (!t) return;
+    (async () => {
+      try {
+        let synced = false;
+        try { synced = !!localStorage.getItem(CLOUD_SYNC_KEY); } catch { /* приватный режим */ }
+        let sc;
+        if (!synced) {
+          // одноразовый переезд накопленной копилки в облако (HSETNX — без задвоения)
+          const s = loadScore();
+          sc = await cloudCall({ action: "sync", tgId: t.id, name: t.name, detective: s.detective, canon: s.canon, fantasia: s.fantasia, diario: s.diario });
+          try { localStorage.setItem(CLOUD_SYNC_KEY, "1"); } catch { /* приватный режим */ }
+        } else {
+          sc = await cloudCall({ action: "get", tgId: t.id });
+        }
+        setCloud(sc);
+        // облако — источник правды для общего счёта: подтягиваем локальную копилку,
+        // если в облаке больше (другое устройство / чистый localStorage)
+        setSession(prev => {
+          const n = { ...prev };
+          let changed = false;
+          for (const k of ["detective", "canon", "fantasia", "diario"]) {
+            if ((sc[k] || 0) > (n[k] || 0)) { n[k] = sc[k]; changed = true; }
+          }
+          if (changed) saveScore(n);
+          return changed ? n : prev;
+        });
+      } catch { /* офлайн или база недоступна — тренажёр работает локально */ }
+    })();
+  }, []);
+
+  function addScore(roleKey, pts) {
+    if (pts > 0) {
+      setSession(s => { const n = { ...s, [roleKey]: (s[roleKey] || 0) + pts }; saveScore(n); return n; });
+      const t = tg.current;
+      if (t) cloudCall({ action: "add", tgId: t.id, src: roleKey, pts, name: t.name }).then(setCloud).catch(() => {});
+    }
+  }
   const [showTour, setShowTour] = useState(() => !tourSeen());
   // Deep-link из бота Don Verbo: ?verbo=preguntar открывает тренажёр спряжения сразу на этом глаголе
   const [deepVerb, setDeepVerb] = useState(() => {
@@ -1140,19 +1202,18 @@ export default function SimuladorJugador() {
     } catch { return null; }
   });
 
-  function addScore(roleKey, pts) {
-    if (pts > 0) setSession(s => { const n = { ...s, [roleKey]: (s[roleKey] || 0) + pts }; saveScore(n); return n; });
-  }
   const goDiario = () => { setRole("diario"); setEntered(true); };
+  // session + очки разминки Don Verbo из облака — для бейджа копилки
+  const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={goDiario} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
-  if (!role) return <RolePicker onPick={setRole} session={session} onBack={() => setEntered(false)} onDiario={goDiario} />;
-  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={session} onDiario={goDiario} />;
-  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={session} />;
-  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={session} onDiario={goDiario} />;
+  if (!role) return <RolePicker onPick={setRole} session={sess} onBack={() => setEntered(false)} onDiario={goDiario} />;
+  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
+  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
+  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
 }
 
 // ============================================================
@@ -2093,7 +2154,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.12</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.13</div>
     </div></div>
   );
 }
@@ -2191,7 +2252,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.12</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.13</div>
     </div></div>
   );
 }
