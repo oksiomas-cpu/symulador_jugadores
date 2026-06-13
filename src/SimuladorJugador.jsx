@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
     </div>
   );
 }
@@ -480,35 +480,43 @@ function LiveDetective({ onBack, roundN, turn, live }) {
     const conflict = stEff.A && stEff.B && stEff.A !== stEff.B;
     const canAsk = !!(live && qid && turn && turn.mine && !askBusy && !live.pendingOwn && !gamePaused);
     function handleSet(w, val) { if (liveAns) { live.onSetAns(qid, w, val); } else { onSet(w, val); } }
+    const wn = (live && live.witNames) || {};
     return (
       <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
-        {ru && <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 8 }}>{ru}</div>}
-        {live && qid && (
-          <div style={{ display: "flex", gap: 6, margin: "2px 0 6px" }}>
-            {["A", "B"].map(w => {
-              const was = live.asked.some(a => a.qid === qid && a.to === w);
-              return (
-                <button key={w} disabled={!canAsk} onClick={() => doAsk(qid, es, w)} style={{ flex: 1, background: was ? C.creamDeep : canAsk ? C.gold : "#EFE7D6", color: was ? C.inkSoft : canAsk ? "#fff" : "#B5A88F", border: `1.5px solid ${was ? C.line : canAsk ? C.goldDeep : C.line}`, borderRadius: 8, padding: "7px 4px", fontSize: 12.5, fontWeight: 700, cursor: canAsk ? "pointer" : "default", fontFamily: SERIF }}>
-                  {was ? "✓ задан · " : "📨 "}{w} · {live.witNames[w]}
-                </button>
-              );
-            })}
-          </div>
-        )}
-        {["A", "B"].map(w => (
-          <div key={w} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
-            <span style={{ width: 78, fontSize: 13, fontWeight: 700, color: C.inkSoft }}>Testigo {w}:</span>
-            {[["sí", "SÍ", C.emerald], ["no", "NO", C.raspberry]].map(([val, lab, col]) => {
-              const on = stEff[w] === val;
-              return (
-                <button key={val} onClick={() => handleSet(w, val)} style={{ flex: 1, background: on ? col : "#fff", color: on ? "#fff" : col, border: `1.5px solid ${col}`, borderRadius: 8, padding: "6px 0", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
-                  {on ? "✓ " : ""}{lab}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+        {ru && <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 4 }}>{ru}</div>}
+        {/* Каждый свидетель — своя ячейка целиком: имя → 📨 задать ЕМУ → его SÍ/NO.
+            Так A и B нельзя перепутать: всё про свидетеля лежит внутри его коробки.
+            Цвет шапки тот же, что у →A/→B в «Истории допроса» (золото = A, крем = B). */}
+        {["A", "B"].map(w => {
+          const tint = w === "A" ? C.goldSoft : C.creamDeep;
+          const was = live && qid ? live.asked.some(a => a.qid === qid && a.to === w) : false;
+          return (
+            <div key={w} style={{ border: `1.5px solid ${C.line}`, borderRadius: 10, overflow: "hidden", marginTop: 8, background: "#fff" }}>
+              <div style={{ background: tint, padding: "6px 11px", fontSize: 13.5, fontWeight: 800, color: C.ink }}>
+                👤 Testigo {w}{wn[w] ? " · " + wn[w] : ""}
+              </div>
+              <div style={{ padding: "9px 11px" }}>
+                {live && qid && (
+                  <button disabled={!canAsk} onClick={() => doAsk(qid, es, w)} style={{ width: "100%", marginBottom: 9, background: was ? C.creamDeep : canAsk ? C.gold : "#EFE7D6", color: was ? C.inkSoft : canAsk ? "#fff" : "#B5A88F", border: `1.5px solid ${was ? C.line : canAsk ? C.goldDeep : C.line}`, borderRadius: 8, padding: "9px 4px", fontSize: 13, fontWeight: 700, cursor: canAsk ? "pointer" : "default", fontFamily: SERIF }}>
+                    {was ? "✓ вопрос задан этому свидетелю" : "📨 задать этот вопрос"}
+                  </button>
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: C.inkSoft, flexShrink: 0 }}>Su respuesta:</span>
+                  {[["sí", "SÍ", C.emerald], ["no", "NO", C.raspberry]].map(([val, lab, col]) => {
+                    const on = stEff[w] === val;
+                    return (
+                      <button key={val} onClick={() => handleSet(w, val)} style={{ flex: 1, background: on ? col : "#fff", color: on ? "#fff" : col, border: `1.5px solid ${col}`, borderRadius: 8, padding: "9px 0", fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
+                        {on ? "✓ " : ""}{lab}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
         {conflict && <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: C.raspberry }}>⚡ Расхождение — здесь один из них лжёт</div>}
       </div>
     );
@@ -2198,7 +2206,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
     </div></div>
   );
 }
@@ -2296,7 +2304,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
     </div></div>
   );
 }
