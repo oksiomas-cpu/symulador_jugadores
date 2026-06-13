@@ -59,7 +59,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su terraza favorita"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo"], ["¿Qué?", "Café negro y tostadas con caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"sí", n34:"sí", n35:"sí" },
     mask: "preparar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Dentro del palacio, en la gran sala"], ["¿Cuándo?", "Por la tarde, solo los viernes"], ["¿Con quién?", "Con los ayudantes"], ["¿Qué?", "Sopa y pan"]],
     fantVer: "Шеф завтракает внутри дворца вечером — вместе с помощниками, в главном зале. Суп и хлеб. Только по пятницам.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"sí", n35:"no" },
     trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
@@ -70,7 +69,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Por los pasillos del palacio"], ["¿Cuándo?", "Cada mañana, 20 minutos"], ["¿Con quién?", "Solo"], ["¿Cómo?", "Despacio, manos en la espalda"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"sí", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "trabajar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Fuera del palacio, por el jardín"], ["¿Cuándo?", "Por la tarde, 5 minutos"], ["¿Con quién?", "Con los ayudantes"], ["¿Cómo?", "Hablando por el camino"]],
     fantVer: "Шеф идёт вне дворца, вечером, вместе с помощниками — по саду, разговаривают на ходу, 5 минут.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"sí", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Camina en silencio?", ru: "Идёт в тишине?", canon: "sí", fant: "no" },
@@ -81,7 +79,6 @@ const VERBS = [
     dossier: [["¿Quién?", "Los tres ayudantes"], ["¿Dónde?", "En la Cocina Mágica"], ["¿Cuándo?", "Cada mañana, a las 7, 5 minutos"], ["¿Con quién?", "Los tres juntos"], ["¿Qué?", "La melodía del caramelo dorado"]],
     answers: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
     mask: "hablar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En la gran sala"], ["¿Cuándo?", "Por la tarde"], ["¿Con quién?", "Con los ayudantes"], ["¿Qué?", "Habla del menú (no canta)"]],
   },
   {
     key: "mirar", emoji: "👁", inf: "mirar", ru: "смотреть",
@@ -89,7 +86,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Desde la terraza"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo, en silencio"], ["¿Qué?", "Las nubes, el río de caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"no", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"sí", n34:"no", n35:"sí" },
     mask: "escuchar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Dentro, en la sala de espejos"], ["¿Cuándo?", "Por la tarde, solo los sábados"], ["¿Con quién?", "Con los ayudantes"], ["¿Qué?", "Su reflejo en el espejo"]],
     fantVer: "Шеф смотрит в зеркало внутри дворца, вечером, вместе с помощниками — в зеркальном зале. Обсуждают. Только по субботам.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
@@ -100,7 +96,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Un ingrediente especial nuevo"], ["¿Dónde?", "Armarios, cajas del sótano"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "comprar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Fuera, en el jardín"], ["¿Cuándo?", "Por la noche"], ["¿Con quién?", "Con un ayudante"], ["¿Cómo?", "Con una linterna, en voz baja"]],
     fantVer: "Шеф ищет снаружи дворца, ночью, вместе с одним помощником — в саду, с фонарём в руках. Шепчут.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"sí", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Busca dentro del palacio?", ru: "Ищет внутри дворца?", canon: "sí", fant: "no" },
@@ -111,7 +106,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su sillón favorito"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo, en silencio absoluto"], ["¿Qué?", "El caramelo, el viento, los pasos"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "mirar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Fuera, en el jardín"], ["¿Cuándo?", "Por la tarde, 30 minutos"], ["¿Con quién?", "Con los ayudantes"], ["¿Qué?", "Música en vivo"]],
     fantVer: "Шеф слушает живую музыку снаружи дворца, вечером, вместе с помощниками — в саду, 30 минут.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
@@ -122,7 +116,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En la gran sala"], ["¿Cuándo?", "Cada mañana, 15 minutos"], ["¿Con quién?", "Con sus ayudantes"], ["¿De qué?", "Del menú especial del día"]],
     answers: { n11:"sí", m1:"no", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "cantar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su despacho"], ["¿Cuándo?", "Por la tarde, 2 minutos"], ["¿Con quién?", "Solo, por teléfono"], ["¿Cómo?", "En voz baja"]],
     fantVer: "Шеф говорит по телефону — один, вечером, в кабинете, тихим голосом, 2 минуты.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Hay alguien escuchando?", ru: "Есть ли слушатели рядом?", canon: "sí", fant: "no" },
@@ -133,7 +126,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Una tarta de caramelo"], ["¿Dónde?", "En la cocina, mesa de mármol"], ["¿Con quién?", "Solo"], ["¿Con qué?", "Cucharón de oro, varilla de cristal"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"sí" },
     mask: "desayunar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Fuera, en el jardín"], ["¿Cuándo?", "Por la tarde, 30 minutos"], ["¿Con quién?", "Con los ayudantes"], ["¿Cómo?", "Cantando mientras cocina"]],
     fantVer: "Шеф готовит снаружи дворца, вечером, вместе с помощниками — в саду. Поёт в процессе. 30 минут.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
@@ -144,7 +136,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En el mercado de caramelo"], ["¿Cuándo?", "Una vez a la semana, por la mañana"], ["¿Con quién?", "Solo"], ["¿Qué?", "Caramelo, azúcar, especias"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"sí", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "buscar",
-    fantDossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Dentro, en la despensa"], ["¿Cuándo?", "Cada día"], ["¿Con quién?", "Con un ayudante"], ["¿Cómo?", "Intercambio interno, sin dinero"]],
     fantVer: "Шеф получает товары у помощника внутри дворца, в кладовой — без денег, внутренний обмен, каждый день.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     trap: { q: "¿Va al mercado?", ru: "Идёт на рынок?", canon: "sí", fant: "no" },
@@ -155,7 +146,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Jefe y los ayudantes"], ["¿Dónde?", "Cocina y sala de decoración"], ["¿Cuándo?", "De las 7 a las 3"], ["¿Con quién?", "Todos juntos"], ["¿En qué?", "El banquete del viernes"]],
     answers: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
     mask: "caminar",
-    fantDossier: [["¿Quién?", "Solo el Jefe, sin ayudantes"], ["¿Dónde?", "Fuera, en el jardín"], ["¿Cuándo?", "Por la tarde, una hora"], ["¿Con quién?", "Solo"], ["¿Cómo?", "En total silencio"]],
     fantVer: "Только Шеф — без помощников — работает снаружи дворца, в саду, вечером, час, в полной тишине.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     trap: { q: "¿Trabajan varias personas?", ru: "Работают несколько человек?", canon: "sí", fant: "no" },
@@ -166,7 +156,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Toma la varilla dorada"], ["¿Dónde?", "Mesa central de la Cocina"], ["¿Cuándo?", "Cada día, cuando todo está listo"], ["¿Cómo?", "Con las dos manos, un ritual"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"sí" },
     mask: "llevar",
-    fantDossier: [["¿Quién?", "Un ayudante"], ["¿Dónde?", "En el sótano del palacio"], ["¿Cuándo?", "Por la tarde, 2 minutos"], ["¿Con quién?", "Solo, en secreto"], ["¿Qué?", "Un cucharón viejo de madera"]],
     canonVer: "Шеф берёт двумя руками золотой венчик на Волшебной Кухне. Каждый день когда всё готово. Торжественный ритуал, тишина, меньше минуты.",
     fantVer: "Один помощник берёт не золотой венчик, а старый деревянный ковш. В подвале дворца, вечером, тайно, один, 2 минуты.",
     fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
@@ -178,7 +167,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Llama a su equipo"], ["¿Dónde?", "Al pie de la escalera, corredor"], ["¿Cuándo?", "Cada mañana, tras caminar"], ["¿Cómo?", "En voz muy alta, 1-2 veces"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "hablar",
-    fantDossier: [["¿Quién?", "Un ayudante"], ["¿A quién?", "Llama al Jefe (no el Jefe a ellos)"], ["¿Dónde?", "En la cocina"], ["¿Cuándo?", "Por la tarde, 1 vez"], ["¿Con quién?", "Solo"]],
     canonVer: "Шеф зовёт команду громким голосом у подножия золотой лестницы. Каждое утро после прогулки. Эхо по коридорам. Меньше 2 минут.",
     fantVer: "Помощник зовёт Шефа — не Шеф помощников. На кухне, вечером, тихим голосом, один помощник, 1 раз.",
     fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
@@ -190,7 +178,6 @@ const VERBS = [
     dossier: [["¿Quién?", "Los tres ayudantes"], ["¿A quién?", "Al Jefe — él responde"], ["¿Dónde?", "En el gran salón"], ["¿Cuándo?", "Tras la charla del Jefe, mañana"], ["¿Cuánto?", "Exactamente 5 minutos"]],
     answers: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "hablar",
-    fantDossier: [["¿Quién?", "El Jefe (no los ayudantes)"], ["¿A quién?", "A un ayudante"], ["¿Dónde?", "En la cocina"], ["¿Cuándo?", "Por la tarde, 1 minuto"], ["¿Cómo?", "En voz baja, una pregunta"]],
     canonVer: "Спрашивают помощники (не Шеф — он отвечает). В большом зале, утром после речи Шефа. Голоса, 5 минут.",
     fantVer: "Шеф — не помощники — спрашивает одного помощника. Вечером, на кухне, один вопрос, шёпотом, 1 минута.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
@@ -202,7 +189,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde, solo"], ["¿Qué?", "Una página del libro de recetas"], ["¿Dónde?", "En su despacho, en el sillón"], ["¿Cuándo?", "Cada mañana, antes de salir"], ["¿Cuánto?", "Exactamente 30 minutos"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "buscar",
-    fantDossier: [["¿Quién?", "Los tres ayudantes"], ["¿Qué?", "Una receta nueva"], ["¿Dónde?", "En la cocina"], ["¿Cuándo?", "Por la tarde, 10 minutos"], ["¿Cómo?", "Juntos, leyendo en voz alta"]],
     canonVer: "Шеф изучает ОДНУ страницу древней книги рецептов. В кабинете, в кресле, перед выходом. 30 минут, глаза не движутся, полная тишина.",
     fantVer: "Три помощника изучают новый рецепт вместе. На кухне, вечером, 10 минут, читают вслух.",
     fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
@@ -214,7 +200,6 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Gorro blanco + barba"], ["¿Dónde?", "En todos lados, todo el palacio"], ["¿Cuándo?", "Todo el día, cada día"], ["¿Significa?", "Gorro + barba = el Jefe está aquí"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"sí", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"sí", n34:"no", n35:"no" },
     mask: "tomar",
-    fantDossier: [["¿Quién?", "Los ayudantes"], ["¿Qué?", "Gorros marrones de caramelo"], ["¿Dónde?", "En el palacio"], ["¿Cuándo?", "Solo los viernes"], ["¿Cómo?", "Sin barba, no blancos"]],
     canonVer: "Шеф носит на себе высокий белый колпак и тёмную бороду. Везде во дворце, весь день, каждый день. Не берёт в руки — носит как часть образа.",
     fantVer: "Помощники носят маленькие коричневые (карамельные) колпаки — не белые. Только по пятницам, не каждый день, без бороды.",
     fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
@@ -248,7 +233,7 @@ const lvlName = { 1: "Nivel 1 · Categoría", 2: "Nivel 2 · Acotar", 3: "Nivel 
 function Highlighted({ text }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return <span>{parts.map((p, i) => p.startsWith("**") && p.endsWith("**")
-    ? <strong key={i} style={{ color: C.emeraldDeep, fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+    ? <strong key={i} style={{ color: C.raspberry, fontWeight: 700 }}>{p.slice(2, -2)}</strong>
     : <span key={i}>{p}</span>)}</span>;
 }
 function SiNo({ v }) {
@@ -268,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.18</div>
     </div>
   );
 }
@@ -386,9 +371,6 @@ function liveFantAns(v) {
 }
 function liveCanonVer(v) {
   return v.canonVer || ("Правда: " + v.dossier.map(d => d[1]).slice(0,3).join(" · "));
-}
-function liveFantDossier(v) {
-  return v.fantDossier || (verbByKey(v.mask) ? verbByKey(v.mask).dossier : v.dossier);
 }
 
 // ----- Большой бейдж SÍ / NO -----
@@ -624,31 +606,6 @@ function LiveDetective({ onBack, roundN, turn, live }) {
             ⚠️ {askErr}
           </div>
         )}
-
-        {/* ===== ИСТОРИЯ ДОПРОСА — общая лента вопросов всех детективов (новые сверху) ===== */}
-        {live && (
-          <Block stripe={C.emerald}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <h2 style={h2}>📋 История допроса</h2>
-              <span style={{ fontSize: 13, color: C.inkSoft }}>{(live.asked || []).length} preguntas · новые сверху</span>
-            </div>
-            {(!live.asked || live.asked.length === 0) ? (
-              <p style={pHint}>Пока ни одного вопроса. Как детективы начнут спрашивать — лента появится здесь.</p>
-            ) : (
-              <div style={{ maxHeight: 220, overflowY: "auto" }}>
-                {[...live.asked].map((a, i) => ({ ...a, n: i + 1 })).reverse().map((a) => (
-                  <div key={a.n} style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap", padding: "7px 0", borderBottom: `1px dashed ${C.line}`, fontSize: 13.5 }}>
-                    <span style={{ color: C.goldDeep, fontWeight: 800, flexShrink: 0 }}>#{a.n}</span>
-                    <span style={{ flexShrink: 0, fontWeight: 700 }}>🕵️ {a.byName}{a.own ? " (свой)" : ""}</span>
-                    {a.to && <span style={{ flexShrink: 0, background: a.to === "A" ? C.goldSoft : C.creamDeep, borderRadius: 6, padding: "1px 8px", fontWeight: 700, color: C.inkSoft }}>→ {a.to} · {live.witNames[a.to]}</span>}
-                    {a.text && <span style={{ color: C.ink, minWidth: 0 }}>{a.text}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </Block>
-        )}
-
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
@@ -782,14 +739,17 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-// Свидетель только СМОТРИТ: канон глагола в рамке (кто/где/когда на испанском) + выпадающая история.
-// Никакого управления, списков вопросов и гашения — он сам решает, как отвечать вслух.
-// Канон: отвечает по канону (правда). Фантазия: отвечает НЕ по канону (придумывает по ходу).
 function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
-  const [storyOpen, setStoryOpen] = useState(false);
+  const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
+  const [done, setDone] = useState(() => new Set()); // отвеченные вопросы (id)
+  const [cat, setCat] = useState("all"); // фильтр категорий — против скролла на живой игре
   const isCanon = mode === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
-  const v = initialVerbKey ? verbByKey(initialVerbKey) : null;
+  const v = vk ? verbByKey(vk) : null;
+  function pickVerb(k) { setVk(k); setDone(new Set()); setCat("all"); }
+  function toggleDone(id) { setDone(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; }); }
+  // вопросы, заданные мне с пультов детективов, гаснут сами (ручные отметки остаются)
+  const effDone = liveAsked && liveAsked.size ? new Set([...done, ...liveAsked]) : done;
 
   if (!v) {
     return (
@@ -798,15 +758,26 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <Block stripe={accent}>
             <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              Жди начала раунда — ведущая запустит игру, и твой канон откроется здесь сам.
+              Тебе прислали глагол в личку. <b>Выбери его</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
             </div>
           </Block>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {VERBS.map(vv => (
+              <button key={vv.key} onClick={() => pickVerb(vv.key)} style={{ background: C.card, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 8px", cursor: "pointer", fontFamily: SERIF, textAlign: "center", boxShadow: "0 2px 8px rgba(61,43,31,0.06)" }}>
+                <div style={{ fontSize: 26 }}>{vv.emoji}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginTop: 4 }}>{vv.inf}</div>
+                <div style={{ fontSize: 11.5, color: C.inkSoft }}>{vv.ru}</div>
+              </button>
+            ))}
+          </div>
           <div style={{ marginTop: 16 }}><Footer onHome={onBack} /></div>
         </div>
       </div>
     );
   }
 
+  const ans = isCanon ? v.answers : liveFantAns(v);
+  const ver = isCanon ? liveCanonVer(v) : liveFantVer(v);
   return (
     <div style={wrap}>
       <Header subtitle={(isCanon ? "🟢 Свидетель Канон · Живая игра" : "🔴 Свидетель Фантазия · Живая игра") + (myLetter ? " · Ты — Свидетель " + myLetter : "")} />
@@ -824,6 +795,11 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
               <div style={{ textAlign: "center", fontSize: 13.5, marginTop: 4 }}>
                 🟢 Правду говорил(а): <b>{rev.canonName}</b> · 🔴 Выдумывал(а): <b>{rev.fantasyName}</b>
               </div>
+              {liveExtra.myScore && (
+                <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 700, marginTop: 8, color: C.goldDeep }}>
+                  ⭐ Твои очки — раунд: {liveExtra.myScore.r} · игра: {liveExtra.myScore.g}
+                </div>
+              )}
             </div>
           );
         })()}
@@ -834,91 +810,118 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
               : `🔍 ${liveExtra.guess.byName} называет глагол!`}
           </div>
         )}
-
-        {/* ===== ПЛАШКА ОЧКОВ — всегда видна свидетелю ===== */}
-        {liveExtra && liveExtra.myScore && (
-          <div style={{ background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "8px 14px", marginBottom: 12, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: C.goldDeep }}>
-            ⭐ Твои очки — раунд: {liveExtra.myScore.r} · игра: {liveExtra.myScore.g}
+        <Block stripe={accent}>
+          <div style={{ padding: "14px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 30 }}>{v.emoji}</span>
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: accent }}>{v.inf}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft }}>{v.ru}</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12, background: isCanon ? "rgba(45,122,90,0.10)" : "rgba(178,42,75,0.10)", border: `1px solid ${accent}`, borderRadius: 10, padding: "11px 13px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: accent, letterSpacing: ".5px", marginBottom: 4 }}>{isCanon ? "🟢 ТВОЯ ПРАВДА — отвечай строго по ней" : "🔴 ТВОЯ ЛЕГЕНДА — держись её до конца"}</div>
+              <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.45 }}>{ver}</div>
+            </div>
           </div>
-        )}
+        </Block>
 
-        {/* ===== ШАПКА ГЛАГОЛА ===== */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
-          <span style={{ fontSize: 34 }}>{v.emoji}</span>
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: accent }}>{v.inf}</div>
-            <div style={{ fontSize: 13.5, color: C.inkSoft }}>{v.ru}</div>
+        {/* Прогресс допроса */}
+        <Block stripe={C.gold}>
+          <div style={{ padding: "11px 16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+              <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {effDone.size} из {QUESTIONS.length}</span>
+              {done.size > 0 && (
+                <button onClick={() => setDone(new Set())} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>🔄 Сбросить ответы</button>
+              )}
+            </div>
+            <div style={{ height: 8, background: C.creamDeep, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${(effDone.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
+            </div>
+            <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}>Ответил вслух → нажми вопрос, он погаснет. Случайно нажал — нажми ещё раз, вернётся.</div>
           </div>
-        </div>
+        </Block>
 
-        {isCanon ? (
-          <>
-            {/* ===== КАНОН: зелёная рамка с досье (правда) ===== */}
-            <div style={{ background: C.card, border: `2.5px solid ${C.emerald}`, borderRadius: 16, padding: "16px 18px", marginBottom: 14, boxShadow: "0 2px 14px rgba(45,122,90,0.10)" }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>📋 CANON — qué hace el Jefe (правда)</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+        {isCanon && (
+          <Block stripe={C.gold}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.goldDeep, marginBottom: 6 }}>📖 История (правда)</div>
+              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}><Highlighted text={v.storyEs} /></div>
+              <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {v.dossier.map((d, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
-                    <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                  <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
+                    <span style={{ color: C.inkSoft }}>{d[0]} </span><span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 12, background: "rgba(45,122,90,0.12)", border: `1px solid ${C.emerald}`, borderRadius: 10, padding: "10px 13px", fontSize: 14, color: C.ink, lineHeight: 1.45 }}>
-                <b style={{ color: C.emeraldDeep }}>Ты говоришь ПРАВДУ.</b> Отвечай строго по канону. Где детектив угадывает канон — <b style={{ color: C.emeraldDeep }}>SÍ</b>, где нет — <b style={{ color: C.raspberryDeep }}>NO</b>.
-              </div>
             </div>
-
-            {/* Правдивая мини-история — выпадающая */}
-            <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
-              <div onClick={() => setStoryOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen ? C.goldSoft : "#fff" }}>
-                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>📖 Mini-historia <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(правда — почитать перед раундом)</span></span>
-                <span style={{ fontSize: 18, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
-              </div>
-              {storyOpen && (
-                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  <Highlighted text={v.storyEs} />
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            {/* ===== ФАНТАЗИЯ: подсказка как врать ===== */}
-            <div style={{ background: "rgba(178,42,75,0.10)", border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}>
-                <b style={{ color: C.raspberryDeep }}>Ты ВРЁШЬ.</b> Ниже две истории: <b style={{ color: C.raspberryDeep }}>🔴 твоя выдумка</b> (как можно соврать) и <b style={{ color: C.emeraldDeep }}>🟢 правда</b>. Отвечай НЕ по правде, уводи детектива в сторону. Хочешь — держись готовой выдумки, хочешь — придумай свою. Главное: будь убедителен и не путайся.
-              </div>
-            </div>
-
-            {/* 🔴 Придуманная история (легенда) — текст, выпадающая */}
-            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.raspberry}`, boxShadow: "0 2px 10px rgba(178,42,75,0.08)", marginBottom: 12, overflow: "hidden" }}>
-              <div onClick={() => setStoryOpen(o => o === "fant" ? null : "fant")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "fant" ? "rgba(178,42,75,0.08)" : "#fff" }}>
-                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.raspberryDeep }}>🔴 Tu versión <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(как можно соврать)</span></span>
-                <span style={{ fontSize: 18, color: C.raspberry, transform: storyOpen === "fant" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
-              </div>
-              {storyOpen === "fant" && (
-                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  {liveFantVer(v)}
-                </div>
-              )}
-            </div>
-
-            {/* 🟢 Правдивая история — текст, выпадающая */}
-            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.emerald}`, boxShadow: "0 2px 10px rgba(45,122,90,0.08)", marginBottom: 14, overflow: "hidden" }}>
-              <div onClick={() => setStoryOpen(o => o === "true" ? null : "true")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "true" ? "rgba(45,122,90,0.08)" : "#fff" }}>
-                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>🟢 La verdad <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(что на самом деле — от чего уводишь)</span></span>
-                <span style={{ fontSize: 18, color: C.emerald, transform: storyOpen === "true" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
-              </div>
-              {storyOpen === "true" && (
-                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  <Highlighted text={v.storyEs} />
-                </div>
-              )}
-            </div>
-          </>
+          </Block>
         )}
 
+        {/* ЛИПКАЯ ПАНЕЛЬ КАТЕГОРИЙ — мгновенный прыжок без скролла */}
+        <div style={{ position: "sticky", top: 0, zIndex: 20, background: C.cream, borderRadius: 12, border: `1px solid ${C.line}`, boxShadow: "0 4px 14px rgba(61,43,31,0.14)", padding: "8px", marginBottom: 14, display: "flex", gap: 6 }}>
+          <button onClick={() => setCat("all")} style={{ flex: 1, background: cat === "all" ? accent : C.card, color: cat === "all" ? "#fff" : C.inkSoft, border: `1.5px solid ${cat === "all" ? accent : C.line}`, borderRadius: 9, padding: "8px 2px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Все</button>
+          {CATS.map(c => {
+            const left = QUESTIONS.filter(q => q.cat === c.id && !effDone.has(q.id)).length;
+            const active = cat === c.id;
+            return (
+              <button key={c.id} onClick={() => setCat(active ? "all" : c.id)} style={{ flex: 1, background: active ? accent : left === 0 ? C.creamDeep : C.card, border: `1.5px solid ${active ? accent : C.line}`, borderRadius: 9, padding: "5px 2px", cursor: "pointer", fontFamily: SERIF, opacity: left === 0 && !active ? 0.5 : 1 }}>
+                <div style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</div>
+                <div style={{ fontSize: 10.5, fontWeight: 800, color: active ? "#fff" : left === 0 ? C.inkSoft : accent, marginTop: 2 }}>{left}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {CATS.filter(c => cat === "all" || c.id === cat).map(cat => (
+          <Block key={cat.id} stripe={accent}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: accent }}>{cat.es}</span>
+                <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
+              </div>
+              {QUESTIONS.filter(q => q.cat === cat.id).map(q => {
+                const isDone = effDone.has(q.id);
+                if (isDone) return (
+                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.45 }}>
+                    <span style={{ color: C.emeraldDeep, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
+                    <div style={{ flex: 1, fontSize: 12, color: C.inkSoft, textDecoration: "line-through", lineHeight: 1.3 }}>{q.q}</div>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: ans[q.id] === "sí" ? C.emeraldDeep : C.raspberryDeep, flexShrink: 0 }}>{ans[q.id] === "sí" ? "SÍ" : "NO"}</span>
+                  </div>
+                );
+                return (
+                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
+                      <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
+                    </div>
+                    <BigSiNo v={ans[q.id]} />
+                  </div>
+                );
+              })}
+            </div>
+          </Block>
+        ))}
+
+        {v.trap && (
+          <Block stripe={C.raspberry}>
+            <div style={{ padding: "12px 16px" }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: C.raspberry, marginBottom: 8 }}>⚡ Вопрос-ловушка (детектив может подловить)</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600 }}>{v.trap.q}</div>
+                  <div style={{ fontSize: 11.5, color: C.inkSoft }}>{v.trap.ru}</div>
+                </div>
+                <BigSiNo v={isCanon ? v.trap.canon : v.trap.fant} />
+              </div>
+            </div>
+          </Block>
+        )}
+
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button onClick={() => { setVk(null); setDone(new Set()); }} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
+        </div>
         <Footer onHome={onBack} />
       </div>
     </div>
@@ -2151,7 +2154,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.18</div>
     </div></div>
   );
 }
@@ -2249,7 +2252,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.18</div>
     </div></div>
   );
 }
