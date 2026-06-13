@@ -248,7 +248,7 @@ const lvlName = { 1: "Nivel 1 · Categoría", 2: "Nivel 2 · Acotar", 3: "Nivel 
 function Highlighted({ text }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return <span>{parts.map((p, i) => p.startsWith("**") && p.endsWith("**")
-    ? <strong key={i} style={{ color: C.raspberry, fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+    ? <strong key={i} style={{ color: C.emeraldDeep, fontWeight: 700 }}>{p.slice(2, -2)}</strong>
     : <span key={i}>{p}</span>)}</span>;
 }
 function SiNo({ v }) {
@@ -268,7 +268,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.15</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
     </div>
   );
 }
@@ -826,63 +826,73 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
           </div>
         </div>
 
-        {/* ===== ФАНТАЗИЯ: красная рамка ТВОЯ ВЕРСИЯ (сверху) ===== */}
-        {!isCanon && (
-          <div style={{ background: C.card, border: `2.5px solid ${C.raspberry}`, borderRadius: 16, padding: "16px 18px", marginBottom: 12, boxShadow: "0 2px 14px rgba(178,42,75,0.12)" }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberryDeep, letterSpacing: ".5px", marginBottom: 8 }}>🔴 TU VERSIÓN — это рассказываешь ты (ложь)</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-              {liveFantDossier(v).map((d, i) => (
-                <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(178,42,75,0.06)", border: `1px solid ${C.raspberry}`, borderRadius: 9, padding: "8px 12px" }}>
-                  <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.raspberryDeep, minWidth: 78 }}>{d[0]}</span>
-                  <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+        {isCanon ? (
+          <>
+            {/* ===== КАНОН: зелёная рамка с досье (правда) ===== */}
+            <div style={{ background: C.card, border: `2.5px solid ${C.emerald}`, borderRadius: 16, padding: "16px 18px", marginBottom: 14, boxShadow: "0 2px 14px rgba(45,122,90,0.10)" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>📋 CANON — qué hace el Jefe (правда)</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                {v.dossier.map((d, i) => (
+                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
+                    <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 12, background: "rgba(45,122,90,0.12)", border: `1px solid ${C.emerald}`, borderRadius: 10, padding: "10px 13px", fontSize: 14, color: C.ink, lineHeight: 1.45 }}>
+                <b style={{ color: C.emeraldDeep }}>Ты говоришь ПРАВДУ.</b> Отвечай строго по канону. Где детектив угадывает канон — <b style={{ color: C.emeraldDeep }}>SÍ</b>, где нет — <b style={{ color: C.raspberryDeep }}>NO</b>.
+              </div>
+            </div>
+
+            {/* Правдивая мини-история — выпадающая */}
+            <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
+              <div onClick={() => setStoryOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen ? C.goldSoft : "#fff" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>📖 Mini-historia <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(правда — почитать перед раундом)</span></span>
+                <span style={{ fontSize: 18, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              </div>
+              {storyOpen && (
+                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
+                  <Highlighted text={v.storyEs} />
                 </div>
-              ))}
+              )}
             </div>
-            <div style={{ marginTop: 10, fontSize: 13.5, color: C.ink, lineHeight: 1.45 }}>
-              <b style={{ color: C.raspberryDeep }}>Держись своей версии</b> до конца раунда. Сравнивай с правдой ниже: где они расходятся — там твоя ложь.
+          </>
+        ) : (
+          <>
+            {/* ===== ФАНТАЗИЯ: подсказка как врать ===== */}
+            <div style={{ background: "rgba(178,42,75,0.10)", border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
+              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}>
+                <b style={{ color: C.raspberryDeep }}>Ты ВРЁШЬ.</b> Ниже две истории: <b style={{ color: C.raspberryDeep }}>🔴 твоя выдумка</b> (как можно соврать) и <b style={{ color: C.emeraldDeep }}>🟢 правда</b>. Отвечай НЕ по правде, уводи детектива в сторону. Хочешь — держись готовой выдумки, хочешь — придумай свою. Главное: будь убедителен и не путайся.
+              </div>
             </div>
-          </div>
+
+            {/* 🔴 Придуманная история (легенда) — текст, выпадающая */}
+            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.raspberry}`, boxShadow: "0 2px 10px rgba(178,42,75,0.08)", marginBottom: 12, overflow: "hidden" }}>
+              <div onClick={() => setStoryOpen(o => o === "fant" ? null : "fant")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "fant" ? "rgba(178,42,75,0.08)" : "#fff" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.raspberryDeep }}>🔴 Tu versión <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(как можно соврать)</span></span>
+                <span style={{ fontSize: 18, color: C.raspberry, transform: storyOpen === "fant" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              </div>
+              {storyOpen === "fant" && (
+                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
+                  {liveFantVer(v)}
+                </div>
+              )}
+            </div>
+
+            {/* 🟢 Правдивая история — текст, выпадающая */}
+            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.emerald}`, boxShadow: "0 2px 10px rgba(45,122,90,0.08)", marginBottom: 14, overflow: "hidden" }}>
+              <div onClick={() => setStoryOpen(o => o === "true" ? null : "true")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "true" ? "rgba(45,122,90,0.08)" : "#fff" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>🟢 La verdad <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(что на самом деле — от чего уводишь)</span></span>
+                <span style={{ fontSize: 18, color: C.emerald, transform: storyOpen === "true" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              </div>
+              {storyOpen === "true" && (
+                <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
+                  <Highlighted text={v.storyEs} />
+                </div>
+              )}
+            </div>
+          </>
         )}
-
-        {/* ===== КАНОН ГЛАГОЛА — зелёная рамка (правда), всегда открыта у обоих ===== */}
-        <div style={{ background: C.card, border: `2.5px solid ${C.emerald}`, borderRadius: 16, padding: "16px 18px", marginBottom: 14, boxShadow: "0 2px 14px rgba(45,122,90,0.10)" }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>
-            {isCanon ? "📋 CANON — qué hace el Jefe (правда)" : "🟢 VERDAD — qué hace de verdad el Jefe"}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-            {v.dossier.map((d, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
-                <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
-              </div>
-            ))}
-          </div>
-          {/* Строка-подсказка: как отвечать */}
-          <div style={{ marginTop: 12, background: isCanon ? "rgba(45,122,90,0.12)" : "rgba(178,42,75,0.12)", border: `1px solid ${accent}`, borderRadius: 10, padding: "10px 13px" }}>
-            {isCanon ? (
-              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.45 }}>
-                <b style={{ color: C.emeraldDeep }}>Ты говоришь ПРАВДУ.</b> Отвечай строго по канону выше. Где детектив угадывает канон — отвечай <b style={{ color: C.emeraldDeep }}>SÍ</b>, где нет — <b style={{ color: C.raspberryDeep }}>NO</b>.
-              </div>
-            ) : (
-              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.45 }}>
-                <b style={{ color: C.raspberryDeep }}>Ты ВРЁШЬ.</b> Это правда — отвечай по своей версии (красная рамка сверху), уводи детектива от канона. Сам решай, как ответить, чтобы запутать.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ===== ИСТОРИЯ — выпадающая, читать по желанию ===== */}
-        <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
-          <div onClick={() => setStoryOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen ? C.goldSoft : "#fff" }}>
-            <span style={{ fontSize: 14.5, fontWeight: 800, color: C.goldDeep }}>📖 Mini-historia <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(почитать перед раундом)</span></span>
-            <span style={{ fontSize: 18, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
-          </div>
-          {storyOpen && (
-            <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-              <Highlighted text={v.storyEs} />
-            </div>
-          )}
-        </div>
 
         <Footer onHome={onBack} />
       </div>
@@ -2116,7 +2126,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.15</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
     </div></div>
   );
 }
@@ -2214,7 +2224,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.15</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
     </div></div>
   );
 }
