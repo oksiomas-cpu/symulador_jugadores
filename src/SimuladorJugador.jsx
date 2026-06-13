@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
     </div>
   );
 }
@@ -641,7 +641,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
                       <span style={{ flexShrink: 0, fontWeight: 700 }}>🕵️ {a.byName || "—"}{a.own ? " (свой)" : ""}</span>
                       {a.to && <span style={{ flexShrink: 0, background: a.to === "A" ? C.goldSoft : C.creamDeep, borderRadius: 6, padding: "1px 8px", fontWeight: 700, color: C.inkSoft }}>→ {a.to} · {wn[a.to] || ""}</span>}
                       {a.text && <span style={{ color: C.ink, minWidth: 0 }}>{a.text}</span>}
-                      {(() => { const av = (a.qid && a.to) ? wAns[a.qid + ":" + a.to] : null; return av ? <span style={{ flexShrink: 0, marginLeft: "auto", background: av === "sí" ? C.emerald : C.raspberry, color: "#fff", borderRadius: 6, padding: "1px 9px", fontWeight: 800, fontSize: 12.5 }}>{av === "sí" ? "SÍ" : "NO"}</span> : null; })()}
+                      {(() => { const av = (a.qid && a.to) ? wAns[a.qid + ":" + a.to] : null; return av ? <span style={{ flexShrink: 0, marginLeft: 4, background: av === "sí" ? C.emerald : C.raspberry, color: "#fff", borderRadius: 6, padding: "1px 9px", fontWeight: 800, fontSize: 12.5 }}>{av === "sí" ? "SÍ" : "NO"}</span> : null; })()}
                     </div>
                   ))}
                 </div>
@@ -2196,7 +2196,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
     </div></div>
   );
 }
@@ -2294,7 +2294,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
     </div></div>
   );
 }
