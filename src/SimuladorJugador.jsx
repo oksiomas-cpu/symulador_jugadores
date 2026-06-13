@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
     </div>
   );
 }
@@ -939,6 +939,7 @@ function LiveGame({ onHome }) {
   // --- Подключение к комнате ведущего ---
   const [conn, setConn] = useState(loadConn);       // {code, playerId, name}
   const [game, setGame] = useState(null);            // живое состояние из базы
+  const [ansOverlay, setAnsOverlay] = useState({});  // оптимистичный слой ответов {key:{v,t}} — переживает опрос (фикс гонки)
   const [codeIn, setCodeIn] = useState("");
   const [nameIn, setNameIn] = useState(() => (loadConn() || {}).name || "");
   const [joinBusy, setJoinBusy] = useState(false);
@@ -989,8 +990,14 @@ function LiveGame({ onHome }) {
   }
   // детектив фиксирует ответ свидетеля (Sí/No) → общая история допроса, видят все
   async function sendAnswer(qid, target, value) {
+    const key = qid + ":" + target;
+    const sv = (game && game.round && game.round.answers) || {};
+    const ov = ansOverlay[key];
+    const cur = ov !== undefined ? (ov.v || null) : (sv[key] || null);
+    const next = cur === value ? null : value; // тоггл считает клиент
+    setAnsOverlay(prev => ({ ...prev, [key]: { v: next || "", t: Date.now() } })); // мгновенно показать, удержать поверх опроса
     try {
-      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "answer", code: conn.code, playerId: conn.playerId, qid, target, value }) });
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "answer", code: conn.code, playerId: conn.playerId, qid, target, value: next }) });
       const d = await resp.json();
       if (d.ok) { setGame(d.game); return null; }
       return d.error || "Не получилось записать ответ";
@@ -1023,10 +1030,12 @@ function LiveGame({ onHome }) {
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
   const rdLive = game && game.round;
+  const mergedAns = { ...((rdLive && rdLive.answers) || {}) };
+  for (const k in ansOverlay) { const v = ansOverlay[k].v; if (v) mergedAns[k] = v; else delete mergedAns[k]; }
   const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
     witNames: { A: rdLive.witAName, B: rdLive.witBName },
     asked: rdLive.asked || [],
-    answers: rdLive.answers || {},
+    answers: mergedAns,
     onAsk: sendAsk,
     onSetAns: sendAnswer,
     onOwn: sendOwn,
@@ -1079,6 +1088,20 @@ function LiveGame({ onHome }) {
     const t = setInterval(tick, 2000);
     return () => { dead = true; clearInterval(t); };
   }, [conn && conn.code]);
+
+  // самоочистка оптимистичного слоя ответов: снимаем ключ, когда сервер догнал (или по таймауту)
+  useEffect(() => {
+    const sv = (game && game.round && game.round.answers) || {};
+    setAnsOverlay(prev => {
+      let ch = false; const next = { ...prev }; const now = Date.now();
+      for (const k in prev) {
+        const want = prev[k].v || null; const have = sv[k] || null; const age = now - prev[k].t;
+        if (age > 8000) { delete next[k]; ch = true; }
+        else if (want === have && age > 2500) { delete next[k]; ch = true; }
+      }
+      return ch ? next : prev;
+    });
+  }, [game]);
 
   const roundKey = game && game.round ? game.round.n : "manual";
   if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
@@ -2167,7 +2190,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
     </div></div>
   );
 }
@@ -2265,7 +2288,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
     </div></div>
   );
 }

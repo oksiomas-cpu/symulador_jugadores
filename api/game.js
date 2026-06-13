@@ -352,11 +352,7 @@ export default async function handler(req, res) {
       if (!qid || !w) return res.status(200).json({ ok: false, error: "Нужен вопрос и свидетель A/B" });
       g.round.answers = g.round.answers || {};
       const key = qid + ":" + w;
-      if (!val || g.round.answers[key] === val) {
-        delete g.round.answers[key]; // повторный тап того же значения — снять отметку
-      } else {
-        g.round.answers[key] = val;
-      }
+      if (val) { g.round.answers[key] = val; } else { delete g.round.answers[key]; } // тоггл считает клиент; сервер пишет/снимает детерминированно
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: pub(g) });
