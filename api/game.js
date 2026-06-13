@@ -272,6 +272,7 @@ export default async function handler(req, res) {
       g.round.witB = wits[1].id;
       g.round.witBName = wits[1].name;
       g.round.asked = []; // лента вопросов раунда: {by, byName, to, qid, text, ts}
+      g.round.answers = {}; // общие ответы свидетелей: ключ "qid:A"/"qid:B" -> "sí"|"no" (пишет детектив, видят все)
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: pub(g) });
@@ -330,6 +331,32 @@ export default async function handler(req, res) {
         ts: Date.now(),
       });
       advanceTurn(g);
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: pub(g) });
+    }
+
+    // --- Детектив фиксирует ответ свидетеля (Sí/No) → общая история допроса, видят все ---
+    if (action === "answer") {
+      if (!g.round) return res.status(200).json({ ok: false, error: "Раунд ещё не начался" });
+      if (g.round.revealed) return res.status(200).json({ ok: false, error: "Раунд уже завершён" });
+      const dets = (g.round.roles && g.round.roles.detectives) || [];
+      const pid = String(body.playerId || "");
+      const manual = !!body.manual; // ведущая может зафиксировать ответ вручную
+      if (!manual && !dets.includes(pid)) {
+        return res.status(200).json({ ok: false, error: "Ответ свидетеля фиксирует детектив" });
+      }
+      const qid = body.qid ? String(body.qid) : null;
+      const w = body.target === "A" || body.target === "B" ? body.target : null;
+      const val = body.value === "sí" || body.value === "no" ? body.value : null;
+      if (!qid || !w) return res.status(200).json({ ok: false, error: "Нужен вопрос и свидетель A/B" });
+      g.round.answers = g.round.answers || {};
+      const key = qid + ":" + w;
+      if (!val || g.round.answers[key] === val) {
+        delete g.round.answers[key]; // повторный тап того же значения — снять отметку
+      } else {
+        g.round.answers[key] = val;
+      }
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: pub(g) });

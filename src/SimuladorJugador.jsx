@@ -253,7 +253,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.21</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
     </div>
   );
 }
@@ -458,14 +458,22 @@ function LiveDetective({ onBack, roundN, turn, live }) {
     setCustom(prev => [...prev, { text: draft.trim(), A: null, B: null }]);
     setDraft("");
   }
-  const answeredCount = Object.values(asked).filter(x => x.A || x.B).length
-    + custom.filter(c => c.A || c.B).length;
-  const conflictCount = Object.values(asked).filter(x => x.A && x.B && x.A !== x.B).length
-    + custom.filter(c => c.A && c.B && c.A !== c.B).length;
+  const ansByQ = {};
+  if (live && live.answers) {
+    for (const k in live.answers) { const ci = k.lastIndexOf(":"); const id = k.slice(0, ci); const w = k.slice(ci + 1); (ansByQ[id] = ansByQ[id] || {})[w] = live.answers[k]; }
+  }
+  const baseAnswered = live ? Object.values(ansByQ).filter(x => x.A || x.B).length : Object.values(asked).filter(x => x.A || x.B).length;
+  const baseConflict = live ? Object.values(ansByQ).filter(x => x.A && x.B && x.A !== x.B).length : Object.values(asked).filter(x => x.A && x.B && x.A !== x.B).length;
+  const answeredCount = baseAnswered + custom.filter(c => c.A || c.B).length;
+  const conflictCount = baseConflict + custom.filter(c => c.A && c.B && c.A !== c.B).length;
 
   function AnsRow({ es, ru, st, onSet, qid }) {
-    const conflict = st.A && st.B && st.A !== st.B;
+    const liveAns = !!(live && qid);
+    const ansMap = (live && live.answers) || {};
+    const stEff = liveAns ? { A: ansMap[qid + ":A"] || null, B: ansMap[qid + ":B"] || null } : st;
+    const conflict = stEff.A && stEff.B && stEff.A !== stEff.B;
     const canAsk = !!(live && qid && turn && turn.mine && !askBusy && !live.pendingOwn && !gamePaused);
+    function handleSet(w, val) { if (liveAns) { live.onSetAns(qid, w, val); } else { onSet(w, val); } }
     return (
       <div style={{ background: conflict ? "rgba(178,42,75,0.07)" : C.cream, border: `1.5px solid ${conflict ? C.raspberry : C.line}`, borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>{es}</div>
@@ -486,9 +494,9 @@ function LiveDetective({ onBack, roundN, turn, live }) {
           <div key={w} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
             <span style={{ width: 78, fontSize: 13, fontWeight: 700, color: C.inkSoft }}>Testigo {w}:</span>
             {[["sí", "SÍ", C.emerald], ["no", "NO", C.raspberry]].map(([val, lab, col]) => {
-              const on = st[w] === val;
+              const on = stEff[w] === val;
               return (
-                <button key={val} onClick={() => onSet(w, val)} style={{ flex: 1, background: on ? col : "#fff", color: on ? "#fff" : col, border: `1.5px solid ${col}`, borderRadius: 8, padding: "6px 0", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
+                <button key={val} onClick={() => handleSet(w, val)} style={{ flex: 1, background: on ? col : "#fff", color: on ? "#fff" : col, border: `1.5px solid ${col}`, borderRadius: 8, padding: "6px 0", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF }}>
                   {on ? "✓ " : ""}{lab}
                 </button>
               );
@@ -610,6 +618,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
         {live && (() => {
           const hist = Array.isArray(live.asked) ? live.asked : [];
           const wn = live.witNames || {};
+          const wAns = live.answers || {};
           return (
             <Block stripe={C.emerald}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -626,6 +635,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
                       <span style={{ flexShrink: 0, fontWeight: 700 }}>🕵️ {a.byName || "—"}{a.own ? " (свой)" : ""}</span>
                       {a.to && <span style={{ flexShrink: 0, background: a.to === "A" ? C.goldSoft : C.creamDeep, borderRadius: 6, padding: "1px 8px", fontWeight: 700, color: C.inkSoft }}>→ {a.to} · {wn[a.to] || ""}</span>}
                       {a.text && <span style={{ color: C.ink, minWidth: 0 }}>{a.text}</span>}
+                      {(() => { const av = (a.qid && a.to) ? wAns[a.qid + ":" + a.to] : null; return av ? <span style={{ flexShrink: 0, marginLeft: "auto", background: av === "sí" ? C.emerald : C.raspberry, color: "#fff", borderRadius: 6, padding: "1px 9px", fontWeight: 800, fontSize: 12.5 }}>{av === "sí" ? "SÍ" : "NO"}</span> : null; })()}
                     </div>
                   ))}
                 </div>
@@ -977,6 +987,15 @@ function LiveGame({ onHome }) {
       return d.error || "Не получилось отправить вопрос";
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
+  // детектив фиксирует ответ свидетеля (Sí/No) → общая история допроса, видят все
+  async function sendAnswer(qid, target, value) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "answer", code: conn.code, playerId: conn.playerId, qid, target, value }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось записать ответ";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
   // детектив заявляет СВОЙ вопрос: задаёт голосом в Zoom, ведущая оценивает ✅/❌
   async function sendOwn() {
     try {
@@ -1007,7 +1026,9 @@ function LiveGame({ onHome }) {
   const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
     witNames: { A: rdLive.witAName, B: rdLive.witBName },
     asked: rdLive.asked || [],
+    answers: rdLive.answers || {},
     onAsk: sendAsk,
+    onSetAns: sendAnswer,
     onOwn: sendOwn,
     pendingOwn: rdLive.pendingOwn || null,
     myId: conn.playerId,
@@ -2146,7 +2167,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.21</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
     </div></div>
   );
 }
@@ -2244,7 +2265,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.21</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.22</div>
     </div></div>
   );
 }
