@@ -59,7 +59,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su terraza favorita"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo"], ["¿Qué?", "Café negro y tostadas con caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"sí", n34:"sí", n35:"sí" },
     mask: "preparar",
-    fantVer: "Шеф завтракает внутри дворца вечером — вместе с помощниками, в главном зале. Суп и хлеб. Только по пятницам.",
+    fantVer: "El Jefe desayuna dentro del palacio, por la tarde, junto con los ayudantes, en el salón principal. Sopa y pan. Solo los viernes.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"sí", n35:"no" },
     trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
   },
@@ -69,7 +69,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Por los pasillos del palacio"], ["¿Cuándo?", "Cada mañana, 20 minutos"], ["¿Con quién?", "Solo"], ["¿Cómo?", "Despacio, manos en la espalda"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"sí", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "trabajar",
-    fantVer: "Шеф идёт вне дворца, вечером, вместе с помощниками — по саду, разговаривают на ходу, 5 минут.",
+    fantVer: "El Jefe camina fuera del palacio, por la tarde, junto con los ayudantes — por el jardín, hablando mientras andan, 5 minutos.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"sí", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Camina en silencio?", ru: "Идёт в тишине?", canon: "sí", fant: "no" },
   },
@@ -86,7 +86,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "Desde la terraza"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo, en silencio"], ["¿Qué?", "Las nubes, el río de caramelo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"sí", n21:"no", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"sí", n34:"no", n35:"sí" },
     mask: "escuchar",
-    fantVer: "Шеф смотрит в зеркало внутри дворца, вечером, вместе с помощниками — в зеркальном зале. Обсуждают. Только по субботам.",
+    fantVer: "El Jefe se mira en el espejo dentro del palacio, por la tarde, junto con los ayudantes — en la sala de los espejos. Lo comentan. Solo los sábados.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo durante esto?", ru: "Он один во время этого?", canon: "sí", fant: "no" },
   },
@@ -96,7 +96,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Un ingrediente especial nuevo"], ["¿Dónde?", "Armarios, cajas del sótano"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"sí", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "comprar",
-    fantVer: "Шеф ищет снаружи дворца, ночью, вместе с одним помощником — в саду, с фонарём в руках. Шепчут.",
+    fantVer: "El Jefe busca fuera del palacio, de noche, junto con un ayudante — en el jardín, con un farol en la mano. Susurran.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"sí", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Busca dentro del palacio?", ru: "Ищет внутри дворца?", canon: "sí", fant: "no" },
   },
@@ -106,7 +106,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En su sillón favorito"], ["¿Cuándo?", "Cada mañana, 10 minutos"], ["¿Con quién?", "Solo, en silencio absoluto"], ["¿Qué?", "El caramelo, el viento, los pasos"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "mirar",
-    fantVer: "Шеф слушает живую музыку снаружи дворца, вечером, вместе с помощниками — в саду, 30 минут.",
+    fantVer: "El Jefe escucha música en vivo fuera del palacio, por la tarde, junto con los ayudantes — en el jardín, 30 minutos.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"no", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
   },
@@ -116,7 +116,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En la gran sala"], ["¿Cuándo?", "Cada mañana, 15 minutos"], ["¿Con quién?", "Con sus ayudantes"], ["¿De qué?", "Del menú especial del día"]],
     answers: { n11:"sí", m1:"no", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "cantar",
-    fantVer: "Шеф говорит по телефону — один, вечером, в кабинете, тихим голосом, 2 минуты.",
+    fantVer: "El Jefe habla por teléfono — solo, por la tarde, en su despacho, en voz baja, 2 minutos.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Hay alguien escuchando?", ru: "Есть ли слушатели рядом?", canon: "sí", fant: "no" },
   },
@@ -126,7 +126,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Qué?", "Una tarta de caramelo"], ["¿Dónde?", "En la cocina, mesa de mármol"], ["¿Con quién?", "Solo"], ["¿Con qué?", "Cucharón de oro, varilla de cristal"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"sí" },
     mask: "desayunar",
-    fantVer: "Шеф готовит снаружи дворца, вечером, вместе с помощниками — в саду. Поёт в процессе. 30 минут.",
+    fantVer: "El Jefe prepara fuera del palacio, por la tarde, junto con los ayudantes — en el jardín. Canta mientras lo hace. 30 minutos.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Está solo?", ru: "Он один?", canon: "sí", fant: "no" },
   },
@@ -136,7 +136,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Gran Jefe Alcalde"], ["¿Dónde?", "En el mercado de caramelo"], ["¿Cuándo?", "Una vez a la semana, por la mañana"], ["¿Con quién?", "Solo"], ["¿Qué?", "Caramelo, azúcar, especias"]],
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"sí", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"sí", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "buscar",
-    fantVer: "Шеф получает товары у помощника внутри дворца, в кладовой — без денег, внутренний обмен, каждый день.",
+    fantVer: "El Jefe consigue los productos de un ayudante dentro del palacio, en la despensa — sin dinero, un intercambio interno, cada día.",
     fantAns: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"no", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     trap: { q: "¿Va al mercado?", ru: "Идёт на рынок?", canon: "sí", fant: "no" },
   },
@@ -146,7 +146,7 @@ const VERBS = [
     dossier: [["¿Quién?", "El Jefe y los ayudantes"], ["¿Dónde?", "Cocina y sala de decoración"], ["¿Cuándo?", "De las 7 a las 3"], ["¿Con quién?", "Todos juntos"], ["¿En qué?", "El banquete del viernes"]],
     answers: { n11:"sí", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
     mask: "caminar",
-    fantVer: "Только Шеф — без помощников — работает снаружи дворца, в саду, вечером, час, в полной тишине.",
+    fantVer: "Solo el Jefe — sin ayudantes — trabaja fuera del palacio, en el jardín, por la tarde, una hora, en completo silencio.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"no", n14:"sí", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     trap: { q: "¿Trabajan varias personas?", ru: "Работают несколько человек?", canon: "sí", fant: "no" },
   },
@@ -157,7 +157,7 @@ const VERBS = [
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"sí" },
     mask: "llevar",
     canonVer: "Шеф берёт двумя руками золотой венчик на Волшебной Кухне. Каждый день когда всё готово. Торжественный ритуал, тишина, меньше минуты.",
-    fantVer: "Один помощник берёт не золотой венчик, а старый деревянный ковш. В подвале дворца, вечером, тайно, один, 2 минуты.",
+    fantVer: "Un ayudante toma, no la varilla dorada, sino un viejo cucharón de madera. En el sótano del palacio, por la tarde, en secreto, solo, 2 minutos.",
     fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"sí" },
     trap: { q: "¿Mueve los pies durante esto?", ru: "Двигает ногами?", canon: "no", fant: "sí" },
   },
@@ -168,7 +168,7 @@ const VERBS = [
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "hablar",
     canonVer: "Шеф зовёт команду громким голосом у подножия золотой лестницы. Каждое утро после прогулки. Эхо по коридорам. Меньше 2 минут.",
-    fantVer: "Помощник зовёт Шефа — не Шеф помощников. На кухне, вечером, тихим голосом, один помощник, 1 раз.",
+    fantVer: "Un ayudante llama al Jefe — no el Jefe a los ayudantes. En la cocina, por la tarde, en voz baja, un solo ayudante, 1 vez.",
     fantAns: { n11:"no", m1:"sí", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Llama el Jefe?", ru: "Зовёт сам Шеф?", canon: "sí", fant: "no" },
   },
@@ -179,7 +179,7 @@ const VERBS = [
     answers: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"no", n31:"sí", n32:"no", n33:"no", n34:"no", n35:"no" },
     mask: "hablar",
     canonVer: "Спрашивают помощники (не Шеф — он отвечает). В большом зале, утром после речи Шефа. Голоса, 5 минут.",
-    fantVer: "Шеф — не помощники — спрашивает одного помощника. Вечером, на кухне, один вопрос, шёпотом, 1 минута.",
+    fantVer: "El Jefe — no los ayudantes — pregunta a un ayudante. Por la tarde, en la cocina, una sola pregunta, en susurros, 1 minuto.",
     fantAns: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"no", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿El Jefe también pregunta?", ru: "Шеф тоже спрашивает?", canon: "no", fant: "sí" },
   },
@@ -190,7 +190,7 @@ const VERBS = [
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"no", n15:"sí", n16:"sí", n21:"sí", n22:"sí", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"sí", n31:"no", n32:"no", n33:"no", n34:"no", n35:"sí" },
     mask: "buscar",
     canonVer: "Шеф изучает ОДНУ страницу древней книги рецептов. В кабинете, в кресле, перед выходом. 30 минут, глаза не движутся, полная тишина.",
-    fantVer: "Три помощника изучают новый рецепт вместе. На кухне, вечером, 10 минут, читают вслух.",
+    fantVer: "Los tres ayudantes estudian juntos una receta nueva. En la cocina, por la tarde, 10 minutos, leyendo en voz alta.",
     fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"sí", n22:"sí", n23:"sí", n24:"sí", n25:"no", n26:"sí", n27:"no", n28:"sí", n29:"sí", n31:"sí", n32:"sí", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Estudia solo?", ru: "Изучает один?", canon: "sí", fant: "no" },
   },
@@ -201,7 +201,7 @@ const VERBS = [
     answers: { n11:"sí", m1:"sí", n12:"no", n13:"sí", n14:"sí", n15:"sí", n16:"sí", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"sí", n34:"no", n35:"no" },
     mask: "tomar",
     canonVer: "Шеф носит на себе высокий белый колпак и тёмную бороду. Везде во дворце, весь день, каждый день. Не берёт в руки — носит как часть образа.",
-    fantVer: "Помощники носят маленькие коричневые (карамельные) колпаки — не белые. Только по пятницам, не каждый день, без бороды.",
+    fantVer: "Los ayudantes llevan gorros pequeños de color marrón (caramelo) — no blancos. Solo los viernes, no cada día, sin barba.",
     fantAns: { n11:"no", m1:"no", n12:"sí", n13:"sí", n14:"no", n15:"no", n16:"no", n21:"no", n22:"no", n23:"no", n24:"no", n25:"no", n26:"sí", n27:"no", n28:"no", n29:"no", n31:"no", n32:"sí", n33:"no", n34:"no", n35:"no" },
     trap: { q: "¿Es de color blanco?", ru: "Он белого цвета?", canon: "sí", fant: "no" },
   },
@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
     </div>
   );
 }
@@ -370,7 +370,7 @@ const maxw = { maxWidth: 560, margin: "0 auto" };
 function liveFantVer(v) {
   if (v.fantVer) return v.fantVer;
   const m = verbByKey(v.mask);
-  return "Притворись, что Шеф делает «" + m.inf + "» (" + m.ru + "). Отвечай уверенно, как будто глагол именно такой — это твоя легенда.";
+  return "Finge que el Jefe hace «" + m.inf + "». Responde con seguridad, como si el verbo fuera ese — esa es tu leyenda.";
 }
 function liveFantAns(v) {
   return v.fantAns || verbByKey(v.mask).answers;
@@ -792,11 +792,13 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
 function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
-  const [storyOpen, setStoryOpen] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);      // Канон: мини-история
+  const [lieOpen, setLieOpen] = useState(false);          // Фантазия: 🔴 Tu versión (независимая)
+  const [truthOpen, setTruthOpen] = useState(false);      // Фантазия: 🟢 La verdad (независимая)
   const isCanon = mode === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const v = vk ? verbByKey(vk) : null;
-  function pickVerb(k) { setVk(k); setStoryOpen(false); }
+  function pickVerb(k) { setVk(k); setStoryOpen(false); setLieOpen(false); setTruthOpen(false); }
 
   if (!v) {
     return (
@@ -900,33 +902,46 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
           </>
         ) : (
           <>
-            {/* ===== ФАНТАЗИЯ: подсказка как врать ===== */}
-            <div style={{ background: "rgba(178,42,75,0.10)", border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}>
-                <b style={{ color: C.raspberryDeep }}>Ты ВРЁШЬ.</b> Ниже две истории: <b style={{ color: C.raspberryDeep }}>🔴 твоя выдумка</b> (как можно соврать) и <b style={{ color: C.emeraldDeep }}>🟢 правда</b>. Отвечай НЕ по правде, уводи детектива в сторону. Хочешь — держись готовой выдумки, хочешь — придумай свою. Главное: будь убедителен и не путайся.
+            {/* ===== ФАНТАЗИЯ: канон-табличка ВСЕГДА перед глазами (как у Канона) — по ней сверяешься ===== */}
+            <div style={{ background: C.card, border: `2.5px solid ${C.emerald}`, borderRadius: 16, padding: "16px 18px", marginBottom: 12, boxShadow: "0 2px 14px rgba(45,122,90,0.10)" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>📋 CANON — qué hace el Jefe <span style={{ fontWeight: 600, color: C.inkSoft }}>(правда — от этого уводишь)</span></div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                {v.dossier.map((d, i) => (
+                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
+                    <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
+                    <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* 🔴 Придуманная история (легенда) — текст, выпадающая */}
-            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.raspberry}`, boxShadow: "0 2px 10px rgba(178,42,75,0.08)", marginBottom: 12, overflow: "hidden" }}>
-              <div onClick={() => setStoryOpen(o => o === "fant" ? null : "fant")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "fant" ? "rgba(178,42,75,0.08)" : "#fff" }}>
-                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.raspberryDeep }}>🔴 Tu versión <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(как можно соврать)</span></span>
-                <span style={{ fontSize: 18, color: C.raspberry, transform: storyOpen === "fant" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+            {/* ===== Подсказка: ты врёшь ===== */}
+            <div style={{ background: "rgba(178,42,75,0.10)", border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "13px 16px", marginBottom: 12 }}>
+              <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}>
+                <b style={{ color: C.raspberryDeep }}>Ты ВРЁШЬ.</b> Сверху — <b style={{ color: C.emeraldDeep }}>🟢 канон</b> (правда, держи перед глазами). Ниже — <b style={{ color: C.raspberryDeep }}>🔴 Tu versión</b> (готовая выдумка) и <b style={{ color: C.emeraldDeep }}>🟢 La verdad</b> (полная история). Отвечай НЕ по канону, уводи детектива в сторону — убедительно и не путаясь. Раскрывашки независимы: можно держать открытыми обе.
               </div>
-              {storyOpen === "fant" && (
+            </div>
+
+            {/* 🔴 Tu versión — независимая раскрывашка, текст на испанском */}
+            <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.raspberry}`, boxShadow: "0 2px 10px rgba(178,42,75,0.08)", marginBottom: 12, overflow: "hidden" }}>
+              <div onClick={() => setLieOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: lieOpen ? "rgba(178,42,75,0.08)" : "#fff" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.raspberryDeep }}>🔴 Tu versión <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(твоя выдумка — её и говоришь)</span></span>
+                <span style={{ fontSize: 18, color: C.raspberry, transform: lieOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              </div>
+              {lieOpen && (
                 <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
                   {liveFantVer(v)}
                 </div>
               )}
             </div>
 
-            {/* 🟢 Правдивая история — текст, выпадающая */}
+            {/* 🟢 La verdad — независимая раскрывашка */}
             <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.emerald}`, boxShadow: "0 2px 10px rgba(45,122,90,0.08)", marginBottom: 14, overflow: "hidden" }}>
-              <div onClick={() => setStoryOpen(o => o === "true" ? null : "true")} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: storyOpen === "true" ? "rgba(45,122,90,0.08)" : "#fff" }}>
-                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>🟢 La verdad <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(что на самом деле — от чего уводишь)</span></span>
-                <span style={{ fontSize: 18, color: C.emerald, transform: storyOpen === "true" ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+              <div onClick={() => setTruthOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "13px 16px", cursor: "pointer", background: truthOpen ? "rgba(45,122,90,0.08)" : "#fff" }}>
+                <span style={{ fontSize: 14.5, fontWeight: 800, color: C.emeraldDeep }}>🟢 La verdad <span style={{ fontWeight: 400, fontSize: 12.5, color: C.inkSoft }}>(полная история — от чего уводишь)</span></span>
+                <span style={{ fontSize: 18, color: C.emerald, transform: truthOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
               </div>
-              {storyOpen === "true" && (
+              {truthOpen && (
                 <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
                   <Highlighted text={v.storyEs} />
                 </div>
@@ -2206,7 +2221,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
     </div></div>
   );
 }
@@ -2304,7 +2319,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.27</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
     </div></div>
   );
 }
