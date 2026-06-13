@@ -241,8 +241,14 @@ function SiNo({ v }) {
   return <span style={{ background: yes ? C.emerald : C.raspberry, color: "#fff", borderRadius: 7, padding: "2px 12px", fontWeight: 700, fontSize: 14, letterSpacing: ".5px" }}>{yes ? "SÍ" : "NO"}</span>;
 }
 function Header({ subtitle }) {
+  function fullReset() {
+    if (!window.confirm("Полный сброс: выйдешь из текущей игры и роли, начнёшь с чистого экрана. Очки копилки сохранятся. Продолжить?")) return;
+    try { localStorage.removeItem("ciudad_live_v1"); } catch (e) {}
+    window.location.replace(window.location.pathname); // чистая перезагрузка без ?query
+  }
   return (
     <div style={{ textAlign: "center", marginBottom: 18 }}>
+      <button onClick={fullReset} title="Полный сброс сессии" style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "rgba(255,255,255,0.94)", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 12, fontWeight: 700, borderRadius: 10, padding: "6px 10px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.14)" }}>🧹 Сброс</button>
       <div style={{ fontSize: 12, letterSpacing: "2px", color: C.goldDeep, fontWeight: 600 }}>LA CIUDAD DE LOS SENTIDOS</div>
       <div style={{ fontSize: 24, fontWeight: 700, color: C.ink, fontFamily: SERIF }}>La Cata a Ciegas · Entrenamiento</div>
       {subtitle && <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 3 }}>{subtitle}</div>}
@@ -253,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
     </div>
   );
 }
@@ -2190,7 +2196,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
     </div></div>
   );
 }
@@ -2288,7 +2294,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.23</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.24</div>
     </div></div>
   );
 }
