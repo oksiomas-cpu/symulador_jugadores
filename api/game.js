@@ -33,9 +33,27 @@ async function cmd(arr) {
   return d.result;
 }
 
+// Ответы свидетелей (Sí/No) живут в ОТДЕЛЬНОМ Redis-хеше game:{code}:ans:
+// поле = "qid:A" / "qid:B", значение = "sí" / "no". HSET/HDEL атомарны по полю,
+// поэтому ответы A и B независимы и НЕ затираются ни опросом раз в 2 сек, ни
+// параллельными действиями других детективов. Раньше весь блок answers жил
+// внутри game-блоба и переписывался целиком (last-write-wins) — отсюда «бейдж
+// через раз». Хеш — единственный источник правды по ответам.
+async function getAns(code) {
+  const flat = await cmd(["HGETALL", `game:${code}:ans`]);
+  const out = {};
+  if (Array.isArray(flat)) { for (let i = 0; i < flat.length; i += 2) out[flat[i]] = flat[i + 1]; }
+  else if (flat && typeof flat === "object") { Object.assign(out, flat); }
+  return out;
+}
+
 async function getGame(code) {
   const v = await cmd(["GET", `game:${code}`]);
-  return v ? JSON.parse(v) : null;
+  if (!v) return null;
+  const g = JSON.parse(v);
+  // Ответы свидетелей подмешиваем из их хеша — всегда свежие и неклобберимые.
+  if (g && g.round) g.round.answers = await getAns(code);
+  return g;
 }
 function setGame(g) {
   return cmd(["SET", `game:${g.code}`, JSON.stringify(g), "EX", TTL]);
@@ -273,6 +291,7 @@ export default async function handler(req, res) {
       g.round.witBName = wits[1].name;
       g.round.asked = []; // лента вопросов раунда: {by, byName, to, qid, text, ts}
       g.round.answers = {}; // общие ответы свидетелей: ключ "qid:A"/"qid:B" -> "sí"|"no" (пишет детектив, видят все)
+      await cmd(["DEL", `game:${code}:ans`]).catch(() => {}); // новый раунд — стереть ответы прошлого (хеш — источник правды)
       g.v++;
       await setGame(g);
       return res.status(200).json({ ok: true, game: pub(g) });
@@ -352,9 +371,13 @@ export default async function handler(req, res) {
       if (!qid || !w) return res.status(200).json({ ok: false, error: "Нужен вопрос и свидетель A/B" });
       g.round.answers = g.round.answers || {};
       const key = qid + ":" + w;
-      if (val) { g.round.answers[key] = val; } else { delete g.round.answers[key]; } // тоггл считает клиент; сервер пишет/снимает детерминированно
-      g.v++;
-      await setGame(g);
+      // Пишем в отдельный атомарный хеш game:{code}:ans, а НЕ в game-блоб.
+      // Так ответ A/B нельзя затереть ни опросом, ни записью другого детектива.
+      // Тоггл (снять/поставить) считает клиент; сервер пишет/снимает детерминированно.
+      if (val) { await cmd(["HSET", `game:${code}:ans`, key, val]); g.round.answers[key] = val; }
+      else { await cmd(["HDEL", `game:${code}:ans`, key]); delete g.round.answers[key]; }
+      await cmd(["EXPIRE", `game:${code}:ans`, TTL]).catch(() => {}); // держим TTL заодно с блобом
+      // НЕ вызываем setGame — блоб не трогаем вовсе, чтобы не клоббернуть ленту asked.
       return res.status(200).json({ ok: true, game: pub(g) });
     }
 

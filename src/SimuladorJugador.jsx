@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
     </div>
   );
 }
@@ -1095,15 +1095,17 @@ function LiveGame({ onHome }) {
     return () => { dead = true; clearInterval(t); };
   }, [conn && conn.code]);
 
-  // самоочистка оптимистичного слоя ответов: снимаем ключ, когда сервер догнал (или по таймауту)
+  // самоочистка оптимистичного слоя ответов: снимаем ключ ТОЛЬКО когда сервер
+  // подтвердил то же значение (выставил или снял). До подтверждения оптимистичный
+  // ответ держится — бейдж SÍ/NO не мигает и не пропадает после опроса.
   useEffect(() => {
     const sv = (game && game.round && game.round.answers) || {};
     setAnsOverlay(prev => {
       let ch = false; const next = { ...prev }; const now = Date.now();
       for (const k in prev) {
         const want = prev[k].v || null; const have = sv[k] || null; const age = now - prev[k].t;
-        if (age > 8000) { delete next[k]; ch = true; }
-        else if (want === have && age > 2500) { delete next[k]; ch = true; }
+        if (want === have) { delete next[k]; ch = true; }          // сервер догнал — отдаём ответ серверу
+        else if (age > 15000) { delete next[k]; ch = true; }       // страховка от зависшего ключа при сетевом сбое
       }
       return ch ? next : prev;
     });
@@ -2196,7 +2198,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
     </div></div>
   );
 }
@@ -2294,7 +2296,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.25</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.26</div>
     </div></div>
   );
 }
