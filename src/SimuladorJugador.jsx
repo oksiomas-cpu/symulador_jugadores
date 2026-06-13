@@ -826,26 +826,10 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
           </div>
         </Block>
 
-        {/* Прогресс допроса */}
-        <Block stripe={C.gold}>
-          <div style={{ padding: "11px 16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
-              <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {effDone.size} из {QUESTIONS.length}</span>
-              {done.size > 0 && (
-                <button onClick={() => setDone(new Set())} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>🔄 Сбросить ответы</button>
-              )}
-            </div>
-            <div style={{ height: 8, background: C.creamDeep, borderRadius: 4, overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${(effDone.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
-            </div>
-            <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}>Ответил вслух → нажми вопрос, он погаснет. Случайно нажал — нажми ещё раз, вернётся.</div>
-          </div>
-        </Block>
-
         {isCanon && (
-          <Block stripe={C.gold}>
+          <Block stripe={C.emerald} style={{ border: `2px solid ${C.emerald}` }}>
             <div style={{ padding: "12px 16px" }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.goldDeep, marginBottom: 6 }}>📖 История (правда)</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: C.emeraldDeep, marginBottom: 6 }}>📖 История (правда)</div>
               <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.5 }}><Highlighted text={v.storyEs} /></div>
               <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {v.dossier.map((d, i) => (
@@ -858,65 +842,85 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
           </Block>
         )}
 
-        {/* ЛИПКАЯ ПАНЕЛЬ КАТЕГОРИЙ — мгновенный прыжок без скролла */}
-        <div style={{ position: "sticky", top: 0, zIndex: 20, background: C.cream, borderRadius: 12, border: `1px solid ${C.line}`, boxShadow: "0 4px 14px rgba(61,43,31,0.14)", padding: "8px", marginBottom: 14, display: "flex", gap: 6 }}>
-          <button onClick={() => setCat("all")} style={{ flex: 1, background: cat === "all" ? accent : C.card, color: cat === "all" ? "#fff" : C.inkSoft, border: `1.5px solid ${cat === "all" ? accent : C.line}`, borderRadius: 9, padding: "8px 2px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Все</button>
-          {CATS.map(c => {
-            const left = QUESTIONS.filter(q => q.cat === c.id && !effDone.has(q.id)).length;
-            const active = cat === c.id;
-            return (
-              <button key={c.id} onClick={() => setCat(active ? "all" : c.id)} style={{ flex: 1, background: active ? accent : left === 0 ? C.creamDeep : C.card, border: `1.5px solid ${active ? accent : C.line}`, borderRadius: 9, padding: "5px 2px", cursor: "pointer", fontFamily: SERIF, opacity: left === 0 && !active ? 0.5 : 1 }}>
-                <div style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</div>
-                <div style={{ fontSize: 10.5, fontWeight: 800, color: active ? "#fff" : left === 0 ? C.inkSoft : accent, marginTop: 2 }}>{left}</div>
-              </button>
-            );
-          })}
-        </div>
-
-        {CATS.filter(c => cat === "all" || c.id === cat).map(cat => (
-          <Block key={cat.id} stripe={accent}>
-            <div style={{ padding: "12px 16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 18 }}>{cat.icon}</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: accent }}>{cat.es}</span>
-                <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
+        {!isCanon && (
+          <>
+            {/* Прогресс допроса */}
+            <Block stripe={C.gold}>
+              <div style={{ padding: "11px 16px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: C.goldDeep }}>✓ Отвечено: {effDone.size} из {QUESTIONS.length}</span>
+                  {done.size > 0 && (
+                    <button onClick={() => setDone(new Set())} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>🔄 Сбросить ответы</button>
+                  )}
+                </div>
+                <div style={{ height: 8, background: C.creamDeep, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${(effDone.size / QUESTIONS.length) * 100}%`, background: accent, borderRadius: 4, transition: "width .25s" }} />
+                </div>
+                <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}>Ответил вслух → нажми вопрос, он погаснет. Случайно нажал — нажми ещё раз, вернётся.</div>
               </div>
-              {QUESTIONS.filter(q => q.cat === cat.id).map(q => {
-                const isDone = effDone.has(q.id);
-                if (isDone) return (
-                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.45 }}>
-                    <span style={{ color: C.emeraldDeep, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
-                    <div style={{ flex: 1, fontSize: 12, color: C.inkSoft, textDecoration: "line-through", lineHeight: 1.3 }}>{q.q}</div>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: ans[q.id] === "sí" ? C.emeraldDeep : C.raspberryDeep, flexShrink: 0 }}>{ans[q.id] === "sí" ? "SÍ" : "NO"}</span>
-                  </div>
-                );
+            </Block>
+
+            {/* ЛИПКАЯ ПАНЕЛЬ КАТЕГОРИЙ — мгновенный прыжок без скролла */}
+            <div style={{ position: "sticky", top: 0, zIndex: 20, background: C.cream, borderRadius: 12, border: `1px solid ${C.line}`, boxShadow: "0 4px 14px rgba(61,43,31,0.14)", padding: "8px", marginBottom: 14, display: "flex", gap: 6 }}>
+              <button onClick={() => setCat("all")} style={{ flex: 1, background: cat === "all" ? accent : C.card, color: cat === "all" ? "#fff" : C.inkSoft, border: `1.5px solid ${cat === "all" ? accent : C.line}`, borderRadius: 9, padding: "8px 2px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Все</button>
+              {CATS.map(c => {
+                const left = QUESTIONS.filter(q => q.cat === c.id && !effDone.has(q.id)).length;
+                const active = cat === c.id;
                 return (
-                  <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
-                      <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
-                    </div>
-                    <BigSiNo v={ans[q.id]} />
-                  </div>
+                  <button key={c.id} onClick={() => setCat(active ? "all" : c.id)} style={{ flex: 1, background: active ? accent : left === 0 ? C.creamDeep : C.card, border: `1.5px solid ${active ? accent : C.line}`, borderRadius: 9, padding: "5px 2px", cursor: "pointer", fontFamily: SERIF, opacity: left === 0 && !active ? 0.5 : 1 }}>
+                    <div style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</div>
+                    <div style={{ fontSize: 10.5, fontWeight: 800, color: active ? "#fff" : left === 0 ? C.inkSoft : accent, marginTop: 2 }}>{left}</div>
+                  </button>
                 );
               })}
             </div>
-          </Block>
-        ))}
 
-        {v.trap && (
-          <Block stripe={C.raspberry}>
-            <div style={{ padding: "12px 16px" }}>
-              <div style={{ fontSize: 12.5, fontWeight: 800, color: C.raspberry, marginBottom: 8 }}>⚡ Вопрос-ловушка (детектив может подловить)</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600 }}>{v.trap.q}</div>
-                  <div style={{ fontSize: 11.5, color: C.inkSoft }}>{v.trap.ru}</div>
+            {CATS.filter(c => cat === "all" || c.id === cat).map(cat => (
+              <Block key={cat.id} stripe={accent}>
+                <div style={{ padding: "12px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <span style={{ fontSize: 18 }}>{cat.icon}</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: accent }}>{cat.es}</span>
+                    <span style={{ fontSize: 12, color: C.inkSoft }}>· {cat.ru}</span>
+                  </div>
+                  {QUESTIONS.filter(q => q.cat === cat.id).map(q => {
+                    const isDone = effDone.has(q.id);
+                    if (isDone) return (
+                      <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer", opacity: 0.45 }}>
+                        <span style={{ color: C.emeraldDeep, fontWeight: 800, fontSize: 13, flexShrink: 0 }}>✓</span>
+                        <div style={{ flex: 1, fontSize: 12, color: C.inkSoft, textDecoration: "line-through", lineHeight: 1.3 }}>{q.q}</div>
+                        <span style={{ fontSize: 11.5, fontWeight: 700, color: ans[q.id] === "sí" ? C.emeraldDeep : C.raspberryDeep, flexShrink: 0 }}>{ans[q.id] === "sí" ? "SÍ" : "NO"}</span>
+                      </div>
+                    );
+                    return (
+                      <div key={q.id} onClick={() => toggleDone(q.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600, lineHeight: 1.3 }}>{q.q}</div>
+                          <div style={{ fontSize: 11.5, color: C.inkSoft }}>{q.ru}</div>
+                        </div>
+                        <BigSiNo v={ans[q.id]} />
+                      </div>
+                    );
+                  })}
                 </div>
-                <BigSiNo v={isCanon ? v.trap.canon : v.trap.fant} />
-              </div>
-            </div>
-          </Block>
+              </Block>
+            ))}
+
+            {v.trap && (
+              <Block stripe={C.raspberry}>
+                <div style={{ padding: "12px 16px" }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: C.raspberry, marginBottom: 8 }}>⚡ Вопрос-ловушка (детектив может подловить)</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14.5, color: C.ink, fontWeight: 600 }}>{v.trap.q}</div>
+                      <div style={{ fontSize: 11.5, color: C.inkSoft }}>{v.trap.ru}</div>
+                    </div>
+                    <BigSiNo v={isCanon ? v.trap.canon : v.trap.fant} />
+                  </div>
+                </div>
+              </Block>
+            )}
+          </>
         )}
 
         <div style={{ textAlign: "center", marginBottom: 12 }}>
