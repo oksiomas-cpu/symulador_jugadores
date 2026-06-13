@@ -268,7 +268,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
     </div>
   );
 }
@@ -624,6 +624,31 @@ function LiveDetective({ onBack, roundN, turn, live }) {
             ⚠️ {askErr}
           </div>
         )}
+
+        {/* ===== ИСТОРИЯ ДОПРОСА — общая лента вопросов всех детективов (новые сверху) ===== */}
+        {live && (
+          <Block stripe={C.emerald}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <h2 style={h2}>📋 История допроса</h2>
+              <span style={{ fontSize: 13, color: C.inkSoft }}>{(live.asked || []).length} preguntas · новые сверху</span>
+            </div>
+            {(!live.asked || live.asked.length === 0) ? (
+              <p style={pHint}>Пока ни одного вопроса. Как детективы начнут спрашивать — лента появится здесь.</p>
+            ) : (
+              <div style={{ maxHeight: 220, overflowY: "auto" }}>
+                {[...live.asked].map((a, i) => ({ ...a, n: i + 1 })).reverse().map((a) => (
+                  <div key={a.n} style={{ display: "flex", gap: 8, alignItems: "baseline", flexWrap: "wrap", padding: "7px 0", borderBottom: `1px dashed ${C.line}`, fontSize: 13.5 }}>
+                    <span style={{ color: C.goldDeep, fontWeight: 800, flexShrink: 0 }}>#{a.n}</span>
+                    <span style={{ flexShrink: 0, fontWeight: 700 }}>🕵️ {a.byName}{a.own ? " (свой)" : ""}</span>
+                    {a.to && <span style={{ flexShrink: 0, background: a.to === "A" ? C.goldSoft : C.creamDeep, borderRadius: 6, padding: "1px 8px", fontWeight: 700, color: C.inkSoft }}>→ {a.to} · {live.witNames[a.to]}</span>}
+                    {a.text && <span style={{ color: C.ink, minWidth: 0 }}>{a.text}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Block>
+        )}
+
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
@@ -2126,7 +2151,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
     </div></div>
   );
 }
@@ -2224,7 +2249,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.16</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.17</div>
     </div></div>
   );
 }
