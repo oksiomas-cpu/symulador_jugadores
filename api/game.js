@@ -581,6 +581,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, game: pub(g) });
     }
 
+    // --- Игрок выходит из игры НАВСЕГДА (сам или ведущая как страховка) ---
+    // Отличается от kick (полное удаление из лобби) и от eliminated (выбыл в одном раунде).
+    // Ставит флаг left: игрок остаётся в g.players (очки сохранены и видны как «вышел»),
+    // но пульт /host пересобирает СЛЕДУЮЩИЙ раунд без него. Текущий раунд доигрывается
+    // прежним составом — мы НЕ трогаем round.roles/turn здесь.
+    if (action === "leave") {
+      const pid = String(body.playerId || "");
+      const p = (g.players || []).find((x) => x.id === pid);
+      if (!p) return res.status(200).json({ ok: false, error: "Игрок не найден" });
+      p.left = true;
+      p.leftAt = Date.now();
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, game: pub(g) });
+    }
+
     // --- Ведущий убирает игрока из лобби (опечатка в имени и т.п.) ---
     if (action === "kick") {
       const pid = String(body.playerId || "");
