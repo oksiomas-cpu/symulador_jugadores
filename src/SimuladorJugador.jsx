@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
     </div>
   );
 }
@@ -417,6 +417,16 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
     if (!live || askBusy) return;
     setAskBusy(true); setAskErr("");
     const err = await live.onAsk(qid, text, target);
+    if (err) setAskErr(err);
+    setAskBusy(false);
+  }
+  // Игрок-голосом: спросил вслух → одной кнопкой двигает ход. Вопрос считается как обычный
+  // (идёт в счётчик/круги), без текста и адреса — что именно спросил, фиксировать не нужно.
+  const voiceMode = !!(live && live.mode === "voice");
+  async function doAskVoice() {
+    if (!live || askBusy) return;
+    setAskBusy(true); setAskErr("");
+    const err = await live.onAsk(null, "🎙 вопрос голосом", null);
     if (err) setAskErr(err);
     setAskBusy(false);
   }
@@ -603,6 +613,16 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
             {turn.mine ? "🎤 Спрашивай!" : "⏳ Жди своей очереди"}
           </div>
         )}
+        {voiceMode && turn && turn.mine && !gamePaused && !(live && live.pendingOwn) && (
+          <div style={{ marginBottom: 12 }}>
+            <button disabled={askBusy} onClick={doAskVoice} style={{ width: "100%", border: "none", borderRadius: 14, padding: "18px 16px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, background: askBusy ? "#D8CBB4" : C.goldDeep, color: "#fff", cursor: askBusy ? "default" : "pointer", boxShadow: `0 3px 12px ${C.gold}66` }}>
+              ✅ Я задал вопрос вслух → передать ход
+            </button>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.45, textAlign: "center" }}>
+              Спроси своими словами в Zoom, потом жми эту кнопку — ход уйдёт следующему. Хочешь засчитать вопрос как «свой» (+2) — жми «🎙 Задать свой вопрос» ниже.
+            </div>
+          </div>
+        )}
         {live && live.myScore && (
           <div style={{ background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "8px 14px", marginBottom: 12, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: C.goldDeep }}>
             ⭐ Твои очки — раунд: {live.myScore.r} · игра: {live.myScore.g}
@@ -657,6 +677,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
             </Block>
           );
         })()}
+        {!voiceMode ? (
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
@@ -669,8 +690,15 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
             </div>
           </div>
         </Block>
+        ) : (
+        <Block stripe={C.goldDeep}>
+          <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.55 }}>
+            🎙 <b>Ты играешь сам.</b> Глагол скрыт — спрашивай свидетелей <b>своими словами в Zoom</b>, ответы держи в голове. Список вопросов и кнопки SÍ/NO тебе не нужны. В свой ход жми <b>«✅ Я задал вопрос»</b> сверху, чтобы передать ход.
+          </div>
+        </Block>
+        )}
 
-        {CATS.map(cat => {
+        {!voiceMode && CATS.map(cat => {
           const qs = QUESTIONS.filter(q => q.cat === cat.id);
           const catConflicts = qs.reduce((s, q) => { const a = asked[q.id] || {}; return s + (a.A && a.B && a.A !== a.B ? 1 : 0); }, 0);
           const isOpen = open === cat.id;
@@ -711,15 +739,17 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
                 🎙 Задать свой вопрос (✅ ведущей = +2)
               </button>
               <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 6, lineHeight: 1.45 }}>
-                Жми в свой ход → задай вопрос <b>голосом в Zoom</b> → ведущая решит ✅/❌. Поле ниже — твой личный блокнот, на сервер не идёт.
+                Жми в свой ход → задай вопрос <b>голосом в Zoom</b> → ведущая решит ✅/❌.{!voiceMode && <span> Поле ниже — твой личный блокнот, на сервер не идёт.</span>}
               </div>
             </div>
           )}
+          {!voiceMode && (<>
           <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
             <input value={draft} onChange={e => setDraft(e.target.value)} placeholder="Напиши свой вопрос…" style={{ flex: 1, border: `1.5px solid ${C.line}`, borderRadius: 8, padding: "9px 12px", fontSize: 14.5, fontFamily: SERIF, color: C.ink, outline: "none" }} />
             <button onClick={addCustom} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 8, padding: "0 16px", fontSize: 20, fontWeight: 700, cursor: "pointer" }}>＋</button>
           </div>
           {custom.map((c, i) => <AnsRow key={i} es={c.text} ru="" st={c} onSet={(w, val) => setCustomAns(i, w, val)} />)}
+          </>)}
         </div>
 
         <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
@@ -1096,6 +1126,10 @@ function LiveGame({ onHome }) {
     lastElim: rdLive.lastElim || null,
     onHand: sendHand,
     onVote: sendVote,
+    mode: (() => {
+      const me = (game.players || []).find((p) => p.id === conn.playerId);
+      return (me && me.mode) || (conn && conn.mode) || "pad";
+    })(),
   } : null;
   // Шаг 5: что видит свидетель (голосование / называние / вскрытие)
   const liveWitExtra = conn && rdLive ? {
@@ -2284,7 +2318,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
     </div></div>
   );
 }
@@ -2382,7 +2416,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
     </div></div>
   );
 }
