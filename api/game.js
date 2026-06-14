@@ -214,14 +214,22 @@ export default async function handler(req, res) {
     if (action === "join") {
       const name = String(body.name || "").trim().slice(0, 24);
       if (!name) return res.status(200).json({ ok: false, error: "Введи имя" });
+      // Режим пульта: "voice" = играет сам, без блока вопросов (двигает ход своей кнопкой);
+      // "pad" (по умолчанию) = с вопросником (готовые вопросы + SÍ/NO). Полноценный игрок в обоих случаях.
+      const mode = body.mode === "voice" ? "voice" : "pad";
       // То же имя = повторный вход (например, обновил страницу)
       let p = g.players.find((x) => x.name.toLowerCase() === name.toLowerCase());
       if (!p) {
         if (g.players.length >= 7) {
           return res.status(200).json({ ok: false, error: "Комната заполнена (7 игроков)" });
         }
-        p = { id: Math.random().toString(36).slice(2, 8), name };
+        p = { id: Math.random().toString(36).slice(2, 8), name, mode };
         g.players.push(p);
+        g.v++;
+        await setGame(g);
+      } else if (p.mode !== mode) {
+        // Повторный вход с другим выбором режима — обновляем (передумал на входе)
+        p.mode = mode;
         g.v++;
         await setGame(g);
       }

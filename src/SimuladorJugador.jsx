@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
     </div>
   );
 }
@@ -976,6 +976,7 @@ function LiveGame({ onHome }) {
   const [nameIn, setNameIn] = useState(() => (loadConn() || {}).name || "");
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinErr, setJoinErr] = useState("");
+  const [modeIn, setModeIn] = useState(() => (loadConn() || {}).mode || "pad"); // "pad" = с вопросником, "voice" = сам/без вопросов
   const [skipConn, setSkipConn] = useState(false);   // старый режим без комнаты
 
   async function joinRoom() {
@@ -983,9 +984,9 @@ function LiveGame({ onHome }) {
     if (!code || !name) { setJoinErr("Введи код игры и своё имя"); return; }
     setJoinBusy(true); setJoinErr("");
     try {
-      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "join", code, name }) });
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "join", code, name, mode: modeIn }) });
       const d = await resp.json();
-      if (d.ok) { const c = { code, playerId: d.playerId, name }; setConn(c); saveConn(c); setGame(d.game); }
+      if (d.ok) { const c = { code, playerId: d.playerId, name, mode: modeIn }; setConn(c); saveConn(c); setGame(d.game); }
       else setJoinErr(d.error || "Не получилось войти");
     } catch (e) { setJoinErr("Сеть недоступна, попробуй ещё раз"); }
     setJoinBusy(false);
@@ -1190,6 +1191,21 @@ function LiveGame({ onHome }) {
               style={{ width: "100%", boxSizing: "border-box", fontSize: 30, fontWeight: 800, letterSpacing: 10, textAlign: "center", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${C.gold}`, fontFamily: SERIF, color: C.ink, marginBottom: 10 }} />
             <input value={nameIn} onChange={(e) => setNameIn(e.target.value)} placeholder="Твоё имя"
               style={{ width: "100%", boxSizing: "border-box", fontSize: 17, padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${C.line}`, fontFamily: SERIF, color: C.ink, marginBottom: 12 }} />
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 7 }}>Как тебе удобнее играть?</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              {[
+                { k: "pad", t: "🎴 С вопросником", d: "Готовые вопросы и кнопки SÍ/NO на пульте" },
+                { k: "voice", t: "🎙 Сам, голосом", d: "Спрашиваешь своими словами, без списка вопросов" },
+              ].map((m) => {
+                const on = modeIn === m.k;
+                return (
+                  <button key={m.k} onClick={() => setModeIn(m.k)} style={{ flex: 1, textAlign: "left", cursor: "pointer", fontFamily: SERIF, background: on ? "#FBF3E0" : C.card, border: `1.5px solid ${on ? C.gold : C.line}`, borderRadius: 12, padding: "10px 11px", color: C.ink, boxShadow: on ? `0 0 0 2px ${C.gold}55` : "none" }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 800 }}>{m.t}</div>
+                    <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 3, lineHeight: 1.35 }}>{m.d}</div>
+                  </button>
+                );
+              })}
+            </div>
             <button onClick={joinRoom} disabled={joinBusy} style={{ width: "100%", background: joinBusy ? "#D8CBB4" : C.raspberry, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 17, fontWeight: 700, fontFamily: SERIF, cursor: joinBusy ? "default" : "pointer" }}>
               {joinBusy ? "Вхожу..." : "Войти в игру"}
             </button>
@@ -1221,6 +1237,15 @@ function LiveGame({ onHome }) {
               <span style={{ fontWeight: 800, color: C.emeraldDeep, fontSize: 15 }}>✅ Ты в игре {conn.code} как {conn.name}</span>
               <button onClick={leaveRoom} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>выйти</button>
             </div>
+            {(() => {
+              const me = game && (game.players || []).find((p) => p.id === conn.playerId);
+              const mm = (me && me.mode) || conn.mode || "pad";
+              return (
+                <div style={{ display: "inline-block", marginTop: 6, fontSize: 12.5, fontWeight: 700, color: mm === "voice" ? C.goldDeep : C.inkSoft, background: mm === "voice" ? "#FBF3E0" : "transparent", border: mm === "voice" ? `1px solid ${C.gold}` : "none", borderRadius: 8, padding: mm === "voice" ? "3px 9px" : 0 }}>
+                  {mm === "voice" ? "🎙 Играешь сам, без вопросника" : "🎴 С вопросником"}
+                </div>
+              );
+            })()}
             {game && (
               <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 5 }}>
                 В комнате ({(game.players || []).length}/5): {(game.players || []).map((p) => p.name).join(", ") || "—"}
@@ -2259,7 +2284,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
     </div></div>
   );
 }
@@ -2357,7 +2382,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.30</div>
     </div></div>
   );
 }
