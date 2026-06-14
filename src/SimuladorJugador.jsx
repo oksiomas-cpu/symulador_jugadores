@@ -259,7 +259,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
     </div>
   );
 }
@@ -386,7 +386,7 @@ function BigSiNo({ v }) {
 }
 
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
-function LiveDetective({ onBack, roundN, turn, live }) {
+function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
   const [open, setOpen] = useState("quien");
   const [ruledOut, setRuledOut] = useState(new Set()); // отметённые глаголы — личный блокнот, на сервер не идёт
   function toggleRuled(k) {
@@ -783,6 +783,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
           )}
         </div>
 
+        {onLeave && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onLeave} style={{ background: "transparent", border: `1.5px solid ${C.raspberry}`, color: C.raspberry, borderRadius: 10, padding: "9px 18px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>🚪 Покинуть игру</button></div>}
         <Footer onHome={onBack} />
       </div>
     </div>
@@ -790,7 +791,7 @@ function LiveDetective({ onBack, roundN, turn, live }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
+function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [storyOpen, setStoryOpen] = useState(false);      // Канон: мини-история
   const [lieOpen, setLieOpen] = useState(false);          // Фантазия: 🔴 Tu versión (независимая)
@@ -819,6 +820,7 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
               </button>
             ))}
           </div>
+          {onLeave && <div style={{ textAlign: "center", marginTop: 16 }}><button onClick={onLeave} style={{ background: "transparent", border: `1.5px solid ${C.raspberry}`, color: C.raspberry, borderRadius: 10, padding: "9px 18px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>🚪 Покинуть игру</button></div>}
           <div style={{ marginTop: 16 }}><Footer onHome={onBack} /></div>
         </div>
       </div>
@@ -953,6 +955,7 @@ function LiveWitness({ mode, onBack, initialVerbKey, roundN, liveAsked, myLetter
         <div style={{ textAlign: "center", marginBottom: 12 }}>
           <button onClick={() => setVk(null)} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
         </div>
+        {onLeave && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onLeave} style={{ background: "transparent", border: `1.5px solid ${C.raspberry}`, color: C.raspberry, borderRadius: 10, padding: "9px 18px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>🚪 Покинуть игру</button></div>}
         <Footer onHome={onBack} />
       </div>
     </div>
@@ -1058,6 +1061,17 @@ function LiveGame({ onHome }) {
       return d.error || "Не получилось проголосовать";
     } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
   }
+  // Игрок выходит из партии НАВСЕГДА. Очки замораживаются и остаются видны.
+  // Сервер ставит флаг left; следующий опрос/ответ подхватит — экран сам сменится на «Ты вышел».
+  async function leaveGame() {
+    if (!conn) return;
+    if (!window.confirm("Точно выйти? Вернуться в эту партию не получится.")) return;
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "leave", code: conn.code, playerId: conn.playerId }) });
+      const d = await resp.json();
+      if (d.ok && d.game) setGame(d.game);
+    } catch (e) { /* следующий опрос подхватит флаг left */ }
+  }
   const rdLive = game && game.round;
   const mergedAns = { ...((rdLive && rdLive.answers) || {}) };
   for (const k in ansOverlay) { const v = ansOverlay[k].v; if (v) mergedAns[k] = v; else delete mergedAns[k]; }
@@ -1135,9 +1149,33 @@ function LiveGame({ onHome }) {
   }, [game]);
 
   const roundKey = game && game.round ? game.round.n : "manual";
-  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
-  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
-  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
+
+  // Игрок вышел навсегда (сам или ведущая-страховка) — показываем замороженные очки, дальше не играет.
+  const meInRoom = conn && game ? (game.players || []).find((p) => p.id === conn.playerId) : null;
+  if (meInRoom && meInRoom.left) {
+    const frozen = (game.scores && game.scores[conn.playerId]) ? game.scores[conn.playerId].g : 0;
+    return (
+      <div style={wrap}>
+        <Header subtitle="🚪 Ты вышел из игры" />
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 16, padding: "26px 20px", textAlign: "center", boxShadow: "0 2px 14px rgba(61,43,31,0.12)" }}>
+            <div style={{ fontSize: 40 }}>🚪</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginTop: 8 }}>Ты вышел из игры</div>
+            <div style={{ fontSize: 14.5, color: C.inkSoft, marginTop: 8, lineHeight: 1.5 }}>Спасибо за партию! Дальше ты не участвуешь, но твои очки сохранены.</div>
+            <div style={{ marginTop: 18, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 16px" }}>
+              <div style={{ fontSize: 12, color: C.inkSoft, textTransform: "uppercase", letterSpacing: 0.5 }}>Твои очки сохранены</div>
+              <div style={{ fontSize: 34, fontWeight: 800, color: C.goldDeep, marginTop: 4 }}>{frozen}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 16 }}><Footer onHome={onHome} /></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
 
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
@@ -2221,7 +2259,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
     </div></div>
   );
 }
@@ -2319,7 +2357,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.28</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.29</div>
     </div></div>
   );
 }
