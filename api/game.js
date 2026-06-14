@@ -217,8 +217,8 @@ export default async function handler(req, res) {
       // То же имя = повторный вход (например, обновил страницу)
       let p = g.players.find((x) => x.name.toLowerCase() === name.toLowerCase());
       if (!p) {
-        if (g.players.length >= 5) {
-          return res.status(200).json({ ok: false, error: "Комната заполнена (5 игроков)" });
+        if (g.players.length >= 7) {
+          return res.status(200).json({ ok: false, error: "Комната заполнена (7 игроков)" });
         }
         p = { id: Math.random().toString(36).slice(2, 8), name };
         g.players.push(p);
