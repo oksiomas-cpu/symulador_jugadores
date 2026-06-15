@@ -10,6 +10,8 @@
 // (verdict), принудительное завершение раунда (end_round).
 // Право первой попытки — у детектива, задавшего вопрос (голосом, без кнопки);
 // кнопка «рука» — заявка остальных, слово даёт ведущая.
+// Этап 3, шаг 2: join принимает tgId (Telegram, из Mini App) и сохраняет
+// p.tgId — мост к общей копилке score:{tgId}. tgId не отдаём в pub().
 // ============================================================
 
 const TTL = String(60 * 60 * 12); // игра живёт в базе 12 часов
@@ -61,9 +63,15 @@ function setGame(g) {
 
 // Тайное голосование: до вскрытия наружу уходит только КТО проголосовал, не ЗА КОГО
 function pub(g) {
-  if (!g || !g.round || !g.round.votes || g.round.revealed) return g;
+  if (!g) return g;
+  // tgId — внутреннее поле для моста с копилкой (Этап 3), наружу не отдаём
+  const players = (g.players || []).map((p) => {
+    const { tgId, ...rest } = p;
+    return rest;
+  });
+  if (!g.round || !g.round.votes || g.round.revealed) return { ...g, players };
   const round = { ...g.round, votedIds: Object.keys(g.round.votes), votes: undefined };
-  return { ...g, round };
+  return { ...g, players, round };
 }
 
 function aliveDets(g) {
@@ -217,6 +225,8 @@ export default async function handler(req, res) {
       // Режим пульта: "voice" = играет сам, без блока вопросов (двигает ход своей кнопкой);
       // "pad" (по умолчанию) = с вопросником (готовые вопросы + SÍ/NO). Полноценный игрок в обоих случаях.
       const mode = body.mode === "voice" ? "voice" : "pad";
+      // tgId — Telegram ID игрока, если открыто из Mini App (мост к копилке score:{tgId}, Этап 3)
+      const tgId = body.tgId ? String(body.tgId).replace(/\D/g, "") : "";
       // То же имя = повторный вход (например, обновил страницу)
       let p = g.players.find((x) => x.name.toLowerCase() === name.toLowerCase());
       if (!p) {
@@ -224,14 +234,15 @@ export default async function handler(req, res) {
           return res.status(200).json({ ok: false, error: "Комната заполнена (7 игроков)" });
         }
         p = { id: Math.random().toString(36).slice(2, 8), name, mode };
+        if (tgId) p.tgId = tgId;
         g.players.push(p);
         g.v++;
         await setGame(g);
-      } else if (p.mode !== mode) {
-        // Повторный вход с другим выбором режима — обновляем (передумал на входе)
-        p.mode = mode;
-        g.v++;
-        await setGame(g);
+      } else {
+        let changed = false;
+        if (p.mode !== mode) { p.mode = mode; changed = true; }
+        if (tgId && p.tgId !== tgId) { p.tgId = tgId; changed = true; }
+        if (changed) { g.v++; await setGame(g); }
       }
       return res.status(200).json({ ok: true, playerId: p.id, game: pub(g) });
     }
@@ -619,3 +630,4 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: false, error: String(e) });
   }
 }
+

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
+// v2.32 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -259,7 +260,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div>
   );
 }
@@ -998,12 +999,14 @@ function saveConn(c) { try { c ? localStorage.setItem("ciudad_live_v1", JSON.str
 
 function LiveGame({ onHome }) {
   const [r, setR] = useState(null);
+  // Telegram-пользователь (если открыто из Mini App) — для моста playerId ↔ tgId (Этап 3)
+  const tg = getTg();
   // --- Подключение к комнате ведущего ---
   const [conn, setConn] = useState(loadConn);       // {code, playerId, name}
   const [game, setGame] = useState(null);            // живое состояние из базы
   const [ansOverlay, setAnsOverlay] = useState({});  // оптимистичный слой ответов {key:{v,t}} — переживает опрос (фикс гонки)
   const [codeIn, setCodeIn] = useState("");
-  const [nameIn, setNameIn] = useState(() => (loadConn() || {}).name || "");
+  const [nameIn, setNameIn] = useState(() => (loadConn() || {}).name || (tg && tg.name) || "");
   const [joinBusy, setJoinBusy] = useState(false);
   const [joinErr, setJoinErr] = useState("");
   const [modeIn, setModeIn] = useState(() => (loadConn() || {}).mode || "pad"); // "pad" = с вопросником, "voice" = сам/без вопросов
@@ -1014,7 +1017,9 @@ function LiveGame({ onHome }) {
     if (!code || !name) { setJoinErr("Введи код игры и своё имя"); return; }
     setJoinBusy(true); setJoinErr("");
     try {
-      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "join", code, name, mode: modeIn }) });
+      const body = { action: "join", code, name, mode: modeIn };
+      if (tg && tg.id) body.tgId = tg.id; // мост к копилке score:{tgId} (Этап 3)
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const d = await resp.json();
       if (d.ok) { const c = { code, playerId: d.playerId, name, mode: modeIn }; setConn(c); saveConn(c); setGame(d.game); }
       else setJoinErr(d.error || "Не получилось войти");
@@ -2318,7 +2323,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div></div>
   );
 }
@@ -2416,7 +2421,8 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.31</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div></div>
   );
 }
+
