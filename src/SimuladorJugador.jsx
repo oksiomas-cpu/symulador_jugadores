@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
-// v2.33 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
+// v2.32 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -260,7 +260,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div>
   );
 }
@@ -1388,68 +1388,6 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР РОЛИ
 // ============================================================
-function VerbLibrary() {
-  const [open, setOpen] = React.useState(false);
-  const [storyKey, setStoryKey] = React.useState(null);
-  const story = storyKey ? verbByKey(storyKey) : null;
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ background: C.card, borderRadius: 14, border: "1.5px solid " + C.gold, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", overflow: "hidden" }}>
-        <div onClick={() => { setOpen(!open); setStoryKey(null); }}
-          style={{ padding: "14px 16px", cursor: "pointer", background: C.goldSoft, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: C.goldDeep }}>{"📖 Глаголы игры — истории"}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{"15 глаголов · тап на любой — откроется его история"}</div>
-          </div>
-          <span style={{ fontSize: 20, color: C.gold }}>{open ? "▾" : "›"}</span>
-        </div>
-        {open && !story && (
-          <div style={{ padding: "12px 14px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-            {VERBS.map(function(vv) {
-              return (
-                <button key={vv.key} onClick={function() { setStoryKey(vv.key); }}
-                  style={{ background: C.cream, border: "1px solid " + C.line, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
-                  <div style={{ fontSize: 22 }}>{vv.emoji}</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
-                  <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-        {open && story && (
-          <div style={{ padding: "14px 16px" }}>
-            <button onClick={function() { setStoryKey(null); }}
-              style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 12, padding: 0, fontFamily: SERIF }}>
-              {"← Все глаголы"}
-            </button>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <span style={{ fontSize: 30 }}>{story.emoji}</span>
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: C.goldDeep }}>{story.inf}</div>
-                <div style={{ fontSize: 13, color: C.inkSoft }}>{story.ru}</div>
-              </div>
-            </div>
-            <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.7, marginBottom: 12 }}>
-              <Highlighted text={story.storyEs} />
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {story.dossier.map(function(d, i) {
-                return (
-                  <div key={i} style={{ background: C.cream, border: "1px solid " + C.line, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
-                    <span style={{ color: C.inkSoft }}>{d[0]}{" "}</span>
-                    <span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function RolePicker({ onPick, session, onBack, onDiario }) {
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
@@ -1462,7 +1400,6 @@ function RolePicker({ onPick, session, onBack, onDiario }) {
       {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>📖 Вернуться к истории</button></div>}
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
-      <VerbLibrary />
       {cards.map((c) => (
         <div key={c.id} onClick={() => onPick(c.id)} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
           <div style={{ width: 7, background: c.c, flexShrink: 0 }} />
@@ -2386,7 +2323,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div></div>
   );
 }
@@ -2484,7 +2421,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
     </div></div>
   );
 }
