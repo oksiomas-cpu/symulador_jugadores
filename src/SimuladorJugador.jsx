@@ -1393,49 +1393,60 @@ function VerbLibrary() {
   const [storyKey, setStoryKey] = React.useState(null);
   const story = storyKey ? verbByKey(storyKey) : null;
   return (
-    <>
-      <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, overflow: "hidden" }}>
-        <div onClick={() => setOpen(!open)}
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ background: C.card, borderRadius: 14, border: "1.5px solid " + C.gold, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", overflow: "hidden" }}>
+        <div onClick={() => { setOpen(!open); setStoryKey(null); }}
           style={{ padding: "14px 16px", cursor: "pointer", background: C.goldSoft, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: C.goldDeep }}>📖 Глаголы игры — истории</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>15 глаголов · тап на любой — откроется его история</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: C.goldDeep }}>{"📖 Глаголы игры — истории"}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{"15 глаголов · тап на любой — откроется его история"}</div>
           </div>
-          <span style={{ fontSize: 20, color: C.gold, transform: open ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+          <span style={{ fontSize: 20, color: C.gold }}>{open ? "▾" : "›"}</span>
         </div>
-        {open && (
-          <div style={{ padding: "12px 14px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-              {VERBS.map(vv => (
-                <button key={vv.key} onClick={() => setStoryKey(vv.key)}
-                  style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
+        {open && !story && (
+          <div style={{ padding: "12px 14px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            {VERBS.map(function(vv) {
+              return (
+                <button key={vv.key} onClick={function() { setStoryKey(vv.key); }}
+                  style={{ background: C.cream, border: "1px solid " + C.line, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
                   <div style={{ fontSize: 22 }}>{vv.emoji}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
                   <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
                 </button>
-              ))}
+              );
+            })}
+          </div>
+        )}
+        {open && story && (
+          <div style={{ padding: "14px 16px" }}>
+            <button onClick={function() { setStoryKey(null); }}
+              style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 12, padding: 0, fontFamily: SERIF }}>
+              {"← Все глаголы"}
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 30 }}>{story.emoji}</span>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: C.goldDeep }}>{story.inf}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft }}>{story.ru}</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.7, marginBottom: 12 }}>
+              <Highlighted text={story.storyEs} />
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {story.dossier.map(function(d, i) {
+                return (
+                  <div key={i} style={{ background: C.cream, border: "1px solid " + C.line, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
+                    <span style={{ color: C.inkSoft }}>{d[0]}{" "}</span>
+                    <span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
       </div>
-      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && (
-          <>
-            <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.7, marginBottom: 14 }}>
-              <Highlighted text={story.storyEs} />
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {story.dossier.map((d, i) => (
-                <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
-                  <span style={{ color: C.inkSoft }}>{d[0]} </span>
-                  <span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </Sheet>
-    </>
+    </div>
   );
 }
 
