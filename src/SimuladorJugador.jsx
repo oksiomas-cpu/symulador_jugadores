@@ -2374,6 +2374,8 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
+  const [storyKey, setStoryKey] = useState(null);
+  const story = storyKey ? verbByKey(storyKey) : null;
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
@@ -2418,15 +2420,15 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       {/* Глоссарий — раскрывашка */}
       <Block stripe={C.emerald}>
         <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 Los 15 verbos · todos terminan en -AR</div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 Los 15 verbos · тап — история глагола</div>
           <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
         {glosOpen && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 12 }}>
-            {MAYA.glos.map(([v, r]) => (
-              <div key={v} style={{ background: C.creamDeep, borderRadius: 8, padding: "7px 10px", fontSize: 13.5 }}>
-                <strong style={{ color: C.raspberry }}>{v}</strong> <span style={{ color: C.inkSoft }}>— {r}</span>
-              </div>
+            {VERBS.map((v) => (
+              <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 8, padding: "8px 10px", fontSize: 13.5, cursor: "pointer", fontFamily: SERIF, textAlign: "left" }}>
+                <strong style={{ color: C.raspberry }}>{v.emoji} {v.inf}</strong> <span style={{ color: C.inkSoft }}>— {v.ru}</span>
+              </button>
             ))}
           </div>
         )}
@@ -2444,6 +2446,11 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
       <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+
+      {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
     </div></div>
   );
 }
