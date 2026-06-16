@@ -1406,7 +1406,7 @@ function VerbLibrary() {
         <div style={{ padding: "12px 14px" }}>
           {story ? (
             <div>
-              <button onClick={() => setStoryKey(null)} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все глаголы</button>
+              <button onClick={(e) => { e.stopPropagation(); setStoryKey(null); }} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все глаголы</button>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                 <span style={{ fontSize: 32 }}>{story.emoji}</span>
                 <div>
@@ -1429,7 +1429,7 @@ function VerbLibrary() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
               {VERBS.map(vv => (
-                <button key={vv.key} onClick={() => setStoryKey(vv.key)}
+                <button key={vv.key} onClick={(e) => { e.stopPropagation(); setStoryKey(vv.key); }}
                   style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 6px", cursor: "pointer", fontFamily: SERIF, textAlign: "center" }}>
                   <div style={{ fontSize: 22 }}>{vv.emoji}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 3 }}>{vv.inf}</div>
