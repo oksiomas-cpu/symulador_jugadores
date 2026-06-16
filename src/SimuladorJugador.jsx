@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
-// v2.32 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
+// v2.33 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -260,7 +260,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
     </div>
   );
 }
@@ -1389,6 +1389,8 @@ export default function SimuladorJugador() {
 // ВЫБОР РОЛИ
 // ============================================================
 function RolePicker({ onPick, session, onBack, onDiario }) {
+  const [storyKey, setStoryKey] = useState(null);
+  const story = storyKey ? verbByKey(storyKey) : null;
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
@@ -1409,12 +1411,32 @@ function RolePicker({ onPick, session, onBack, onDiario }) {
           </div>
         </div>
       ))}
+
+      {/* БИБЛИОТЕКА ГЛАГОЛОВ — те же 15 глаголов с историями, что у детектива */}
+      <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "16px 18px", marginBottom: 14 }}>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 Глаголы игры — истории</div>
+        <p style={{ ...pHint, marginTop: 4 }}>Тап по глаголу — его история поверх экрана. Все 15 глаголов La Ciudad.</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+          {VERBS.map((v) => (
+            <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+              <div>{v.emoji} {v.inf}</div>
+              <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div style={{ textAlign: "center", marginTop: 6 }}>
         <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
           📔 Не играешь, а тренируешь грамматику? Mi Diario →
         </button>
       </div>
       <Footer />
+
+      {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
     </div></div>
   );
 }
@@ -2323,7 +2345,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
     </div></div>
   );
 }
@@ -2421,7 +2443,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.32</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
     </div></div>
   );
 }
