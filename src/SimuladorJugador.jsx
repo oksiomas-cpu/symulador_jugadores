@@ -555,12 +555,12 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
         })()}
         {live && !revealed && myElim && (
           <div style={{ background: C.creamDeep, border: `2px solid ${C.line}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
-            ❌ Глагол был неверный — ты выбыл до конца раунда. Следи за игрой: в новом раунде ты снова в деле.
+            ❌ Глагол был неверный — ты выбыл до конца этого круга. Следи за игрой: в следующем круге ты снова в деле.
           </div>
         )}
         {live && !revealed && !myElim && live.lastElim && Date.now() - live.lastElim.ts < 12000 && (
           <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "10px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14, color: C.inkSoft }}>
-            ❌ {live.lastElim.byName} назвал(а) неверный глагол и выбыл(а) из раунда
+            ❌ {live.lastElim.byName} назвал(а) неверный глагол и выбыл(а) из круга
           </div>
         )}
         {live && !revealed && guess && guess.stage === "voting" && (
