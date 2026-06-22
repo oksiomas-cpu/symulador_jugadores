@@ -1591,6 +1591,7 @@ export default function SimuladorJugador() {
   if (!entered) return <LevelPicker
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
+    onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
@@ -1602,7 +1603,7 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function LevelPicker({ onPick, onLive }) {
+function LevelPicker({ onPick, onLive, onTour }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
@@ -1647,6 +1648,12 @@ function LevelPicker({ onPick, onLive }) {
         <div style={{ fontSize: 28, marginBottom: 6 }}>🎮</div>
         <div style={{ fontSize: 19, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Пульт живой игры</div>
         <div style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", marginTop: 6 }}>Только во время Zoom-игры</div>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: 18 }}>
+        <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          ❓ Правила игры — посмотреть снова
+        </button>
       </div>
 
       <Footer />
