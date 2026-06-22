@@ -1588,14 +1588,70 @@ export default function SimuladorJugador() {
 
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
-  if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={goDiario} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
+  if (!entered) return <LevelPicker
+    onPick={(p) => { setPack(p); setEntered(true); }}
+    onLive={() => { setRole("live"); setEntered(true); }}
+  />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
-  // Меню выбора игры (Глава 1 / Глава 2) — перед выбором роли
-  if (!pack) return <ChapterPicker onPick={setPack} session={sess} onBack={() => setEntered(false)} onDiario={goDiario} />;
-  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => setPack(null)} onDiario={goDiario} />;
+  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setPack(null); setEntered(false); }} onDiario={goDiario} />;
   if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
   return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
+}
+
+// ============================================================
+// ВЫБОР УРОВНЯ — первый экран после тура
+// ============================================================
+function LevelPicker({ onPick, onLive }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Bienvenido · добро пожаловать" />
+
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
+        Выбери уровень, который тренируешь, или подключайся к живой игре:
+      </p>
+
+      {/* Уровень 1 — золотой */}
+      <div onClick={() => onPick(PACKS.cap1)} style={{
+        background: C.gold, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(201,162,75,0.30)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap1.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 1 · {PACKS.cap1.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap1.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap1.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap1.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+      </div>
+
+      {/* Уровень 2 — изумрудный */}
+      <div onClick={() => onPick(PACKS.cap2)} style={{
+        background: C.emerald, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(22,121,91,0.28)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap2.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 2 · {PACKS.cap2.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+      </div>
+
+      {/* Живая игра — малиновая, отдельно */}
+      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "8px 0 16px" }} />
+      <div onClick={onLive} style={{
+        background: C.raspberry, borderRadius: 20, padding: "22px 24px",
+        cursor: "pointer", textAlign: "center",
+        boxShadow: "0 4px 16px rgba(168,27,62,0.22)",
+      }}>
+        <div style={{ fontSize: 28, marginBottom: 6 }}>🎮</div>
+        <div style={{ fontSize: 19, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Пульт живой игры</div>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", marginTop: 6 }}>Только во время Zoom-игры</div>
+      </div>
+
+      <Footer />
+    </div></div>
+  );
 }
 
 // ============================================================
@@ -1603,31 +1659,29 @@ export default function SimuladorJugador() {
 // ============================================================
 function ChapterPicker({ onPick, session, onBack, onDiario }) {
   const list = [PACKS.cap1, PACKS.cap2];
-  const colors = { cap1: C.gold, cap2: C.raspberry };
-  const shadows = { cap1: "rgba(201,162,75,0.28)", cap2: "rgba(168,27,62,0.28)" };
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="Elige el nivel · выбери уровень" />
+      <Header subtitle="Elige el caso · выбери дело" />
       <ScoreBadge session={session} />
-      <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>Два уровня La Cata a Ciegas. Выбери, какой тренируешь сегодня:</p>
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Две игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
       {list.map((p) => (
-        <div key={p.id} onClick={() => onPick(p)} style={{
-          background: colors[p.id],
-          borderRadius: 20,
-          padding: "30px 24px",
-          marginBottom: 18,
-          cursor: "pointer",
-          textAlign: "center",
-          boxShadow: `0 6px 24px ${shadows[p.id]}`,
-        }}>
-          <div style={{ fontSize: 38, marginBottom: 10 }}>{p.emoji}</div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel {p.num} · {p.grammar}</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 10 }}>{p.titulo}</div>
-          <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{p.desc}</div>
-          <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 12 }}>{p.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+        <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${p.id === "cap2" ? C.raspberry : C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+          <div style={{ width: 7, background: p.id === "cap2" ? C.raspberry : C.gold, flexShrink: 0 }} />
+          <div style={{ padding: "16px 18px", flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase" }}>{p.emoji} Capítulo {p.num} · {p.grammar}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: p.id === "cap2" ? C.raspberry : C.goldDeep, marginTop: 3, lineHeight: 1.25 }}>{p.titulo}</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.5 }}>{p.desc}</div>
+            <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 6 }}>{p.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+          </div>
+          <div style={{ fontSize: 22, color: C.gold, alignSelf: "center", paddingRight: 12 }}>›</div>
         </div>
       ))}
-      {onBack && <div style={{ textAlign: "center", marginTop: 4 }}><button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад</button></div>}
+      {onBack && <div style={{ textAlign: "center", marginTop: 6 }}><button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад</button></div>}
+      <div style={{ textAlign: "center", marginTop: 10 }}>
+        <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          📔 Тренируешь только грамматику? Mi Diario →
+        </button>
+      </div>
       <Footer />
     </div></div>
   );
@@ -2619,11 +2673,16 @@ function NavCard({ icon, color, title, when, text, onClick }) {
 }
 
 function Welcome({ onEnter, onDiario, onLive, onTour }) {
+  const [ru, setRu] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [glosOpen, setGlosOpen] = useState(false);
+  const [storyKey, setStoryKey] = useState(null);
+  const story = storyKey ? verbByKey(storyKey) : null;
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
 
-      {/* Описание игры — общее, не привязано к главе */}
+      {/* Краткое напоминание сути + ссылка на тур */}
       <Block stripe={C.raspberry}>
         <div style={{ fontWeight: 700, color: C.ink, fontSize: 16, marginBottom: 6 }}>🕵️ La Cata a Ciegas — лингвистический детектив</div>
         <div style={{ ...pHint, fontSize: 13.5 }}>
@@ -2632,26 +2691,68 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
         <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13, fontWeight: 700, cursor: "pointer", padding: 0, marginTop: 8, fontFamily: SERIF, textDecoration: "underline" }}>❓ Как это работает — посмотреть знакомство</button>
       </Block>
 
-      {/* Тренировка ролей → ведёт на выбор уровня */}
-      <div onClick={onEnter} style={{ background: C.gold, borderRadius: 18, padding: "26px 24px", marginBottom: 14, cursor: "pointer", textAlign: "center", boxShadow: "0 4px 18px rgba(201,162,75,0.28)" }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>🕵️</div>
-        <div style={{ fontSize: 21, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Тренировать роли</div>
-        <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.85)", marginTop: 6, lineHeight: 1.5 }}>Выбери уровень, потом роль — Detective · Canon · Fantasía</div>
-      </div>
+      {/* История-маяк — раскрывашка */}
+      <Block stripe={C.gold}>
+        <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div>
+            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 El día en el Palacio de Caramelo</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Прочитай историю — все 15 глаголов игры спрятаны в ней</div>
+          </div>
+          <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {storyOpen && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ textAlign: "right", marginBottom: 8 }}>
+              <button onClick={() => setRu(v => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "5px 13px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
+                {ru ? "ES ✓" : "RU перевод"}
+              </button>
+            </div>
+            <div style={{ fontSize: 16, lineHeight: 1.85, color: C.ink }}>
+              {MAYA.es.map((p, i) => (
+                <div key={i} style={{ marginBottom: 12 }}>
+                  <div><Highlighted text={p} /></div>
+                  {ru && <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{MAYA.ru[i]}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Block>
 
-      {/* Mi Diario */}
-      <div onClick={onDiario} style={{ background: C.card, border: `1.5px solid ${C.emerald}`, borderRadius: 18, padding: "20px 24px", marginBottom: 14, cursor: "pointer", textAlign: "center" }}>
-        <div style={{ fontSize: 26, marginBottom: 6 }}>📔</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: C.emeraldDeep, fontFamily: SERIF }}>Mi Diario</div>
-        <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 }}>Тренировка спряжения — впиши глаголы в правильной форме</div>
-      </div>
+      {/* Глоссарий — раскрывашка */}
+      <Block stripe={C.emerald}>
+        <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 Los 15 verbos · тап — история глагола</div>
+          <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {glosOpen && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 12 }}>
+            {VERBS.map((v) => (
+              <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 8, padding: "8px 10px", fontSize: 13.5, cursor: "pointer", fontFamily: SERIF, textAlign: "left" }}>
+                <strong style={{ color: C.raspberry }}>{v.emoji} {v.inf}</strong> <span style={{ color: C.inkSoft }}>— {v.ru}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </Block>
+
+      {/* Навигация */}
+      <NavCard icon="🕵️" color={C.goldDeep} title="Тренировка ролей" when="Между играми"
+        text="Detective · Canon · Fantasía. Прокачай роль и заработай очки перед игрой." onClick={onEnter} />
+      <NavCard icon="📔" color={C.emeraldDeep} title="Mi Diario" when="Между играми"
+        text="Впиши глаголы дня в правильной форме — тренировка спряжения." onClick={onDiario} />
 
       {/* Пульт — визуально отделён */}
       <div style={{ borderTop: `1px dashed ${C.line}`, margin: "16px 0 12px" }} />
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.34</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+
+      {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
     </div></div>
   );
 }
