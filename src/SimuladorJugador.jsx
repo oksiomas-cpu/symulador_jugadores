@@ -209,6 +209,215 @@ const VERBS = [
 ];
 
 const verbByKey = (k) => VERBS.find((v) => v.key === k);
+
+/* ============================================================
+   CAPÍTULO 2 — Pretérito Perfecto (картридж cap2-perfecto)
+   Источники: История-маяк+глаголы + Шпаргалки Свидетелей Гл.2 (Notion).
+   Игра 1 (Cap.1, Presente) — выше, НЕ изменена.
+   ============================================================ */
+
+const QUESTIONS2 = [
+  { id: "q11", lvl: 1, cat: "quien", q: "¿El Jefe lo ha hecho?", ru: "Это сделал Шеф?" },
+  { id: "q12", lvl: 1, cat: "quien", q: "¿Lo ha hecho un ayudante?", ru: "Это сделал помощник?" },
+  { id: "q13", lvl: 1, cat: "quien", q: "¿Lo han hecho varias personas?", ru: "Это сделали несколько человек?" },
+  { id: "q21", lvl: 1, cat: "donde", q: "¿Ha pasado dentro del palacio?", ru: "Произошло внутри дворца?" },
+  { id: "q22", lvl: 1, cat: "donde", q: "¿Ha pasado fuera?", ru: "Произошло снаружи?" },
+  { id: "q23", lvl: 3, cat: "donde", q: "¿Ha pasado en la Sala?", ru: "Произошло в Зале?" },
+  { id: "q24", lvl: 3, cat: "donde", q: "¿Ha pasado en la cocina?", ru: "Произошло на кухне?" },
+  { id: "q31", lvl: 1, cat: "cuando", q: "¿Lo ha hecho esta mañana?", ru: "Сделал сегодня утром?" },
+  { id: "q32", lvl: 1, cat: "cuando", q: "¿Lo ha hecho esta noche?", ru: "Сделал этой ночью?" },
+  { id: "q33", lvl: 3, cat: "cuando", q: "¿Lo ha hecho antes, esta semana?", ru: "Сделал раньше, на этой неделе?" },
+  { id: "q34", lvl: 1, cat: "cuando", q: "¿Lo hace siempre, cada día?", ru: "Делает всегда, каждый день?" },
+  { id: "q35", lvl: 3, cat: "cuando", q: "¿Ha durado solo un momento?", ru: "Длилось лишь мгновение?" },
+  { id: "q41", lvl: 2, cat: "como", q: "¿Ha usado las manos?", ru: "Использовал руки?" },
+  { id: "q42", lvl: 2, cat: "como", q: "¿Ha usado las piernas?", ru: "Использовал ноги?" },
+  { id: "q43", lvl: 2, cat: "como", q: "¿Ha usado la voz?", ru: "Использовал голос?" },
+  { id: "q44", lvl: 2, cat: "como", q: "¿Ha necesitado los oídos?", ru: "Нужны были уши?" },
+  { id: "q45", lvl: 2, cat: "como", q: "¿Ha necesitado los ojos?", ru: "Нужны были глаза?" },
+  { id: "q46", lvl: 2, cat: "como", q: "¿Ha usado un objeto en las manos?", ru: "Держал предмет в руках?" },
+  { id: "q51", lvl: 2, cat: "detalles", q: "¿Ha producido un sonido?", ru: "Это произвело звук?" },
+  { id: "q52", lvl: 2, cat: "detalles", q: "¿Ha habido silencio?", ru: "Была тишина?" },
+  { id: "q53", lvl: 3, cat: "detalles", q: "¿Todavía no lo ha terminado?", ru: "Ещё не закончил?" },
+  { id: "q54", lvl: 3, cat: "detalles", q: "¿Lo ha hecho muchas veces?", ru: "Делал много раз?" },
+];
+
+const CATS2 = [
+  { id: "quien",    icon: "👤", es: "¿QUIÉN?",        ru: "КТО" },
+  { id: "donde",    icon: "📍", es: "¿DÓNDE?",        ru: "ГДЕ" },
+  { id: "cuando",   icon: "🕐", es: "¿CUÁNDO?",       ru: "КОГДА" },
+  { id: "como",     icon: "✋", es: "¿CÓMO/CON QUÉ?", ru: "КАК / ЧЕМ" },
+  { id: "detalles", icon: "🔎", es: "DETALLES",       ru: "ДЕТАЛИ" },
+];
+
+// ── helpers для построения наборов ответов Главы 2 (21 вопрос) ──
+const Q2_IDS = ["q11","q12","q13","q21","q22","q23","q24","q31","q32","q33","q34","q35","q41","q42","q43","q44","q45","q46","q51","q52","q53","q54"];
+const A2 = (yes) => Object.fromEntries(Q2_IDS.map((id) => [id, yes.includes(id) ? "sí" : "no"]));
+const A2f = (yes, flips) => { const o = A2(yes); for (const k in flips) o[k] = flips[k]; return o; };
+
+const VERBS2 = [
+  {
+    key: "encender", emoji: "💡", inf: "encender", ru: "зажигать",
+    storyEs: "El primer ayudante **ha encendido** las luces esta mañana, como siempre. Es cosa de un segundo. **Ya ha encendido** todas las lámparas cuando los demás llegan. Nunca ha entrado en la Sala a oscuras.",
+    dossier: [["¿Quién?","El primer ayudante"],["¿Qué?","Enciende las luces de la Sala"],["¿Dónde?","Dentro, en la Sala"],["¿Cuándo?","Esta mañana · cada día"],["¿Cómo?","Un segundo · con las manos"]],
+    answers: A2(["q12","q21","q23","q31","q34","q35","q41","q52","q54"]),
+    fantVer: "Es el Jefe quien ha encendido algo — no un ayudante, no por la mañana sino esta noche, con un objeto en las manos, una sola vez.",
+    fantAns: A2f(["q12","q21","q23","q31","q34","q35","q41","q52","q54"], { q11:"sí", q12:"no", q31:"no", q32:"sí", q35:"no", q46:"sí", q54:"no" }),
+    trap: { q: "¿Lo ha hecho el Jefe?", ru: "Это сделал Шеф?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "recoger", emoji: "🧹", inf: "recoger", ru: "подбирать",
+    storyEs: "La segunda ayudante **ha recogido** los papeles del suelo dos veces hoy. Cada vez le lleva unos cinco minutos. **Nunca ha tocado** los ingredientes — solo recoge lo que se cae. Todavía no ha terminado del todo.",
+    dossier: [["¿Quién?","La segunda ayudante"],["¿Qué?","Recoge papeles del suelo"],["¿Dónde?","Dentro, en la Sala"],["¿Cuándo?","Hoy, dos veces"],["¿Clave?","Los ingredientes nunca · 5 min"]],
+    answers: A2(["q12","q21","q23","q41","q45","q52","q53","q54"]),
+    fantVer: "Lo han hecho varias personas, no en la Sala sino en la cocina, con un objeto, y ya lo han terminado.",
+    fantAns: A2f(["q12","q21","q23","q41","q45","q52","q53","q54"], { q13:"sí", q23:"no", q24:"sí", q46:"sí", q53:"no" }),
+    trap: { q: "¿Ha recogido los ingredientes?", ru: "Он подобрал ингредиенты?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "llevar", emoji: "🍽️", inf: "llevar", ru: "носить / приносить",
+    storyEs: "La segunda ayudante **ha llevado** el desayuno del Jefe esta mañana, como cada día. Del pasillo a la Sala son tres minutos con la bandeja en las manos. **Nunca ha llevado** los ingredientes — eso no es su tarea.",
+    dossier: [["¿Quién?","La segunda ayudante"],["¿Qué?","Lleva el desayuno (bandeja)"],["¿Dónde?","Pasillo → Sala"],["¿Cuándo?","Esta mañana · cada día"],["¿Cómo?","3 min · manos · bandeja"]],
+    answers: A2(["q12","q21","q23","q31","q34","q41","q42","q46","q52","q54"]),
+    fantVer: "No esta mañana sino esta noche, y no cada día — fue algo de una sola vez.",
+    fantAns: A2f(["q12","q21","q23","q31","q34","q41","q42","q46","q52","q54"], { q31:"no", q32:"sí", q34:"no", q54:"no" }),
+    trap: { q: "¿Lo ha llevado cada día?", ru: "Он носил это каждый день?", canon: "sí", fant: "no" },
+  },
+  {
+    key: "entrar", emoji: "🚪", inf: "entrar", ru: "входить",
+    storyEs: "La segunda ayudante **ha entrado** en la Sala dos veces hoy: por la mañana y por la tarde. Cada entrada dura solo un momento. **Esta semana ha entrado muchas veces**, siempre con algo en las manos.",
+    dossier: [["¿Quién?","La segunda ayudante"],["¿Qué?","Entra en la Sala"],["¿Dónde?","Puerta de la Sala"],["¿Cuándo?","Hoy · muchas veces esta semana"],["¿Cómo?","Un momento · piernas"]],
+    answers: A2(["q12","q21","q23","q31","q33","q35","q42","q46","q52","q54"]),
+    fantVer: "No por la mañana sino esta noche, no esta semana, no fue un momento — y todavía no ha terminado.",
+    fantAns: A2f(["q12","q21","q23","q31","q33","q35","q42","q46","q52","q54"], { q31:"no", q32:"sí", q33:"no", q35:"no", q53:"sí", q54:"no" }),
+    trap: { q: "¿Ha entrado muchas veces esta semana?", ru: "Входил много раз на этой неделе?", canon: "sí", fant: "no" },
+  },
+  {
+    key: "revisar", emoji: "📑", inf: "revisar", ru: "проверять",
+    storyEs: "El tercer ayudante **ha revisado** todos los documentos esta semana. Le ha costado varios días — son muchos papeles. Hoy todavía no ha vuelto a la Sala: ha estado con los documentos.",
+    dossier: [["¿Quién?","El tercer ayudante"],["¿Qué?","Lee y comprueba documentos"],["¿Dónde?","En el despacho"],["¿Cuándo?","Esta semana · varios días"],["¿Clave?","Solo lee · NO numera · ojos"]],
+    answers: A2(["q12","q21","q33","q45","q52","q53"]),
+    fantVer: "Fue esta noche, no durante la semana, duró un momento, usó un objeto, y ya lo ha terminado.",
+    fantAns: A2f(["q12","q21","q33","q45","q52","q53"], { q32:"sí", q33:"no", q35:"sí", q46:"sí", q53:"no" }),
+    trap: { q: "¿Ha usado un lápiz?", ru: "Он пользовался карандашом?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "ordenar", emoji: "🗂️", inf: "ordenar", ru: "упорядочивать",
+    storyEs: "Esta semana el tercer ayudante **ha ordenado** los documentos uno por uno y los **ha numerado** del uno al cien con un lápiz rojo. Le ha llevado toda la tarde del lunes. Nunca ha dejado un papel fuera de su sitio.",
+    dossier: [["¿Quién?","El tercer ayudante"],["¿Qué?","Ordena y numera documentos"],["¿Dónde?","En el despacho"],["¿Cuándo?","Esta semana · una tarde"],["¿Clave?","Lápiz rojo · numera 1→100"]],
+    answers: A2(["q12","q21","q33","q41","q45","q46","q52"]),
+    fantVer: "Lo han hecho varias personas, esta noche, en voz alta y con ruido — no en silencio.",
+    fantAns: A2f(["q12","q21","q33","q41","q45","q46","q52"], { q13:"sí", q32:"sí", q33:"no", q43:"sí", q51:"sí", q52:"no" }),
+    trap: { q: "¿Ha usado un lápiz rojo?", ru: "Он пользовался красным карандашом?", canon: "sí", fant: "no" },
+  },
+  {
+    key: "trabajar", emoji: "⚙️", inf: "trabajar", ru: "работать",
+    storyEs: "El tercer ayudante **ha trabajado** en la cocina toda la tarde de hoy. Son muchas horas de pie entre cazos y caramelo. **Hoy no ha vuelto** a la Sala ni una vez — el trabajo no se lo ha permitido.",
+    dossier: [["¿Quién?","El tercer ayudante"],["¿Qué?","Trabaja entre cazos y caramelo"],["¿Dónde?","En la cocina"],["¿Cuándo?","Toda la tarde de hoy"],["¿Clave?","Manos+ojos+piernas · hay sonido"]],
+    answers: A2(["q12","q21","q24","q41","q42","q45","q46","q51"]),
+    fantVer: "Fue en la Sala, no en la cocina, duró un momento, en silencio total, y lo hace muchas veces.",
+    fantAns: A2f(["q12","q21","q24","q41","q42","q45","q46","q51"], { q23:"sí", q24:"no", q35:"sí", q51:"no", q52:"sí", q54:"sí" }),
+    trap: { q: "¿Ha vuelto a la Sala hoy?", ru: "Он возвращался в Зал сегодня?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "volver", emoji: "🔙", inf: "volver", ru: "возвращаться",
+    storyEs: "El tercer ayudante **vuelve** a la Sala cada tarde a las seis, y el camino le lleva dos minutos desde la cocina. Pero **hoy todavía no ha vuelto**: nunca ha pasado un día así. Usa las piernas, no las manos.",
+    dossier: [["¿Quién?","El tercer ayudante"],["¿Qué?","Vuelve a la Sala (hábito)"],["¿Dónde?","Cocina → Sala"],["¿Cuándo?","Cada tarde a las seis"],["¿Clave?","Hoy todavía no · piernas · 2 min"]],
+    answers: A2(["q12","q21","q23","q24","q34","q35","q42","q52","q53","q54"]),
+    fantVer: "No viene de la cocina, fue esta mañana, no es cada día, no fue un momento, y ya lo ha terminado.",
+    fantAns: A2f(["q12","q21","q23","q24","q34","q35","q42","q52","q53","q54"], { q24:"no", q31:"sí", q34:"no", q35:"no", q53:"no" }),
+    trap: { q: "¿Ha vuelto ya hoy?", ru: "Он уже вернулся сегодня?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "caminar", emoji: "🚶", inf: "caminar", ru: "ходить",
+    storyEs: "El Jefe **ha caminado** despacio alrededor de la mesa vacía esta noche. Lo hace siempre que piensa: unos diez minutos dando vueltas. **Esta noche ya ha caminado** mucho, y todavía no tiene la respuesta.",
+    dossier: [["¿Quién?","El Jefe"],["¿Qué?","Camina pensando, en círculos"],["¿Dónde?","Dentro · alrededor de la mesa"],["¿Cuándo?","Esta noche · siempre que piensa"],["¿Clave?","Piernas · silencio · 10 min"]],
+    answers: A2(["q11","q21","q23","q32","q34","q42","q52"]),
+    fantVer: "No el Jefe sino un ayudante, fuera del palacio, no en la Sala, hablando y con ruido — sin silencio.",
+    fantAns: A2f(["q11","q21","q23","q32","q34","q42","q52"], { q11:"no", q12:"sí", q22:"sí", q23:"no", q43:"sí", q51:"sí", q52:"no" }),
+    trap: { q: "¿Ha hablado mientras lo hacía?", ru: "Он говорил во время этого?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "preguntar", emoji: "❓", inf: "preguntar", ru: "спрашивать",
+    storyEs: "Esta noche el Jefe **ha preguntado** dos cosas: quién ha entrado en la Sala y quién ha tocado los ingredientes. Cada pregunta dura un instante. Siempre pregunta en voz baja, y espera la respuesta.",
+    dossier: [["¿Quién?","El Jefe"],["¿Qué?","Pregunta al equipo"],["¿Dónde?","Dentro, en la Sala"],["¿Cuándo?","Esta noche · siempre en voz baja"],["¿Clave?","Voz + oídos · espera respuesta"]],
+    answers: A2(["q11","q21","q23","q32","q34","q43","q44","q51"]),
+    fantVer: "No el Jefe sino un ayudante, duró un momento, no necesitó los oídos y usó un objeto.",
+    fantAns: A2f(["q11","q21","q23","q32","q34","q43","q44","q51"], { q11:"no", q12:"sí", q35:"sí", q44:"no", q46:"sí" }),
+    trap: { q: "¿Ha esperado una respuesta?", ru: "Он ждал ответа?", canon: "sí", fant: "no" },
+  },
+  {
+    key: "recibir", emoji: "🛎️", inf: "recibir", ru: "принимать",
+    storyEs: "El guardia **ha recibido** a las visitas en la puerta principal toda la tarde, como cada día. Hoy **no ha recibido** a nadie de fuera: nadie ha llegado. Vigila la puerta con los ojos, y cada saludo dura un minuto.",
+    dossier: [["¿Quién?","El guardia (no ayudante, no Jefe)"],["¿Qué?","Recibe visitas en la puerta"],["¿Dónde?","Puerta principal (dentro)"],["¿Cuándo?","Toda la tarde · cada día"],["¿Clave?","Hoy no ha recibido a nadie · ojos"]],
+    answers: A2(["q21","q34","q45","q52","q54"]),
+    fantVer: "Fue el Jefe, en la Sala, esta noche, no cada día, usando las manos y sin mirar.",
+    fantAns: A2f(["q21","q34","q45","q52","q54"], { q11:"sí", q23:"sí", q32:"sí", q34:"no", q41:"sí", q45:"no" }),
+    trap: { q: "¿Ha recibido a alguien hoy?", ru: "Он принял кого-то сегодня?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "recordar", emoji: "💭", inf: "recordar", ru: "вспоминать",
+    storyEs: "El ayudante más joven **acaba de recordar** algo importante. Le ha costado toda la noche — la memoria ha vuelto de golpe. Hasta ahora no había dicho nada, porque no estaba seguro.",
+    dossier: [["¿Quién?","El ayudante más joven"],["¿Qué?","Recuerda algo importante"],["¿Dónde?","Dentro, en la Sala"],["¿Cuándo?","Acaba de · esta noche"],["¿Clave?","Mente · silencio · no lo dijo antes"]],
+    answers: A2(["q12","q21","q23","q32","q52"]),
+    fantVer: "Lo han recordado varias personas, fue esta mañana, en voz alta y con ruido — sin silencio.",
+    fantAns: A2f(["q12","q21","q23","q32","q52"], { q13:"sí", q31:"sí", q32:"no", q43:"sí", q51:"sí", q52:"no" }),
+    trap: { q: "¿Lo ha dicho en voz alta?", ru: "Он сказал это вслух?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "tocar", emoji: "✋", inf: "tocar", ru: "трогать / касаться",
+    storyEs: "Esta noche el Jefe **ha tocado** su varilla dorada un momento: la ha cogido para crear, pero la ha dejado enseguida. La toca siempre antes de empezar, es cosa de un segundo. **Nunca ha tocado** los ingredientes con las manos.",
+    dossier: [["¿Quién?","El Jefe"],["¿Qué?","Toca la varilla dorada"],["¿Dónde?","Dentro, en la Sala (mesa)"],["¿Cuándo?","Esta noche · siempre antes de empezar"],["¿Clave?","Manos · varilla, NO ingredientes"]],
+    answers: A2(["q11","q21","q23","q32","q34","q35","q41","q46","q52"]),
+    fantVer: "No el Jefe sino un ayudante, no en la Sala sino en la cocina, no fue un momento, y miró con los ojos.",
+    fantAns: A2f(["q11","q21","q23","q32","q34","q35","q41","q46","q52"], { q11:"no", q12:"sí", q23:"no", q24:"sí", q35:"no", q45:"sí" }),
+    trap: { q: "¿Ha tocado los ingredientes?", ru: "Он трогал ингредиенты?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "buscar", emoji: "🔦", inf: "buscar", ru: "искать",
+    storyEs: "Todos **han buscado** los ingredientes esta noche: en la Sala, en la cocina, en el jardín. Llevan más de una hora buscando. **Todavía no han encontrado** nada. Nunca habían buscado así, con tanto miedo.",
+    dossier: [["¿Quién?","Todos juntos"],["¿Qué?","Buscan los ingredientes"],["¿Dónde?","Sala + cocina + jardín (dentro y fuera)"],["¿Cuándo?","Esta noche · más de una hora"],["¿Clave?","Todavía no han encontrado nada"]],
+    answers: A2(["q13","q21","q22","q23","q24","q32","q41","q42","q45","q53"]),
+    fantVer: "Lo ha buscado el Jefe solo, solo dentro (no en el jardín, no en la cocina), un momento, y ya lo ha encontrado.",
+    fantAns: A2f(["q13","q21","q22","q23","q24","q32","q41","q42","q45","q53"], { q11:"sí", q13:"no", q22:"no", q24:"no", q35:"sí", q53:"no" }),
+    trap: { q: "¿Ya lo ha encontrado?", ru: "Он уже это нашёл?", canon: "no", fant: "sí" },
+  },
+  {
+    key: "llamar", emoji: "📣", inf: "llamar", ru: "звать",
+    storyEs: "Esta noche el Jefe **ha llamado** a su equipo, como hace siempre en los momentos difíciles. Una sola palabra, un segundo, y esta vez todos han acudido enseguida. **Hoy los ha llamado** sin sonreír — algo va mal.",
+    dossier: [["¿Quién?","El Jefe"],["¿Qué?","Llama al equipo con una palabra"],["¿Dónde?","Dentro, en la Sala"],["¿Cuándo?","Esta noche · siempre en momentos difíciles"],["¿Clave?","Voz · NO espera respuesta · oídos no"]],
+    answers: A2(["q11","q21","q23","q32","q34","q35","q43","q51"]),
+    fantVer: "No el Jefe sino un ayudante, fue por la mañana, usando un objeto, y lo ha hecho muchas veces.",
+    fantAns: A2f(["q11","q21","q23","q32","q34","q35","q43","q51"], { q11:"no", q12:"sí", q31:"sí", q32:"no", q46:"sí", q54:"sí" }),
+    trap: { q: "¿Ha esperado una respuesta?", ru: "Он ждал ответа?", canon: "no", fant: "sí" },
+  },
+];
+
+const verbByKey2 = (k) => VERBS2.find((v) => v.key === k);
+
+/* ============================================================
+   РЕЕСТР ИГР (картриджи). Каждый pack самодостаточен:
+   свои глаголы, банк вопросов, категории и резолвер «лжи».
+   - cap1: ложь = ответы глагола-маски (verbByKey(mask).answers)
+   - cap2: ложь = собственный fantAns глагола
+   ============================================================ */
+const PACKS = {
+  cap1: {
+    id: "cap1", num: 1, titulo: "El día en el Palacio de Caramelo",
+    grammar: "Presente", emoji: "☀️",
+    desc: "Один день Шефа во дворце. 15 глаголов в настоящем времени.",
+    VERBS, QUESTIONS, CATS, verbByKey,
+    fantAnsOf: (v) => verbByKey(v.mask).answers,
+  },
+  cap2: {
+    id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
+    grammar: "Pretérito Perfecto", emoji: "🌙",
+    desc: "Ночное расследование: пропали ингредиенты. 15 глаголов в Perfecto.",
+    VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
+    fantAnsOf: (v) => v.fantAns,
+  },
+};
+const DEFAULT_PACK = PACKS.cap1;
+
 function rnd(n) { return Math.floor(Math.random() * n); }
 function shuffle(a) { const x = [...a]; for (let i = x.length - 1; i > 0; i--) { const j = rnd(i + 1); [x[i], x[j]] = [x[j], x[i]]; } return x; }
 
@@ -1371,6 +1580,8 @@ export default function SimuladorJugador() {
     } catch { return null; }
   });
 
+  // Выбранная игра (картридж). null → показываем меню выбора главы.
+  const [pack, setPack] = useState(null);
   const goDiario = () => { setRole("diario"); setEntered(true); };
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
@@ -1379,18 +1590,53 @@ export default function SimuladorJugador() {
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (!entered) return <Welcome onEnter={() => setEntered(true)} onDiario={goDiario} onLive={() => { setRole("live"); setEntered(true); }} onTour={() => setShowTour(true)} />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
-  if (!role) return <RolePicker onPick={setRole} session={sess} onBack={() => setEntered(false)} onDiario={goDiario} />;
-  if (role === "detective") return <DetectiveMode onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
-  return <WitnessMode role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
+  // Меню выбора игры (Глава 1 / Глава 2) — перед выбором роли
+  if (!pack) return <ChapterPicker onPick={setPack} session={sess} onBack={() => setEntered(false)} onDiario={goDiario} />;
+  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => setPack(null)} onDiario={goDiario} />;
+  if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
+  return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
+}
+
+// ============================================================
+// ВЫБОР ИГРЫ (картриджа) — Глава 1 / Глава 2
+// ============================================================
+function ChapterPicker({ onPick, session, onBack, onDiario }) {
+  const list = [PACKS.cap1, PACKS.cap2];
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Elige el caso · выбери дело" />
+      <ScoreBadge session={session} />
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Две игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
+      {list.map((p) => (
+        <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${p.id === "cap2" ? C.raspberry : C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+          <div style={{ width: 7, background: p.id === "cap2" ? C.raspberry : C.gold, flexShrink: 0 }} />
+          <div style={{ padding: "16px 18px", flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase" }}>{p.emoji} Capítulo {p.num} · {p.grammar}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: p.id === "cap2" ? C.raspberry : C.goldDeep, marginTop: 3, lineHeight: 1.25 }}>{p.titulo}</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.5 }}>{p.desc}</div>
+            <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 6 }}>{p.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+          </div>
+          <div style={{ fontSize: 22, color: C.gold, alignSelf: "center", paddingRight: 12 }}>›</div>
+        </div>
+      ))}
+      {onBack && <div style={{ textAlign: "center", marginTop: 6 }}><button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад</button></div>}
+      <div style={{ textAlign: "center", marginTop: 10 }}>
+        <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          📔 Тренируешь только грамматику? Mi Diario →
+        </button>
+      </div>
+      <Footer />
+    </div></div>
+  );
 }
 
 // ============================================================
 // ВЫБОР РОЛИ
 // ============================================================
-function RolePicker({ onPick, session, onBack, onDiario }) {
+function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) {
   const [storyKey, setStoryKey] = useState(null);
-  const story = storyKey ? verbByKey(storyKey) : null;
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
   const cards = [
     { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
@@ -1398,8 +1644,8 @@ function RolePicker({ onPick, session, onBack, onDiario }) {
   ];
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="Elige tu rol para entrenar" />
-      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>📖 Вернуться к истории</button></div>}
+      <Header subtitle={`Cap. ${pack.num} · ${pack.grammar} · elige tu rol`} />
+      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую игру</button></div>}
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
       {cards.map((c) => (
@@ -1412,12 +1658,12 @@ function RolePicker({ onPick, session, onBack, onDiario }) {
         </div>
       ))}
 
-      {/* БИБЛИОТЕКА ГЛАГОЛОВ — те же 15 глаголов с историями, что у детектива */}
+      {/* БИБЛИОТЕКА ГЛАГОЛОВ — глаголы выбранной главы */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "16px 18px", marginBottom: 14 }}>
         <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 Глаголы игры — истории</div>
-        <p style={{ ...pHint, marginTop: 4 }}>Тап по глаголу — его история поверх экрана. Все 15 глаголов La Ciudad.</p>
+        <p style={{ ...pHint, marginTop: 4 }}>Тап по глаголу — его история поверх экрана. Все {pack.VERBS.length} глаголов главы.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-          {VERBS.map((v) => (
+          {pack.VERBS.map((v) => (
             <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
               <div>{v.emoji} {v.inf}</div>
               <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
@@ -1444,11 +1690,11 @@ function RolePicker({ onPick, session, onBack, onDiario }) {
 // ============================================================
 // ДЕТЕКТИВ — подсчёт баллов по числу вопросов
 // ============================================================
-function DetectiveMode({ onHome, onScore, session, onDiario }) {
+function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario }) {
   function freshGame() {
-    const verb = VERBS[rnd(VERBS.length)];
+    const verb = pack.VERBS[rnd(pack.VERBS.length)];
     const canonIsA = Math.random() < 0.5;
-    return { verb, canonIsA, deck: shuffle(QUESTIONS), idx: 0, log: [], result: null };
+    return { verb, canonIsA, deck: shuffle(pack.QUESTIONS), idx: 0, log: [], result: null };
   }
   const [g, setG] = useState(freshGame);
   const [guessing, setGuessing] = useState(false);
@@ -1461,7 +1707,7 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
 
   const current = g.deck[g.idx % g.deck.length];
   const canonAns = g.verb.answers[current.id];
-  const fantasyAns = verbByKey(g.verb.mask).answers[current.id];
+  const fantasyAns = pack.fantAnsOf(g.verb)[current.id];
   const ansA = g.canonIsA ? canonAns : fantasyAns;
   const ansB = g.canonIsA ? fantasyAns : canonAns;
 
@@ -1487,7 +1733,7 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
   }
   function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); setAskedInCurrent(new Set()); setRuledOut(new Set()); }
 
-  const story = storyKey ? verbByKey(storyKey) : null;
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
 
   return (
     <div style={wrap}><div style={maxw}>
@@ -1501,7 +1747,7 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
           </h2>
           <p style={{ fontSize: 15, margin: "6px 0" }}>
             Глагол был: <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
-            {!g.result.ok && <> Ты поверил не тому свидетелю. Назвал: <strong>{verbByKey(g.result.picked).inf}</strong> — {verbByKey(g.result.picked).ru}.</>}
+            {!g.result.ok && <> Ты поверил не тому свидетелю. Назвал: <strong>{pack.verbByKey(g.result.picked).inf}</strong> — {pack.verbByKey(g.result.picked).ru}.</>}
           </p>
           {g.result.ok && (
             <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "10px 14px", display: "inline-block" }}>
@@ -1607,12 +1853,12 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6 }}>
               <h2 style={h2}>Проверь гипотезу</h2>
               <span style={{ fontSize: 13.5, fontWeight: 700, color: ruledOut.size ? C.emeraldDeep : C.inkSoft }}>
-                Осталось {VERBS.length - ruledOut.size} из {VERBS.length}
+                Осталось {pack.VERBS.length - ruledOut.size} из {pack.VERBS.length}
               </span>
             </div>
             <p style={pHint}>Тап по глаголу — его история поверх экрана. Тап по ✕ — отмести глагол (погасить). Погашенные тускнеют, держать их в голове не нужно.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-              {VERBS.map((v) => {
+              {pack.VERBS.map((v) => {
                 const out = ruledOut.has(v.key);
                 return (
                   <div key={v.key} style={{ position: "relative", opacity: out ? 0.35 : 1 }}>
@@ -1644,7 +1890,7 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
       {/* УГАДЫВАНИЕ — всплывает поверх экрана */}
       <Sheet open={guessing && !g.result} onClose={() => setGuessing(false)} title="Твоя версия — какой это глагол?">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {VERBS.map((v) => {
+          {pack.VERBS.map((v) => {
             const out = ruledOut.has(v.key);
             return (
               <button key={v.key} onClick={() => guess(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 14px", fontSize: 14.5, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3, opacity: out ? 0.35 : 1, textDecoration: out ? "line-through" : "none" }}>
@@ -1662,13 +1908,13 @@ function DetectiveMode({ onHome, onScore, session, onDiario }) {
 // ============================================================
 // СВИДЕТЕЛЬ — раунд 18 вопросов, система баллов
 // ============================================================
-function WitnessMode({ role, onHome, onScore, session, onDiario }) {
+function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDiario }) {
   const isCanon = role === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const accentDeep = isCanon ? C.emeraldDeep : C.raspberryDeep;
 
-  const [verb, setVerb] = useState(() => VERBS[rnd(VERBS.length)]);
-  const [deck, setDeck] = useState(() => shuffle(QUESTIONS));
+  const [verb, setVerb] = useState(() => pack.VERBS[rnd(pack.VERBS.length)]);
+  const [deck, setDeck] = useState(() => shuffle(pack.QUESTIONS));
   const [idx, setIdx] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [score, setScore] = useState({ good: 0, total: 0 });
@@ -1711,7 +1957,7 @@ function WitnessMode({ role, onHome, onScore, session, onDiario }) {
     if (roundDone) return;
     setFeedback(null);
     const newIdx = idx + 1;
-    if (newIdx % deck.length === 0) { setDeck(shuffle(QUESTIONS)); setIdx(0); }
+    if (newIdx % deck.length === 0) { setDeck(shuffle(pack.QUESTIONS)); setIdx(0); }
     else setIdx(newIdx);
     const newRoundQ = roundQ + 1;
     setRoundQ(newRoundQ);
@@ -1722,8 +1968,8 @@ function WitnessMode({ role, onHome, onScore, session, onDiario }) {
 
   function startNextRound() {
     // Новый глагол + сброс раунда
-    setVerb(VERBS[rnd(VERBS.length)]);
-    setDeck(shuffle(QUESTIONS));
+    setVerb(pack.VERBS[rnd(pack.VERBS.length)]);
+    setDeck(shuffle(pack.QUESTIONS));
     setIdx(0);
     setFeedback(null);
     setShowStory(false);
@@ -1875,7 +2121,7 @@ function WitnessMode({ role, onHome, onScore, session, onDiario }) {
         ) : (
           <>
             <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🔴 ОТВЕТЫ ПО ТВОЕЙ ЛЕГЕНДЕ</div>
-            {QUESTIONS.map((q) => {
+            {pack.QUESTIONS.map((q) => {
               const fa = liveFantAns(verb)[q.id];
               return (
                 <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
