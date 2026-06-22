@@ -1524,8 +1524,106 @@ function LiveGame({ onHome }) {
   );
 }
 
+// ============================================================
+// CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
+// Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
+// ============================================================
+function ChapterWelcome({ pack, onEnter, onDiario, onBack }) {
+  const isCapOne = pack.id === "cap1";
+  const maya = isCapOne ? MAYA : MAYA2;
+  const [ru, setRu] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [glosOpen, setGlosOpen] = useState(false);
+  const [storyKey, setStoryKey] = useState(null);
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle={`${pack.emoji} Capítulo ${pack.num} · ${pack.grammar}`} />
+
+      {onBack && (
+        <div style={{ textAlign: "center", marginBottom: 14 }}>
+          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую главу</button>
+        </div>
+      )}
+
+      {/* ИСТОРИЯ-МАЯК */}
+      <Block stripe={C.gold}>
+        <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div>
+            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 {pack.titulo}</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>История-маяк · все {pack.VERBS.length} глаголов спрятаны здесь</div>
+          </div>
+          <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {storyOpen && (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ textAlign: "right", marginBottom: 8 }}>
+              <button onClick={() => setRu(v => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "5px 13px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
+                {ru ? "ES ✓" : "RU перевод"}
+              </button>
+            </div>
+            <div style={{ fontSize: 15.5, lineHeight: 1.85, color: C.ink }}>
+              {maya.es.map((p, i) => (
+                <div key={i} style={{ marginBottom: 12 }}>
+                  <div><Highlighted text={p} /></div>
+                  {ru && <div style={{ fontSize: 13, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{maya.ru[i]}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Block>
+
+      {/* ГЛОССАРИЙ ГЛАГОЛОВ */}
+      <Block stripe={C.emerald}>
+        <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 {pack.VERBS.length} глаголов · тап — история глагола</div>
+          <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+        </div>
+        {glosOpen && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 12 }}>
+            {pack.VERBS.map((v) => (
+              <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 8, padding: "8px 10px", fontSize: 13.5, cursor: "pointer", fontFamily: SERIF, textAlign: "left" }}>
+                <strong style={{ color: C.raspberry }}>{v.emoji} {v.inf}</strong><br/>
+                <span style={{ color: C.inkSoft, fontSize: 12 }}>{v.ru}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </Block>
+
+      {/* ТРЕНАЖЁР СПРЯЖЕНИЙ */}
+      <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>📊 Тренажёр спряжений</div>
+        {isCapOne ? (
+          <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть Mi Diario →
+          </button>
+        ) : (
+          <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.5 }}>
+            Тренажёр для Pretérito Perfecto — скоро появится. Пока практикуй роли ниже.
+          </div>
+        )}
+      </div>
+
+      {/* ГЛАВНАЯ КНОПКА */}
+      <button onClick={onEnter} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "17px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
+        Тренировать роли →
+      </button>
+
+      <Footer />
+
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
+    </div></div>
+  );
+}
+
 export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
+  const [chapterShown, setChapterShown] = useState(false);
   const [role, setRole] = useState(null);
   const [session, setSession] = useState(loadScore);
   // Облачный счёт: warmup — очки разминки Don Verbo, total — общий (тренажёр + разминка)
@@ -1595,7 +1693,13 @@ export default function SimuladorJugador() {
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
-  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setPack(null); setEntered(false); }} onDiario={goDiario} />;
+  if (!chapterShown) return <ChapterWelcome
+    pack={pack}
+    onEnter={() => setChapterShown(true)}
+    onDiario={goDiario}
+    onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
+  />;
+  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={goDiario} />;
   if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
   return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
 }
@@ -2560,6 +2664,37 @@ const MAYA = {
     ["cantar", "петь"], ["llamar", "звать / звонить"], ["hablar", "говорить"],
     ["preparar", "готовить"], ["preguntar", "спрашивать"], ["comprar", "покупать"],
     ["trabajar", "работать"], ["estudiar", "изучать"], ["llevar", "носить с собой"],
+  ],
+};
+
+// ============================================================
+// ИСТОРИЯ-МАЯК Главы 2 — El Gran Misterio del Palacio de Caramelo
+// ============================================================
+const MAYA2 = {
+  es: [
+    "El Jefe toma su varilla dorada. Es el momento de crear. Pero las palabras no vienen. Mezcla, agita, espera. Nada. La varilla no brilla. El cuenco está vacío. Algo falta — algo esencial, algo sin lo cual las palabras no nacen.",
+    "El Jefe mira a sus ayudantes. Los ayudantes miran el cuenco. «Los ingredientes», dice el Jefe en voz baja. «¿Dónde están los ingredientes gramaticales?» Nadie responde. El Jefe deja la varilla sobre la mesa despacio.",
+    "«Bien. Esta noche nadie sale del palacio. Vamos a recordar juntos qué ha pasado hoy.» El primer ayudante habla: «Esta mañana **he encendido** las luces. He dejado los ingredientes sobre la mesa. Los he visto con mis propios ojos.»",
+    "La segunda ayudante añade: «Yo hoy **he entrado** dos veces. **He llevado** el desayuno del Jefe. **He recogido** los papeles del suelo. Pero no **he tocado** los ingredientes. Nunca los toco.»",
+    "El tercero dice en voz baja: «Esta semana **he revisado** todos los documentos. Los **he ordenado**, los he numerado. Pero hoy no **he vuelto** a la Sala. **He trabajado** en la cocina toda la tarde.»",
+    "El Jefe escucha. **Camina** despacio alrededor de la mesa vacía. Se detiene. «¿Alguien **ha recibido** una visita hoy?» Silencio. El ayudante más joven levanta la mano: «Yo... acabo de **recordar** algo. Esta tarde **he buscado** algo en la Sala. Vi una sombra. Pero no dije nada porque no estaba seguro.»",
+    "El Jefe lo mira fijamente. «Esta noche **he preguntado** lo que necesitaba saber. **He llamado** a todos». «Ahora ya estás seguro», dice. «Y nosotros acabamos de empezar la investigación.»",
+  ],
+  ru: [
+    "Шеф берёт свой золотой венчик. Настало время творить. Но слова не приходят. Он мешает, взбивает, ждёт. Ничего. Венчик не светится. Чаша пуста. Чего-то не хватает — чего-то важного, без чего слова не рождаются.",
+    "Шеф смотрит на помощников. Помощники смотрят на чашу. «Ингредиенты, — тихо говорит Шеф. — Где грамматические ингредиенты?» Никто не отвечает. Шеф медленно кладёт венчик на стол.",
+    "«Хорошо. Сегодня ночью никто не выходит из дворца. Давайте вместе вспомним, что произошло сегодня». Первый помощник: «Сегодня утром я зажёг свет. Я оставил ингредиенты на столе. Я видел их собственными глазами».",
+    "Вторая помощница: «Я сегодня входила дважды. Я приносила завтрак Шефа. Я подбирала бумаги с пола. Но я не трогала ингредиенты. Я их никогда не трогаю».",
+    "Третий говорит тихо: «На этой неделе я проверил все документы. Я их упорядочил, пронумеровал. Но сегодня я не возвращался в Зал. Я весь день работал на кухне».",
+    "Шеф слушает. Он медленно ходит вокруг пустого стола. Останавливается. «Кто-нибудь принимал сегодня гостя?» Тишина. Тогда самый младший помощник поднимает руку: «Я... я только что кое-что вспомнил. Сегодня вечером я искал кое-что в Зале. Я видел тень. Но я ничего не сказал, потому что не был уверен».",
+    "Шеф пристально смотрит на него. «Этой ночью я спросил всё, что нужно. Я позвал всех». «Теперь ты уверен, — говорит он. — А мы только что начали расследование».",
+  ],
+  glos: [
+    ["encender", "зажигать"], ["recoger", "подбирать"], ["llevar", "нести/принести"],
+    ["entrar", "входить"], ["revisar", "проверять"], ["ordenar", "упорядочивать"],
+    ["trabajar", "работать"], ["volver", "возвращаться"], ["caminar", "ходить"],
+    ["preguntar", "спрашивать"], ["recibir", "принимать"], ["recordar", "вспоминать"],
+    ["tocar", "трогать"], ["buscar", "искать"], ["llamar", "звать"],
   ],
 };
 
