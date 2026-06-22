@@ -411,7 +411,7 @@ const PACKS = {
   cap2: {
     id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
     grammar: "Pretérito Perfecto", emoji: "🌙",
-    desc: "Ночное расследование: пропали ингредиенты. 15 глаголов в Perfecto.",
+    desc: "Ночное расследование: пропали ингредиенты. 15 глаголов en Pretérito Perfecto.",
     VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
     fantAnsOf: (v) => v.fantAns,
   },
@@ -1602,7 +1602,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onBack }) {
           </button>
         ) : (
           <button onClick={onPerfecto} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-            Открыть тренажёр Perfecto →
+            Открыть тренажёр Pretérito Perfecto →
           </button>
         )}
       </div>
@@ -1682,11 +1682,13 @@ export default function SimuladorJugador() {
   });
   // Показывать тренажёр Perfecto (Уровень 2)
   const [showPerfecto, setShowPerfecto] = useState(false);
+  const [showDiario2, setShowDiario2] = useState(false);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
   const goDiario = () => { setRole("diario"); setEntered(true); };
   const goPerfecto = () => setShowPerfecto(true);
+  const goDiario2 = () => setShowDiario2(true);
   const grammarAction = (pack && pack.id === "cap2") ? goPerfecto : goDiario;
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
@@ -1702,10 +1704,11 @@ export default function SimuladorJugador() {
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
   if (showPerfecto) return <PerfectoTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPerfecto(false)} />;
+  if (showDiario2) return <DiarioMode2 onHome={() => setShowDiario2(false)} onScore={p => addScore("diario", p)} session={sess} />;
   if (!chapterShown) return <ChapterWelcome
     pack={pack}
     onEnter={() => setChapterShown(true)}
-    onDiario={goDiario}
+    onDiario={pack && pack.id === "cap2" ? goDiario2 : goDiario}
     onPerfecto={() => setShowPerfecto(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
@@ -1851,7 +1854,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       <div style={{ textAlign: "center", marginTop: 6 }}>
         <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
-          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Perfecto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
+          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
         </button>
       </div>
       <Footer />
@@ -1936,7 +1939,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
           <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
           <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
             <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Perfecto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
           </div>
           {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
         </Block>
@@ -2182,7 +2185,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
           <br />
           <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
             <Btn bg={C.emerald} onClick={startNextRound}>Следующий глагол →</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Perfecto →" : "📔 Спряжение в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto →" : "📔 Спряжение в Mi Diario →"}</Btn>
           </div>
           {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
         </Block>
@@ -2950,6 +2953,231 @@ function DiarioMode({ onHome, onScore, session }) {
         📊 Entrenador de conjugación{errorVerbs.length ? ` · ${errorVerbs.length} con errores` : ""}
       </Btn>
 
+      <Footer onHome={onHome} />
+    </div></div>
+  );
+}
+
+
+
+// ============================================================
+// MI DIARIO v2 — Pretérito Perfecto (cap2)
+// ============================================================
+
+const DIARIO2 = {
+  title: "Mi Diario · Esta semana con Ana",
+  segments: [
+    { t: "Esta semana ha sido especial. El lunes, mi amiga Ana me ha " }, { blank: 0 },
+    { t: " por teléfono. «¿Tú has " }, { blank: 1 },
+    { t: " mucho esta semana?», me ha dicho. Yo he " }, { blank: 2 },
+    { t: " que hacía tiempo que no nos veíamos.\n\nEl martes hemos " }, { blank: 3 },
+    { t: " juntas en una librería del centro. «¿Has " }, { blank: 4 },
+    { t: " ya ese libro que querías?», le he preguntado. Ella ha " }, { blank: 5 },
+    { t: " un mensaje importante y ha " }, { blank: 6 },
+    { t: " si podíamos parar un momento. Yo he " }, { blank: 7 },
+    { t: " mis notas mientras esperaba.\n\nDespués hemos " }, { blank: 8 },
+    { t: " hasta el parque y hemos " }, { blank: 9 },
+    { t: " algo de comer. Su hermana ha " }, { blank: 10 },
+    { t: " las luces del jardín cuando llegamos. Sus vecinos han " }, { blank: 11 },
+    { t: " todo el patio — estaba precioso.\n\nPor la tarde, he " }, { blank: 12 },
+    { t: " mis cosas y he " }, { blank: 13 },
+    { t: " el timbre de su portal para despedirme. Por la noche he " }, { blank: 14 },
+    { t: " a casa tarde. Ha sido una semana bonita pero cansada." },
+  ],
+  // person использует ключи PRON2: yo / tu / el / nos / vos / ell
+  blanks: [
+    { person: "el",  accept: ["llamar"] },
+    { person: "tu",  accept: ["trabajar"] },
+    { person: "yo",  accept: ["recordar"] },
+    { person: "nos", accept: ["entrar"] },
+    { person: "tu",  accept: ["buscar"] },
+    { person: "el",  accept: ["recibir"] },
+    { person: "el",  accept: ["preguntar"] },
+    { person: "yo",  accept: ["revisar"] },
+    { person: "nos", accept: ["caminar"] },
+    { person: "nos", accept: ["llevar"] },
+    { person: "el",  accept: ["encender"] },
+    { person: "ell", accept: ["ordenar"] },
+    { person: "yo",  accept: ["recoger"] },
+    { person: "yo",  accept: ["tocar"] },
+    { person: "yo",  accept: ["volver"] },
+  ],
+};
+
+// Проверка пропуска Pretérito Perfecto: «haber(лицо) + participio»
+// ok    — правильный глагол + правильное лицо haber
+// conj  — правильный participio, но неверная форма haber
+// sense — другой participio из cap2, не по смыслу
+// bad   — не распознано
+// empty — пусто
+const PRON2_KEY_IDX = Object.fromEntries(PRON2.map((p, i) => [p.key, i]));
+function analyzeBlankPerfecto(input, b) {
+  const v = normES(input);
+  if (!v) return { st: "empty" };
+  const parts = v.split(" ");
+  if (parts.length !== 2) return { st: "bad" };
+  const [haberIn, partIn] = parts;
+  const expectedHaber = HABER2[PRON2_KEY_IDX[b.person]];
+  const acceptParts = b.accept.map(k => { const e = NIVEL2_ALL.find(x => x.inf === k); return e ? e.part : null; }).filter(Boolean);
+  if (haberIn === expectedHaber && acceptParts.includes(partIn)) return { st: "ok" };
+  if (acceptParts.includes(partIn)) return { st: "conj", verb: b.accept[0] };
+  const allParts2 = NIVEL2_ALL.map(x => x.part);
+  if (allParts2.includes(partIn)) { const ve = NIVEL2_ALL.find(x => x.part === partIn); return { st: "sense", verb: ve.inf }; }
+  return { st: "bad" };
+}
+
+function ConjHintPerfecto() {
+  const [open, setOpen] = useState(true);
+  return (
+    <Block stripe={C.gold}>
+      <div onClick={() => setOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Pretérito Perfecto · haber</span>
+        <span style={{ color: C.goldDeep, fontSize: 13 }}>{open ? "ocultar ▲" : "mostrar ▼"}</span>
+      </div>
+      {open && (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ ...pHint, marginBottom: 9 }}>Auxiliar <strong>haber</strong> + participio. Escribe las dos palabras: «he trabajado», «ha llamado»...</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            {[[0,3],[1,4],[2,5]].flatMap(([a,bI]) => [
+              <div key={PRON2[a].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+                <span style={{ color: C.inkSoft }}>{PRON2[a].label}</span>{" "}
+                <strong style={{ color: C.raspberry }}>{HABER2[a]}</strong>
+              </div>,
+              <div key={PRON2[bI].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+                <span style={{ color: C.inkSoft }}>{PRON2[bI].label}</span>{" "}
+                <strong style={{ color: C.raspberry }}>{HABER2[bI]}</strong>
+              </div>
+            ])}
+          </div>
+        </div>
+      )}
+    </Block>
+  );
+}
+
+function DiarioMode2({ onHome, onScore, session }) {
+  const N = DIARIO2.blanks.length;
+  const [vals, setVals] = useState({});
+  const [res, setRes] = useState({});
+  const [everFailed, setEverFailed] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [trainer, setTrainer] = useState(null);
+  const [awardedPts, setAwardedPts] = useState(null);
+
+  const allOk = checked && DIARIO2.blanks.every((_, i) => res[i] && res[i].st === "ok");
+  const filledAll = DIARIO2.blanks.every((_, i) => normES(vals[i]) !== "");
+  const errorVerbs = [...new Set(Object.values(res).filter(r => r.st === "conj").map(r => r.verb))];
+  const hasConj = Object.values(res).some(r => r.st === "conj");
+  const hasSense = Object.values(res).some(r => r.st === "sense");
+  const hasBad = Object.values(res).some(r => r.st === "bad");
+
+  function check() {
+    const r = {}; const ef = { ...everFailed };
+    DIARIO2.blanks.forEach((b, i) => { const a = analyzeBlankPerfecto(vals[i], b); r[i] = a; if (a.st !== "ok") ef[i] = true; });
+    setRes(r); setEverFailed(ef); setChecked(true);
+    const allNowOk = DIARIO2.blanks.every((_, i) => r[i] && r[i].st === "ok");
+    if (allNowOk && awardedPts === null) {
+      const corrected = DIARIO2.blanks.filter((_, i) => ef[i]).length;
+      const pts = corrected === 0 ? 5 : corrected <= 2 ? 3 : 1;
+      setAwardedPts(pts); if (onScore) onScore(pts);
+    }
+  }
+
+  if (trainer) {
+    return <PerfectoConjugation startVerb={trainer} onScore={onScore} onBack={() => { setTrainer(null); setChecked(false); }} />;
+  }
+
+  let scoreBlock = null;
+  if (allOk) {
+    const corrected = DIARIO2.blanks.filter((_, i) => everFailed[i]).length;
+    const first = N - corrected;
+    const score10 = Math.round(((first + 0.5 * corrected) / N) * 10);
+    scoreBlock = (
+      <Block stripe={C.emerald}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
+          <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
+          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено: <strong>{corrected}</strong></div>
+          {awardedPts !== null && (
+            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "8px 16px", display: "inline-block" }}>
+              <span style={{ fontSize: 20, fontWeight: 800, color: C.raspberry }}>+{awardedPts}</span>
+              <span style={{ fontSize: 13, color: C.goldDeep }}> 📔 в копилку!</span>
+            </div>
+          )}
+        </div>
+      </Block>
+    );
+  }
+
+  function blankStyle(st) {
+    if (st === "ok") return { bd: C.emerald, bg: "#EAF5F0", col: C.emeraldDeep };
+    if (st === "conj") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };
+    if (st === "sense") return { bd: "#D98A2B", bg: "#FCF1E0", col: "#A85F12" };
+    if (st === "bad") return { bd: "#3B7CB8", bg: "#E8F1F9", col: "#2C5F8A" };
+    return { bd: C.gold, bg: "#fff", col: C.ink };
+  }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📔 Mi Diario · Pretérito Perfecto" />
+      <ScoreBadge session={session} />
+      <ConjHintPerfecto />
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO2.title}</div>
+        <div style={pHint}>Впиши каждый глагол в форме <strong>Pretérito Perfecto</strong>: haber + participio. Например: «he llamado», «hemos entrado». Лицо haber подсказывает контекст. Подсказка сверху.</div>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
+          <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 5, fontWeight: 600 }}>Verbos disponibles · выбирай из этих 15:</div>
+          <div style={{ fontSize: 13, color: C.raspberry, lineHeight: 1.7, fontWeight: 600 }}>{NIVEL2_ALL.map(x => x.inf).join(" · ")}</div>
+        </div>
+      </Block>
+      <Block stripe={C.gold}>
+        <div style={{ fontSize: 17, lineHeight: 2.1, color: C.ink }}>
+          {DIARIO2.segments.map((seg, idx) => {
+            if (seg.t !== undefined) {
+              return seg.t.split("\n\n").map((para, pi, arr) => (
+                <span key={idx + "_" + pi}>{para}{pi < arr.length - 1 ? <span style={{ display: "block", height: 10 }} /> : null}</span>
+              ));
+            }
+            const i = seg.blank;
+            const st = res[i] ? res[i].st : undefined;
+            const locked = st === "ok";
+            const s = blankStyle(st);
+            return (
+              <input key={"b" + i} value={vals[i] || ""} disabled={locked}
+                onChange={e => setVals(v => ({ ...v, [i]: e.target.value }))}
+                placeholder="…"
+                style={{ width: 155, margin: "0 2px", padding: "3px 8px", fontSize: 15, fontFamily: SERIF, textAlign: "center",
+                  borderRadius: 7, outline: "none", verticalAlign: "middle",
+                  border: `2px solid ${s.bd}`, background: s.bg, color: s.col, fontWeight: st && st !== "empty" ? 700 : 400 }} />
+            );
+          })}
+        </div>
+      </Block>
+      {checked && !allOk && (
+        <Block stripe={C.raspberry}>
+          {hasConj && <div style={{ marginBottom: hasSense || hasBad ? 8 : 0 }}>
+            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Неверная форма haber</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Participio верный, но лицо haber не то. Иди в тренажёр — отработай спряжение и вернись исправить.</div>
+          </div>}
+          {hasSense && <div style={{ marginBottom: hasBad ? 8 : 0 }}>
+            <div style={{ fontWeight: 700, color: "#A85F12" }}>🟠 Не по смыслу</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Participio верный, но этот глагол сюда не подходит. Перечитай фразу и выбери другой.</div>
+          </div>}
+          {hasBad && <div>
+            <div style={{ fontWeight: 700, color: "#2C5F8A" }}>🔵 Не распознано</div>
+            <div style={{ ...pHint, marginTop: 2 }}>Проверь написание. Формат: «ha llamado», «hemos entrado» (haber + participio, две слова).</div>
+          </div>}
+        </Block>
+      )}
+      {!allOk && (
+        <Btn bg={filledAll ? C.gold : "#D8CBB4"} disabled={!filledAll} onClick={check} style={{ width: "100%", marginBottom: 12 }}>
+          {filledAll ? "Comprobar el diario" : "Rellena todos los huecos…"}
+        </Btn>
+      )}
+      {scoreBlock}
+      <Btn bg={C.raspberry} onClick={() => setTrainer(errorVerbs[0] || NIVEL2_ALL[0].inf)} style={{ width: "100%", marginBottom: 14 }}>
+        📊 Тренажёр спряжения{errorVerbs.length ? ` · ${errorVerbs.length} с ошибками` : ""}
+      </Btn>
       <Footer onHome={onHome} />
     </div></div>
   );
