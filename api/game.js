@@ -16,6 +16,10 @@
 
 const TTL = String(60 * 60 * 12); // игра живёт в базе 12 часов
 
+// Telegram ID тест-аккаунтов (репетитор / Оксана Майкова).
+// Исключаются из gamesPlayed, voronka и league check.
+const TEST_IDS = ['316593124', '835260826'];
+
 function env() {
   return {
     url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
@@ -189,6 +193,62 @@ function doReveal(g, guessedBy, guessedByName) {
     ts: Date.now(),
   };
   rd.guess = null;
+}
+
+// Этап 3, шаг 3: слить очки этого раунда в общую копилку score:{tgId} по роли
+// (только для игроков с известным tgId — вошли через Telegram Mini App) и
+// один раз за игру (комнату) засчитать gamesPlayed для лиг.
+// ВАЖНО: score:{tgId} — Redis HASH (HINCRBY ок), а user:{tgId} у Don Verbo —
+// JSON-блоб (redis.get/set с JSON.stringify), HINCRBY на нём не работает —
+// правим через GET → JSON.parse → +1 → SET, тот же паттерн, что в lib/engine.js.
+async function bumpGamesPlayed(tgId) {
+  // Тест-аккаунты (репетитор) не считаются
+  if (TEST_IDS.includes(String(tgId))) return;
+  try {
+    const raw = await cmd(["GET", `user:${tgId}`]);
+    if (!raw) return; // профиля Don Verbo нет — не создаём его отсюда
+    const u = JSON.parse(raw);
+    u.gamesPlayed = (typeof u.gamesPlayed === "number" ? u.gamesPlayed : 0) + 1;
+    await cmd(["SET", `user:${tgId}`, JSON.stringify(u)]);
+  } catch (_) {}
+}
+async function syncRoundScores(g) {
+  const rd = g.round || {};
+  const roles = rd.roles || {};
+  const dets = roles.detectives || [];
+  g.gpCounted = g.gpCounted || [];
+  for (const p of g.players || []) {
+    if (!p.tgId) continue;
+    const role = p.id === roles.canon ? "canon"
+      : p.id === roles.fantasy ? "fantasia"
+      : dets.includes(p.id) ? "detective"
+      : null;
+    const delta = (g.scores && g.scores[p.id] && g.scores[p.id].r) || 0;
+    if (role && delta > 0) {
+      await cmd(["HINCRBY", `score:${p.tgId}`, role, String(delta)]).catch(() => {});
+    }
+    if (!g.gpCounted.includes(p.tgId)) {
+      g.gpCounted.push(p.tgId);
+      await bumpGamesPlayed(p.tgId);
+    }
+  }
+}
+
+// Этап 3, шаг 4: закрытие комнаты ведущей.
+// Ставит флаг needsLeagueCheck:true каждому клубному участнику (есть user:{tgId}).
+// Don Verbo cron при следующем запуске заберёт флаг и пошлёт сообщение участнику.
+async function markLeagueCheck(g) {
+  for (const p of g.players || []) {
+    if (!p.tgId) continue;
+    if (TEST_IDS.includes(String(p.tgId))) continue; // репетитор — пропускаем
+    try {
+      const raw = await cmd(["GET", `user:${p.tgId}`]);
+      if (!raw) continue; // гость без аккаунта в клубе
+      const u = JSON.parse(raw);
+      u.needsLeagueCheck = true;
+      await cmd(["SET", `user:${p.tgId}`, JSON.stringify(u)]);
+    } catch (_) {}
+  }
 }
 
 export default async function handler(req, res) {
@@ -549,6 +609,7 @@ export default async function handler(req, res) {
         if (g.round.guess.endRound) {
           // принудительное завершение: вскрытие без называния глагола
           doReveal(g, null, null);
+          await syncRoundScores(g);
         } else {
           g.round.guess.stage = "naming";
         }
@@ -564,7 +625,7 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: false, error: "Сейчас нет голосования" });
       }
       g.round.votesDone = true;
-      if (g.round.guess.endRound) doReveal(g, null, null);
+      if (g.round.guess.endRound) { doReveal(g, null, null); await syncRoundScores(g); }
       else g.round.guess.stage = "naming";
       g.v++;
       await setGame(g);
@@ -579,6 +640,7 @@ export default async function handler(req, res) {
       const gu = g.round.guess;
       if (body.correct) {
         doReveal(g, gu.by, gu.byName);
+        await syncRoundScores(g);
       } else {
         // неверный глагол → выбывание до конца ТЕКУЩЕГО КРУГА (9 вопросов), ложь НЕ раскрывается
         g.round.eliminated = g.round.eliminated || [];
@@ -589,6 +651,7 @@ export default async function handler(req, res) {
         if (!aliveDets(g).length) {
           // все детективы выбыли → раунд завершается, очки свидетелям
           doReveal(g, null, null);
+          await syncRoundScores(g);
         } else {
           fixTurn(g);
         }
@@ -607,6 +670,7 @@ export default async function handler(req, res) {
       }
       if (g.round.votesDone) {
         doReveal(g, null, null);
+        await syncRoundScores(g);
       } else if (g.round.guess && g.round.guess.stage === "voting") {
         // голосование уже идёт — просто помечаем: после последнего голоса будет вскрытие
         g.round.guess.endRound = true;
@@ -645,9 +709,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, game: pub(g) });
     }
 
+    // --- Этап 3, шаг 4: ведущая закрывает комнату после просмотра результатов ---
+    // Ставит needsLeagueCheck:true каждому клубному участнику.
+    // Don Verbo cron при следующем запуске обработает флаг.
+    if (action === "close_game") {
+      await markLeagueCheck(g);
+      g.phase = "closed";
+      g.closedAt = new Date().toISOString();
+      g.v++;
+      await setGame(g);
+      return res.status(200).json({ ok: true, closed: true });
+    }
+
     return res.status(200).json({ ok: false, error: "Неизвестное действие: " + action });
   } catch (e) {
     return res.status(200).json({ ok: false, error: String(e) });
   }
 }
+
 
