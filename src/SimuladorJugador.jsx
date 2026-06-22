@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
-// v2.33 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
+// v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
 /* ============================================================
    LA CATA A CIEGAS — Симулятор игрока  /player  (v2.1)
@@ -469,7 +469,7 @@ function Footer({ onHome }) {
   return (
     <div style={{ textAlign: "center", marginTop: 24 }}>
       {onHome && <button onClick={onHome} style={{ background: C.goldSoft, border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 16, fontWeight: 700, borderRadius: 12, padding: "13px 28px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.10)" }}>← Сменить роль</button>}
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 14 }}>La Ciudad de los Sentidos 🍬 · v2.37</div>
     </div>
   );
 }
@@ -1686,6 +1686,8 @@ export default function SimuladorJugador() {
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
   const goDiario = () => { setRole("diario"); setEntered(true); };
+  const goPerfecto = () => setShowPerfecto(true);
+  const grammarAction = (pack && pack.id === "cap2") ? goPerfecto : goDiario;
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
@@ -1707,9 +1709,9 @@ export default function SimuladorJugador() {
     onPerfecto={() => setShowPerfecto(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
-  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={goDiario} />;
-  if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={goDiario} />;
-  return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={goDiario} />;
+  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
+  if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={grammarAction} />;
+  return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={grammarAction} />;
 }
 
 // ============================================================
@@ -1849,7 +1851,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       <div style={{ textAlign: "center", marginTop: 6 }}>
         <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
-          📔 Не играешь, а тренируешь грамматику? Mi Diario →
+          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Perfecto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
         </button>
       </div>
       <Footer />
@@ -1934,7 +1936,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
           <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
           <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
             <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>📔 Закрепи глаголы в Mi Diario →</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Perfecto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
           </div>
           {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
         </Block>
@@ -2180,7 +2182,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
           <br />
           <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
             <Btn bg={C.emerald} onClick={startNextRound}>Следующий глагол →</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>📔 Спряжение в Mi Diario →</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Perfecto →" : "📔 Спряжение в Mi Diario →"}</Btn>
           </div>
           {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
         </Block>
@@ -2359,7 +2361,7 @@ function conjPerfecto(verb) {
 }
 
 // ---------- Экран 1: Правила ----------
-function PerfectoRules({ onNext }) {
+function PerfectoRules({ onNext, onBack }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📚 Pretérito Perfecto · Правила" />
@@ -2420,6 +2422,7 @@ function PerfectoRules({ onNext }) {
         <strong>tú has vuelto</strong> — «ты вернулся» <span style={{ color: C.raspberry, fontSize: 12 }}>← исключение!</span>
       </div>
 
+      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← Назад</Btn>}
       <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(22,121,91,.22)`, marginBottom: 16 }}>
         Тренировать причастия →
       </button>
@@ -2429,7 +2432,7 @@ function PerfectoRules({ onNext }) {
 }
 
 // ---------- Экран 2: Дрилл причастий (вариант Б — кнопки суффиксов) ----------
-function ParticipioDrill({ onNext, onScore }) {
+function ParticipioDrill({ onNext, onScore, onBack }) {
   const [deck] = useState(() => shuffle([...NIVEL2_DRILL]));
   const [idx, setIdx] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -2471,6 +2474,7 @@ function ParticipioDrill({ onNext, onScore }) {
             <div style={{ fontSize: 14, color: C.inkSoft }}>причастий верно</div>
           </div>
         </Block>
+        {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← К правилам</Btn>}
         <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", marginBottom: 16 }}>
           Полное спряжение →
         </button>
@@ -2532,6 +2536,7 @@ function ParticipioDrill({ onNext, onScore }) {
           )}
         </div>
       </Block>
+      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← К правилам</Btn>}
       <Footer />
     </div></div>
   );
@@ -2614,8 +2619,8 @@ function PerfectoConjugation({ startVerb, onScore, onBack }) {
 function PerfectoTrainer({ startVerb, onScore, onBack }) {
   // если deep-link с глаголом — сразу на экран спряжения
   const [screen, setScreen] = useState(startVerb ? "conj" : "rules");
-  if (screen === "rules") return <PerfectoRules onNext={() => setScreen("drill")} />;
-  if (screen === "drill") return <ParticipioDrill onNext={() => setScreen("conj")} onScore={onScore} />;
+  if (screen === "rules") return <PerfectoRules onNext={() => setScreen("drill")} onBack={onBack} />;
+  if (screen === "drill") return <ParticipioDrill onNext={() => setScreen("conj")} onScore={onScore} onBack={() => setScreen("rules")} />;
   return <PerfectoConjugation startVerb={startVerb} onScore={onScore} onBack={() => setScreen("drill")} />;
 }
 
@@ -3103,7 +3108,7 @@ function Tour({ onDone }) {
           {i === LAST ? "Empezar · начать →" : "Дальше →"}
         </Btn>
       </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.37</div>
     </div></div>
   );
 }
@@ -3203,7 +3208,7 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
       <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
         text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.33</div>
+      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.37</div>
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
@@ -3212,4 +3217,5 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
     </div></div>
   );
 }
+
 
