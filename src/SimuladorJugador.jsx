@@ -1528,7 +1528,7 @@ function LiveGame({ onHome }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onBack }) {
   const isCapOne = pack.id === "cap1";
   const maya = isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
@@ -1601,9 +1601,9 @@ function ChapterWelcome({ pack, onEnter, onDiario, onBack }) {
             Открыть Mi Diario →
           </button>
         ) : (
-          <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.5 }}>
-            Тренажёр для Pretérito Perfecto — скоро появится. Пока практикуй роли ниже.
-          </div>
+          <button onClick={onPerfecto} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть тренажёр Perfecto →
+          </button>
         )}
       </div>
 
@@ -1670,13 +1670,18 @@ export default function SimuladorJugador() {
     }
   }
   const [showTour, setShowTour] = useState(() => !tourSeen());
-  // Deep-link из бота Don Verbo: ?verbo=preguntar открывает тренажёр спряжения сразу на этом глаголе
+  // Deep-link из бота Don Verbo: ?verbo=preguntar&nivel=N открывает тренажёр нужного уровня
   const [deepVerb, setDeepVerb] = useState(() => {
     try {
       const v = new URLSearchParams(window.location.search).get("verbo");
       return v && VERBS15.includes(v) ? v : null;
     } catch { return null; }
   });
+  const [deepNivel, setDeepNivel] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("nivel") || "1"; } catch { return "1"; }
+  });
+  // Показывать тренажёр Perfecto (Уровень 2)
+  const [showPerfecto, setShowPerfecto] = useState(false);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
@@ -1684,6 +1689,7 @@ export default function SimuladorJugador() {
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
+  if (deepVerb && deepNivel === "2") return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (!entered) return <LevelPicker
@@ -1693,10 +1699,12 @@ export default function SimuladorJugador() {
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
+  if (showPerfecto) return <PerfectoTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPerfecto(false)} />;
   if (!chapterShown) return <ChapterWelcome
     pack={pack}
     onEnter={() => setChapterShown(true)}
     onDiario={goDiario}
+    onPerfecto={() => setShowPerfecto(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
   if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={goDiario} />;
@@ -2303,6 +2311,312 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
       </Sheet>
     </div></div>
   );
+}
+
+// ============================================================
+// ТРЕНАЖЁР PRETÉRITO PERFECTO — Уровень 2
+// 3 экрана: Правила → Дрилл причастий → Полное спряжение
+// ============================================================
+
+// 14 регулярных глаголов для дрилла (volver — исключение, только в правилах и спряжении)
+const NIVEL2_DRILL = [
+  { inf: "caminar",   part: "caminado",   suf: "ado" },
+  { inf: "buscar",    part: "buscado",    suf: "ado" },
+  { inf: "preguntar", part: "preguntado", suf: "ado" },
+  { inf: "trabajar",  part: "trabajado",  suf: "ado" },
+  { inf: "llamar",    part: "llamado",    suf: "ado" },
+  { inf: "tocar",     part: "tocado",     suf: "ado" },
+  { inf: "revisar",   part: "revisado",   suf: "ado" },
+  { inf: "ordenar",   part: "ordenado",   suf: "ado" },
+  { inf: "entrar",    part: "entrado",    suf: "ado" },
+  { inf: "llevar",    part: "llevado",    suf: "ado" },
+  { inf: "recordar",  part: "recordado",  suf: "ado" },
+  { inf: "encender",  part: "encendido",  suf: "ido" },
+  { inf: "recoger",   part: "recogido",   suf: "ido" },
+  { inf: "recibir",   part: "recibido",   suf: "ido" },
+];
+
+// Все 15 глаголов (+ volver) — для экрана спряжения
+const NIVEL2_ALL = [
+  ...NIVEL2_DRILL,
+  { inf: "volver", part: "vuelto", suf: null, irregular: true },
+];
+
+const HABER2 = ["he", "has", "ha", "hemos", "habéis", "han"];
+const PRON2 = [
+  { key: "yo",  label: "yo" },
+  { key: "tu",  label: "tú" },
+  { key: "el",  label: "él / ella" },
+  { key: "nos", label: "nosotros" },
+  { key: "vos", label: "vosotros" },
+  { key: "ell", label: "ellos / ellas" },
+];
+
+function conjPerfecto(verb) {
+  const r = {};
+  PRON2.forEach((p, i) => { r[p.key] = `${HABER2[i]} ${verb.part}`; });
+  return r;
+}
+
+// ---------- Экран 1: Правила ----------
+function PerfectoRules({ onNext }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📚 Pretérito Perfecto · Правила" />
+
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 700, fontSize: 17, color: C.ink, marginBottom: 10 }}>
+          Как образуется Pretérito Perfecto
+        </div>
+        <div style={{ fontSize: 15, color: C.ink, lineHeight: 1.6, marginBottom: 14 }}>
+          <strong style={{ color: C.emeraldDeep }}>haber</strong> + причастие (participio)
+        </div>
+
+        {/* Таблица haber */}
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>ГЛАГОЛ HABER:</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 16 }}>
+          {PRON2.map((p, i) => (
+            <div key={p.key} style={{ background: "rgba(22,121,91,0.08)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ color: C.inkSoft, fontSize: 13 }}>{p.label}</span>
+              <strong style={{ color: C.emeraldDeep, fontSize: 15 }}>{HABER2[i]}</strong>
+            </div>
+          ))}
+        </div>
+
+        {/* Правило причастий */}
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>КАК ОБРАЗОВАТЬ ПРИЧАСТИЕ:</div>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 13px", marginBottom: 8 }}>
+            <span style={{ color: C.inkSoft }}>глаголы <strong>-AR</strong>: убрать -AR → добавить </span>
+            <strong style={{ color: C.raspberry, fontSize: 16 }}>-ado</strong>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>
+              caminar → camin<strong style={{ color: C.raspberry }}>ado</strong> · buscar → busc<strong style={{ color: C.raspberry }}>ado</strong> · llevar → llev<strong style={{ color: C.raspberry }}>ado</strong>
+            </div>
+          </div>
+          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 13px" }}>
+            <span style={{ color: C.inkSoft }}>глаголы <strong>-ER / -IR</strong>: убрать окончание → добавить </span>
+            <strong style={{ color: C.raspberry, fontSize: 16 }}>-ido</strong>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>
+              encender → encend<strong style={{ color: C.raspberry }}>ido</strong> · recibir → recib<strong style={{ color: C.raspberry }}>ido</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* Исключение volver */}
+        <div style={{ background: "rgba(168,27,62,0.08)", border: `2px solid ${C.raspberry}`, borderRadius: 10, padding: "10px 13px" }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberryDeep, marginBottom: 6 }}>⚠️ ИСКЛЮЧЕНИЕ в нашем наборе:</div>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <span style={{ fontSize: 15, fontWeight: 700 }}>volver</span>
+            <span style={{ color: C.inkSoft }}>→</span>
+            <strong style={{ color: C.raspberry, fontSize: 17 }}>vuelto</strong>
+            <span style={{ fontSize: 12, color: C.inkSoft }}>(не «volvido»!)</span>
+          </div>
+        </div>
+      </Block>
+
+      <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 16px", marginBottom: 14, fontSize: 14, color: C.ink, lineHeight: 1.65 }}>
+        <strong>yo he caminado</strong> — «я (уже) прошёл / погулял»<br />
+        <strong>ellos han recibido</strong> — «они получили»<br />
+        <strong>tú has vuelto</strong> — «ты вернулся» <span style={{ color: C.raspberry, fontSize: 12 }}>← исключение!</span>
+      </div>
+
+      <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(22,121,91,.22)`, marginBottom: 16 }}>
+        Тренировать причастия →
+      </button>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ---------- Экран 2: Дрилл причастий (вариант Б — кнопки суффиксов) ----------
+function ParticipioDrill({ onNext, onScore }) {
+  const [deck] = useState(() => shuffle([...NIVEL2_DRILL]));
+  const [idx, setIdx] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [score, setScore] = useState(0);
+  const [done, setDone] = useState(false);
+
+  const current = deck[idx];
+  // основа = инфинитив без последних 2 букв (-ar / -er / -ir)
+  const stem = current.inf.slice(0, -2);
+
+  function pick(suf) {
+    if (feedback) return;
+    const ok = suf === current.suf;
+    setFeedback({ ok, chosen: suf });
+    if (ok) {
+      setScore(s => s + 1);
+      if (onScore) onScore(1);
+    }
+  }
+
+  function next() {
+    setFeedback(null);
+    if (idx + 1 >= deck.length) setDone(true);
+    else setIdx(i => i + 1);
+  }
+
+  if (done) {
+    return (
+      <div style={wrap}><div style={maxw}>
+        <Header subtitle="📚 Дрилл причастий · итог" />
+        <Block stripe={score >= 13 ? C.emerald : score >= 10 ? C.gold : C.raspberry}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: score >= 13 ? C.emeraldDeep : score >= 10 ? C.goldDeep : C.raspberryDeep, marginBottom: 8 }}>
+              {score === 14 ? "🏆 Идеально!" : score >= 12 ? "👍 Отлично!" : score >= 10 ? "✓ Хорошо!" : "❌ Потренируйся ещё"}
+            </div>
+            <div style={{ fontSize: 42, fontWeight: 800, color: C.raspberry, margin: "8px 0" }}>
+              {score}<span style={{ fontSize: 20, color: C.inkSoft }}>/14</span>
+            </div>
+            <div style={{ fontSize: 14, color: C.inkSoft }}>причастий верно</div>
+          </div>
+        </Block>
+        <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", marginBottom: 16 }}>
+          Полное спряжение →
+        </button>
+        <Footer />
+      </div></div>
+    );
+  }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📚 Дрилл причастий" />
+
+      {/* Прогресс */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.inkSoft, marginBottom: 5 }}>
+          <span>Глагол {idx + 1} из {deck.length}</span>
+          <span style={{ color: C.emeraldDeep, fontWeight: 700 }}>Верно: {score}</span>
+        </div>
+        <div style={{ display: "flex", gap: 3 }}>
+          {deck.map((_, i) => (
+            <div key={i} style={{ flex: 1, height: 6, borderRadius: 3, background: i < idx ? C.emerald : i === idx ? C.gold : C.line }} />
+          ))}
+        </div>
+      </div>
+
+      <Block stripe={C.emerald}>
+        <div style={{ textAlign: "center", padding: "8px 0" }}>
+          <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 6, fontWeight: 600 }}>Инфинитив:</div>
+          <div style={{ fontSize: 38, fontWeight: 800, color: C.ink, fontFamily: SERIF, marginBottom: 16 }}>{current.inf}</div>
+
+          {!feedback ? (
+            <>
+              <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 12 }}>Выбери суффикс причастия:</div>
+              <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                {["ado", "ido"].map(suf => (
+                  <button key={suf} onClick={() => pick(suf)} style={{ flex: 1, maxWidth: 160, background: C.gold, color: "#fff", border: "none", borderRadius: 14, padding: "18px 8px", fontSize: 24, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 3px 12px rgba(201,162,75,.3)` }}>
+                    -{suf}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div>
+              <div style={{ background: feedback.ok ? C.emerald : C.raspberry, color: "#fff", borderRadius: 14, padding: "12px 18px", marginBottom: 12, fontSize: 16, fontWeight: 800 }}>
+                {feedback.ok ? "✓ Верно!" : `✗ Нет — правильно: -${current.suf}`}
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 6 }}>
+                {stem}<strong style={{ color: feedback.ok ? C.emeraldDeep : C.raspberryDeep }}>
+                  {current.suf}
+                </strong>
+              </div>
+              <div style={{ fontSize: 15, color: C.inkSoft, marginBottom: 16 }}>
+                = <strong>{current.part}</strong>
+              </div>
+              <button onClick={next} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 12, padding: "12px 28px", fontSize: 16, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+                {idx + 1 < deck.length ? "Следующий →" : "Итог →"}
+              </button>
+            </div>
+          )}
+        </div>
+      </Block>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ---------- Экран 3: Полное спряжение Perfecto ----------
+function PerfectoConjugation({ startVerb, onScore, onBack }) {
+  const [verbIdx, setVerbIdx] = useState(() => {
+    if (startVerb) { const i = NIVEL2_ALL.findIndex(v => v.inf === startVerb); return i >= 0 ? i : 0; }
+    return 0;
+  });
+  const [vals, setVals] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [awarded, setAwarded] = useState(() => new Set());
+
+  const verb = NIVEL2_ALL[verbIdx];
+  const correct = conjPerfecto(verb);
+  const allOk = PRON2.every(p => normES(vals[p.key]) === correct[p.key]);
+
+  function pick(i) { setVerbIdx(i); setVals({}); setChecked(false); }
+
+  function check() {
+    setChecked(true);
+    if (allOk && !awarded.has(verb.inf)) {
+      setAwarded(s => new Set([...s, verb.inf]));
+      if (onScore) onScore(1);
+    }
+  }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📚 Pretérito Perfecto · Спряжение" />
+
+      {/* Выбор глагола */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16, justifyContent: "center" }}>
+        {NIVEL2_ALL.map((v, i) => (
+          <button key={v.inf} onClick={() => pick(i)} style={{ border: `1.5px solid ${i === verbIdx ? C.emerald : v.irregular ? C.raspberry : C.line}`, background: i === verbIdx ? C.emerald : v.irregular ? "rgba(168,27,62,0.06)" : C.card, color: i === verbIdx ? "#fff" : v.irregular ? C.raspberryDeep : C.inkSoft, borderRadius: 20, padding: "6px 12px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
+            {v.irregular && i !== verbIdx ? "⚠ " : ""}{v.inf}{awarded.has(v.inf) ? " ✓" : ""}
+          </button>
+        ))}
+      </div>
+
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 800, fontSize: 19, color: C.ink, marginBottom: 2 }}>
+          {verb.inf}
+          {verb.irregular && <span style={{ fontSize: 13, color: C.raspberry, fontWeight: 600, marginLeft: 8 }}>исключение → <strong>{verb.part}</strong></span>}
+        </div>
+        <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 14 }}>
+          причастие: <strong style={{ color: C.emeraldDeep }}>{verb.part}</strong>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {PRON2.map((p, i) => {
+            const ok = checked && normES(vals[p.key]) === correct[p.key];
+            const bad = checked && normES(vals[p.key]) !== correct[p.key];
+            return (
+              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 120, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
+                <input value={vals[p.key] || ""} onChange={e => setVals(v => ({ ...v, [p.key]: e.target.value }))}
+                  placeholder={`${HABER2[i]} …`}
+                  style={{ flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF, border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`, background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none" }} />
+                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{correct[p.key]}</span>}
+              </div>
+            );
+          })}
+        </div>
+
+        {!checked && <Btn bg={C.gold} onClick={check} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
+        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
+        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 <span style={{ color: C.raspberry }}>+1 📊 в копилку</span></div>}
+      </Block>
+
+      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 14, color: C.goldDeep }}>← Назад к Дриллу</Btn>}
+      <Footer />
+    </div></div>
+  );
+}
+
+// ---------- PerfectoTrainer — переключатель экранов ----------
+function PerfectoTrainer({ startVerb, onScore, onBack }) {
+  // если deep-link с глаголом — сразу на экран спряжения
+  const [screen, setScreen] = useState(startVerb ? "conj" : "rules");
+  if (screen === "rules") return <PerfectoRules onNext={() => setScreen("drill")} />;
+  if (screen === "drill") return <ParticipioDrill onNext={() => setScreen("conj")} onScore={onScore} />;
+  return <PerfectoConjugation startVerb={startVerb} onScore={onScore} onBack={() => setScreen("drill")} />;
 }
 
 // ============================================================
