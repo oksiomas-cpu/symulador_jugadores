@@ -597,7 +597,8 @@ function BigSiNo({ v }) {
 }
 
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
-function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
+function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 }) {
+  const QUESTIONS = pack.QUESTIONS, VERBS = pack.VERBS, CATS = pack.CATS, verbByKey = pack.verbByKey;
   const [open, setOpen] = useState("quien");
   const [ruledOut, setRuledOut] = useState(new Set()); // отметённые глаголы — личный блокнот, на сервер не идёт
   function toggleRuled(k) {
@@ -1032,7 +1033,8 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live }) {
 }
 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
-function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked, myLetter, liveExtra }) {
+function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked, myLetter, liveExtra, pack = PACKS.cap1 }) {
+  const VERBS = pack.VERBS, verbByKey = pack.verbByKey;
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [storyOpen, setStoryOpen] = useState(false);      // Канон: мини-история
   const [lieOpen, setLieOpen] = useState(false);          // Фантазия: 🔴 Tu versión (независимая)
@@ -1318,6 +1320,15 @@ function LiveGame({ onHome }) {
       if (d.ok && d.game) setGame(d.game);
     } catch (e) { /* следующий опрос подхватит флаг left */ }
   }
+  // Глава комнаты определяет картридж живой игры (вопросы + улики).
+  // 1) game.packId от ведущего (надёжный путь). 2) запасной — по verbKey раунда. 3) дефолт cap1.
+  const livePack = (() => {
+    const pid = game && game.packId;
+    if (pid && PACKS[pid]) return PACKS[pid];
+    const vk = game && game.round && game.round.verbKey;
+    if (vk) { for (const k in PACKS) { if (PACKS[k].verbByKey(vk)) return PACKS[k]; } }
+    return PACKS.cap1;
+  })();
   const rdLive = game && game.round;
   const mergedAns = { ...((rdLive && rdLive.answers) || {}) };
   for (const k in ansOverlay) { const v = ansOverlay[k].v; if (v) mergedAns[k] = v; else delete mergedAns[k]; }
@@ -1423,9 +1434,9 @@ function LiveGame({ onHome }) {
     );
   }
 
-  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} />;
-  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
-  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} />;
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} pack={livePack} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} pack={livePack} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} pack={livePack} />;
 
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
