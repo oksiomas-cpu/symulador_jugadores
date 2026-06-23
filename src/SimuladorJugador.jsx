@@ -406,6 +406,8 @@ const PACKS = {
     id: "cap1", num: 1, titulo: "El día en el Palacio de Caramelo",
     grammar: "Presente", emoji: "☀️",
     desc: "Один день Шефа во дворце. 15 глаголов в настоящем времени.",
+    // термины для UI живой игры: nom — им.п., acc — вин.п., gen2 — род.мн., revPart — причастие (вскрыт/вскрыта)
+    term: { nom: "Глагол", acc: "глагол", gen2: "глаголов", revPart: "вскрыт", other: "Другой глагол" },
     VERBS, QUESTIONS, CATS, verbByKey,
     fantAnsOf: (v) => verbByKey(v.mask).answers,
   },
@@ -413,6 +415,7 @@ const PACKS = {
     id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
     grammar: "Pretérito Perfecto", emoji: "🌙",
     desc: "Ночное расследование: 15 улик и детективные вопросы в Pretérito Perfecto.",
+    term: { nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта", other: "Другая улика" },
     VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
     fantAnsOf: (v) => v.fantAns,
   },
@@ -599,6 +602,7 @@ function BigSiNo({ v }) {
 // ===== ПУЛЬТ ДЕТЕКТИВА =====
 function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 }) {
   const QUESTIONS = pack.QUESTIONS, VERBS = pack.VERBS, CATS = pack.CATS, verbByKey = pack.verbByKey;
+  const T = pack.term;
   const [open, setOpen] = useState("quien");
   const [ruledOut, setRuledOut] = useState(new Set()); // отметённые глаголы — личный блокнот, на сервер не идёт
   function toggleRuled(k) {
@@ -752,10 +756,10 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
           const rv = verbByKey(revealed.verbKey);
           return (
             <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(61,43,31,0.12)" }}>
-              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — глагол вскрыт!</div>
+              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — {T.nom} {T.revPart}!</div>
               <div style={{ textAlign: "center", fontSize: 24, fontWeight: 800, color: C.ink }}>{rv ? `${rv.emoji} ${rv.inf}` : revealed.verbKey}{rv ? <span style={{ fontSize: 14, color: C.inkSoft, fontWeight: 600 }}> · {rv.ru}</span> : null}</div>
               <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 700, marginTop: 8, color: revealed.ok ? C.emeraldDeep : C.inkSoft }}>
-                {revealed.ok ? `🎉 ${revealed.byName} угадал(а): +${revealed.detPts} (круг ${revealed.circle})` : "Никто не угадал глагол"}
+                {revealed.ok ? `🎉 ${revealed.byName} угадал(а): +${revealed.detPts} (круг ${revealed.circle})` : `Никто не угадал ${T.acc}`}
               </div>
               <div style={{ textAlign: "center", fontSize: 13.5, marginTop: 6, color: C.ink }}>
                 🟢 Правду говорил(а): <b>{revealed.canonName}</b> · 🔴 Выдумывал(а): <b>{revealed.fantasyName}</b>
@@ -766,19 +770,19 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         })()}
         {live && !revealed && myElim && (
           <div style={{ background: C.creamDeep, border: `2px solid ${C.line}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
-            ❌ Глагол был неверный — ты выбыл до конца этого круга. Следи за игрой: в следующем круге ты снова в деле.
+            ❌ {T.nom} был{pack.id==="cap2"?"а неверной":" неверным"} — ты выбыл до конца этого круга. Следи за игрой: в следующем круге ты снова в деле.
           </div>
         )}
         {live && !revealed && !myElim && live.lastElim && Date.now() - live.lastElim.ts < 12000 && (
           <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "10px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14, color: C.inkSoft }}>
-            ❌ {live.lastElim.byName} назвал(а) неверный глагол и выбыл(а) из круга
+            ❌ {live.lastElim.byName} назвал(а) неверн{pack.id==="cap2"?"ую улику":"ый глагол"} и выбыл(а) из круга
           </div>
         )}
         {live && !revealed && guess && guess.stage === "voting" && (
           <div style={{ background: C.card, border: `2px solid ${C.raspberry}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12 }}>
             <div style={{ textAlign: "center", fontWeight: 800, fontSize: 16, color: C.raspberry }}>🗳 Тайное голосование</div>
             <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, margin: "4px 0 10px", lineHeight: 1.45 }}>
-              {guess.byName ? `${guess.byName} готов назвать глагол. ` : "Раунд завершается. "}Кому из свидетелей ты веришь? Твой выбор никто не видит.
+              {guess.byName ? `${guess.byName} готов назвать ${T.acc}. ` : "Раунд завершается. "}Кому из свидетелей ты веришь? Твой выбор никто не видит.
             </div>
             {!myVoted ? (
               <div style={{ display: "flex", gap: 8 }}>
@@ -798,18 +802,18 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         {live && !revealed && guess && guess.stage === "naming" && (
           guess.by === live.myId ? (
             <div style={{ background: C.raspberry, color: "#fff", border: `2px solid ${C.raspberryDeep}`, borderRadius: 12, padding: "13px 16px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 16 }}>
-              🎤 Назови глагол голосом в Zoom! Ведущая решит: верный или нет.
+              🎤 Назови {T.acc} голосом в Zoom! Ведущая решит: верн{pack.id==="cap2"?"ая":"ый"} или нет.
             </div>
           ) : (
             <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "11px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
-              🔍 {guess.byName} называет глагол — слушаем…
+              🔍 {guess.byName} называет {T.acc} — слушаем…
             </div>
           )
         )}
         {live && !revealed && !myElim && !(guess && (guess.stage === "voting" || guess.by === live.myId)) && (
           <div style={{ marginBottom: 12 }}>
             <button disabled={askBusy} onClick={doHand} style={{ width: "100%", border: myHand ? `2px solid ${C.emerald}` : "none", borderRadius: 12, padding: "12px", fontSize: 15.5, fontWeight: 800, fontFamily: SERIF, background: myHand ? C.card : C.emerald, color: myHand ? C.emeraldDeep : "#fff", cursor: "pointer", boxSizing: "border-box" }}>
-              {myHand ? "🖐 Рука поднята — ведущая видит · нажми, чтобы убрать" : "🖐 Готов назвать глагол (поднять руку)"}
+              {myHand ? "🖐 Рука поднята — ведущая видит · нажми, чтобы убрать" : `🖐 Готов назвать ${T.acc} (поднять руку)`}
             </button>
             <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 5, lineHeight: 1.45, textAlign: "center" }}>
               Первым называет тот, кто задал вопрос. Молчит — ведущая даёт слово первой руке.
@@ -893,7 +897,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              Глагол скрыт. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
+              {T.nom} скрыт{pack.id==="cap2"?"а":""}. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
               {live && <span> В свой ход нажми <b>📨</b> под вопросом — ведущая и свидетель увидят его сами.</span>}
             </div>
             <div style={{ marginTop: 10, display: "flex", gap: 14, fontSize: 13, fontWeight: 700 }}>
@@ -905,7 +909,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         ) : (
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.55 }}>
-            🎙 <b>Ты играешь сам.</b> Глагол скрыт — спрашивай свидетелей <b>своими словами в Zoom</b>, ответы держи в голове. Список вопросов и кнопки SÍ/NO тебе не нужны. В свой ход жми <b>«✅ Я задал вопрос»</b> сверху, чтобы передать ход.
+            🎙 <b>Ты играешь сам.</b> {T.nom} скрыт{pack.id==="cap2"?"а":""} — спрашивай свидетелей <b>своими словами в Zoom</b>, ответы держи в голове. Список вопросов и кнопки SÍ/NO тебе не нужны. В свой ход жми <b>«✅ Я задал вопрос»</b> сверху, чтобы передать ход.
           </div>
         </Block>
         )}
@@ -969,7 +973,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
                onClick={() => setStoryView(storyView === "__open__" ? null : "__open__")}>
             <div>
               <div style={{ fontSize: 15, fontWeight: 800, color: C.goldDeep }}>🔍 Проверь гипотезу{ruledOut.size > 0 && <span style={{ color: C.emeraldDeep }}> · осталось {VERBS.length - ruledOut.size} из {VERBS.length}</span>}</div>
-              <div style={{ fontSize: 12, color: C.inkSoft }}>Тап — история глагола · ✕ — отмести (твой личный блокнот)</div>
+              <div style={{ fontSize: 12, color: C.inkSoft }}>Тап — история · ✕ — отмести (твой личный блокнот)</div>
             </div>
             <span style={{ fontSize: 18, color: C.gold, transform: (storyView !== null) ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
           </div>
@@ -979,7 +983,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
                 const sv = verbByKey(storyView);
                 return (
                   <div>
-                    <button onClick={() => setStoryView("__open__")} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все глаголы</button>
+                    <button onClick={() => setStoryView("__open__")} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все {pack.id==="cap2"?"улики":"глаголы"}</button>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                       <span style={{ fontSize: 32 }}>{sv.emoji}</span>
                       <div>
@@ -1012,7 +1016,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
                           <div style={{ fontSize: 10.5, color: C.inkSoft }}>{vv.ru}</div>
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); toggleRuled(vv.key); }}
-                          title={out ? "Вернуть глагол" : "Отмести глагол"}
+                          title={out ? `Вернуть ${T.acc}` : `Отмести ${T.acc}`}
                           style={{ position: "absolute", top: 3, right: 3, width: 22, height: 22, borderRadius: "50%", border: `1px solid ${out ? C.emerald : C.line}`, background: out ? C.emerald : C.card, color: out ? "#fff" : C.inkSoft, fontSize: 11, fontWeight: 800, cursor: "pointer", lineHeight: 1, padding: 0 }}>
                           {out ? "↺" : "✕"}
                         </button>
@@ -1035,6 +1039,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
 function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked, myLetter, liveExtra, pack = PACKS.cap1 }) {
   const VERBS = pack.VERBS, verbByKey = pack.verbByKey;
+  const T = pack.term;
   const [vk, setVk] = useState(initialVerbKey && verbByKey(initialVerbKey) ? initialVerbKey : null);
   const [storyOpen, setStoryOpen] = useState(false);      // Канон: мини-история
   const [lieOpen, setLieOpen] = useState(false);          // Фантазия: 🔴 Tu versión (независимая)
@@ -1051,7 +1056,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <Block stripe={accent}>
             <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              Тебе прислали глагол в личку. <b>Выбери его</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
+              Тебе прислали {T.acc} в личку. <b>Выбери {pack.id==="cap2"?"её":"его"}</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
             </div>
           </Block>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -1079,10 +1084,10 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
           const rv = verbByKey(rev.verbKey);
           return (
             <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12, boxShadow: "0 2px 12px rgba(61,43,31,0.12)" }}>
-              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — глагол вскрыт!</div>
+              <div style={{ textAlign: "center", fontWeight: 800, fontSize: 17, color: C.raspberry, marginBottom: 6 }}>🔔 Раунд завершён — {T.nom} {T.revPart}!</div>
               <div style={{ textAlign: "center", fontSize: 22, fontWeight: 800, color: C.ink }}>{rv ? `${rv.emoji} ${rv.inf}` : rev.verbKey}</div>
               <div style={{ textAlign: "center", fontSize: 14, fontWeight: 700, marginTop: 6, color: rev.ok ? C.emeraldDeep : C.inkSoft }}>
-                {rev.ok ? `🎉 ${rev.byName} угадал(а) глагол` : "Никто не угадал"}
+                {rev.ok ? `🎉 ${rev.byName} угадал(а) ${T.acc}` : "Никто не угадал"}
               </div>
               <div style={{ textAlign: "center", fontSize: 13.5, marginTop: 4 }}>
                 🟢 Правду говорил(а): <b>{rev.canonName}</b> · 🔴 Выдумывал(а): <b>{rev.fantasyName}</b>
@@ -1094,7 +1099,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
           <div style={{ background: liveExtra.guess.stage === "naming" ? C.raspberry : C.card, color: liveExtra.guess.stage === "naming" ? "#fff" : C.ink, border: `2px solid ${C.raspberry}`, borderRadius: 12, padding: "12px 15px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 15 }}>
             {liveExtra.guess.stage === "voting"
               ? "🗳 Детективы тайно голосуют, кому из вас верят…"
-              : `🔍 ${liveExtra.guess.byName} называет глагол!`}
+              : `🔍 ${liveExtra.guess.byName} называет ${T.acc}!`}
           </div>
         )}
 
@@ -1196,7 +1201,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
         )}
 
         <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <button onClick={() => setVk(null)} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← Другой глагол</button>
+          <button onClick={() => setVk(null)} style={{ background: "none", border: `1.5px solid ${accent}`, color: accent, fontSize: 14, fontWeight: 700, borderRadius: 10, padding: "9px 18px", cursor: "pointer", fontFamily: SERIF }}>← {T.other}</button>
         </div>
         {onLeave && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onLeave} style={{ background: "transparent", border: `1.5px solid ${C.raspberry}`, color: C.raspberry, borderRadius: 10, padding: "9px 18px", fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>🚪 Покинуть игру</button></div>}
         <Footer onHome={onBack} />
