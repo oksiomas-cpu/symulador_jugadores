@@ -2364,6 +2364,65 @@ const NIVEL2_ALL = [
   { inf: "volver", part: "vuelto", suf: null, irregular: true },
 ];
 
+// ============================================================
+// GRAMMAR_PERFECTO — данные Grammar Base (Pretérito Perfecto)
+// Архитектурно изолированы — легко переехать в Grammar Hub
+// ============================================================
+const GRAMMAR_PERFECTO = {
+  marcadores: [
+    {
+      grupo: "ESTE / ESTA — якорная группа",
+      emoji: "📅",
+      hint: "Период ещё не закончился — ты внутри него. Perfecto!",
+      items: [
+        { es: "hoy", ru: "сегодня" },
+        { es: "esta mañana", ru: "сегодня утром" },
+        { es: "esta tarde", ru: "сегодня днём / вечером" },
+        { es: "esta noche", ru: "сегодня ночью" },
+        { es: "este día", ru: "в этот день" },
+        { es: "esta semana", ru: "на этой неделе" },
+        { es: "este mes", ru: "в этом месяце" },
+        { es: "este año", ru: "в этом году" },
+      ],
+    },
+    {
+      grupo: "NUNCA / SIEMPRE — опыт за всю жизнь",
+      emoji: "🌌",
+      hint: "Не вчера и не сегодня — это вся твоя жизнь до этой секунды.",
+      items: [
+        { es: "nunca", ru: "никогда" },
+        { es: "siempre", ru: "всегда" },
+        { es: "alguna vez", ru: "когда-нибудь / однажды" },
+        { es: "jamás", ru: "никогда (усиленное)" },
+      ],
+    },
+    {
+      grupo: "YA / TODAVÍA — состояние сейчас",
+      emoji: "⏱",
+      hint: "Уже случилось или ещё нет — важен момент сейчас.",
+      items: [
+        { es: "ya", ru: "уже" },
+        { es: "todavía no", ru: "ещё не" },
+        { es: "últimamente", ru: "в последнее время" },
+        { es: "recientemente", ru: "недавно" },
+        { es: "hace un momento", ru: "только что" },
+      ],
+    },
+  ],
+  excepciones: [
+    { inf: "ver",      part: "visto",    ru: "видеть" },
+    { inf: "decir",    part: "dicho",    ru: "говорить" },
+    { inf: "hacer",    part: "hecho",    ru: "делать" },
+    { inf: "poner",    part: "puesto",   ru: "класть" },
+    { inf: "volver",   part: "vuelto",   ru: "возвращаться" },
+    { inf: "romper",   part: "roto",     ru: "ломать" },
+    { inf: "abrir",    part: "abierto",  ru: "открывать" },
+    { inf: "escribir", part: "escrito",  ru: "писать" },
+    { inf: "morir",    part: "muerto",   ru: "умирать" },
+    { inf: "cubrir",   part: "cubierto", ru: "покрывать" },
+  ],
+};
+
 const HABER2 = ["he", "has", "ha", "hemos", "habéis", "han"];
 const PRON2 = [
   { key: "yo",  label: "yo" },
@@ -2381,10 +2440,11 @@ function conjPerfecto(verb) {
 }
 
 // ---------- Экран 1: Правила ----------
-function PerfectoRules({ onNext, onBack }) {
+function PerfectoRules({ onNext, onBack, tabBar }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📚 Pretérito Perfecto · Правила" />
+      {tabBar}
 
       <Block stripe={C.emerald}>
         <div style={{ fontWeight: 700, fontSize: 17, color: C.ink, marginBottom: 10 }}>
@@ -2452,7 +2512,7 @@ function PerfectoRules({ onNext, onBack }) {
 }
 
 // ---------- Экран 2: Дрилл причастий (вариант Б — кнопки суффиксов) ----------
-function ParticipioDrill({ onNext, onScore, onBack }) {
+function ParticipioDrill({ onNext, onScore, onBack, tabBar }) {
   const [deck] = useState(() => shuffle([...NIVEL2_DRILL]));
   const [idx, setIdx] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -2483,6 +2543,7 @@ function ParticipioDrill({ onNext, onScore, onBack }) {
     return (
       <div style={wrap}><div style={maxw}>
         <Header subtitle="📚 Дрилл причастий · итог" />
+        {tabBar}
         <Block stripe={score >= 13 ? C.emerald : score >= 10 ? C.gold : C.raspberry}>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: score >= 13 ? C.emeraldDeep : score >= 10 ? C.goldDeep : C.raspberryDeep, marginBottom: 8 }}>
@@ -2506,6 +2567,7 @@ function ParticipioDrill({ onNext, onScore, onBack }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📚 Дрилл причастий" />
+      {tabBar}
 
       {/* Прогресс */}
       <div style={{ marginBottom: 14 }}>
@@ -2563,7 +2625,7 @@ function ParticipioDrill({ onNext, onScore, onBack }) {
 }
 
 // ---------- Экран 3: Полное спряжение Perfecto ----------
-function PerfectoConjugation({ startVerb, onScore, onBack }) {
+function PerfectoConjugation({ startVerb, onScore, onBack, tabBar }) {
   const [verbIdx, setVerbIdx] = useState(() => {
     if (startVerb) { const i = NIVEL2_ALL.findIndex(v => v.inf === startVerb); return i >= 0 ? i : 0; }
     return 0;
@@ -2589,6 +2651,7 @@ function PerfectoConjugation({ startVerb, onScore, onBack }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="📚 Pretérito Perfecto · Спряжение" />
+      {tabBar}
 
       {/* Выбор глагола */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16, justifyContent: "center" }}>
@@ -2635,13 +2698,306 @@ function PerfectoConjugation({ startVerb, onScore, onBack }) {
   );
 }
 
-// ---------- PerfectoTrainer — переключатель экранов ----------
+
+// ============================================================
+// PerfectoTeoria — вкладка «Teoría»
+// ============================================================
+function PerfectoTeoria({ tabBar, onBack }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="🌙 Pretérito Perfecto · Teoría" />
+      {onBack && (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
+        </div>
+      )}
+      {tabBar}
+
+      <Block stripe={C.emerald}>
+        <div style={{ fontWeight: 700, fontSize: 16, color: C.emeraldDeep, marginBottom: 10 }}>¿Qué es el Pretérito Perfecto?</div>
+        <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>
+          Это время, которое <strong>соединяет прошлое с этой секундой</strong>. Действие случилось раньше, но оно ещё живёт в настоящем — потому что:
+        </div>
+        <ul style={{ fontSize: 14, color: C.ink, lineHeight: 1.9, marginTop: 10, paddingLeft: 20 }}>
+          <li>это произошло в <strong>период, который ещё не закончился</strong> — сегодня, на этой неделе, в этом месяце</li>
+          <li>или это часть твоего <strong>опыта за всю жизнь</strong> — когда-нибудь, никогда, всегда</li>
+        </ul>
+        <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 10, lineHeight: 1.6 }}>
+          В разговорной Испании это время используется каждый день — это живая речь, не учебник.
+        </div>
+      </Block>
+
+      <Block stripe={C.gold}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 10 }}>Формула: haber + participio</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 14 }}>
+          {[["yo","he"],["tú","has"],["él / ella","ha"],["nosotros","hemos"],["vosotros","habéis"],["ellos / ellas","han"]].map(([p,h]) => (
+            <div key={p} style={{ background: "rgba(22,121,91,0.07)", border: `1px solid ${C.emerald}`, borderRadius: 8, padding: "7px 10px", display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: C.inkSoft, fontSize: 13 }}>{p}</span>
+              <strong style={{ color: C.emeraldDeep, fontSize: 15 }}>{h}</strong>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px" }}>
+            <span style={{ color: C.inkSoft, fontSize: 13.5 }}>Глаголы <strong>-AR</strong>: убрать -AR → добавить </span>
+            <strong style={{ color: C.raspberry, fontSize: 15 }}>-ado</strong>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 3 }}>caminar → caminado · llamar → llamado</div>
+          </div>
+          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px" }}>
+            <span style={{ color: C.inkSoft, fontSize: 13.5 }}>Глаголы <strong>-ER / -IR</strong>: убрать окончание → добавить </span>
+            <strong style={{ color: C.raspberry, fontSize: 15 }}>-ido</strong>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 3 }}>recibir → recibido · encender → encendido</div>
+          </div>
+        </div>
+      </Block>
+
+      <Block stripe={C.raspberry}>
+        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 10 }}>Примеры с маркерами</div>
+        {[
+          { es: "Hoy he comido paella.", ru: "Сегодня я ел паэлью." },
+          { es: "Esta semana ha llamado tres veces.", ru: "На этой неделе он звонил трижды." },
+          { es: "¿Alguna vez has visto esto?", ru: "Ты когда-нибудь видел такое?" },
+          { es: "Todavía no he terminado.", ru: "Я ещё не закончил." },
+          { es: "Nunca he estado en Madrid.", ru: "Я никогда не был в Мадриде." },
+        ].map(({ es, ru }, i) => (
+          <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px", marginBottom: 7 }}>
+            <div style={{ fontSize: 14.5, fontWeight: 600, color: C.ink }}>{es}</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2, fontStyle: "italic" }}>{ru}</div>
+          </div>
+        ))}
+      </Block>
+
+      <div style={{ background: "rgba(201,162,75,0.10)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "12px 15px", marginBottom: 16, fontSize: 13.5, color: C.inkSoft, lineHeight: 1.65 }}>
+        💡 На уровне A1–A2 работаем с маркерами как опорой. Бывают случаи без маркера — но это следующий уровень. <strong>Пока маркер = твой ориентир.</strong>
+      </div>
+
+      <Footer />
+    </div></div>
+  );
+}
+
+// ============================================================
+// PerfectoMarcadores — вкладка «Marcadores»
+// ============================================================
+function PerfectoMarcadores({ tabBar, onBack }) {
+  const [open, setOpen] = useState(null);
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="⏱ Marcadores de tiempo" />
+      {onBack && (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
+        </div>
+      )}
+      {tabBar}
+
+      <div style={{ fontSize: 14, color: C.inkSoft, marginBottom: 14, lineHeight: 1.65 }}>
+        Маркеры — твой ориентир. Они сигнализируют: здесь нужен <strong>Pretérito Perfecto</strong>. Учи группами — запоминается быстрее.
+      </div>
+
+      {GRAMMAR_PERFECTO.marcadores.map((g, gi) => {
+        const colors = [C.emerald, C.raspberry, C.gold];
+        const col = colors[gi];
+        const isOpen = open === gi;
+        return (
+          <Block key={gi} stripe={col}>
+            <div onClick={() => setOpen(isOpen ? null : gi)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 15.5, color: C.ink }}>{g.emoji} {g.grupo}</div>
+                <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2, fontStyle: "italic" }}>{g.hint}</div>
+              </div>
+              <span style={{ fontSize: 20, color: col, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .15s", marginLeft: 8 }}>›</span>
+            </div>
+            {isOpen && (
+              <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {g.items.map(({ es, ru }) => (
+                  <div key={es} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 11px" }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{es}</div>
+                    <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{ru}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Block>
+        );
+      })}
+
+      <div style={{ background: "rgba(201,162,75,0.10)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "12px 15px", marginBottom: 16 }}>
+        <div style={{ fontWeight: 700, fontSize: 13, color: C.goldDeep, marginBottom: 8 }}>Все маркеры одним взглядом:</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {GRAMMAR_PERFECTO.marcadores.flatMap(g => g.items).map(({ es }) => (
+            <span key={es} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, color: C.ink, fontWeight: 600 }}>{es}</span>
+          ))}
+        </div>
+      </div>
+
+      <Footer />
+    </div></div>
+  );
+}
+
+// ============================================================
+// ExcepcionesFlash — вкладка «Excepciones» (список + флеш-карты)
+// ============================================================
+function ExcepcionesFlash({ tabBar, onScore, onBack }) {
+  const [mode, setMode] = useState("list");
+  const [deck, setDeck] = useState(() => shuffle([...GRAMMAR_PERFECTO.excepciones]));
+  const [idx, setIdx] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState(new Set());
+  const [done, setDone] = useState(false);
+
+  function startFlash() {
+    setDeck(shuffle([...GRAMMAR_PERFECTO.excepciones]));
+    setIdx(0); setFlipped(false); setKnown(new Set()); setDone(false); setMode("flash");
+  }
+
+  function handleKnow(isKnown) {
+    const nk = new Set(known);
+    if (isKnown) { nk.add(deck[idx].inf); if (onScore) onScore(1); }
+    setKnown(nk); setFlipped(false);
+    if (idx + 1 >= deck.length) setDone(true);
+    else setIdx(i => i + 1);
+  }
+
+  if (mode === "flash" && done) {
+    return (
+      <div style={wrap}><div style={maxw}>
+        <Header subtitle="⚡ Excepciones · Итог" />
+        {tabBar}
+        <Block stripe={known.size >= 8 ? C.emerald : known.size >= 5 ? C.gold : C.raspberry}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: known.size >= 8 ? C.emeraldDeep : known.size >= 5 ? C.goldDeep : C.raspberryDeep, marginBottom: 6 }}>
+              {known.size === 10 ? "🏆 Идеально!" : known.size >= 8 ? "👍 Отлично!" : known.size >= 5 ? "✓ Хорошо!" : "Ещё потренируйся"}
+            </div>
+            <div style={{ fontSize: 42, fontWeight: 800, color: C.raspberry, margin: "8px 0" }}>{known.size}<span style={{ fontSize: 20, color: C.inkSoft }}>/10</span></div>
+            <div style={{ fontSize: 14, color: C.inkSoft }}>знаю причастий</div>
+          </div>
+        </Block>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 14 }}>
+          {GRAMMAR_PERFECTO.excepciones.map(({ inf, part, ru }) => (
+            <div key={inf} style={{ background: known.has(inf) ? "rgba(22,121,91,0.07)" : "rgba(168,27,62,0.05)", border: `1.5px solid ${known.has(inf) ? C.emerald : C.raspberry}`, borderRadius: 10, padding: "10px 12px" }}>
+              <div style={{ fontSize: 13, color: C.inkSoft }}>{inf}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: known.has(inf) ? C.emeraldDeep : C.raspberryDeep }}>{part}</div>
+              <div style={{ fontSize: 11, color: C.inkSoft }}>{ru}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={startFlash} style={{ width: "100%", background: C.gold, color: "#fff", border: "none", borderRadius: 14, padding: "14px", fontSize: 16, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginBottom: 10 }}>Повторить ещё раз</button>
+        <button onClick={() => setMode("list")} style={{ width: "100%", background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "10px", fontSize: 13, cursor: "pointer", fontFamily: SERIF, marginBottom: 14 }}>← К списку</button>
+        <Footer />
+      </div></div>
+    );
+  }
+
+  if (mode === "flash") {
+    const card = deck[idx];
+    return (
+      <div style={wrap}><div style={maxw}>
+        <Header subtitle="⚡ Excepciones · Флеш-карты" />
+        {tabBar}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.inkSoft, marginBottom: 5 }}>
+            <span>Карточка {idx + 1} из {deck.length}</span>
+            <span style={{ color: C.emeraldDeep, fontWeight: 700 }}>Знаю: {known.size}</span>
+          </div>
+          <div style={{ display: "flex", gap: 3 }}>
+            {deck.map((_, i) => <div key={i} style={{ flex: 1, height: 6, borderRadius: 3, background: i < idx ? C.emerald : i === idx ? C.gold : C.line }} />)}
+          </div>
+        </div>
+        <Block stripe={C.gold}>
+          <div style={{ textAlign: "center", padding: "16px 0" }}>
+            <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 8, fontWeight: 600 }}>Инфинитив → причастие?</div>
+            <div style={{ fontSize: 42, fontWeight: 800, color: C.ink, fontFamily: SERIF, marginBottom: 20 }}>{card.inf}</div>
+            {!flipped ? (
+              <button onClick={() => setFlipped(true)} style={{ background: C.emerald, color: "#fff", border: "none", borderRadius: 14, padding: "14px 32px", fontSize: 17, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+                Показать причастие
+              </button>
+            ) : (
+              <div>
+                <div style={{ fontSize: 38, fontWeight: 800, color: C.raspberryDeep, marginBottom: 6 }}>{card.part}</div>
+                <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 20 }}>{card.ru}</div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                  <button onClick={() => handleKnow(false)} style={{ flex: 1, maxWidth: 140, background: "rgba(168,27,62,0.09)", border: `2px solid ${C.raspberry}`, color: C.raspberryDeep, borderRadius: 12, padding: "12px 8px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>✗ Не знал</button>
+                  <button onClick={() => handleKnow(true)} style={{ flex: 1, maxWidth: 140, background: C.emerald, border: "none", color: "#fff", borderRadius: 12, padding: "12px 8px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>✓ Знаю</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Block>
+        <button onClick={() => setMode("list")} style={{ width: "100%", background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "10px", fontSize: 13, cursor: "pointer", fontFamily: SERIF, marginBottom: 14 }}>← К списку всех</button>
+        <Footer />
+      </div></div>
+    );
+  }
+
+  // mode === "list"
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="⚡ Excepciones — топ 10" />
+      {onBack && (
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
+        </div>
+      )}
+      {tabBar}
+      <div style={{ fontSize: 14, color: C.inkSoft, marginBottom: 14, lineHeight: 1.65 }}>
+        Эти причастия не подчиняются правилу. Их нужно <strong>запомнить</strong> — не вычислить. Изучи список, потом тренируй с флеш-картами.
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 16 }}>
+        {GRAMMAR_PERFECTO.excepciones.map(({ inf, part, ru }) => (
+          <div key={inf} style={{ background: "rgba(168,27,62,0.05)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "11px 13px" }}>
+            <div style={{ fontSize: 13, color: C.inkSoft }}>{inf}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberryDeep, margin: "2px 0" }}>{part}</div>
+            <div style={{ fontSize: 11, color: C.inkSoft }}>{ru}</div>
+          </div>
+        ))}
+      </div>
+      <button onClick={startFlash} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
+        Тренировать с флеш-картами →
+      </button>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ---------- PerfectoTrainer — вкладки Teoría / Marcadores / Excepciones / Ejercicios ----------
 function PerfectoTrainer({ startVerb, onScore, onBack }) {
-  // если deep-link с глаголом — сразу на экран спряжения
-  const [screen, setScreen] = useState(startVerb ? "conj" : "rules");
-  if (screen === "rules") return <PerfectoRules onNext={() => setScreen("drill")} onBack={onBack} />;
-  if (screen === "drill") return <ParticipioDrill onNext={() => setScreen("conj")} onScore={onScore} onBack={() => setScreen("rules")} />;
-  return <PerfectoConjugation startVerb={startVerb} onScore={onScore} onBack={() => setScreen("drill")} />;
+  const TABS = [
+    { id: "teoria",      label: "Teoría" },
+    { id: "marcadores",  label: "Marcadores" },
+    { id: "excepciones", label: "Excepciones" },
+    { id: "ejercicios",  label: "Ejercicios" },
+  ];
+  const [tab, setTab] = useState(startVerb ? "ejercicios" : "teoria");
+  const [exScreen, setExScreen] = useState(startVerb ? "conj" : "rules");
+
+  const tabBar = (
+    <div style={{ display: "flex", gap: 3, marginBottom: 16, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+      {TABS.map(t => (
+        <button key={t.id} onClick={() => setTab(t.id)} style={{
+          flex: 1, minWidth: 68, padding: "9px 3px", border: "none",
+          borderRadius: 10, fontSize: 12, fontWeight: tab === t.id ? 800 : 600,
+          background: tab === t.id ? C.raspberry : C.creamDeep,
+          color: tab === t.id ? "#fff" : C.inkSoft,
+          cursor: "pointer", fontFamily: SERIF,
+          borderBottom: tab === t.id ? `3px solid ${C.raspberryDeep}` : "3px solid transparent",
+          transition: "all .15s",
+        }}>
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (tab === "teoria")      return <PerfectoTeoria tabBar={tabBar} onBack={onBack} />;
+  if (tab === "marcadores")  return <PerfectoMarcadores tabBar={tabBar} onBack={onBack} />;
+  if (tab === "excepciones") return <ExcepcionesFlash tabBar={tabBar} onScore={onScore} onBack={onBack} />;
+
+  // ejercicios — существующий флоу rules → drill → conj
+  if (exScreen === "rules") return <PerfectoRules tabBar={tabBar} onNext={() => setExScreen("drill")} onBack={onBack} />;
+  if (exScreen === "drill") return <ParticipioDrill tabBar={tabBar} onNext={() => setExScreen("conj")} onScore={onScore} onBack={() => setExScreen("rules")} />;
+  return <PerfectoConjugation tabBar={tabBar} startVerb={startVerb} onScore={onScore} onBack={() => setExScreen("drill")} />;
 }
 
 // ============================================================
