@@ -2497,9 +2497,9 @@ function PerfectoRules({ onNext, onBack, tabBar }) {
       </Block>
 
       <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 16px", marginBottom: 14, fontSize: 14, color: C.ink, lineHeight: 1.65 }}>
-        <strong>yo he caminado</strong> — «я (уже) прошёл / погулял»<br />
-        <strong>ellos han recibido</strong> — «они получили»<br />
-        <strong>tú has vuelto</strong> — «ты вернулся» <span style={{ color: C.raspberry, fontSize: 12 }}>← исключение!</span>
+        <strong>Hoy yo he caminado veinte minutos.</strong> — «Сегодня я ходил двадцать минут.»<br />
+        <strong>Esta semana ellos han recibido una carta.</strong> — «На этой неделе они получили письмо.»<br />
+        <strong>Hoy tú has vuelto muy tarde.</strong> — «Сегодня ты вернулся очень поздно.» <span style={{ color: C.raspberry, fontSize: 12 }}>← исключение!</span>
       </div>
 
       {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← Назад</Btn>}
