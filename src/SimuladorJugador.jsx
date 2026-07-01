@@ -1545,7 +1545,7 @@ function LiveGame({ onHome }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onBack }) {
   const isCapOne = pack.id === "cap1";
   const maya = isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
@@ -1622,6 +1622,11 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onBack }) {
             Открыть тренажёр Pretérito Perfecto →
           </button>
         )}
+        {!isCapOne && (
+          <button onClick={onPresenteErIr} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            Presente · глаголы -ER / -IR →
+          </button>
+        )}
       </div>
 
       {/* ГЛАВНАЯ КНОПКА */}
@@ -1690,16 +1695,29 @@ export default function SimuladorJugador() {
   // Deep-link из бота Don Verbo: ?verbo=preguntar&nivel=N открывает тренажёр нужного уровня
   const [deepVerb, setDeepVerb] = useState(() => {
     try {
-      const v = new URLSearchParams(window.location.search).get("verbo");
-      return v && VERBS15.includes(v) ? v : null;
+      const params = new URLSearchParams(window.location.search);
+      const v = params.get("verbo");
+      if (!v) return null;
+      const nivel = params.get("nivel") || "1";
+      // nivel=2 (Perfecto) и grupo=erir (Presente -ER/-IR) используют свои наборы глаголов;
+      // иначе — 15 глаголов -AR Главы 1. Без этой развилки любой не-AR глагол выкидывал на старт.
+      const known =
+        nivel === "2"        ? NIVEL2_ALL.some((x) => x.inf === v) :
+        params.get("grupo") === "erir" ? VERBS_ERIR_ALL.includes(v) :
+        VERBS15.includes(v);
+      return known ? v : null;
     } catch { return null; }
   });
   const [deepNivel, setDeepNivel] = useState(() => {
     try { return new URLSearchParams(window.location.search).get("nivel") || "1"; } catch { return "1"; }
   });
+  const [deepGrupo, setDeepGrupo] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("grupo") || ""; } catch { return ""; }
+  });
   // Показывать тренажёр Perfecto (Уровень 2)
   const [showPerfecto, setShowPerfecto] = useState(false);
   const [showDiario2, setShowDiario2] = useState(false);
+  const [showPresenteErIr, setShowPresenteErIr] = useState(false);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
@@ -1711,6 +1729,7 @@ export default function SimuladorJugador() {
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
   if (deepVerb && deepNivel === "2") return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
+  if (deepVerb && deepGrupo === "erir") return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (!entered) return <LevelPicker
@@ -1721,12 +1740,14 @@ export default function SimuladorJugador() {
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
   if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
   if (showPerfecto) return <PerfectoTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPerfecto(false)} />;
+  if (showPresenteErIr) return <PresenteErIrTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPresenteErIr(false)} />;
   if (showDiario2) return <DiarioMode2 onHome={() => setShowDiario2(false)} onScore={p => addScore("diario", p)} session={sess} />;
   if (!chapterShown) return <ChapterWelcome
     pack={pack}
     onEnter={() => setChapterShown(true)}
     onDiario={pack && pack.id === "cap2" ? goDiario2 : goDiario}
     onPerfecto={() => setShowPerfecto(true)}
+    onPresenteErIr={() => setShowPresenteErIr(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
   if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
@@ -3178,6 +3199,183 @@ function ConjTrainer({ startVerb, errorVerbs = [], onBack, onScore }) {
       </Block>
 
       <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Volver al diario</Btn>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ============================================================
+// PRESENTE · -ER / -IR — тренажёр спряжения (доп. грамматика Гл.2)
+// Только РЕГУЛЯРНЫЕ глаголы. -ER = 2-я группа, -IR = 3-я группа.
+// ============================================================
+const VERBS_ER = [
+  { inf: "comer",      ru: "есть" },
+  { inf: "beber",      ru: "пить" },
+  { inf: "aprender",   ru: "учить(ся)" },
+  { inf: "comprender", ru: "понимать" },
+  { inf: "vender",     ru: "продавать" },
+  { inf: "correr",     ru: "бегать" },
+  { inf: "responder",  ru: "отвечать" },
+  { inf: "leer",       ru: "читать" },
+];
+const VERBS_IR = [
+  { inf: "vivir",     ru: "жить" },
+  { inf: "escribir",  ru: "писать" },
+  { inf: "recibir",   ru: "получать" },
+  { inf: "abrir",     ru: "открывать" },
+  { inf: "subir",     ru: "подниматься" },
+  { inf: "decidir",   ru: "решать" },
+  { inf: "partir",    ru: "уезжать" },
+  { inf: "describir", ru: "описывать" },
+];
+const PRON_ER = [
+  { key: "yo",       label: "yo",                       end: "o" },
+  { key: "tú",       label: "tú",                       end: "es" },
+  { key: "él",       label: "él / ella / usted",        end: "e" },
+  { key: "nosotros", label: "nosotros / nosotras",      end: "emos" },
+  { key: "vosotros", label: "vosotros / vosotras",      end: "éis" },
+  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "en" },
+];
+const PRON_IR = [
+  { key: "yo",       label: "yo",                       end: "o" },
+  { key: "tú",       label: "tú",                       end: "es" },
+  { key: "él",       label: "él / ella / usted",        end: "e" },
+  { key: "nosotros", label: "nosotros / nosotras",      end: "imos" },
+  { key: "vosotros", label: "vosotros / vosotras",      end: "ís" },
+  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "en" },
+];
+function conjugateGroup(inf, pron) {
+  const stem = inf.slice(0, -2);
+  const m = {};
+  pron.forEach((p) => { m[p.key] = stem + p.end; });
+  return m;
+}
+const VERBS_ERIR_ALL = [...VERBS_ER.map(v => v.inf), ...VERBS_IR.map(v => v.inf)];
+
+// ---- Тренажёр Presente · -ER / -IR ----
+function PresenteErIrTrainer({ startVerb, onBack, onScore }) {
+  const initGroup = startVerb && VERBS_IR.some(v => v.inf === startVerb) ? "ir" : "er";
+  const [group, setGroup] = useState(initGroup);
+  const list = group === "er" ? VERBS_ER : VERBS_IR;
+  const pron = group === "er" ? PRON_ER : PRON_IR;
+  const [verb, setVerb] = useState(startVerb && VERBS_ERIR_ALL.includes(startVerb) ? startVerb : list[0].inf);
+  const [vals, setVals] = useState({});
+  const [checked, setChecked] = useState(false);
+  const [awarded, setAwarded] = useState(() => new Set());
+
+  const correct = conjugateGroup(verb, pron);
+  const allOk = pron.every((p) => normES(vals[p.key]) === correct[p.key]);
+  const curRu = (list.find((v) => v.inf === verb) || {}).ru || "";
+  const exInf = group === "er" ? "comer" : "vivir";
+  const exRu = group === "er" ? "есть" : "жить";
+  const ex = conjugateGroup(exInf, pron);
+
+  function switchGroup(g) {
+    if (g === group) return;
+    const l = g === "er" ? VERBS_ER : VERBS_IR;
+    setGroup(g); setVerb(l[0].inf); setVals({}); setChecked(false);
+  }
+  function pick(inf) { setVerb(inf); setVals({}); setChecked(false); }
+  function comprobar() {
+    setChecked(true);
+    if (allOk && !awarded.has(group + ":" + verb)) {
+      setAwarded((s) => new Set([...s, group + ":" + verb]));
+      if (onScore) onScore(1);
+    }
+  }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="📊 Presente · verbos -ER / -IR" />
+
+      {/* Переключатель группы */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        {[["er", "2-я группа · -ER"], ["ir", "3-я группа · -IR"]].map(([g, lbl]) => {
+          const on = group === g;
+          return (
+            <button key={g} onClick={() => switchGroup(g)} style={{
+              flex: 1, padding: "11px 6px", border: `2px solid ${on ? C.emerald : C.line}`,
+              borderRadius: 12, background: on ? C.emerald : C.card, color: on ? "#fff" : C.inkSoft,
+              fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF,
+            }}>{lbl}</button>
+          );
+        })}
+      </div>
+
+      {/* ОБЪЯСНЕНИЕ */}
+      <Block stripe={C.gold}>
+        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 8 }}>
+          Как спрягается <strong style={{ color: C.emeraldDeep }}>{exInf}</strong> <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 13 }}>· {exRu}</span>
+        </div>
+        <div style={{ ...pHint, marginBottom: 10 }}>
+          Убери <strong>-{group === "er" ? "ER" : "IR"}</strong>, добавь окончание:{" "}
+          <strong style={{ color: C.raspberry }}>
+            {group === "er" ? "-o, -es, -e, -emos, -éis, -en" : "-o, -es, -e, -imos, -ís, -en"}
+          </strong>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+          {pron.map((p) => (
+            <div key={p.key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
+              <span style={{ color: C.inkSoft }}>{p.label.split(" / ")[0]}</span>{" "}
+              <strong style={{ color: C.raspberry }}>{ex[p.key]}</strong>
+            </div>
+          ))}
+        </div>
+        <div style={{ ...pHint, marginTop: 10, fontSize: 12.5 }}>
+          Разница -ER и -IR только в <strong>nosotros</strong> (-emos / -imos) и <strong>vosotros</strong> (-éis / -ís). Остальные формы одинаковые.
+        </div>
+      </Block>
+
+      {/* Плашка про исключения */}
+      <div style={{ background: "rgba(168,27,62,0.07)", border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "11px 14px", marginBottom: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberryDeep, marginBottom: 4 }}>⚠️ Есть неправильные — но не здесь</div>
+        <div style={{ fontSize: 13, color: C.ink, lineHeight: 1.55 }}>
+          Некоторые -ER/-IR меняют основу: <strong>encender → enc<span style={{ color: C.raspberry }}>ie</span>nde</strong>, <strong>volver → v<span style={{ color: C.raspberry }}>ue</span>lve</strong>. Здесь тренируем <strong>только регулярные</strong> — сначала закрепим их.
+        </div>
+      </div>
+
+      {/* Выбор глагола */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, justifyContent: "center" }}>
+        {list.map((v) => {
+          const active = v.inf === verb;
+          return (
+            <button key={v.inf} onClick={() => pick(v.inf)} style={{
+              border: `1.5px solid ${active ? C.raspberry : C.line}`,
+              background: active ? C.raspberry : C.card,
+              color: active ? "#fff" : C.inkSoft,
+              borderRadius: 20, padding: "6px 13px", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF,
+            }}>{v.inf}</button>
+          );
+        })}
+      </div>
+
+      {/* Таблица форм */}
+      <Block stripe={C.raspberry}>
+        <div style={{ fontWeight: 700, fontSize: 19, color: C.ink }}>{verb} <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 14 }}>· {curRu} · presente</span></div>
+        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          {pron.map((p) => {
+            const ok = checked && normES(vals[p.key]) === correct[p.key];
+            const bad = checked && normES(vals[p.key]) !== correct[p.key];
+            return (
+              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 150, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
+                <input value={vals[p.key] || ""} onChange={(e) => setVals((v) => ({ ...v, [p.key]: e.target.value }))}
+                  placeholder="…" style={{
+                    flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF,
+                    border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`,
+                    background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none",
+                  }} />
+                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{correct[p.key]}</span>}
+              </div>
+            );
+          })}
+        </div>
+        {!checked && <Btn bg={C.gold} onClick={comprobar} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
+        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
+        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo. <span style={{ color: C.raspberry }}>+1 📔 в копилку</span></div>}
+      </Block>
+
+      <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Назад</Btn>
       <Footer />
     </div></div>
   );
