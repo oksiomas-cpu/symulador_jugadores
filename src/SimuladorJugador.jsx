@@ -1856,7 +1856,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
   const [storyKey, setStoryKey] = useState(null);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
   const cards = [
-    { id: "detective", emoji: "🕵️", t: "Detective", d: "Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай глагол.", c: C.goldDeep },
+    { id: "detective", emoji: "🕵️", t: "Detective", d: `Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай ${pack.id === "cap2" ? "улику" : "глагол"}.`, c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
     { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Ты врёшь красиво. Запутай детектива и уведи его от правды.", c: C.raspberry },
   ];
@@ -1878,8 +1878,8 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       {/* БИБЛИОТЕКА ГЛАГОЛОВ — глаголы выбранной главы */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "16px 18px", marginBottom: 14 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 Глаголы игры — истории</div>
-        <p style={{ ...pHint, marginTop: 4 }}>Тап по глаголу — его история поверх экрана. Все {pack.VERBS.length} глаголов главы.</p>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 {pack.id === "cap2" ? "Улики игры" : "Глаголы игры"} — истории</div>
+        <p style={{ ...pHint, marginTop: 4 }}>Тап по {pack.id === "cap2" ? "улике" : "глаголу"} — её история поверх экрана. Все {pack.VERBS.length} {pack.id === "cap2" ? "предметов" : "глаголов"} главы.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
           {pack.VERBS.map((v) => (
             <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
