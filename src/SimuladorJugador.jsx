@@ -1692,20 +1692,14 @@ export default function SimuladorJugador() {
     }
   }
   const [showTour, setShowTour] = useState(() => !tourSeen());
-  // Deep-link из бота Don Verbo: ?verbo=preguntar&nivel=N открывает тренажёр нужного уровня
+  // Deep-link из бота Don Verbo: ?verbo=preguntar&nivel=N&grupo=erir открывает тренажёр.
+  // Если verbo пришёл — ВСЕГДА открываем тренажёр (тип выбирается ниже по nivel/grupo).
+  // Никакой проверки «глагол в списке» — иначе незнакомый глагол выкидывал на лицевой экран.
+  // Каждый тренажёр (ConjTrainer / PerfectoConjugation / PresenteErIrTrainer) сам делает
+  // fallback на первый глагол своего набора, если startVerb ему незнаком.
   const [deepVerb, setDeepVerb] = useState(() => {
     try {
-      const params = new URLSearchParams(window.location.search);
-      const v = params.get("verbo");
-      if (!v) return null;
-      const nivel = params.get("nivel") || "1";
-      // nivel=2 (Perfecto) и grupo=erir (Presente -ER/-IR) используют свои наборы глаголов;
-      // иначе — 15 глаголов -AR Главы 1. Без этой развилки любой не-AR глагол выкидывал на старт.
-      const known =
-        nivel === "2"        ? NIVEL2_ALL.some((x) => x.inf === v) :
-        params.get("grupo") === "erir" ? VERBS_ERIR_ALL.includes(v) :
-        VERBS15.includes(v);
-      return known ? v : null;
+      return new URLSearchParams(window.location.search).get("verbo") || null;
     } catch { return null; }
   });
   const [deepNivel, setDeepNivel] = useState(() => {
