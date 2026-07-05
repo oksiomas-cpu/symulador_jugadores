@@ -407,7 +407,7 @@ const PACKS = {
     grammar: "Presente", emoji: "☀️",
     desc: "Один день Шефа во дворце. 15 глаголов в настоящем времени.",
     // термины для UI живой игры: nom — им.п., acc — вин.п., gen2 — род.мн., revPart — причастие (вскрыт/вскрыта)
-    term: { nom: "Глагол", acc: "глагол", gen2: "глаголов", revPart: "вскрыт", other: "Другой глагол" },
+    term: { es: "verbo", nom: "Глагол", acc: "глагол", gen2: "глаголов", revPart: "вскрыт", other: "Другой глагол", next: "Следующий глагол" },
     VERBS, QUESTIONS, CATS, verbByKey,
     fantAnsOf: (v) => verbByKey(v.mask).answers,
   },
@@ -415,7 +415,7 @@ const PACKS = {
     id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
     grammar: "Pretérito Perfecto", emoji: "🌙",
     desc: "Ночное расследование: 15 улик и детективные вопросы в Pretérito Perfecto.",
-    term: { nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта", other: "Другая улика" },
+    term: { es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта", other: "Другая улика", next: "Следующая улика" },
     VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
     fantAnsOf: (v) => v.fantAns,
   },
@@ -2124,6 +2124,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
   const isCanon = role === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const accentDeep = isCanon ? C.emeraldDeep : C.raspberryDeep;
+  const T = pack.term;
 
   const [verb, setVerb] = useState(() => pack.VERBS[rnd(pack.VERBS.length)]);
   const [deck, setDeck] = useState(() => shuffle(pack.QUESTIONS));
@@ -2210,13 +2211,13 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
             Ошибок в зоне оценки (вопросы 10–18): <strong style={{ color: C.ink }}>{roundErrors}</strong> из 9
           </p>
           <div style={{ background: roundPts > 0 ? C.goldSoft : C.creamDeep, border: `1px solid ${roundPts > 0 ? C.gold : C.line}`, borderRadius: 10, padding: "10px 14px", display: "inline-block", marginBottom: 12 }}>
-            <span style={{ fontSize: 13, color: C.goldDeep }}>Глагол {verb.inf} · </span>
+            <span style={{ fontSize: 13, color: C.goldDeep }}>{T.nom} {verb.inf} · </span>
             <span style={{ fontSize: 28, fontWeight: 700, color: C.raspberry }}>+{roundPts}</span>
             <span style={{ fontSize: 13, color: C.goldDeep }}> {roundPts === 5 ? "идеально!" : roundPts === 3 ? "хорошая работа" : roundPts === 1 ? "можно лучше" : "без баллов"}</span>
           </div>
           <br />
           <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
-            <Btn bg={C.emerald} onClick={startNextRound}>Следующий глагол →</Btn>
+            <Btn bg={C.emerald} onClick={startNextRound}>{T.next} →</Btn>
             <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto →" : "📔 Спряжение в Mi Diario →"}</Btn>
           </div>
           {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
@@ -2227,7 +2228,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
       <Block stripe={accent}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <div style={tag}>Tu verbo</div>
+            <div style={tag}>Tu {T.es}</div>
             <div style={{ fontSize: 34, fontWeight: 700, lineHeight: 1.1, color: C.ink }}>{verb.emoji} {verb.inf}</div>
             <div style={{ color: C.inkSoft, fontSize: 15, fontStyle: "italic" }}>{verb.ru}</div>
           </div>
