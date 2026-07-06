@@ -353,6 +353,47 @@ function TemaPresenteRaiz({ onBack, onTrain }) {
   );
 }
 
+// ============================================================
+// ТЕМА II.4 — Presente: полностью неправильные (estar, ir)
+// ============================================================
+function TemaPresenteIrr({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена · Presente de indicativo" title="Полностью неправильные" sub="Самые древние и самые частые глаголы языка. Они не подчиняются схемам — их формы знают в лицо." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1" /></div>
+
+      <RuleCard>
+        Есть глаголы, которые звучат так часто, что время обточило их до неузнаваемости. Правило «корень + окончание» тут не работает: у <b>ir</b> («идти») от инфинитива в формах не остаётся <b>ни одной буквы</b>.
+        <div style={{ marginTop: 10 }}>
+          Такие глаголы не выводят — их <b>запоминают целиком</b>, как имена. Хорошая новость: их мало, и это самые нужные слова языка. Начинаем с двух: <b>estar</b> (находиться, быть где-то / в каком-то состоянии) и <b>ir</b> (идти, ехать).
+        </div>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "estar", ru: "находиться", forms: ["estoy", "estás", "está", "estamos", "estáis", "están"], endLen: [2, 2, 1, 4, 4, 2] },
+        { inf: "ir", ru: "идти", forms: ["voy", "vas", "va", "vamos", "vais", "van"], endLen: [3, 3, 2, 5, 4, 3] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>estar</b> почти честный: окончания знакомые, но <b>yo → estoy</b> (не «esto») и ударения на окончаниях: est<b>á</b>s, est<b>á</b>, est<b>á</b>is, est<b>á</b>n. Не забывай знаки — они здесь часть формы.</Nota>
+        <Nota><b>ir</b> — главный обманщик Королевства: взял чужой корень <b>v-</b> и спрягается как глагол на -AR: v-oy, v-as, v-a, v-amos, v-ais, v-an.</Nota>
+        <Nota>Заметь пару: est<b>oy</b> — v<b>oy</b>. У неправильных глаголов yo часто кончается на <b>-oy</b>.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучит в Королевстве:</b>
+        <Ejemplo es="—<b>Estoy</b> en el pasillo con mi farol —dice Tomás." ru="«Я в коридоре со своим фонарём», — говорит Томас (где я — estar)" />
+        <Ejemplo es="Lucía <b>está</b> en la cocina: el desayuno casi está listo." ru="Люсия на кухне: завтрак почти готов (где она + состояние)" />
+        <Ejemplo es="Nico <b>va</b> a la Sala Grande con las jarras." ru="Нико идёт в Большой зал с кувшинами (движение — ir)" />
+        <Ejemplo es="—<b>Vamos</b> al palacio —dice el Jefe. Y todos van." ru="«Идём во дворец», — говорит Шеф. И все идут." />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -410,6 +451,17 @@ const DRILLS = {
     { pre: "Lucía", gap: "el fuego de la cocina.", inf: "encender", ok: "enciende" },
     { pre: "Yo no", gap: "los faroles de día.", inf: "encender", ok: "enciendo" },
   ],
+  // II.4 — полностью неправильные estar/ir: сам впиши форму
+  irr: [
+    { pre: "Yo", gap: "en el pasillo con mi farol. (слова Томаса)", inf: "estar", ok: "estoy", note: "estar в yo — особая форма: estoy, не «esto»." },
+    { pre: "Nico", gap: "a la Sala Grande con las jarras.", inf: "ir", ok: "va", note: "ir живёт на чужом корне v-: va." },
+    { pre: "Lucía", gap: "en la cocina.", inf: "estar", ok: "está", note: "не забудь ударение: está." },
+    { pre: "Yo", gap: "al palacio cada mañana.", inf: "ir", ok: "voy", note: "пара на -oy: estoy — voy." },
+    { pre: "Los ayudantes", gap: "en la Cocina Mágica.", inf: "estar", ok: "están", note: "ударение: están." },
+    { pre: "Nosotros", gap: "a la Sala Grande con el Jefe.", inf: "ir", ok: "vamos" },
+    { pre: "Tú", gap: "cerca de la puerta, con tu farol.", inf: "estar", ok: "estás", note: "ударение: estás." },
+    { pre: "Vosotros", gap: "con el Jefe por los pasillos.", inf: "ir", ok: "vais" },
+  ],
   regulares: [
     { pre: "Lucía", gap: "el desayuno en la cocina.", inf: "preparar", ok: "prepara", opts: ["prepara", "preparo", "preparan"] },
     { pre: "Yo", gap: "por el pasillo con mi farol. (слова Томаса)", inf: "caminar", ok: "camino", opts: ["camino", "camina", "caminas"] },
@@ -425,7 +477,7 @@ const DRILLS = {
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -451,7 +503,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -542,7 +594,7 @@ const BRANCHES = [
       { id: "presente-reg", title: "Presente de indicativo · регулярные глаголы", lvl: "A1", ready: true },
       { id: "presente-orto", title: "Presente · орфографические изменения (g→j…)", lvl: "A1", ready: true },
       { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: true },
-      { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: false },
+      { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: true },
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: false },
     ],
   },
@@ -647,6 +699,7 @@ export default function Gramatica({ onBack }) {
   if (view === "presente-reg") return <TemaPresenteRegulares onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "presente-reg")} />;
   if (view === "presente-orto") return <TemaPresenteOrto onBack={() => setView("verbo")} onTrain={() => openDrill("orto", "presente-orto")} />;
   if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
+  if (view === "presente-irr") return <TemaPresenteIrr onBack={() => setView("verbo")} onTrain={() => openDrill("irr", "presente-irr")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
