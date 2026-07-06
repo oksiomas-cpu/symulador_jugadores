@@ -743,10 +743,23 @@ function GramaticaRoot({ onVerbo, onBack }) {
 // ============================================================
 // ГЛАВНЫЙ КОМПОНЕНТ
 // ============================================================
-export default function Gramatica({ onBack }) {
+// Deep-link из капсул Don Verbo: id темы → её дрилл (приземление сразу в тренировку).
+const TEMA_TO_DRILL = {
+  "infinitivo": "grupos",
+  "personas": "personas",
+  "presente-reg": "regulares",
+  "presente-orto": "orto",
+  "presente-raiz": "raiz",
+  "presente-irr": "irr",
+  "perfecto": "perfecto",
+};
+
+export default function Gramatica({ onBack, startTema }) {
   // view: root | verbo | тема | drill:<set>
-  const [view, setView] = useState("root");
-  const [drillFrom, setDrillFrom] = useState(null);
+  // startTema (deep-link ?tema=): открываем сразу дрилл темы; «назад» ведёт на страницу темы.
+  const startDrill = startTema && TEMA_TO_DRILL[startTema] ? "drill:" + TEMA_TO_DRILL[startTema] : null;
+  const [view, setView] = useState(startDrill || "root");
+  const [drillFrom, setDrillFrom] = useState(startDrill ? startTema : null);
 
   const openDrill = (set, from) => { setDrillFrom(from); setView("drill:" + set); };
 

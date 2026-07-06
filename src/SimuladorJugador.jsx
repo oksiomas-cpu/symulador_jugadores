@@ -1710,6 +1710,12 @@ export default function SimuladorJugador() {
   const [deepGrupo, setDeepGrupo] = useState(() => {
     try { return new URLSearchParams(window.location.search).get("grupo") || ""; } catch { return ""; }
   });
+  // Deep-link ?tema=<id> из капсул Don Verbo: отработка глагола идёт через раздел Gramática —
+  // сразу в дрилл нужной темы (presente-reg / presente-orto / presente-raiz / perfecto…).
+  // Приоритетнее ?verbo= — новая логистика капсул Сезонов 1–2.
+  const [deepTema, setDeepTema] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("tema") || null; } catch { return null; }
+  });
   // Показывать тренажёр Perfecto (Уровень 2)
   const [showPerfecto, setShowPerfecto] = useState(false);
   const [showDiario2, setShowDiario2] = useState(false);
@@ -1728,6 +1734,7 @@ export default function SimuladorJugador() {
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
+  if (deepTema) return <Gramatica startTema={deepTema} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
   if (deepVerb && deepNivel === "2") return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
   if (deepVerb && deepGrupo === "erir") return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
