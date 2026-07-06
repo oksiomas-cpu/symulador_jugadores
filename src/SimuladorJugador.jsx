@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import LibroVivo from "./LibroVivo.jsx";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -1712,6 +1713,8 @@ export default function SimuladorJugador() {
   const [showPerfecto, setShowPerfecto] = useState(false);
   const [showDiario2, setShowDiario2] = useState(false);
   const [showPresenteErIr, setShowPresenteErIr] = useState(false);
+  // Libro Vivo — живая книга «Королевство Карамели», третья самостоятельная активность
+  const [showLibro, setShowLibro] = useState(false);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
@@ -1726,9 +1729,11 @@ export default function SimuladorJugador() {
   if (deepVerb && deepGrupo === "erir") return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
+  if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
   if (!entered) return <LevelPicker
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
+    onLibro={() => setShowLibro(true)}
     onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
@@ -1752,7 +1757,7 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function LevelPicker({ onPick, onLive, onTour }) {
+function LevelPicker({ onPick, onLive, onLibro, onTour }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
@@ -1785,6 +1790,20 @@ function LevelPicker({ onPick, onLive, onTour }) {
         <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+      </div>
+
+      {/* Libro Vivo — живая книга, самостоятельная жизнь внутри Королевства */}
+      <div onClick={onLibro} style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.gold}`,
+        boxShadow: "0 6px 22px rgba(201,162,75,0.22)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📖</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 4 }}>Libro Vivo · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
+        <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
       </div>
 
       {/* Живая игра — малиновая, отдельно */}
