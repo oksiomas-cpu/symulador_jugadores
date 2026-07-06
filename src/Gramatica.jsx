@@ -441,56 +441,6 @@ function TemaPerfecto({ onBack, onTrain }) {
   );
 }
 
-// ============================================================
-// ТЕМА II.5b — Perfecto: причастия неправильные (слой внутри Perfecto)
-// Канон 6 июля 2026: volver→vuelto (Глава 2, 3-й помощник) + abrir/decir/ver
-// для контраста — все три реально звучат в допросе Главы 2 (История-маяк),
-// но не входят в 15 канонических глаголов улик. Не выдумано — только канон.
-// ============================================================
-function TemaParticipiosIrr({ onBack, onTrain }) {
-  return (
-    <div style={wrap}><div style={maxw}>
-      <GHeader kicker="El verbo · II. Времена · Perfecto" title="Причастия неправильные" sub="Правило Perfecto не меняется — меняется только само причастие: у нескольких частых глаголов оно не по шаблону -ado/-ido, и его просто нужно запомнить." />
-      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2" /></div>
-
-      <RuleCard>
-        Haber спрягается как обычно: <b>he, has, ha, hemos, habéis, han</b>. Но у части глаголов причастие — не «-ado/-ido», а особое слово, которое нужно выучить целиком, как печать с новым рисунком.
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "14px 0 6px", textAlign: "center" }}>
-          {[["volver", "vuelto"], ["abrir", "abierto"], ["decir", "dicho"], ["ver", "visto"]].map(([inf, part]) => (
-            <div key={inf} style={{ flex: "1 1 auto", minWidth: 74, background: C.cream, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "10px 8px" }}>
-              <div style={{ fontSize: 14, color: C.inkSoft }}>{inf}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: C.raspberry, marginTop: 2 }}>{part}</div>
-            </div>
-          ))}
-        </div>
-        <Nota><b>volver → vuelto</b> — единственный из 15 глаголов допроса Главы 2 с неправильным причастием (3-й помощник). <b>abrir, decir, ver</b> — за пределами 15, но уже звучали в устах свидетелей той же ночи.</Nota>
-      </RuleCard>
-
-      <ConjTable cols={[
-        { inf: "volver", ru: "возвращаться", forms: ["he vuelto", "has vuelto", "ha vuelto", "hemos vuelto", "habéis vuelto", "han vuelto"], endLen: [6, 6, 6, 6, 6, 6] },
-        { inf: "abrir", ru: "открывать", forms: ["he abierto", "has abierto", "ha abierto", "hemos abierto", "habéis abierto", "han abierto"], endLen: [7, 7, 7, 7, 7, 7] },
-        { inf: "decir", ru: "говорить", forms: ["he dicho", "has dicho", "ha dicho", "hemos dicho", "habéis dicho", "han dicho"], endLen: [5, 5, 5, 5, 5, 5] },
-        { inf: "ver", ru: "видеть", forms: ["he visto", "has visto", "ha visto", "hemos visto", "habéis visto", "han visto"], endLen: [5, 5, 5, 5, 5, 5] },
-      ]} />
-
-      <RuleCard>
-        <Nota>Причастие подсвечено целиком — потому что здесь неправильна вся форма, не только окончание.</Nota>
-        <Nota>Маркер времени по-прежнему обязателен: <b>esta mañana, esta tarde, hoy, todavía no, nunca</b>.</Nota>
-      </RuleCard>
-
-      <RuleCard>
-        <b>Так это прозвучало в допросе Шефа (Глава 2):</b>
-        <Ejemplo es="El primer ayudante: «Esta mañana <b>he abierto</b> la Sala yo solo. He encendido las luces.»" ru="abrir → abierto (не «abrido»). Рядом — регулярное encendido: неправильное причастие не отменяет остальные." />
-        <Ejemplo es="El ayudante más joven: «<b>He visto</b> una sombra. Pero no <b>he dicho</b> nada porque no estaba seguro.»" ru="ver → visto, decir → dicho — два неправильных причастия в одной фразе одного свидетеля." />
-        <Ejemplo es="El tercer ayudante: «Hoy todavía no <b>he vuelto</b> a la Sala.»" ru="volver → vuelto — его алиби построено на этой форме: обычно возвращается cada tarde a las seis, но сегодня — нет." />
-      </RuleCard>
-
-      <TrainBtn onClick={onTrain} />
-      <BackBtn onClick={onBack} />
-    </div></div>
-  );
-}
-
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -582,21 +532,10 @@ const DRILLS = {
     { pre: "Todos", gap: "los ingredientes esta noche: en la Sala, en la cocina, en el jardín.", inf: "buscar", ok: "han buscado", note: "ellos/todos: han. El participio sigue siendo buscado, sin importar cuántos sean." },
     { pre: "El guardia", gap: "a las visitas en la puerta principal toda la tarde.", inf: "recibir", ok: "ha recibido", note: "recibir → recibido: -ir → -ido, igual que -er." },
   ],
-  // II.5b — причастия неправильные: сам впиши форму (canon Cap.2 + contraste)
-  "participios-irr": [
-    { pre: "El primer ayudante, esta mañana,", gap: "la Sala yo solo.", inf: "abrir", ok: "he abierto", note: "abrir → abierto, no «abrido». Yo: he." },
-    { pre: "El ayudante más joven:", gap: "una sombra esta tarde.", inf: "ver", ok: "he visto", note: "ver → visto. Yo: he." },
-    { pre: "Pero no", gap: "nada porque no estaba seguro.", inf: "decir", ok: "he dicho", note: "decir → dicho, no «decido»." },
-    { pre: "El tercer ayudante hoy todavía no", gap: "a la Sala.", inf: "volver", ok: "ha vuelto", note: "volver → vuelto — el único de los 15 verbos del interrogatorio con participio irregular." },
-    { pre: "Nosotros", gap: "la puerta principal esta tarde.", inf: "abrir", ok: "hemos abierto", note: "nosotros: hem-os + abierto. El participio no cambia." },
-    { pre: "¿Vosotros", gap: "la verdad?", inf: "decir", ok: "habéis dicho", note: "vosotros: hab-éis + dicho." },
-    { pre: "Todos", gap: "la sombra cerca de la Sala.", inf: "ver", ok: "han visto", note: "ellos: han + visto." },
-    { pre: "Tú nunca", gap: "tan tarde antes.", inf: "volver", ok: "has vuelto", note: "tú: has + vuelto." },
-  ],
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -622,7 +561,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -715,7 +654,6 @@ const BRANCHES = [
       { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: true },
       { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: true },
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
-      { id: "participios-irr", title: "Perfecto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
     ],
   },
   {
@@ -814,7 +752,6 @@ const TEMA_TO_DRILL = {
   "presente-raiz": "raiz",
   "presente-irr": "irr",
   "perfecto": "perfecto",
-  "participios-irr": "participios-irr",
 };
 
 export default function Gramatica({ onBack, startTema }) {
@@ -835,7 +772,6 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
   if (view === "presente-irr") return <TemaPresenteIrr onBack={() => setView("verbo")} onTrain={() => openDrill("irr", "presente-irr")} />;
   if (view === "perfecto") return <TemaPerfecto onBack={() => setView("verbo")} onTrain={() => openDrill("perfecto", "perfecto")} />;
-  if (view === "participios-irr") return <TemaParticipiosIrr onBack={() => setView("verbo")} onTrain={() => openDrill("participios-irr", "participios-irr")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
