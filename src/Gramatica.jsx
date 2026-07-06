@@ -265,6 +265,94 @@ function TemaPresenteRegulares({ onBack, onTrain }) {
   );
 }
 
+// ============================================================
+// ТЕМА II.2 — Presente: орфографические изменения (g→j)
+// ============================================================
+function TemaPresenteOrto({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена · Presente de indicativo" title="Орфографические изменения" sub="Глагол спрягается по правилу — меняется только запись. Виновата не грамматика, а чтение." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1" /></div>
+
+      <RuleCard>
+        Буква <b>g</b> читается по-разному: перед <b>e, i</b> — как /х/ (<i>recoger</i> — «рекох́ер»), перед <b>a, o, u</b> — как /г/.
+        <div style={{ marginTop: 10 }}>
+          Теперь смотри: в форме <b>yo</b> окончание — <b>-o</b>. Если написать <i>recogo</i>, придётся прочитать «реко<b>го</b>» — звук /х/ пропал. Чтобы <b>звук остался тем же</b>, испанцы меняют букву: <b>g → j</b>.
+        </div>
+        <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
+          recoger → <span style={{ color: C.raspberry, fontWeight: 800 }}>reco<span style={{ color: C.goldDeep }}>j</span>o</span>
+        </div>
+        <Nota>Это <b>не исключение</b> и не каприз глагола. Произношение во всех шести формах абсолютно правильное — подстраивается только орфография, и только там, где после g идёт -o: в форме <b>yo</b>.</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "recoger", ru: "собирать", forms: ["recojo", "recoges", "recoge", "recogemos", "recogéis", "recogen"], endLen: [2, 2, 1, 4, 4, 2] },
+        { inf: "dirigir", ru: "направлять", forms: ["dirijo", "diriges", "dirige", "dirigimos", "dirigís", "dirigen"], endLen: [2, 2, 1, 4, 2, 2] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>Меняется одна форма — yo.</b> Во всех остальных после g идёт e или i, звук /х/ сохраняется сам — писать нечего.</Nota>
+        <Nota>Правило работает для глаголов на <b>-ger / -gir</b>: recoger → reco<b>j</b>o, coger → co<b>j</b>o, dirigir → diri<b>j</b>o.</Nota>
+        <Nota>Есть и зеркальный случай: у глаголов на <b>-guir</b> перед -o исчезает немая u (gu → g) — перед o звук /г/ и так твёрдый, помощница-u не нужна. Такие глаголы встретятся в историях позже.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучит в Королевстве:</b>
+        <Ejemplo es="—Reco<b>j</b>o las tazas del desayuno —dice Nico." ru="«Собираю чашки после завтрака», — говорит Нико (yo → g стала j)" />
+        <Ejemplo es="Tomás reco<b>g</b>e su farol y sale al pasillo." ru="Томас берёт свой фонарь и выходит в коридор (él → g на месте)" />
+        <Ejemplo es="Los ayudantes reco<b>g</b>en la Sala Grande." ru="помощники убирают Большой зал (ellos → g на месте)" />
+        <Ejemplo es="—Diri<b>j</b>o la Cocina Mágica —dice el Jefe." ru="«Я руковожу Волшебной Кухней», — говорит Шеф (yo → снова j)" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
+// ============================================================
+// ТЕМА II.3 — Presente: чередования в корне (e→ie)
+// ============================================================
+function TemaPresenteRaiz({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена · Presente de indicativo" title="Чередования в корне" sub="Здесь меняется уже не буква, а звук: под ударением гласная корня раскрывается в дифтонг." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1" /></div>
+
+      <RuleCard>
+        У части глаголов гласная корня <b>под ударением</b> превращается в дифтонг: <b>e → ie</b>.
+        <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
+          encender → <span style={{ color: C.raspberry, fontWeight: 800 }}>enc<span style={{ color: C.goldDeep }}>ie</span>ndo</span>
+        </div>
+        <div style={{ marginTop: 8 }}>
+          Ключ — <b>ударение</b>. В формах yo, tú, él, ellos оно падает на корень — и e раскрывается в ie. В <b>nosotros и vosotros</b> ударение уходит на окончание (encend<b>e</b>mos, encend<b>é</b>is) — корень без ударения остаётся спокойным: <b>e</b>.
+        </div>
+        <Nota>Окончания при этом — <b>обычные, регулярные</b>. Меняется только корень, и только там, где на него давит ударение.</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "encender", ru: "зажигать", forms: ["enciendo", "enciendes", "enciende", "encendemos", "encendéis", "encienden"], endLen: [5, 6, 5, 4, 4, 6] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>Схема 1-2-3-6:</b> чередование живёт в четырёх формах (yo, tú, él, ellos), а nosotros и vosotros — всегда с исходной гласной. Если обвести эти четыре формы в таблице — получится «сапожок».</Nota>
+        <Nota>Тот же механизм есть у других пар гласных (например, <b>o → ue</b>) — принцип один: дифтонг под ударением. Эти глаголы придут со следующими главами книги.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучит в Королевстве:</b>
+        <Ejemplo es="—Enc<b>ie</b>ndo la luz —dice Tomás. Y la luz se enciende." ru="«Зажигаю свет», — говорит Томас. И свет зажигается (yo → ударение на корне)" />
+        <Ejemplo es="Tomás enc<b>ie</b>nde dieciocho faroles cada mañana." ru="Томас зажигает восемнадцать фонарей каждое утро (él → ie)" />
+        <Ejemplo es="Nosotros enc<b>e</b>ndemos las luces de la Sala Grande." ru="мы зажигаем огни Большого зала (nosotros → ударение ушло, корень спокоен: e)" />
+        <Ejemplo es="Los ayudantes enc<b>ie</b>nden los hornos de la Cocina Mágica." ru="помощники зажигают печи Волшебной Кухни (ellos → ie)" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -300,6 +388,28 @@ const DRILLS = {
     { pre: "«Sube las jarras». Кто действует?", gap: "", inf: "subir → sub-e", ok: "él / ella", opts: ["yo", "él / ella", "tú"] },
     { pre: "«Desayuno solo en la terraza». Кто действует?", gap: "", inf: "desayunar → desayun-o", ok: "yo", opts: ["yo", "él / ella", "tú"] },
   ],
+  // II.2 — орфография g→j: сам впиши форму
+  orto: [
+    { pre: "Yo", gap: "las tazas del desayuno. (слова Нико)", inf: "recoger", ok: "recojo", note: "yo → окончание -o, поэтому g → j: reco-j-o. Звук /х/ сохранён." },
+    { pre: "Tú", gap: "los caramelos de la mesa.", inf: "recoger", ok: "recoges", note: "после g идёт e — звук /х/ на месте сам, менять нечего." },
+    { pre: "Bruno", gap: "su lista y la abre.", inf: "recoger", ok: "recoge" },
+    { pre: "Nosotros", gap: "la Sala Grande después de la cena.", inf: "recoger", ok: "recogemos" },
+    { pre: "Yo", gap: "el coro de los ayudantes. (слова Шефа)", inf: "dirigir", ok: "dirijo", note: "то же правило в группе -IR: g → j только в yo." },
+    { pre: "El Jefe", gap: "la Cocina Mágica.", inf: "dirigir", ok: "dirige" },
+    { pre: "Yo", gap: "mi farol antes de salir. (слова Томаса)", inf: "coger", ok: "cojo", note: "coger → cojo: g → j перед -o." },
+    { pre: "Los ayudantes", gap: "las jarras de la cocina.", inf: "coger", ok: "cogen" },
+  ],
+  // II.3 — чередование e→ie: сам впиши форму
+  raiz: [
+    { pre: "Yo", gap: "la luz. (слова Томаса)", inf: "encender", ok: "enciendo", note: "ударение на корне → e раскрывается в ie." },
+    { pre: "Tomás", gap: "dieciocho faroles cada mañana.", inf: "encender", ok: "enciende" },
+    { pre: "Tú", gap: "el primer farol del pasillo.", inf: "encender", ok: "enciendes" },
+    { pre: "Nosotros", gap: "las luces de la Sala Grande.", inf: "encender", ok: "encendemos", note: "nosotros: ударение ушло на окончание — корень спокоен, остаётся e." },
+    { pre: "Los ayudantes", gap: "los hornos de la Cocina Mágica.", inf: "encender", ok: "encienden" },
+    { pre: "Vosotros", gap: "vuestras velas con el Jefe.", inf: "encender", ok: "encendéis", note: "vosotros — вторая форма без чередования: encend-éis (не забудь é)." },
+    { pre: "Lucía", gap: "el fuego de la cocina.", inf: "encender", ok: "enciende" },
+    { pre: "Yo no", gap: "los faroles de día.", inf: "encender", ok: "enciendo" },
+  ],
   regulares: [
     { pre: "Lucía", gap: "el desayuno en la cocina.", inf: "preparar", ok: "prepara", opts: ["prepara", "preparo", "preparan"] },
     { pre: "Yo", gap: "por el pasillo con mi farol. (слова Томаса)", inf: "caminar", ok: "camino", opts: ["camino", "camina", "caminas"] },
@@ -315,7 +425,7 @@ const DRILLS = {
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = setKey === "regulares"; // третий тип: сам впиши форму
+  const isInput = ["regulares", "orto", "raiz"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -341,7 +451,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -430,8 +540,8 @@ const BRANCHES = [
     id: "tiempos", num: "II", title: "Времена", sub: "Каждое время — своя тема; неправильности — слои внутри",
     topics: [
       { id: "presente-reg", title: "Presente de indicativo · регулярные глаголы", lvl: "A1", ready: true },
-      { id: "presente-orto", title: "Presente · орфографические изменения (g→j…)", lvl: "A1", ready: false },
-      { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: false },
+      { id: "presente-orto", title: "Presente · орфографические изменения (g→j…)", lvl: "A1", ready: true },
+      { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: true },
       { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: false },
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: false },
     ],
@@ -535,6 +645,8 @@ export default function Gramatica({ onBack }) {
   if (view === "infinitivo") return <TemaInfinitivo onBack={() => setView("verbo")} onTrain={() => openDrill("grupos", "infinitivo")} />;
   if (view === "personas") return <TemaPersonas onBack={() => setView("verbo")} onTrain={() => openDrill("personas", "personas")} />;
   if (view === "presente-reg") return <TemaPresenteRegulares onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "presente-reg")} />;
+  if (view === "presente-orto") return <TemaPresenteOrto onBack={() => setView("verbo")} onTrain={() => openDrill("orto", "presente-orto")} />;
+  if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
