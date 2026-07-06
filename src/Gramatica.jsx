@@ -57,7 +57,8 @@ const PERSONS = ["yo", "tú", "él / ella / usted", "nosotros/-as", "vosotros/-a
 function ConjTable({ cols }) {
   // cols: [{ inf, ru, forms: [6], hl: [indices to highlight endings? simple bold ending] }]
   return (
-    <div style={{ overflowX: "auto", margin: "14px 0" }}>
+    <div style={{ margin: "14px 0" }}>
+      <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse", width: "100%", background: C.card, borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 10px rgba(61,43,31,0.08)" }}>
         <thead>
           <tr>
@@ -86,6 +87,12 @@ function ConjTable({ cols }) {
           ))}
         </tbody>
       </table>
+      </div>
+      {typeof window !== "undefined" && window.innerWidth < 480 && (
+        <div style={{ textAlign: "center", fontSize: 12, color: C.inkSoft, marginTop: 6 }}>
+          ↻ Тесно? Переверни телефон горизонтально — таблица встанет целиком
+        </div>
+      )}
     </div>
   );
 }
@@ -308,9 +315,11 @@ const DRILLS = {
 };
 
 function Drill({ setKey, onBack }) {
+  const isInput = setKey === "regulares"; // третий тип: сам впиши форму
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
   const [score, setScore] = useState(0);
   const done = i >= items.length;
 
@@ -324,7 +333,7 @@ function Drill({ setKey, onBack }) {
           {score === items.length ? "Идеально. Окончания Королевства слушаются тебя." : score >= items.length * 0.7 ? "Отлично. Загляни в таблицу ещё раз — и будет идеально." : "Хорошее начало. Вернись к таблице и попробуй снова."}
         </div>
       </div>
-      <div onClick={() => { setI(0); setScore(0); setPicked(null); }} style={{ background: C.emerald, borderRadius: 14, padding: "14px", cursor: "pointer", textAlign: "center", marginTop: 14 }}>
+      <div onClick={() => { setI(0); setScore(0); setPicked(null); setTyped(""); }} style={{ background: C.emerald, borderRadius: 14, padding: "14px", cursor: "pointer", textAlign: "center", marginTop: 14 }}>
         <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>↻ Ещё раз</div>
       </div>
       <BackBtn onClick={onBack} label="← К теме" />
@@ -332,7 +341,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Поставь глагол в форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -347,6 +356,37 @@ function Drill({ setKey, onBack }) {
         <div style={{ fontSize: 18, lineHeight: 1.6, textAlign: "center" }}>
           {it.pre} <span style={{ display: "inline-block", minWidth: 90, borderBottom: `2px solid ${C.gold}`, color: picked ? (picked === it.ok ? C.emeraldDeep : C.raspberry) : "transparent", fontWeight: 800, textAlign: "center" }}>{picked ? it.ok : "____"}</span> {it.gap}
         </div>
+        {isInput ? (
+          <div style={{ marginTop: 20 }}>
+            <input
+              value={typed}
+              onChange={e => setTyped(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && typed.trim() && !picked) pick(typed.trim().toLowerCase()); }}
+              disabled={!!picked}
+              placeholder="впиши форму глагола…"
+              autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              style={{
+                width: "100%", boxSizing: "border-box", padding: "13px 14px", fontSize: 17,
+                fontFamily: SERIF, borderRadius: 12, outline: "none", textAlign: "center",
+                border: `2px solid ${picked ? (picked === it.ok ? C.emerald : C.raspberry) : C.gold}`,
+                background: C.cream, color: C.ink,
+              }}
+            />
+            {!picked && (
+              <div onClick={() => typed.trim() && pick(typed.trim().toLowerCase())} style={{
+                background: typed.trim() ? C.emerald : C.creamDeep, borderRadius: 12, padding: "12px",
+                cursor: typed.trim() ? "pointer" : "default", textAlign: "center", marginTop: 12, transition: "background .15s",
+              }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: typed.trim() ? "#fff" : C.inkSoft }}>Проверить</div>
+              </div>
+            )}
+            {picked && picked !== it.ok && (
+              <div style={{ textAlign: "center", marginTop: 12, fontSize: 15 }}>
+                Правильно: <b style={{ color: C.emeraldDeep }}>{it.ok}</b>
+              </div>
+            )}
+          </div>
+        ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
           {it.opts.map(o => {
             const isOk = picked && o === it.ok;
@@ -362,9 +402,10 @@ function Drill({ setKey, onBack }) {
             );
           })}
         </div>
+        )}
         {picked && it.note && <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 14, lineHeight: 1.5, background: C.cream, borderRadius: 10, padding: "10px 12px" }}>✦ {it.note}</div>}
         {picked && (
-          <div onClick={() => { setI(i + 1); setPicked(null); }} style={{ background: C.gold, borderRadius: 12, padding: "12px", cursor: "pointer", textAlign: "center", marginTop: 16 }}>
+          <div onClick={() => { setI(i + 1); setPicked(null); setTyped(""); }} style={{ background: C.gold, borderRadius: 12, padding: "12px", cursor: "pointer", textAlign: "center", marginTop: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>Дальше →</div>
           </div>
         )}
