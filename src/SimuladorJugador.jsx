@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
+import Gramatica from "./Gramatica.jsx";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -1715,6 +1716,8 @@ export default function SimuladorJugador() {
   const [showPresenteErIr, setShowPresenteErIr] = useState(false);
   // Libro Vivo — живая книга «Королевство Карамели», третья самостоятельная активность
   const [showLibro, setShowLibro] = useState(false);
+  // Gramática — грамматический справочник, четвёртая самостоятельная активность
+  const [showGramatica, setShowGramatica] = useState(false);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
@@ -1730,10 +1733,12 @@ export default function SimuladorJugador() {
   if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
+  if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (!entered) return <LevelPicker
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
     onLibro={() => setShowLibro(true)}
+    onGramatica={() => setShowGramatica(true)}
     onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
@@ -1757,7 +1762,7 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function LevelPicker({ onPick, onLive, onLibro, onTour }) {
+function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
@@ -1804,6 +1809,20 @@ function LevelPicker({ onPick, onLive, onLibro, onTour }) {
         <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
         <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
         <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
+      </div>
+
+      {/* Gramática — грамматический справочник Королевства */}
+      <div onClick={onGramatica} style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.emerald}`,
+        boxShadow: "0 6px 22px rgba(22,121,91,0.18)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📐</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.emeraldDeep, textTransform: "uppercase", marginBottom: 4 }}>Gramática · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.emeraldDeep, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Грамматика</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Справочник Королевства: правила по-русски, примеры из наших историй и тренировка после каждой темы</div>
+        <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>El verbo · три спряжения · Presente</div>
       </div>
 
       {/* Живая игра — малиновая, отдельно */}
