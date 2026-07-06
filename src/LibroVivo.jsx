@@ -107,12 +107,38 @@ const PRUEBAS = [
   { pista: "tomar aire, como una persona viva; el palacio lo hace", ru: "дышать, вдыхать воздух, как живой; дворец это делает", ok: "respirar" },
 ];
 
+const PRON = ["yo", "tú", "él / ella", "nosotros", "vosotros", "ellos / ellas"];
 const DOSSIER = [
-  { v: "despertarse", nota: "e→ie", pres: "me despierto · te despiertas · se despierta · nos despertamos · os despertáis · se despiertan", perf: "me he despertado, te has despertado…" },
-  { v: "encender", nota: "e→ie", pres: "enciendo · enciendes · enciende · encendemos · encendéis · encienden", perf: "he encendido, has encendido…" },
-  { v: "coger", nota: "g→j en «yo»", pres: "cojo · coges · coge · cogemos · cogéis · cogen", perf: "he cogido, has cogido…" },
-  { v: "estar", nota: "irregular", pres: "estoy · estás · está · estamos · estáis · están", perf: "he estado, has estado…" },
-  { v: "ir", nota: "irregular", pres: "voy · vas · va · vamos · vais · van", perf: "he ido, has ido…" },
+  {
+    v: "despertarse", ru: "просыпаться", nota: "irregular · e→ie",
+    expl: "Гласная в корне меняется: despErtarse → despIErto. Смотри, где корень под ударением — там e превращается в ie. Только nosotros и vosotros сохраняют e.",
+    pres: ["me despierto", "te despiertas", "se despierta", "nos despertamos", "os despertáis", "se despiertan"],
+    perf: ["me he despertado", "te has despertado", "se ha despertado", "nos hemos despertado", "os habéis despertado", "se han despertado"],
+  },
+  {
+    v: "encender", ru: "зажигать, включать", nota: "irregular · e→ie",
+    expl: "Та же перемена гласной в корне: encEnder → encIEndo. В nosotros и vosotros корень остаётся без изменений: encendemos, encendéis.",
+    pres: ["enciendo", "enciendes", "enciende", "encendemos", "encendéis", "encienden"],
+    perf: ["he encendido", "has encendido", "ha encendido", "hemos encendido", "habéis encendido", "han encendido"],
+  },
+  {
+    v: "coger", ru: "брать, хватать", nota: "irregular · g→j en «yo»",
+    expl: "Меняется не гласная, а согласная — и только в форме yo: g превращается в j (cojo), чтобы сохранить звук [х]. Остальные формы — как у обычного глагола на -er.",
+    pres: ["cojo", "coges", "coge", "cogemos", "cogéis", "cogen"],
+    perf: ["he cogido", "has cogido", "ha cogido", "hemos cogido", "habéis cogido", "han cogido"],
+  },
+  {
+    v: "estar", ru: "быть, находиться", nota: "irregular",
+    expl: "Полностью особый глагол: форма yo — estoy, и почти во всех формах ударение падает на окончание (estás, está, están).",
+    pres: ["estoy", "estás", "está", "estamos", "estáis", "están"],
+    perf: ["he estado", "has estado", "ha estado", "hemos estado", "habéis estado", "han estado"],
+  },
+  {
+    v: "ir", ru: "идти, ехать", nota: "irregular",
+    expl: "Самый неправильный глагол: формы voy, vas, va вообще не похожи на инфинитив ir. Их просто запоминают — как имя персонажа.",
+    pres: ["voy", "vas", "va", "vamos", "vais", "van"],
+    perf: ["he ido", "has ido", "ha ido", "hemos ido", "habéis ido", "han ido"],
+  },
 ];
 
 const DONDE = [
@@ -340,20 +366,47 @@ function Pruebas() {
 function Dossier() {
   return (
     <div style={cardS}>
-      <Titulo emoji="📁" es="Dossier de verbos" ru="Досье глаголов листа — solo español" />
-      <Instruccion><b>Прочитай каждое спряжение вслух</b> — сверху вниз, как считалку. Особые приметы глаголов выделены.</Instruccion>
+      <Titulo emoji="📁" es="Dossier de verbos" ru="Досье глаголов листа" />
+      <Instruccion>
+        Все глаголы этого листа — <b>irregulares</b> (неправильные), у каждого своя особая примета: смотри, как меняется гласная или согласная в корне.<br />
+        <b>Прочитай каждую табличку вслух</b> — сверху вниз, как считалку. Времена: <b>Presente</b> (настоящее) и <b>Pretérito Perfecto Compuesto</b> (прошедшее «этой недели»).
+      </Instruccion>
       {DOSSIER.map((d, i) => (
-        <div key={d.v} style={{ borderTop: i ? `1px dashed ${C.line}` : "none", padding: "12px 0" }}>
-          <div style={{ fontSize: 16.5, fontWeight: 800, color: C.goldDeep }}>
-            {d.v} <span style={{ fontSize: 12.5, fontWeight: 700, color: C.raspberryDeep, background: "#F9E3E8", borderRadius: 8, padding: "2px 8px", marginLeft: 6 }}>{d.nota}</span>
+        <div key={d.v} style={{ borderTop: i ? `1px dashed ${C.line}` : "none", padding: "14px 0" }}>
+          <div style={{ fontSize: 17.5, fontWeight: 800, color: C.goldDeep }}>
+            {d.v} <span style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>— {d.ru}</span>
           </div>
-          <div style={{ fontSize: 14.5, lineHeight: 1.6, marginTop: 6 }}><b>Presente:</b> {d.pres}</div>
-          <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 3 }}><b>Perfecto:</b> {d.perf}</div>
+          <div style={{ marginTop: 4 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: C.raspberryDeep, background: "#F9E3E8", borderRadius: 8, padding: "2px 9px" }}>{d.nota}</span>
+          </div>
+          <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.6, margin: "8px 0 10px" }}>{d.expl}</div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ borderCollapse: "collapse", width: "100%", fontSize: 13.5 }}>
+              <thead>
+                <tr>
+                  <th style={thS}></th>
+                  <th style={thS}>Presente</th>
+                  <th style={thS}>Pretérito Perfecto Compuesto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PRON.map((p, r) => (
+                  <tr key={p} style={{ background: r % 2 ? "#FBF7EC" : C.card }}>
+                    <td style={{ ...tdS, color: C.inkSoft, fontStyle: "italic", whiteSpace: "nowrap" }}>{p}</td>
+                    <td style={{ ...tdS, fontWeight: 700 }}>{d.pres[r]}</td>
+                    <td style={tdS}>{d.perf[r]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ))}
     </div>
   );
 }
+const thS = { textAlign: "left", padding: "6px 9px", fontSize: 11.5, fontWeight: 700, letterSpacing: ".3px", color: "#A67C2E", textTransform: "uppercase", borderBottom: "2px solid #C9A24B" };
+const tdS = { padding: "6px 9px", borderBottom: "1px solid #E6D6B8", color: "#3D2B1F", lineHeight: 1.4 };
 
 function DondeHaPasado() {
   return (
@@ -386,13 +439,14 @@ function LeyDelReino() {
 function CapituloRuso() {
   return (
     <div style={cardS}>
-      <Titulo emoji="📖" es="Глава на русском" ru="Художественное чтение — только слушать" />
+      <Titulo emoji="📖" es="Начало истории — на русском" ru="Сначала войди в мир — потом читай его на испанском" />
       <Ilustracion label="El Reino del Caramelo" />
       <Instruccion>
-        Русская версия — <b>самостоятельное литературное произведение</b>, не перевод. Здесь нет упражнений: <b>просто слушай</b>, как аудиокнигу. Сначала вступление Шефа, потом глава.
+        <b>Начни отсюда.</b> Слушай начало истории на русском — это самостоятельное литературное произведение, не перевод. Ты узнаешь, куда попал: Королевство Карамели, дворец, Шеф и его помощники.<br />
+        Когда история станет твоей — переходи на следующий лист и читай её же на испанском. Ты уже будешь понимать всё.
       </Instruccion>
       <Audio src="/audio/cap1-hoja_ru.mp3" label="Записка Шефа (русский)" />
-      <Audio src="/audio/cap1-historia_ru.mp3" label="Глава 1 — художественное чтение (русский)" />
+      <Audio src="/audio/cap1-historia_ru.mp3" label="Начало Главы 1 — художественное чтение (русский)" />
     </div>
   );
 }
@@ -400,6 +454,7 @@ function CapituloRuso() {
 // ---------- каркас с перелистыванием ----------
 
 const HOJAS = [
+  { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
   { id: "hoja", label: "📜", node: <HojaJefe /> },
   { id: "historia", label: "📖", node: <Historia /> },
   { id: "pregunta", label: "🕵️", node: <JefePregunta /> },
@@ -409,7 +464,6 @@ const HOJAS = [
   { id: "dossier", label: "📁", node: <Dossier /> },
   { id: "donde", label: "🗂", node: <DondeHaPasado /> },
   { id: "ley", label: "⚖️", node: <LeyDelReino /> },
-  { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
 ];
 
 export default function LibroVivo({ onBack }) {
