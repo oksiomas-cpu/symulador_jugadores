@@ -394,6 +394,53 @@ function TemaPresenteIrr({ onBack, onTrain }) {
   );
 }
 
+// ============================================================
+// ТЕМА II.5 — Pretérito Perfecto Compuesto (причастия регулярные)
+// ============================================================
+function TemaPerfecto({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена" title="Pretérito Perfecto Compuesto" sub="Второе Королевство говорит о том, что уже случилось — но связано с сегодня. Шеф ведёт допрос именно в этом времени." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1–A2" /></div>
+
+      <RuleCard>
+        Perfecto собирается из двух частей: <b>haber</b> (вспомогательный глагол, спрягается) + <b>причастие</b> (participio, не меняется никогда).
+        <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
+          <span style={{ color: C.raspberry, fontWeight: 800 }}>he</span> + llev<span style={{ color: C.goldDeep, fontWeight: 800 }}>ado</span>
+        </div>
+        <div style={{ marginTop: 10 }}>
+          Причастие строится от инфинитива: <b>-ar → -ado</b> (llevar → llevado), <b>-er / -ir → -ido</b> (recoger → recogido, recibir → recibido). Спрягается только <b>haber</b> — причастие во всех шести лицах выглядит одинаково.
+        </div>
+        <Nota>Меняется только то, что стоит ПЕРЕД причастием. Само причастие — как печать: одна форма на все лица.</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "llevar", ru: "носить", forms: ["he llevado", "has llevado", "ha llevado", "hemos llevado", "habéis llevado", "han llevado"], endLen: [3, 3, 3, 3, 3, 3] },
+        { inf: "recoger", ru: "собирать", forms: ["he recogido", "has recogido", "ha recogido", "hemos recogido", "habéis recogido", "han recogido"], endLen: [3, 3, 3, 3, 3, 3] },
+        { inf: "recibir", ru: "принимать", forms: ["he recibido", "has recibido", "ha recibido", "hemos recibido", "habéis recibido", "han recibido"], endLen: [3, 3, 3, 3, 3, 3] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>haber</b> — единственная переменная часть: he, has, ha, hemos, habéis, han.</Nota>
+        <Nota><b>-ER и -IR совпадают</b> в причастии: comer → comido, recibir → recibido. Разница -ado/-ido — единственное, что нужно помнить.</Nota>
+        <Nota>Perfecto без маркера времени звучит как «просто в прошлом» и теряет смысл. Всегда рядом маркер: <b>esta mañana, esta noche, hoy, esta semana, ya, todavía no, nunca, siempre, acaba de</b>.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучит в допросе Шефа:</b>
+        <Ejemplo es="—<b>He encendido</b> las luces —dice el primer ayudante." ru="«Я зажёг свет», — говорит первый помощник (yo → he + encendido)" />
+        <Ejemplo es="La segunda ayudante <b>ha llevado</b> el desayuno del Jefe esta mañana, como cada día." ru="вторая помощница принесла завтрак Шефа сегодня утром, как каждый день (ella → ha)" />
+        <Ejemplo es="El tercer ayudante <b>ha revisado</b> todos los documentos esta semana." ru="третий помощник проверил все документы на этой неделе (él → ha)" />
+        <Ejemplo es="El guardia <b>ha recibido</b> a las visitas en la puerta principal toda la tarde." ru="охранник принимал гостей у главной двери весь день (él → ha, -ir → -ido)" />
+        <Ejemplo es="Todos <b>han buscado</b> los ingredientes esta noche: en la Sala, en la cocina, en el jardín." ru="все искали ингредиенты этой ночью: в Зале, на кухне, в саду (ellos → han)" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -474,10 +521,21 @@ const DRILLS = {
     { pre: "Vosotros", gap: "con el Jefe cada día. (Шеф — к читателям)", inf: "caminar", ok: "camináis", opts: ["caminan", "camináis", "caminamos"] },
     { pre: "Ellos no", gap: "la palabra «ayer».", inf: "comprender", ok: "comprenden", opts: ["comprende", "comprendemos", "comprenden"] },
   ],
+  // II.5 — Pretérito Perfecto Compuesto: сам впиши haber + participio
+  perfecto: [
+    { pre: "Yo", gap: "las luces esta mañana. (dice el primer ayudante)", inf: "encender", ok: "he encendido", note: "encender → encendido: -er → -ido. Haber en yo: he." },
+    { pre: "Tú", gap: "el desayuno del Jefe. ¿Ya lo has hecho?", inf: "llevar", ok: "has llevado", note: "llevar → llevado: -ar → -ado. Haber en tú: has." },
+    { pre: "La segunda ayudante", gap: "los papeles del suelo dos veces hoy.", inf: "recoger", ok: "ha recogido", note: "recoger → recogido: -er → -ido, como cualquier -ER." },
+    { pre: "El tercer ayudante", gap: "todos los documentos esta semana.", inf: "revisar", ok: "ha revisado" },
+    { pre: "Nosotros", gap: "en la Sala dos veces hoy.", inf: "entrar", ok: "hemos entrado", note: "nosotros: hem-os + entrado. El participio no cambia." },
+    { pre: "Vosotros", gap: "en la cocina toda la tarde. ¿No es así?", inf: "trabajar", ok: "habéis trabajado", note: "vosotros: hab-éis — la forma menos usada, pero regular." },
+    { pre: "Todos", gap: "los ingredientes esta noche: en la Sala, en la cocina, en el jardín.", inf: "buscar", ok: "han buscado", note: "ellos/todos: han. El participio sigue siendo buscado, sin importar cuántos sean." },
+    { pre: "El guardia", gap: "a las visitas en la puerta principal toda la tarde.", inf: "recibir", ok: "ha recibido", note: "recibir → recibido: -ir → -ido, igual que -er." },
+  ],
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz", "irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -503,7 +561,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -595,7 +653,7 @@ const BRANCHES = [
       { id: "presente-orto", title: "Presente · орфографические изменения (g→j…)", lvl: "A1", ready: true },
       { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: true },
       { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: true },
-      { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: false },
+      { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
     ],
   },
   {
@@ -700,6 +758,7 @@ export default function Gramatica({ onBack }) {
   if (view === "presente-orto") return <TemaPresenteOrto onBack={() => setView("verbo")} onTrain={() => openDrill("orto", "presente-orto")} />;
   if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
   if (view === "presente-irr") return <TemaPresenteIrr onBack={() => setView("verbo")} onTrain={() => openDrill("irr", "presente-irr")} />;
+  if (view === "perfecto") return <TemaPerfecto onBack={() => setView("verbo")} onTrain={() => openDrill("perfecto", "perfecto")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
