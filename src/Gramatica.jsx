@@ -147,6 +147,20 @@ function TemaInfinitivo({ onBack, onTrain }) {
         <Ejemplo es="prepar<b>ar</b> → prepar- + окончание" ru="Люсия каждое утро: prepara el desayuno — готовит завтрак" />
       </RuleCard>
 
+      <RuleCard>
+        <b>Вот как это работает в Presente</b> — у каждой группы свой набор окончаний, по одному на каждое лицо:
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "cantar", ru: "петь", forms: ["canto", "cantas", "canta", "cantamos", "cantáis", "cantan"], endLen: [1, 2, 1, 4, 4, 2] },
+        { inf: "comer", ru: "есть", forms: ["como", "comes", "come", "comemos", "coméis", "comen"], endLen: [1, 2, 1, 4, 4, 2] },
+        { inf: "vivir", ru: "жить", forms: ["vivo", "vives", "vive", "vivimos", "vivís", "viven"], endLen: [1, 2, 1, 4, 2, 2] },
+      ]} />
+
+      <RuleCard>
+        <Nota>Золотым выделены окончания — это и есть «почерк» группы. Подробный разбор Presente со всеми наблюдениями — в ветке <b>II. Времена</b>.</Nota>
+      </RuleCard>
+
       <TrainBtn onClick={onTrain} />
       <BackBtn onClick={onBack} />
     </div></div>
@@ -257,9 +271,31 @@ function TrainBtn({ onClick }) {
 // МИНИ-ТРЕНАЖЁР — вставка форм (регулярные Presente)
 // ============================================================
 const DRILLS = {
+  // I.1 — определи группу глагола по инфинитиву
+  grupos: [
+    { pre: "preparar — готовить. Какая группа?", gap: "", inf: "Lucía prepara el desayuno", ok: "-AR (1-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "encender — зажигать. Какая группа?", gap: "", inf: "Tomás enciende los faroles", ok: "-ER (2-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "abrir — открывать. Какая группа?", gap: "", inf: "Bruno abre su lista", ok: "-IR (3-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "caminar — идти. Какая группа?", gap: "", inf: "El Jefe camina por los pasillos", ok: "-AR (1-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "subir — поднимать(ся). Какая группа?", gap: "", inf: "Nico sube las jarras", ok: "-IR (3-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "aprender — учить. Какая группа?", gap: "", inf: "Tú aprendes las palabras del Reino", ok: "-ER (2-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "vivir — жить. Какая группа?", gap: "", inf: "Los ayudantes viven en el palacio", ok: "-IR (3-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+    { pre: "cantar — петь. Какая группа?", gap: "", inf: "Los ayudantes cantan juntos", ok: "-AR (1-я)", opts: ["-AR (1-я)", "-ER (2-я)", "-IR (3-я)"] },
+  ],
+  // I.2 — определи лицо по окончанию
+  personas: [
+    { pre: "«Preparo el desayuno». Кто действует?", gap: "", inf: "preparar → prepar-o", ok: "yo", opts: ["yo", "tú", "él / ella"] },
+    { pre: "«Cantan una canción». Кто действует?", gap: "", inf: "cantar → cant-an", ok: "ellos / ellas", opts: ["nosotros", "ellos / ellas", "vosotros"] },
+    { pre: "«Abre su lista». Кто действует?", gap: "", inf: "abrir → abr-e", ok: "él / ella", opts: ["yo", "tú", "él / ella"] },
+    { pre: "«Vivimos en el palacio». Кто действует?", gap: "", inf: "vivir → viv-imos", ok: "nosotros", opts: ["nosotros", "vosotros", "ellos / ellas"] },
+    { pre: "«Caminas despacio». Кто действует?", gap: "", inf: "caminar → camin-as", ok: "tú", opts: ["yo", "tú", "él / ella"] },
+    { pre: "«Coméis caramelo». Кто действует?", gap: "", inf: "comer → com-éis", ok: "vosotros", opts: ["nosotros", "vosotros", "ellos / ellas"] },
+    { pre: "«Sube las jarras». Кто действует?", gap: "", inf: "subir → sub-e", ok: "él / ella", opts: ["yo", "él / ella", "tú"] },
+    { pre: "«Desayuno solo en la terraza». Кто действует?", gap: "", inf: "desayunar → desayun-o", ok: "yo", opts: ["yo", "él / ella", "tú"] },
+  ],
   regulares: [
     { pre: "Lucía", gap: "el desayuno en la cocina.", inf: "preparar", ok: "prepara", opts: ["prepara", "preparo", "preparan"] },
-    { pre: "Yo", gap: "la luz cada mañana. (слова Томаса)", inf: "encender*", ok: "enciendo", opts: ["enciendo", "enciende", "encendemos"], note: "encender меняет корень (e→ie) — об этом отдельная тема, но окончание тут регулярное: yo → -o" },
+    { pre: "Yo", gap: "por el pasillo con mi farol. (слова Томаса)", inf: "caminar", ok: "camino", opts: ["camino", "camina", "caminas"] },
     { pre: "Los ayudantes", gap: "juntos en la Cocina Mágica.", inf: "cantar", ok: "cantan", opts: ["canta", "cantan", "cantáis"] },
     { pre: "Bruno", gap: "su lista cada mañana.", inf: "abrir", ok: "abre", opts: ["abro", "abres", "abre"] },
     { pre: "Nosotros", gap: "en el Palacio de Caramelo.", inf: "vivir", ok: "vivimos", opts: ["vivimos", "viven", "vivís"] },
@@ -296,6 +332,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Поставь глагол в форму" };
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -304,7 +341,7 @@ function Drill({ setKey, onBack }) {
 
   return (
     <div style={wrap}><div style={maxw}>
-      <GHeader kicker={`Тренировка · ${i + 1} / ${items.length}`} title="Поставь глагол в форму" />
+      <GHeader kicker={`Тренировка · ${i + 1} / ${items.length}`} title={TITLES[setKey] || "Тренировка"} />
       <div style={{ background: C.card, borderRadius: 16, padding: "22px 20px", border: `1.5px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)" }}>
         <div style={{ fontSize: 12.5, color: C.goldDeep, fontWeight: 700, textAlign: "center", marginBottom: 12 }}>{it.inf}</div>
         <div style={{ fontSize: 18, lineHeight: 1.6, textAlign: "center" }}>
@@ -454,8 +491,8 @@ export default function Gramatica({ onBack }) {
 
   if (view === "root") return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
   if (view === "verbo") return <VerboIndex onOpen={(id) => setView(id)} onBack={() => setView("root")} />;
-  if (view === "infinitivo") return <TemaInfinitivo onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "infinitivo")} />;
-  if (view === "personas") return <TemaPersonas onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "personas")} />;
+  if (view === "infinitivo") return <TemaInfinitivo onBack={() => setView("verbo")} onTrain={() => openDrill("grupos", "infinitivo")} />;
+  if (view === "personas") return <TemaPersonas onBack={() => setView("verbo")} onTrain={() => openDrill("personas", "personas")} />;
   if (view === "presente-reg") return <TemaPresenteRegulares onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "presente-reg")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
