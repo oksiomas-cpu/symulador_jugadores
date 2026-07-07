@@ -1941,6 +1941,22 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         Выбери уровень, который тренируешь, или подключайся к живой игре:
       </p>
 
+      {/* Libro Vivo — живая книга */}
+      <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
+      <div style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.gold}`,
+        boxShadow: "0 6px 22px rgba(201,162,75,0.22)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📖</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 4 }}>Libro Vivo · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
+        <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
+      </div>
+      </Gate>
+
       {/* Уровень 1 — золотой */}
       <Gate open={acc.cap1} title="Nivel 1" onOpen={() => onPick(PACKS.cap1)}>
       <div style={{
@@ -1968,22 +1984,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
-      </div>
-      </Gate>
-
-      {/* Libro Vivo — живая книга */}
-      <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
-      <div style={{
-        background: C.card, borderRadius: 20, padding: "24px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        border: `2px solid ${C.gold}`,
-        boxShadow: "0 6px 22px rgba(201,162,75,0.22)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>📖</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 4 }}>Libro Vivo · El Reino del Caramelo</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
-        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
-        <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
       </div>
       </Gate>
 
