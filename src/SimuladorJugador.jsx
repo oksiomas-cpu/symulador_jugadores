@@ -213,7 +213,7 @@ const VERBS = [
 const verbByKey = (k) => VERBS.find((v) => v.key === k);
 
 /* ============================================================
-   CAPÍTULO 2 — Pretérito Perfecto (картридж cap2-perfecto)
+   CAPÍTULO 2 — Pretérito Perfecto Compuesto (картридж cap2-perfecto)
    Источники: История-маяк+глаголы + Шпаргалки Свидетелей Гл.2 (Notion).
    Игра 1 (Cap.1, Presente) — выше, НЕ изменена.
    ============================================================ */
@@ -415,8 +415,8 @@ const PACKS = {
   },
   cap2: {
     id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
-    grammar: "Pretérito Perfecto", emoji: "🌙",
-    desc: "Ночное расследование: 15 улик и детективные вопросы в Pretérito Perfecto.",
+    grammar: "Pretérito Perfecto Compuesto", emoji: "🌙",
+    desc: "Ночное расследование: 15 улик и детективные вопросы в Pretérito Perfecto Compuesto.",
     term: { es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта", other: "Другая улика", next: "Следующая улика" },
     VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
     fantAnsOf: (v) => v.fantAns,
@@ -1621,7 +1621,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
           </button>
         ) : (
           <button onClick={onPerfecto} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-            Открыть тренажёр Pretérito Perfecto →
+            Открыть тренажёр Pretérito Perfecto Compuesto →
           </button>
         )}
         {!isCapOne && (
@@ -1931,7 +1931,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       <div style={{ textAlign: "center", marginTop: 6 }}>
         <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
-          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
+          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto Compuesto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
         </button>
       </div>
       <Footer />
@@ -2016,7 +2016,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
           <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
           <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
             <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto Compuesto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
           </div>
           {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
         </Block>
@@ -2263,7 +2263,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
           <br />
           <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
             <Btn bg={C.emerald} onClick={startNextRound}>{T.next} →</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto →" : "📔 Спряжение в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto Compuesto →" : "📔 Спряжение в Mi Diario →"}</Btn>
           </div>
           {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
         </Block>
@@ -2426,7 +2426,7 @@ const NIVEL2_ALL = [
 ];
 
 // ============================================================
-// GRAMMAR_PERFECTO — данные Grammar Base (Pretérito Perfecto)
+// GRAMMAR_PERFECTO — данные Grammar Base (Pretérito Perfecto Compuesto)
 // Архитектурно изолированы — легко переехать в Grammar Hub
 // ============================================================
 const GRAMMAR_PERFECTO = {
@@ -2504,12 +2504,12 @@ function conjPerfecto(verb) {
 function PerfectoRules({ onNext, onBack, tabBar }) {
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="📚 Pretérito Perfecto · Правила" />
+      <Header subtitle="📚 Pretérito Perfecto Compuesto · Правила" />
       {tabBar}
 
       <Block stripe={C.emerald}>
         <div style={{ fontWeight: 700, fontSize: 17, color: C.ink, marginBottom: 10 }}>
-          Как образуется Pretérito Perfecto
+          Как образуется Pretérito Perfecto Compuesto
         </div>
         <div style={{ fontSize: 15, color: C.ink, lineHeight: 1.6, marginBottom: 14 }}>
           <strong style={{ color: C.emeraldDeep }}>haber</strong> + причастие (participio)
@@ -2711,7 +2711,7 @@ function PerfectoConjugation({ startVerb, onScore, onBack, tabBar }) {
 
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="📚 Pretérito Perfecto · Спряжение" />
+      <Header subtitle="📚 Pretérito Perfecto Compuesto · Спряжение" />
       {tabBar}
 
       {/* Выбор глагола */}
@@ -2766,7 +2766,7 @@ function PerfectoConjugation({ startVerb, onScore, onBack, tabBar }) {
 function PerfectoTeoria({ tabBar, onBack }) {
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="🌙 Pretérito Perfecto · Teoría" />
+      <Header subtitle="🌙 Pretérito Perfecto Compuesto · Teoría" />
       {onBack && (
         <div style={{ textAlign: "center", marginBottom: 12 }}>
           <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
@@ -2775,7 +2775,7 @@ function PerfectoTeoria({ tabBar, onBack }) {
       {tabBar}
 
       <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, fontSize: 16, color: C.emeraldDeep, marginBottom: 10 }}>¿Qué es el Pretérito Perfecto?</div>
+        <div style={{ fontWeight: 700, fontSize: 16, color: C.emeraldDeep, marginBottom: 10 }}>¿Qué es el Pretérito Perfecto Compuesto?</div>
         <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>
           Это время, которое <strong>соединяет прошлое с этой секундой</strong>. Действие случилось раньше, но оно ещё живёт в настоящем — потому что:
         </div>
@@ -2853,7 +2853,7 @@ function PerfectoMarcadores({ tabBar, onBack }) {
       {tabBar}
 
       <div style={{ fontSize: 14, color: C.inkSoft, marginBottom: 14, lineHeight: 1.65 }}>
-        Маркеры — твой ориентир. Они сигнализируют: здесь нужен <strong>Pretérito Perfecto</strong>. Учи группами — запоминается быстрее.
+        Маркеры — твой ориентир. Они сигнализируют: здесь нужен <strong>Pretérito Perfecto Compuesto</strong>. Учи группами — запоминается быстрее.
       </div>
 
       {GRAMMAR_PERFECTO.marcadores.map((g, gi) => {
@@ -3572,7 +3572,7 @@ function DiarioMode({ onHome, onScore, session }) {
 
 
 // ============================================================
-// MI DIARIO v2 — Pretérito Perfecto (cap2)
+// MI DIARIO v2 — Pretérito Perfecto Compuesto (cap2)
 // ============================================================
 
 const DIARIO2 = {
@@ -3615,7 +3615,7 @@ const DIARIO2 = {
   ],
 };
 
-// Проверка пропуска Pretérito Perfecto: «haber(лицо) + participio»
+// Проверка пропуска Pretérito Perfecto Compuesto: «haber(лицо) + participio»
 // ok    — правильный глагол + правильное лицо haber
 // conj  — правильный participio, но неверная форма haber
 // sense — другой participio из cap2, не по смыслу
@@ -3642,7 +3642,7 @@ function ConjHintPerfecto() {
   return (
     <Block stripe={C.gold}>
       <div onClick={() => setOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Pretérito Perfecto · haber</span>
+        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Pretérito Perfecto Compuesto · haber</span>
         <span style={{ color: C.goldDeep, fontSize: 13 }}>{open ? "ocultar ▲" : "mostrar ▼"}</span>
       </div>
       {open && (
@@ -3730,12 +3730,12 @@ function DiarioMode2({ onHome, onScore, session }) {
 
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="📔 Mi Diario · Pretérito Perfecto" />
+      <Header subtitle="📔 Mi Diario · Pretérito Perfecto Compuesto" />
       <ScoreBadge session={session} />
       <ConjHintPerfecto />
       <Block stripe={C.emerald}>
         <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO2.title}</div>
-        <div style={pHint}>Впиши каждый глагол в форме <strong>Pretérito Perfecto</strong>: haber + participio. Например: «he llamado», «hemos entrado». Лицо haber подсказывает контекст. Подсказка сверху.</div>
+        <div style={pHint}>Впиши каждый глагол в форме <strong>Pretérito Perfecto Compuesto</strong>: haber + participio. Например: «he llamado», «hemos entrado». Лицо haber подсказывает контекст. Подсказка сверху.</div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
           <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 5, fontWeight: 600 }}>Verbos disponibles · выбирай из этих 15:</div>
           <div style={{ fontSize: 13, color: C.raspberry, lineHeight: 1.7, fontWeight: 600 }}>{NIVEL2_ALL.map(x => x.inf).join(" · ")}</div>

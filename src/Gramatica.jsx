@@ -404,7 +404,7 @@ function TemaPerfecto({ onBack, onTrain }) {
       <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1–A2" /></div>
 
       <RuleCard>
-        Perfecto собирается из двух частей: <b>haber</b> (вспомогательный глагол, спрягается) + <b>причастие</b> (participio, не меняется никогда).
+        Pretérito Perfecto Compuesto собирается из двух частей: <b>haber</b> (вспомогательный глагол, спрягается) + <b>причастие</b> (participio, не меняется никогда).
         <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
           <span style={{ color: C.raspberry, fontWeight: 800 }}>he</span> + llev<span style={{ color: C.goldDeep, fontWeight: 800 }}>ado</span>
         </div>
@@ -423,7 +423,7 @@ function TemaPerfecto({ onBack, onTrain }) {
       <RuleCard>
         <Nota><b>haber</b> — единственная переменная часть: he, has, ha, hemos, habéis, han.</Nota>
         <Nota><b>-ER и -IR совпадают</b> в причастии: comer → comido, recibir → recibido. Разница -ado/-ido — единственное, что нужно помнить.</Nota>
-        <Nota>Perfecto без маркера времени звучит как «просто в прошлом» и теряет смысл. Всегда рядом маркер: <b>esta mañana, esta noche, hoy, esta semana, ya, todavía no, nunca, siempre, acaba de</b>.</Nota>
+        <Nota>Pretérito Perfecto Compuesto без маркера времени звучит как «просто в прошлом» и теряет смысл. Всегда рядом маркер: <b>esta mañana, esta noche, hoy, esta semana, ya, todavía no, nunca, siempre, acaba de</b>.</Nota>
       </RuleCard>
 
       <RuleCard>
@@ -442,15 +442,15 @@ function TemaPerfecto({ onBack, onTrain }) {
 }
 
 // ============================================================
-// ТЕМА II.5b — Perfecto: причастия неправильные (слой внутри Perfecto)
-// Источник: учебник «Domina los verbos» (стр. 22–24) — полный список 18 причастий,
-// правило производных, двойные формы. Упражнения: канонные реплики Главы 2
-// (прямая речь СОХРАНЯЕТСЯ в кавычках «...») + примеры учебника. 7 июля 2026.
+// ТЕМА II.5b — Pretérito Perfecto Compuesto: причастия неправильные (слой внутри времени)
+// Полный список 18 частотных форм + производные + двойные формы.
+// Упражнения: канонные реплики Главы 2 (прямая речь СОХРАНЯЕТСЯ в кавычках «...»).
+// Источник структуры — методичка, в UI НЕ упоминается (решение Оксаны 7.07). Голос — Оксаны.
 // ============================================================
 function TemaParticipiosIrr({ onBack, onTrain }) {
   return (
     <div style={wrap}><div style={maxw}>
-      <GHeader kicker="El verbo · II. Времена · Perfecto" title="Причастия неправильные" sub="Правило Perfecto не меняется — меняется только само причастие: у нескольких частых глаголов оно не по шаблону -ado/-ido, и его просто нужно запомнить." />
+      <GHeader kicker="El verbo · II. Времена · Pretérito Perfecto Compuesto" title="Причастия неправильные" sub="Правило Pretérito Perfecto Compuesto не меняется — меняется только само причастие: у нескольких частых глаголов оно не по шаблону -ado/-ido, и его просто нужно запомнить." />
       <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2" /></div>
 
       <RuleCard>
@@ -463,8 +463,8 @@ function TemaParticipiosIrr({ onBack, onTrain }) {
             </div>
           ))}
         </div>
-        <Nota>Это полный список частотных неправильных причастий (учебник «Domina los verbos», Nivel Básico). Производные наследуют форму: descubrir → descu<b>bierto</b>, devolver → de<b>vuelto</b>, componer → com<b>puesto</b>, prever → pre<b>visto</b>, deshacer → des<b>hecho</b>. Исключения: bendecir/maldecir → bendec<b>ido</b>/maldec<b>ido</b>.</Nota>
-        <Nota>Три глагола имеют две равноправные формы: freír → freído / <b>frito</b>, imprimir → imprimido / <b>impreso</b>, proveer → proveído / <b>provisto</b>.</Nota>
+        <Nota>Это полный список — других сюрпризов на этом уровне не будет. А родственники наследуют форму, как фамилию: descubrir → descu<b>bierto</b>, devolver → de<b>vuelto</b>, componer → com<b>puesto</b>. Выучил один — вся семья в подарок.</Nota>
+        <Nota>У freír две законные формы: freído и <b>frito</b>. Вторая тебе давно знакома — patatas fritas.</Nota>
         <Nota>В допросе Главы 2 неправильные причастия уже звучали: <b>vuelto</b> (3-й помощник, его алиби), <b>abierto, dicho, visto</b> (свидетели той же ночи). Остальные 15 глаголов улик — с регулярными причастиями.</Nota>
       </RuleCard>
 
@@ -590,8 +590,8 @@ const DRILLS = {
     { pre: "El ayudante más joven: «", gap: "una sombra esta tarde.»", inf: "ver", ok: "he visto", note: "ver → visto. Прямая речь: yo → he." },
     { pre: "«Pero no", gap: "nada porque no estaba seguro.»", inf: "decir", ok: "he dicho", note: "decir → dicho, no «decido»." },
     { pre: "El tercer ayudante hoy todavía no", gap: "a la Sala.", inf: "volver", ok: "ha vuelto", note: "volver → vuelto. О помощнике говорим в 3-м лице: ha." },
-    { pre: "Los niños todavía no", gap: "los deberes.", inf: "hacer", ok: "han hecho", note: "hacer → hecho (пример учебника). ellos → han." },
-    { pre: "Yo nunca", gap: "una ópera.", inf: "ver", ok: "he visto", note: "ver → visto (пример учебника). nunca дружит с Perfecto." },
+    { pre: "Los niños todavía no", gap: "los deberes.", inf: "hacer", ok: "han hecho", note: "hacer → hecho. ellos → han." },
+    { pre: "Yo nunca", gap: "una ópera.", inf: "ver", ok: "he visto", note: "ver → visto. nunca дружит с Pretérito Perfecto Compuesto." },
     { pre: "Nosotros", gap: "la puerta principal esta tarde.", inf: "abrir", ok: "hemos abierto", note: "nosotros: hemos + abierto. Причастие не меняется по лицам." },
     { pre: "¿Vosotros", gap: "la verdad al Jefe?", inf: "decir", ok: "habéis dicho", note: "vosotros: habéis + dicho." },
     { pre: "¿Quién", gap: "la puerta de la Sala esta noche?", inf: "abrir", ok: "ha abierto", note: "¿quién? → 3-е лицо ед.: ha + abierto." },
@@ -719,7 +719,7 @@ const BRANCHES = [
       { id: "presente-raiz", title: "Presente · чередования в корне (e→ie…)", lvl: "A1", ready: true },
       { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: true },
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
-      { id: "participios-irr", title: "Perfecto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
+      { id: "participios-irr", title: "Pretérito Perfecto Compuesto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
     ],
   },
   {
