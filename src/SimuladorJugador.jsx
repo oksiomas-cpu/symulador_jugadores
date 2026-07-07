@@ -1761,7 +1761,14 @@ export default function SimuladorJugador() {
   // Доступ по Пропуску (ТЗ шаг 2): undefined = грузим; затем { status, expiresAt }.
   const [access, setAccess] = useState(undefined);
   useEffect(() => {
-    const t = tg.current;
+    let t = tg.current;
+    // Превью в браузере (для тестов Оксаны): ?tgId=... подставляет личность вне Telegram.
+    if (!t) {
+      try {
+        const q = new URLSearchParams(window.location.search).get("tgId");
+        if (q && /^\d+$/.test(q)) t = { id: Number(q), name: "preview" };
+      } catch (e) { /* noop */ }
+    }
     if (!t) { setAccess({ status: "notg" }); return; }
     let alive = true;
     fetchAccess(t.id)
