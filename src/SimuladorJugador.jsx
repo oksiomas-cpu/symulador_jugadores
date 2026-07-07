@@ -508,6 +508,110 @@ async function cloudCall(payload) {
   return d.score;
 }
 
+
+// ---- Доступ (Пропуск в Город): статус из бота Don Verbo ----
+// ТЗ шаг 2 (3964c9eb6e00814e87a7dd5ac33e8ccb). Единая точка — api/access.js.
+const ACCESS_API = "https://don-verbo.vercel.app/api/access";
+const CHANNEL_URL = "https://t.me/es_consabor";        // бесплатный канал — получить Пропуск
+const CLUB_URL = "https://t.me/oksanamaikova_spanish"; // посадочная клуба
+const BOT_URL = "https://t.me/DonVerbobot";
+
+const CTA_BTN = {
+  display: "inline-block", background: C.raspberry, color: "#fff", border: "none",
+  borderRadius: 12, padding: "13px 22px", fontSize: 15.5, fontWeight: 700,
+  cursor: "pointer", fontFamily: SERIF, boxShadow: "0 4px 16px rgba(168,27,62,0.25)",
+};
+
+function openTg(url) {
+  try {
+    const w = window.Telegram && window.Telegram.WebApp;
+    if (w && w.openTelegramLink) { w.openTelegramLink(url); return; }
+  } catch (e) { /* вне Telegram */ }
+  try { window.open(url, "_blank"); } catch (e) { /* noop */ }
+}
+
+async function fetchAccess(tgId) {
+  const r = await fetch(`${ACCESS_API}?tgId=${tgId}`);
+  const d = await r.json();
+  return d && d.status ? d : { status: "none", expiresAt: null };
+}
+
+// Витрина замков: что открыто при данном статусе.
+//   cap1 — Nivel 1 (AR); cap2 — Nivel 2 (Perfecto); libro — Живая книга;
+//   gramatica — раздел «Грамматика» (меню); live — Пульт живой игры;
+//   presente/perfecto — дрилл темы по deep-link из капсул Дона.
+function accessMap(status) {
+  switch (status) {
+    case "club":
+      return { cap1: true, cap2: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
+    case "trial2":
+      return { cap1: true, cap2: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+    case "trial1":
+      return { cap1: true, cap2: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+    default: // none
+      return { cap1: false, cap2: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
+  }
+}
+function temaAllowed(tema, acc) {
+  if (!tema) return true;
+  return String(tema).startsWith("perfecto") ? acc.perfecto : acc.presente;
+}
+
+// ============================================================
+// ЭКРАНЫ ДОСТУПА (ТЗ «Пропуск в Город», шаг 2)
+// ============================================================
+function AccessLoading() {
+  return (<div style={wrap}><div style={maxw}>
+    <Header subtitle="Un momento…" />
+    <p style={{ ...pHint, textAlign: "center", marginTop: 34 }}>🔑 Проверяю твой Пропуск в Город…</p>
+    <Footer />
+  </div></div>);
+}
+
+function OpenInBot() {
+  return (<div style={wrap}><div style={maxw}>
+    <Header subtitle="La Ciudad de los Sentidos" />
+    <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 20, padding: "28px 24px", textAlign: "center", marginTop: 12 }}>
+      <div style={{ fontSize: 40, marginBottom: 10 }}>🏛</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, marginBottom: 10 }}>Вход — через Дона Вербо</div>
+      <p style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.6, margin: "0 0 18px" }}>Город открывается из Telegram: там я узнаю тебя и выдаю Пропуск. Открой бота и нажми «🏛 Войти в Город».</p>
+      <button onClick={() => openTg(BOT_URL)} style={CTA_BTN}>🎩 Открыть Дона Вербо</button>
+    </div>
+    <Footer />
+  </div></div>);
+}
+
+function NoPassScreen() {
+  return (<div style={wrap}><div style={maxw}>
+    <Header subtitle="La Ciudad de los Sentidos" />
+    <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 20, padding: "28px 24px", textAlign: "center", marginTop: 12 }}>
+      <div style={{ fontSize: 40, marginBottom: 10 }}>🎟️</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, marginBottom: 10 }}>Нужен Пропуск в Город</div>
+      <p style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.6, margin: "0 0 18px" }}>Пропуск я выдаю жителям нашего открытого канала. Подпишись — и напиши Дону в Telegram, Пропуск будет ждать тебя.</p>
+      <button onClick={() => openTg(CHANNEL_URL)} style={CTA_BTN}>📡 Открытый канал</button>
+    </div>
+    <Footer />
+  </div></div>);
+}
+
+function LockedScreen({ status, onBack }) {
+  const toClub = status === "trial1" || status === "trial2";
+  return (<div style={wrap}><div style={maxw}>
+    <Header subtitle="Todavía no…" />
+    <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 20, padding: "28px 24px", textAlign: "center", marginTop: 12 }}>
+      <div style={{ fontSize: 40, marginBottom: 10 }}>🔒</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, marginBottom: 10 }}>Открывается жителям Города</div>
+      <p style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.6, margin: "0 0 18px" }}>{toClub ? "Эта часть Города открыта участникам клуба. Загляни — там весь уровень, книга целиком и живые игры." : "Эта часть Города пока закрыта. Начни с Пропуска: осмотрись, попробуй, а дальше двери откроются сами."}</p>
+      <button onClick={() => openTg(toClub ? CLUB_URL : CHANNEL_URL)} style={CTA_BTN}>{toClub ? "🏛 Войти в клуб" : "📡 Открытый канал"}</button>
+    </div>
+    <div style={{ textAlign: "center", marginTop: 14 }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад в Город</button>
+    </div>
+    <Footer />
+  </div></div>);
+}
+
+
 // ---- Бейдж копилки ----
 function ScoreBadge({ session }) {
   const warmup = session.warmup || 0;
@@ -1654,6 +1758,18 @@ export default function SimuladorJugador() {
   const [cloud, setCloud] = useState(null);
   const tg = useRef(getTg());
 
+  // Доступ по Пропуску (ТЗ шаг 2): undefined = грузим; затем { status, expiresAt }.
+  const [access, setAccess] = useState(undefined);
+  useEffect(() => {
+    const t = tg.current;
+    if (!t) { setAccess({ status: "notg" }); return; }
+    let alive = true;
+    fetchAccess(t.id)
+      .then((a) => { if (alive) setAccess(a); })
+      .catch(() => { if (alive) setAccess({ status: "none" }); });
+    return () => { alive = false; };
+  }, []);
+
   useEffect(() => {
     const t = tg.current;
     if (!t) return;
@@ -1734,14 +1850,34 @@ export default function SimuladorJugador() {
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
-  if (deepTema) return <Gramatica startTema={deepTema} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
-  if (deepVerb && deepNivel === "2") return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
-  if (deepVerb && deepGrupo === "erir") return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
-  if (deepVerb) return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
+  // --- Витрина доступа (ТЗ «Пропуск в Город», шаг 2) ---
+  if (access === undefined) return <AccessLoading />;
+  if (access.status === "notg") return <OpenInBot />;
+  const acc = accessMap(access.status);
+  if (access.status === "none") return <NoPassScreen />;
+
+  // Deep-link из капсул Дона: дрилл темы. Perfecto — только club; presente — trial1+.
+  if (deepTema) {
+    if (!temaAllowed(deepTema, acc)) return <LockedScreen status={access.status} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
+    return <Gramatica startTema={deepTema} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
+  }
+  if (deepVerb && deepNivel === "2") {
+    if (!acc.perfecto) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
+  }
+  if (deepVerb && deepGrupo === "erir") {
+    if (!acc.perfecto) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
+  }
+  if (deepVerb) {
+    if (!acc.presente) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
+  }
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (!entered) return <LevelPicker
+    acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
     onLibro={() => setShowLibro(true)}
@@ -1769,7 +1905,27 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour }) {
+  const [locked, setLocked] = useState(null);
+  const toClub = status === "trial1" || status === "trial2";
+  const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
+  const ctaLabel = toClub ? "🏛 Войти в клуб" : "📡 Открытый канал";
+
+  // Обёртка карточки: открыта → свой onClick; закрыта → витрина замка.
+  function Gate({ open, title, onOpen, children }) {
+    if (open) return <div onClick={onOpen}>{children}</div>;
+    return (
+      <div style={{ position: "relative" }} onClick={() => setLocked(title)}>
+        <div style={{ filter: "grayscale(0.9)", opacity: 0.5, pointerEvents: "none" }}>{children}</div>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <div style={{ background: "rgba(255,255,255,0.94)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "9px 15px", fontSize: 13, fontWeight: 800, color: C.goldDeep, fontFamily: SERIF, textAlign: "center", boxShadow: "0 4px 14px rgba(61,43,31,0.18)" }}>
+            🔒 Открывается жителям Города
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
@@ -1779,7 +1935,8 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
       </p>
 
       {/* Уровень 1 — золотой */}
-      <div onClick={() => onPick(PACKS.cap1)} style={{
+      <Gate open={acc.cap1} title="Nivel 1" onOpen={() => onPick(PACKS.cap1)}>
+      <div style={{
         background: C.gold, borderRadius: 20, padding: "28px 24px",
         marginBottom: 16, cursor: "pointer", textAlign: "center",
         boxShadow: "0 6px 22px rgba(201,162,75,0.30)",
@@ -1790,9 +1947,11 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap1.desc}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap1.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
       </div>
+      </Gate>
 
       {/* Уровень 2 — изумрудный */}
-      <div onClick={() => onPick(PACKS.cap2)} style={{
+      <Gate open={acc.cap2} title="Nivel 2" onOpen={() => onPick(PACKS.cap2)}>
+      <div style={{
         background: C.emerald, borderRadius: 20, padding: "28px 24px",
         marginBottom: 16, cursor: "pointer", textAlign: "center",
         boxShadow: "0 6px 22px rgba(22,121,91,0.28)",
@@ -1803,9 +1962,11 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
       </div>
+      </Gate>
 
-      {/* Libro Vivo — живая книга, самостоятельная жизнь внутри Королевства */}
-      <div onClick={onLibro} style={{
+      {/* Libro Vivo — живая книга */}
+      <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
+      <div style={{
         background: C.card, borderRadius: 20, padding: "24px 24px",
         marginBottom: 16, cursor: "pointer", textAlign: "center",
         border: `2px solid ${C.gold}`,
@@ -1817,9 +1978,11 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
         <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
         <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
       </div>
+      </Gate>
 
-      {/* Gramática — грамматический справочник Королевства */}
-      <div onClick={onGramatica} style={{
+      {/* Gramática — справочник */}
+      <Gate open={acc.gramatica} title="Грамматика" onOpen={onGramatica}>
+      <div style={{
         background: C.card, borderRadius: 20, padding: "24px 24px",
         marginBottom: 16, cursor: "pointer", textAlign: "center",
         border: `2px solid ${C.emerald}`,
@@ -1831,10 +1994,12 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
         <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Справочник Королевства: правила по-русски, примеры из наших историй и тренировка после каждой темы</div>
         <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>El verbo · три спряжения · Presente</div>
       </div>
+      </Gate>
 
       {/* Живая игра — малиновая, отдельно */}
       <div style={{ borderTop: `1px dashed ${C.line}`, margin: "8px 0 16px" }} />
-      <div onClick={onLive} style={{
+      <Gate open={acc.live} title="Пульт живой игры" onOpen={onLive}>
+      <div style={{
         background: C.raspberry, borderRadius: 20, padding: "22px 24px",
         cursor: "pointer", textAlign: "center",
         boxShadow: "0 4px 16px rgba(168,27,62,0.22)",
@@ -1843,6 +2008,7 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
         <div style={{ fontSize: 19, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Пульт живой игры</div>
         <div style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", marginTop: 6 }}>Только во время Zoom-игры</div>
       </div>
+      </Gate>
 
       <div style={{ textAlign: "center", marginTop: 18 }}>
         <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
@@ -1851,6 +2017,12 @@ function LevelPicker({ onPick, onLive, onLibro, onGramatica, onTour }) {
       </div>
 
       <Footer />
+
+      {/* CTA замка */}
+      <Sheet open={!!locked} onClose={() => setLocked(null)} title={locked ? `🔒 ${locked}` : ""}>
+        <p style={{ fontSize: 15, lineHeight: 1.7, margin: "0 0 16px" }}>{toClub ? "Эта часть Города открыта участникам клуба — там весь уровень, книга целиком и живые игры." : "Эта часть Города открывается жителям. Начни с Пропуска: осмотрись и попробуй, дальше двери откроются сами."}</p>
+        <button onClick={() => openTg(ctaUrl)} style={CTA_BTN}>{ctaLabel}</button>
+      </Sheet>
     </div></div>
   );
 }
