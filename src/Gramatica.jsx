@@ -588,7 +588,7 @@ const DRILLS = {
   "participios-irr": [
     { pre: "El primer ayudante: «Esta mañana", gap: "la Sala yo solo.»", inf: "abrir", ok: "he abierto", note: "abrir → abierto, no «abrido». Прямая речь помощника: yo → he." },
     { pre: "El ayudante más joven: «", gap: "una sombra esta tarde.»", inf: "ver", ok: "he visto", note: "ver → visto. Прямая речь: yo → he." },
-    { pre: "«Pero no", gap: "nada porque no estaba seguro.»", inf: "decir", ok: "he dicho", note: "decir → dicho, no «decido»." },
+    { pre: "El ayudante más joven sigue: «Pero no", gap: "nada porque no estaba seguro.»", inf: "decir", ok: "he dicho", note: "decir → dicho, no «decido». Он всё ещё говорит о себе: yo → he." },
     { pre: "El tercer ayudante hoy todavía no", gap: "a la Sala.", inf: "volver", ok: "ha vuelto", note: "volver → vuelto. О помощнике говорим в 3-м лице: ha." },
     { pre: "Los niños todavía no", gap: "los deberes.", inf: "hacer", ok: "han hecho", note: "hacer → hecho. ellos → han." },
     { pre: "Yo nunca", gap: "una ópera.", inf: "ver", ok: "he visto", note: "ver → visto. nunca дружит с Pretérito Perfecto Compuesto." },
