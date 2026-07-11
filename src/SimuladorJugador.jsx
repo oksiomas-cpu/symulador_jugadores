@@ -261,9 +261,9 @@ const VERBS2 = [
     key: "varilla", emoji: "🪄", inf: "La varilla dorada", ru: "золотой венчик",
     storyEs: "El Jefe **ha cogido** la varilla dorada esta noche. **La ha tocado** un segundo y **la ha dejado** sobre la mesa. No ha brillado — primera señal de que algo va mal. **Nosotros hemos buscado** si alguien la movió, pero **ningún ayudante la ha tocado**.",
     dossier: [["¿Qué es?","Una varilla de oro"],["¿Para qué?","Crea palabras con ella"],["¿Dónde?","Sobre la mesa de la Sala"],["¿Quién?","Solo el Jefe la ha tocado"],["¿Estado?","No ha brillado esta noche"]],
-    answers: A2(["p1","p5","p6","p7","q1","q4","q5","q8"]),
+    answers: A2(["p1","p5","p6","p7","q1","q4","q5","q8","q9"]),
     fantVer: "Un ayudante ha llevado la varilla a otro lugar: ya no está en la Sala, ya no sigue en su lugar, y el Jefe no la ha usado esta noche.",
-    fantAns: A2f(["p1","p5","p6","p7","q1","q4","q5","q8"], { q1:"no", q4:"no", q5:"no", q6:"sí" }),
+    fantAns: A2f(["p1","p5","p6","p7","q1","q4","q5","q8","q9"], { q1:"no", q4:"no", q5:"no", q6:"sí" }),
     trap: { q: "¿Ha brillado la varilla esta noche?", ru: "Венчик светился этой ночью?", canon: "no", fant: "sí" },
   },
   {
@@ -315,9 +315,9 @@ const VERBS2 = [
     key: "lapiz", emoji: "✏️", inf: "El lápiz rojo", ru: "красный карандаш",
     storyEs: "Esta semana el tercer ayudante **ha usado** el lápiz rojo para numerar los documentos. **Lo ha cogido** del cajón del despacho y **lo ha marcado** en cada página. **Nosotros lo hemos guardado** esta tarde — sigue en el cajón.",
     dossier: [["¿Qué es?","Un lápiz de color rojo"],["¿Para qué?","Numerar los documentos"],["¿Dónde?","En el cajón del despacho"],["¿Cuándo?","Esta semana"],["¿Quién?","El tercer ayudante"]],
-    answers: A2(["p5","q2","q4"]),
+    answers: A2(["p5","p7","q2","q4"]),
     fantVer: "El Jefe ha usado el lápiz esta noche en la Sala — no en el despacho — y alguien lo ha tocado.",
-    fantAns: A2f(["p5","q2","q4"], { q1:"sí", q2:"no", q5:"sí", q8:"sí" }),
+    fantAns: A2f(["p5","p7","q2","q4"], { q1:"sí", q2:"no", q5:"sí", q8:"sí" }),
     trap: { q: "¿Es de color rojo?", ru: "Он красного цвета?", canon: "sí", fant: "no" },
   },
   {
