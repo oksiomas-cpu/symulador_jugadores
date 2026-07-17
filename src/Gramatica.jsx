@@ -627,6 +627,7 @@ function Drill({ setKey, onBack }) {
 
   const it = items[i];
   const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму" };
+  const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " "); // схлопываем лишние пробелы: «habéis  trabajado» = «habéis trabajado»
   const pick = (o) => {
     if (picked) return;
     setPicked(o);
@@ -646,7 +647,7 @@ function Drill({ setKey, onBack }) {
             <input
               value={typed}
               onChange={e => setTyped(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && typed.trim() && !picked) pick(typed.trim().toLowerCase()); }}
+              onKeyDown={e => { if (e.key === "Enter" && typed.trim() && !picked) pick(norm(typed)); }}
               disabled={!!picked}
               placeholder="впиши форму глагола…"
               autoCapitalize="none" autoCorrect="off" spellCheck={false}
@@ -658,7 +659,7 @@ function Drill({ setKey, onBack }) {
               }}
             />
             {!picked && (
-              <div onClick={() => typed.trim() && pick(typed.trim().toLowerCase())} style={{
+              <div onClick={() => typed.trim() && pick(norm(typed))} style={{
                 background: typed.trim() ? C.emerald : C.creamDeep, borderRadius: 12, padding: "12px",
                 cursor: typed.trim() ? "pointer" : "default", textAlign: "center", marginTop: 12, transition: "background .15s",
               }}>
