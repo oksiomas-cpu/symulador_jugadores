@@ -245,7 +245,12 @@ async function syncRoundScores(g) {
 }
 
 // Названия глав для слепка журнала игр (по packId).
-const CHAPTER_TITLES = { cap1: "Глава 1", cap2: "Глава 2" };
+const CHAPTER_TITLES = { cap1: "Глава 1", cap2: "Глава 2", cap3: "Глава 3" };
+
+// Допустимые картриджи комнаты. Новая глава добавляется ЗДЕСЬ и в PACKS
+// обоих клиентов — иначе комната молча откатится на cap1 и игроки получат
+// вопросы чужой главы.
+const PACK_IDS = ["cap1", "cap2", "cap3"];
 
 // Слепок завершённой игры для ручной привязки в Don Verbo (команда /vincular).
 // Пишется в финале в ключ gamelog:{code} БЕЗ TTL (журнал должен пережить комнату,
@@ -316,7 +321,7 @@ export default async function handler(req, res) {
       const g = {
         code,
         phase: "lobby", // lobby | game (этап 2) | final (этап 2)
-        packId: (function () { const p = String(body.packId || "").trim(); return (p === "cap1" || p === "cap2") ? p : "cap1"; })(), // глава комнаты: cap1 (Presente) | cap2 (Perfecto). Дефолт cap1 — обратная совместимость
+        packId: (function () { const p = String(body.packId || "").trim(); return PACK_IDS.includes(p) ? p : "cap1"; })(), // глава комнаты: cap1 (Presente) | cap2 (Perfecto) | cap3 (три прошедших). Дефолт cap1 — обратная совместимость
         createdAt: new Date().toISOString(),
         players: [], // [{id, name}]
         v: 1, // счётчик версий состояния
