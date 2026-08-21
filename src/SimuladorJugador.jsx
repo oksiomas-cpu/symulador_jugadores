@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
+import {
+  QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
+} from "./game3Data.js";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -409,7 +412,16 @@ const PACKS = {
     grammar: "Presente", emoji: "☀️",
     desc: "Один день Шефа во дворце. 15 глаголов в настоящем времени.",
     // термины для UI живой игры: nom — им.п., acc — вин.п., gen2 — род.мн., revPart — причастие (вскрыт/вскрыта)
-    term: { es: "verbo", nom: "Глагол", acc: "глагол", gen2: "глаголов", revPart: "вскрыт", other: "Другой глагол", next: "Следующий глагол" },
+    // fem — род термина; pool/objects — слова для счётчиков; accent — цвет главы
+    term: {
+      es: "verbo", nom: "Глагол", acc: "глагол", gen2: "глаголов", revPart: "вскрыт",
+      other: "Другой глагол", next: "Следующий глагол",
+      fem: false, plural: "глаголы", objects: "глаголов",
+    },
+    accent: "gold", grammarRoute: "diario",
+    grammarCta: "📔 Не играешь, а тренируешь грамматику? Mi Diario →",
+    grammarCtaShort: "📔 Закрепи глаголы в Mi Diario →",
+    grammarCtaShort2: "📔 Спряжение в Mi Diario →",
     VERBS, QUESTIONS, CATS, verbByKey,
     fantAnsOf: (v) => verbByKey(v.mask).answers,
   },
@@ -417,12 +429,52 @@ const PACKS = {
     id: "cap2", num: 2, titulo: "El Gran Misterio del Palacio de Caramelo",
     grammar: "Pretérito Perfecto Compuesto", emoji: "🌙",
     desc: "Ночное расследование: 15 улик и детективные вопросы в Pretérito Perfecto Compuesto.",
-    term: { es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта", other: "Другая улика", next: "Следующая улика" },
+    term: {
+      es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта",
+      other: "Другая улика", next: "Следующая улика",
+      fem: true, plural: "улики", objects: "предметов",
+    },
+    accent: "raspberry", grammarRoute: "perfecto",
+    grammarCta: "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto Compuesto →",
+    grammarCtaShort: "📊 Тренажёр Pretérito Perfecto Compuesto →",
+    grammarCtaShort2: "📊 Тренажёр Pretérito Perfecto Compuesto →",
     VERBS: VERBS2, QUESTIONS: QUESTIONS2, CATS: CATS2, verbByKey: verbByKey2,
     fantAnsOf: (v) => v.fantAns,
   },
+  cap3: {
+    id: "cap3", num: 3, titulo: "El Caso de las Tres Huellas",
+    grammar: "Imperfecto · Indefinido · Perfecto Compuesto", emoji: "🕰️",
+    desc: "Три следа одной улики: обычный мир, разрыв вчера, след сегодня. 14 улик и три прошедших времени сразу.",
+    term: {
+      es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта",
+      other: "Другая улика", next: "Следующая улика",
+      fem: true, plural: "улики", objects: "предметов",
+    },
+    // VERBS = только предметы-цели. La sombra в списке физически отсутствует
+    // и выпасть как цель не может (спецификация 92).
+    accent: "emerald", grammarRoute: "perfecto",
+    // Из трёх времён главы тренажёр пока есть только у Perfecto Compuesto.
+    // Площадки Imperfecto и Indefinido — отдельная задача, в это ТЗ не входят.
+    grammarCta: "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto Compuesto →",
+    grammarCtaShort: "📊 Тренажёр Pretérito Perfecto Compuesto →",
+    grammarCtaShort2: "📊 Тренажёр Pretérito Perfecto Compuesto →",
+    VERBS: TARGETS3, QUESTIONS: QUESTIONS3, CATS: CATS3, verbByKey: verbByKey3,
+    fantAnsOf: (v) => v.fantAns,
+    fullAnswer: fullAnswer3,
+    bankNotes: BANK_NOTES3,
+  },
 };
 const DEFAULT_PACK = PACKS.cap1;
+
+/** Пул возможных целей картриджа. Предметы с target:false (la_sombra)
+    в случайный выбор не попадают — спецификация 92, п.5. */
+function targetsOf(pack) {
+  return (pack.VERBS || []).filter((v) => v.target !== false);
+}
+function pickTarget(pack) {
+  const t = targetsOf(pack);
+  return t[rnd(t.length)];
+}
 
 function rnd(n) { return Math.floor(Math.random() * n); }
 function shuffle(a) { const x = [...a]; for (let i = x.length - 1; i > 0; i--) { const j = rnd(i + 1); [x[i], x[j]] = [x[j], x[i]]; } return x; }
@@ -445,6 +497,14 @@ const h2 = { fontSize: 17, fontWeight: 700, margin: "0 0 4px", color: C.ink };
 const pHint = { fontSize: 13, color: C.inkSoft, margin: "4px 0 0", lineHeight: 1.5 };
 const tag = { fontSize: 11.5, letterSpacing: ".5px", color: C.goldDeep, fontWeight: 600, textTransform: "uppercase", marginBottom: 2 };
 const lvlName = { 1: "Nivel 1 · Categoría", 2: "Nivel 2 · Acotar", 3: "Nivel 3 · Precisión" };
+// Подпись над вопросом. У глав 1–2 это уровень вопроса (lvl), у главы 3 —
+// круг расследования (время), потому что вопросы там делятся по временам.
+function qLabel(q, pack) {
+  if (!q) return "";
+  if (q.lvl && lvlName[q.lvl]) return lvlName[q.lvl];
+  const cat = (pack && pack.CATS ? pack.CATS : []).find((c) => c.id === q.cat);
+  return cat ? `${cat.icon} ${cat.es}` : "";
+}
 
 function Highlighted({ text }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -537,19 +597,20 @@ async function fetchAccess(tgId) {
 }
 
 // Витрина замков: что открыто при данном статусе.
-//   cap1 — Nivel 1 (AR); cap2 — Nivel 2 (Perfecto); libro — Живая книга;
+//   cap1 — Nivel 1 (AR); cap2 — Nivel 2 (Perfecto); cap3 — Nivel 3 (три прошедших);
+//   libro — Живая книга;
 //   gramatica — раздел «Грамматика» (меню); live — Пульт живой игры;
 //   presente/perfecto — дрилл темы по deep-link из капсул Дона.
 function accessMap(status) {
   switch (status) {
     case "club":
-      return { cap1: true, cap2: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
+      return { cap1: true, cap2: true, cap3: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
     case "trial2":
-      return { cap1: true, cap2: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
-      return { cap1: true, cap2: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
     default: // none
-      return { cap1: false, cap2: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
+      return { cap1: false, cap2: false, cap3: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
   }
 }
 function temaAllowed(tema, acc) {
@@ -876,12 +937,12 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         })()}
         {live && !revealed && myElim && (
           <div style={{ background: C.creamDeep, border: `2px solid ${C.line}`, borderRadius: 12, padding: "12px 16px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
-            ❌ {T.nom} был{pack.id==="cap2"?"а неверной":" неверным"} — ты выбыл до конца этого круга. Следи за игрой: в следующем круге ты снова в деле.
+            ❌ {T.nom} был{T.fem ? "а неверной" : " неверным"} — ты выбыл до конца этого круга. Следи за игрой: в следующем круге ты снова в деле.
           </div>
         )}
         {live && !revealed && !myElim && live.lastElim && Date.now() - live.lastElim.ts < 12000 && (
           <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "10px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14, color: C.inkSoft }}>
-            ❌ {live.lastElim.byName} назвал(а) неверн{pack.id==="cap2"?"ую улику":"ый глагол"} и выбыл(а) из круга
+            ❌ {live.lastElim.byName} назвал(а) неверн{T.fem ? "ую" : "ый"} {T.acc} и выбыл(а) из круга
           </div>
         )}
         {live && !revealed && guess && guess.stage === "voting" && (
@@ -908,7 +969,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         {live && !revealed && guess && guess.stage === "naming" && (
           guess.by === live.myId ? (
             <div style={{ background: C.raspberry, color: "#fff", border: `2px solid ${C.raspberryDeep}`, borderRadius: 12, padding: "13px 16px", marginBottom: 12, textAlign: "center", fontWeight: 800, fontSize: 16 }}>
-              🎤 Назови {T.acc} голосом в Zoom! Ведущая решит: верн{pack.id==="cap2"?"ая":"ый"} или нет.
+              🎤 Назови {T.acc} голосом в Zoom! Ведущая решит: верн{T.fem ? "ая" : "ый"} или нет.
             </div>
           ) : (
             <div style={{ background: C.creamDeep, border: `1.5px solid ${C.line}`, borderRadius: 12, padding: "11px 14px", marginBottom: 12, textAlign: "center", fontWeight: 700, fontSize: 14.5, color: C.inkSoft }}>
@@ -1003,7 +1064,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px" }}>
             <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              {T.nom} скрыт{pack.id==="cap2"?"а":""}. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
+              {T.nom} скрыт{T.fem ? "а" : ""}. Задавай вопрос обоим свидетелям и отмечай, кто что ответил — <b>SÍ</b> или <b>NO</b>. Где ответы A и B расходятся — там спрятана ложь.
               {live && <span> В свой ход нажми <b>📨</b> под вопросом — ведущая и свидетель увидят его сами.</span>}
             </div>
             <div style={{ marginTop: 10, display: "flex", gap: 14, fontSize: 13, fontWeight: 700 }}>
@@ -1015,7 +1076,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
         ) : (
         <Block stripe={C.goldDeep}>
           <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.55 }}>
-            🎙 <b>Ты играешь сам.</b> {T.nom} скрыт{pack.id==="cap2"?"а":""} — спрашивай свидетелей <b>своими словами в Zoom</b>, ответы держи в голове. Список вопросов и кнопки SÍ/NO тебе не нужны. В свой ход жми <b>«✅ Я задал вопрос»</b> сверху, чтобы передать ход.
+            🎙 <b>Ты играешь сам.</b> {T.nom} скрыт{T.fem ? "а" : ""} — спрашивай свидетелей <b>своими словами в Zoom</b>, ответы держи в голове. Список вопросов и кнопки SÍ/NO тебе не нужны. В свой ход жми <b>«✅ Я задал вопрос»</b> сверху, чтобы передать ход.
           </div>
         </Block>
         )}
@@ -1089,7 +1150,7 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
                 const sv = verbByKey(storyView);
                 return (
                   <div>
-                    <button onClick={() => setStoryView("__open__")} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все {pack.id==="cap2"?"улики":"глаголы"}</button>
+                    <button onClick={() => setStoryView("__open__")} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", marginBottom: 10, padding: 0, fontFamily: SERIF }}>← Все {T.plural}</button>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                       <span style={{ fontSize: 32 }}>{sv.emoji}</span>
                       <div>
@@ -1162,7 +1223,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <Block stripe={accent}>
             <div style={{ padding: "14px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.5 }}>
-              Тебе прислали {T.acc} в личку. <b>Выбери {pack.id==="cap2"?"её":"его"}</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
+              Тебе прислали {T.acc} в личку. <b>Выбери {T.fem ? "её" : "его"}</b> — откроется твоя шпаргалка{isCanon ? " по правде" : " с твоей легендой"}.
             </div>
           </Block>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -1675,7 +1736,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
           <div>
             <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 {pack.titulo}</div>
-            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>{pack.id === "cap2" ? `Улики: ${pack.VERBS.length} предметов для расследования` : `История-маяк · все ${pack.VERBS.length} глаголов спрятаны здесь`}</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>{pack.term.fem ? `${pack.term.nom}: ${pack.VERBS.length} ${pack.term.objects} для расследования` : `История-маяк · все ${pack.VERBS.length} ${pack.term.objects} спрятаны здесь`}</div>
           </div>
           <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
@@ -1701,7 +1762,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
       {/* ГЛОССАРИЙ ГЛАГОЛОВ */}
       <Block stripe={C.emerald}>
         <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>{pack.id === "cap2" ? `🔍 ${pack.VERBS.length} улик · тап — история улики` : `📖 ${pack.VERBS.length} глаголов · тап — история глагола`}</div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>{pack.term.fem ? `🔍 ${pack.VERBS.length} ${pack.term.gen2} · тап — история ${pack.term.gen2.slice(0, -1)}и` : `📖 ${pack.VERBS.length} ${pack.term.gen2} · тап — история глагола`}</div>
           <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
         {glosOpen && (
@@ -1853,7 +1914,7 @@ export default function SimuladorJugador() {
   const goDiario = () => { setRole("diario"); setEntered(true); };
   const goPerfecto = () => setShowPerfecto(true);
   const goDiario2 = () => setShowDiario2(true);
-  const grammarAction = (pack && pack.id === "cap2") ? goPerfecto : goDiario;
+  const grammarAction = (pack && pack.grammarRoute === "perfecto") ? goPerfecto : goDiario;
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
@@ -1899,7 +1960,7 @@ export default function SimuladorJugador() {
   if (!chapterShown) return <ChapterWelcome
     pack={pack}
     onEnter={() => setChapterShown(true)}
-    onDiario={pack && pack.id === "cap2" ? goDiario2 : goDiario}
+    onDiario={pack && pack.grammarRoute === "perfecto" ? goDiario2 : goDiario}
     onPerfecto={() => setShowPerfecto(true)}
     onPresenteErIr={() => setShowPresenteErIr(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
@@ -1983,7 +2044,22 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 2 · {PACKS.cap2.grammar}</div>
         <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} улик · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      {/* Уровень 3 — малиновый: три прошедших времени */}
+      <Gate open={acc.cap3} title="Nivel 3" onOpen={() => onPick(PACKS.cap3)}>
+      <div style={{
+        background: C.raspberry, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(168,27,62,0.28)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap3.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 3 · {PACKS.cap3.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap3.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap3.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap3.VERBS.length} улик · Detective · Canon · Fantasía</div>
       </div>
       </Gate>
 
@@ -2038,18 +2114,18 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
 // ВЫБОР ИГРЫ (картриджа) — Глава 1 / Глава 2
 // ============================================================
 function ChapterPicker({ onPick, session, onBack, onDiario }) {
-  const list = [PACKS.cap1, PACKS.cap2];
+  const list = [PACKS.cap1, PACKS.cap2, PACKS.cap3];
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Elige el caso · выбери дело" />
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Две игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
       {list.map((p) => (
-        <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${p.id === "cap2" ? C.raspberry : C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
-          <div style={{ width: 7, background: p.id === "cap2" ? C.raspberry : C.gold, flexShrink: 0 }} />
+        <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C[p.accent] || C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+          <div style={{ width: 7, background: C[p.accent] || C.gold, flexShrink: 0 }} />
           <div style={{ padding: "16px 18px", flex: 1 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase" }}>{p.emoji} Capítulo {p.num} · {p.grammar}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: p.id === "cap2" ? C.raspberry : C.goldDeep, marginTop: 3, lineHeight: 1.25 }}>{p.titulo}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: C[p.accent] || C.goldDeep, marginTop: 3, lineHeight: 1.25 }}>{p.titulo}</div>
             <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.5 }}>{p.desc}</div>
             <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 6 }}>{p.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
           </div>
@@ -2074,7 +2150,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
   const [storyKey, setStoryKey] = useState(null);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
   const cards = [
-    { id: "detective", emoji: "🕵️", t: "Detective", d: `Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай ${pack.id === "cap2" ? "улику" : "глагол"}.`, c: C.goldDeep },
+    { id: "detective", emoji: "🕵️", t: "Detective", d: `Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай ${pack.term.acc}.`, c: C.goldDeep },
     { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
     { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Ты врёшь красиво. Запутай детектива и уведи его от правды.", c: C.raspberry },
   ];
@@ -2096,8 +2172,8 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       {/* БИБЛИОТЕКА ГЛАГОЛОВ — глаголы выбранной главы */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "16px 18px", marginBottom: 14 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 {pack.id === "cap2" ? "Улики игры" : "Глаголы игры"} — истории</div>
-        <p style={{ ...pHint, marginTop: 4 }}>Тап по {pack.id === "cap2" ? "улике" : "глаголу"} — её история поверх экрана. Все {pack.VERBS.length} {pack.id === "cap2" ? "предметов" : "глаголов"} главы.</p>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 {pack.term.fem ? "Улики игры" : "Глаголы игры"} — истории</div>
+        <p style={{ ...pHint, marginTop: 4 }}>Тап по {pack.term.fem ? "улике" : "глаголу"} — история поверх экрана. Все {pack.VERBS.length} {pack.term.objects} главы.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
           {pack.VERBS.map((v) => (
             <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
@@ -2110,7 +2186,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       <div style={{ textAlign: "center", marginTop: 6 }}>
         <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
-          {pack.id === "cap2" ? "📊 Тренируешь грамматику? Тренажёр Pretérito Perfecto Compuesto →" : "📔 Не играешь, а тренируешь грамматику? Mi Diario →"}
+          {pack.grammarCta}
         </button>
       </div>
       <Footer />
@@ -2128,7 +2204,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 // ============================================================
 function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario }) {
   function freshGame() {
-    const verb = pack.VERBS[rnd(pack.VERBS.length)];
+    const verb = pickTarget(pack);
     const canonIsA = Math.random() < 0.5;
     return { verb, canonIsA, deck: shuffle(pack.QUESTIONS), idx: 0, log: [], result: null };
   }
@@ -2182,7 +2258,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
             {g.result.ok ? "🎉 Верно!" : "❌ Почти..."}
           </h2>
           <p style={{ fontSize: 15, margin: "6px 0" }}>
-            Глагол был: <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
+            {pack.term.nom} был{pack.term.fem ? "а" : ""}: <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
             {!g.result.ok && <> Ты поверил не тому свидетелю. Назвал: <strong>{pack.verbByKey(g.result.picked).inf}</strong> — {pack.verbByKey(g.result.picked).ru}.</>}
           </p>
           {g.result.ok && (
@@ -2195,7 +2271,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
           <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
           <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
             <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto Compuesto →" : "📔 Закрепи глаголы в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.grammarCtaShort}</Btn>
           </div>
           {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
         </Block>
@@ -2248,7 +2324,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
           {/* ВОПРОС — главное действие, сразу под историей допроса */}
           <Block stripe={C.goldDeep}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <div style={tag}>{lvlName[current.lvl]}</div>
+              <div style={tag}>{qLabel(current, pack)}</div>
               <button onClick={nextQ} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>↻ Пропустить</button>
             </div>
             <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 6px" }}>{current.q}</div>
@@ -2350,7 +2426,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
   const accentDeep = isCanon ? C.emeraldDeep : C.raspberryDeep;
   const T = pack.term;
 
-  const [verb, setVerb] = useState(() => pack.VERBS[rnd(pack.VERBS.length)]);
+  const [verb, setVerb] = useState(() => pickTarget(pack));
   const [deck, setDeck] = useState(() => shuffle(pack.QUESTIONS));
   const [idx, setIdx] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -2405,7 +2481,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
 
   function startNextRound() {
     // Новый глагол + сброс раунда
-    setVerb(pack.VERBS[rnd(pack.VERBS.length)]);
+    setVerb(pickTarget(pack));
     setDeck(shuffle(pack.QUESTIONS));
     setIdx(0);
     setFeedback(null);
@@ -2442,7 +2518,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
           <br />
           <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
             <Btn bg={C.emerald} onClick={startNextRound}>{T.next} →</Btn>
-            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.id === "cap2" ? "📊 Тренажёр Pretérito Perfecto Compuesto →" : "📔 Спряжение в Mi Diario →"}</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.grammarCtaShort2}</Btn>
           </div>
           {roundErrors > 0 && <p style={{ ...pHint, marginTop: 8 }}>Были ошибки? Потренируй спряжение этого глагола в Mi Diario.</p>}
         </Block>
@@ -2495,7 +2571,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
       {!roundDone && (
         <Block stripe={C.goldDeep}>
           <h2 style={h2}>El detective pregunta:</h2>
-          <div style={tag}>{lvlName[current.lvl]}</div>
+          <div style={tag}>{qLabel(current, pack)}</div>
           <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 4px" }}>{current.q}</div>
           <div style={{ ...pHint, marginBottom: 14 }}>{current.ru}</div>
           {!feedback ? (
