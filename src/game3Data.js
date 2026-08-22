@@ -185,7 +185,7 @@ export const ITEMS3 = [
            "not_key", "not_writing_tool", "not_permanent_light", "not_substance"],
     coreSummary: ["golden_working_tool_of_jefe", "creates_words", "normally_shines", "stored_in_special_box",
                   "not_key", "not_writing_tool", "not_permanent_light", "not_substance"],
-    coreText: "Золотой рабочий инструмент Шефа · создаёт слова · при нормальной работе светится · хранится в специальной коробке. Не ключ, не письменный предмет, не постоянный источник света и не вещество.",
+    coreText: "Золотой рабочий инструмент Шефа · создаёт слова · при нормальной работе светится · хранится в специальной коробке. Не ключ, не письменный предмет, не постоянный источник света и не вещество.", coreTextEs: "Herramienta de trabajo dorada del Jefe · crea palabras · normalmente brilla mientras funciona · se guarda en una caja especial. No es una llave, ni un objeto de escritura, ni una fuente de luz permanente, ni una sustancia.",
     stories: {
       canon: {
         imperfecto: { es: "La varilla dorada pertenecía al Jefe. Normalmente estaba en la Sala. El Jefe la usaba para crear palabras. Cuando funcionaba, brillaba. Después del trabajo, la guardaban en una caja especial. Los ayudantes normalmente no la tocaban.",
@@ -231,7 +231,7 @@ export const ITEMS3 = [
            "consumable_replenishable", "not_personal_item_of_jefe"],
     coreSummary: ["magical_substance_not_tool", "consumable_replenishable", "material_for_creating_words",
                   "belongs_to_palace", "not_personal_item_of_jefe"],
-    coreText: "Волшебное вещество, а не инструмент · материал для создания слов · принадлежит дворцу · расходуется и пополняется. Не личный предмет Шефа.",
+    coreText: "Волшебное вещество, а не инструмент · материал для создания слов · принадлежит дворцу · расходуется и пополняется. Не личный предмет Шефа.", coreTextEs: "Una sustancia mágica, no una herramienta · material para crear palabras · pertenece al palacio · se gasta y se repone. No es un objeto personal del Jefe.",
     stories: {
       canon: {
         imperfecto: { es: "Los ingredientes pertenecían al Palacio. Cada mañana, el primer ayudante los llevaba desde la despensa hasta la Sala y los dejaba sobre la mesa. El Jefe los mezclaba para crear palabras. Después del trabajo, los guardaban otra vez en la despensa. Normalmente no salían del palacio.",
@@ -272,7 +272,7 @@ export const ITEMS3 = [
            "not_substance", "not_writing_tool"],
     coreSummary: ["crystal_container", "contains_caramel_during_creation", "not_investigation_tool",
                   "not_substance", "not_writing_tool"],
-    coreText: "Хрустальный сосуд · держит карамель во время создания слов. Не инструмент расследования, не вещество и не письменный предмет.",
+    coreText: "Хрустальный сосуд · держит карамель во время создания слов. Не инструмент расследования, не вещество и не письменный предмет.", coreTextEs: "Un recipiente de cristal · contiene el caramelo durante la creación de palabras. No es un instrumento de investigación, ni una sustancia, ni un objeto de escritura.",
     stories: {
       canon: {
         imperfecto: { es: "El cuenco era de cristal y normalmente estaba sobre la mesa de la Sala. Antes de crear palabras, una ayudante lo llenaba de caramelo dorado. El Jefe trabajaba junto al cuenco, pero no lo llevaba consigo. Después, la segunda ayudante lo lavaba y lo dejaba limpio en la misma mesa.",
@@ -310,7 +310,7 @@ export const ITEMS3 = [
     dangerousPairs: ["cuenco_vacio", "llave_dorada", "libro_recetas", "documentos_numerados"],
     core: ["metal_object", "transports_breakfast", "route_reaches_sala", "never_transports_magic_ingredients"],
     coreSummary: ["metal_object", "transports_breakfast", "route_reaches_sala", "never_transports_magic_ingredients"],
-    coreText: "Металлический предмет · переносит завтрак · его маршрут доходит до Sala. Никогда не переносит волшебные ингредиенты.",
+    coreText: "Металлический предмет · переносит завтрак · его маршрут доходит до Sala. Никогда не переносит волшебные ингредиенты.", coreTextEs: "Un objeto de metal · transporta el desayuno · su recorrido llega hasta la Sala. Nunca transporta ingredientes mágicos.",
     stories: {
       canon: {
         imperfecto: { es: "La bandeja era de metal y normalmente se guardaba cerca de la cocina. Cada mañana, la segunda ayudante llevaba el desayuno del pasillo a la Sala. Después de comer, el primer ayudante recogía la bandeja vacía y la devolvía. La limpiaban con frecuencia y nunca llevaban ingredientes mágicos en ella.",
@@ -349,7 +349,7 @@ export const ITEMS3 = [
     dangerousPairs: ["documentos_numerados", "libro_recetas", "sobre_lacrado", "ingredientes_gramaticales"],
     core: ["loose_paper_sheets", "not_official_not_numbered", "used_for_notes_and_lists", "belongs_to_sala_workspace"],
     coreSummary: ["loose_paper_sheets", "used_for_notes_and_lists", "not_official_not_numbered", "belongs_to_sala_workspace"],
-    coreText: "Отдельные бумажные листы · не официальные и не пронумерованные · для заметок и списков · принадлежат рабочему пространству Sala.",
+    coreText: "Отдельные бумажные листы · не официальные и не пронумерованные · для заметок и списков · принадлежат рабочему пространству Sala.", coreTextEs: "Hojas de papel sueltas · no oficiales ni numeradas · para notas y listas · pertenecen al espacio de trabajo de la Sala.",
     stories: {
       canon: {
         imperfecto: { es: "Los papeles eran hojas sueltas para notas y listas. Normalmente estaban en una carpeta sobre una mesa lateral de la Sala. Los ayudantes escribían en ellos y después los ordenaban. No tenían números oficiales y no se guardaban en el despacho.",
@@ -388,7 +388,7 @@ export const ITEMS3 = [
     dangerousPairs: ["papeles_suelo", "lapiz_rojo", "libro_recetas", "sobre_lacrado", "bandeja_desayuno"],
     core: ["official_paper_documents", "numbered_series_1_100", "not_loose_notes", "official_character_persists"],
     coreSummary: ["official_paper_documents", "numbered_series_1_100", "not_loose_notes", "official_character_persists"],
-    coreText: "Официальные бумажные документы · пронумерованная серия 1–100 · не отдельные листы для заметок · официальный характер сохраняется при смене ответственного или места.",
+    coreText: "Официальные бумажные документы · пронумерованная серия 1–100 · не отдельные листы для заметок · официальный характер сохраняется при смене ответственного или места.", coreTextEs: "Documentos oficiales de papel · serie numerada 1–100 · no son hojas sueltas para notas · su carácter oficial se mantiene aunque cambien de responsable o de lugar.",
     stories: {
       canon: {
         imperfecto: { es: "Los documentos eran papeles oficiales del Palacio. Normalmente estaban en el despacho y el tercer ayudante los revisaba uno por uno. Los contaba, los ordenaba y los guardaba en una caja. No se utilizaban para notas rápidas y no permanecían en la Sala.",
@@ -427,7 +427,7 @@ export const ITEMS3 = [
     dangerousPairs: ["documentos_numerados", "varilla_dorada", "llave_dorada", "ingredientes_gramaticales"],
     core: ["red_writing_tool", "not_unique", "not_magical", "belongs_to_despacho_workspace", "creates_words_by_writing"],
     coreSummary: ["red_writing_tool", "not_magical", "not_unique", "belongs_to_despacho_workspace", "creates_words_by_writing"],
-    coreText: "Красный письменный инструмент · не единственный · не волшебный · относится к рабочему пространству кабинета · создаёт слова письмом, а не магией.",
+    coreText: "Красный письменный инструмент · не единственный · не волшебный · относится к рабочему пространству кабинета · создаёт слова письмом, а не магией.", coreTextEs: "Un instrumento de escritura rojo · no es el único · no es mágico · pertenece al espacio de trabajo del despacho · crea palabras por escritura, no por magia.",
     stories: {
       canon: {
         imperfecto: { es: "El lápiz era rojo y normalmente estaba en un cajón del despacho. El tercer ayudante lo usaba para escribir y numerar documentos. Después de trabajar, lo devolvía al cajón. Había varios lápices rojos en el Palacio y ninguno funcionaba con magia.",
@@ -467,7 +467,7 @@ export const ITEMS3 = [
     dangerousPairs: ["reloj_palacio", "varilla_dorada", "puerta_principal"],
     core: ["fixed_installation_sala", "general_room_lighting", "not_portable", "not_stored_after_use"],
     coreSummary: ["fixed_installation_sala", "general_room_lighting", "not_portable", "not_stored_after_use"],
-    coreText: "Стационарная установка Sala · общее освещение всего пространства · не переносной предмет · после использования не убирается.",
+    coreText: "Стационарная установка Sala · общее освещение всего пространства · не переносной предмет · после использования не убирается.", coreTextEs: "Una instalación fija de la Sala · ilumina todo el espacio · no es un objeto portátil · no se guarda después de usarla.",
     stories: {
       canon: {
         imperfecto: { es: "Las lámparas estaban instaladas en la Sala y no se movían de allí. Cada mañana, el primer ayudante encendía la luz antes de que llegaran los demás. Las limpiaban cada semana. Iluminaban toda la Sala y nadie las guardaba después de usarlas.",
@@ -505,7 +505,7 @@ export const ITEMS3 = [
     core: ["fixed_palace_entrance", "not_portable", "under_guard_watch", "authorized_access",
            "locked_with_key", "state_reveals_external_entry"],
     coreSummary: ["fixed_palace_entrance", "under_guard_watch", "authorized_access", "locked_with_key", "not_portable"],
-    coreText: "Стационарный вход дворца · не переносной предмет · под постоянным наблюдением охранника · служит для разрешённых входов и выходов · запирается на ключ · по её состоянию видно, входил ли кто-то снаружи.",
+    coreText: "Стационарный вход дворца · не переносной предмет · под постоянным наблюдением охранника · служит для разрешённых входов и выходов · запирается на ключ · по её состоянию видно, входил ли кто-то снаружи.", coreTextEs: "La entrada fija del palacio · no es un objeto portátil · está bajo vigilancia constante del guardia · sirve para entradas y salidas permitidas · se cierra con llave · su estado revela si alguien de fuera ha entrado.",
     stories: {
       canon: {
         imperfecto: { es: "La puerta principal era la entrada del Palacio y siempre permanecía en el mismo lugar. El guardia la vigilaba cada día. La abría para las entradas autorizadas y la cerraba con llave por la noche. Nadie podía llevarla en la mano ni guardarla en una caja.",
@@ -543,7 +543,7 @@ export const ITEMS3 = [
                      "bandeja_desayuno", "llave_dorada", "lupa"],
     core: ["unique_paper_book_golden_letters", "personal_treasure_of_jefe", "contains_magical_recipes", "always_inside_palace"],
     coreSummary: ["unique_paper_book_golden_letters", "contains_magical_recipes", "personal_treasure_of_jefe", "always_inside_palace"],
-    coreText: "Единственная бумажная книга с золотыми буквами · личное сокровище Шефа · содержит рецепты и волшебное знание · всегда остаётся внутри дворца.",
+    coreText: "Единственная бумажная книга с золотыми буквами · личное сокровище Шефа · содержит рецепты и волшебное знание · всегда остаётся внутри дворца.", coreTextEs: "El único libro de papel con letras doradas · tesoro personal del Jefe · contiene recetas y saber mágico · siempre permanece dentro del palacio.",
     stories: {
       canon: {
         imperfecto: { es: "El libro de recetas pertenecía al Jefe y era su tesoro. Tenía letras doradas y contenía recetas mágicas. El Jefe lo estudiaba cada mañana y lo llevaba consigo dentro del Palacio. Por la noche lo guardaba bajo llave. Los ayudantes podían mirarlo de lejos, pero normalmente no lo tocaban.",
@@ -581,7 +581,7 @@ export const ITEMS3 = [
     dangerousPairs: ["varilla_dorada", "puerta_principal", "bandeja_desayuno", "lapiz_rojo", "sobre_lacrado", "libro_recetas"],
     core: ["unique_gold_key", "portable_closing_tool", "guard_is_habitual_custodian", "does_not_create_words"],
     coreSummary: ["unique_gold_key", "portable_closing_tool", "guard_is_habitual_custodian", "does_not_create_words"],
-    coreText: "Единственный золотой ключ · переносной инструмент для запирания двери и кабинета · охранник — его обычный хранитель · не служит для создания слов.",
+    coreText: "Единственный золотой ключ · переносной инструмент для запирания двери и кабинета · охранник — его обычный хранитель · не служит для создания слов.", coreTextEs: "La única llave de oro · instrumento portátil para cerrar la puerta y el despacho · el guardia es su guardián habitual · no sirve para crear palabras.",
     stories: {
       canon: {
         imperfecto: { es: "La llave era de oro y era única. El guardia la llevaba y la guardaba cada día. Servía para cerrar la puerta principal y el despacho. El Jefe podía pedirla, pero después la devolvía. La llave normalmente permanecía en el bolsillo del guardia o en su lugar de seguridad.",
@@ -621,7 +621,7 @@ export const ITEMS3 = [
     dangerousPairs: ["lamparas", "puerta_principal", "lupa"],
     core: ["fixed_wall_mechanism_sala", "measures_time_and_sounds", "not_transported_not_stored", "fixes_hour_of_events"],
     coreSummary: ["fixed_wall_mechanism_sala", "measures_time_and_sounds", "not_transported_not_stored"],
-    coreText: "Стационарный механизм на стене Sala · измеряет время и подаёт звуковые сигналы · не переносится и не убирается · его работа задаёт час событий.",
+    coreText: "Стационарный механизм на стене Sala · измеряет время и подаёт звуковые сигналы · не переносится и не убирается · его работа задаёт час событий.", coreTextEs: "Mecanismo fijo en la pared de la Sala · mide el tiempo y emite señales sonoras · no se transporta ni se guarda · su funcionamiento marca la hora de los sucesos.",
     stories: {
       canon: {
         imperfecto: { es: "El reloj estaba en la pared de la Sala y nunca cambiaba de lugar. Marcaba la hora y sonaba en las horas completas. Los relojeros lo cuidaban y el Jefe lo miraba para organizar el día. Nadie lo llevaba en la mano ni lo guardaba después de usarlo.",
@@ -659,7 +659,7 @@ export const ITEMS3 = [
            "does_not_create_words", "contains_no_substances"],
     coreSummary: ["portable_crystal_instrument", "belongs_to_jefe", "for_observing_and_investigating",
                   "does_not_create_words", "contains_no_substances"],
-    coreText: "Переносной хрустальный инструмент · принадлежит Шефу · служит для рассматривания деталей и расследования · не создаёт слов и не содержит веществ.",
+    coreText: "Переносной хрустальный инструмент · принадлежит Шефу · служит для рассматривания деталей и расследования · не создаёт слов и не содержит веществ.", coreTextEs: "Instrumento de cristal portátil · pertenece al Jefe · sirve para observar detalles e investigar · no crea palabras ni contiene sustancias.",
     stories: {
       canon: {
         imperfecto: { es: "La lupa era de cristal y pertenecía al Jefe. Normalmente estaba en un cajón del despacho. El Jefe la utilizaba para observar detalles pequeños y después la devolvía al cajón. No servía para crear palabras y no permanecía siempre en la Sala.",
@@ -701,7 +701,7 @@ export const ITEMS3 = [
            "guard_receives_officially", "not_numbered_document_not_worksheet"],
     coreSummary: ["sealed_paper_correspondence", "contains_closed_message", "external_origin",
                   "guard_receives_officially", "not_numbered_document_not_worksheet"],
-    coreText: "Бумажная корреспонденция с красной сургучной печатью · содержит сообщение и остаётся закрытой до разрешения · имеет внешнее происхождение · официально принимается охранником · не пронумерованный документ и не рабочий лист.",
+    coreText: "Бумажная корреспонденция с красной сургучной печатью · содержит сообщение и остаётся закрытой до разрешения · имеет внешнее происхождение · официально принимается охранником · не пронумерованный документ и не рабочий лист.", coreTextEs: "Correspondencia de papel con sello de cera roja · contiene un mensaje y permanece cerrada hasta su apertura autorizada · tiene origen externo · la recibe oficialmente el guardia · no es un documento numerado ni una hoja de trabajo.",
     stories: {
       canon: {
         imperfecto: { es: "El sobre era de papel, llevaba un sello de cera roja y guardaba un mensaje. Antes de llegar al Palacio, permanecía cerrado en el puesto del señor Dulce. Los mensajes importantes normalmente viajaban con un mensajero y el guardia los recibía en la puerta. Nadie debía abrirlos sin autorización.",
@@ -826,14 +826,14 @@ export const VERBS3 = ITEMS3.map((raw) => {
       `**Сегодня…** ${it.stories.canon.perfecto.ru}`,
     ].join("\n\n"),
     dossier: [
-      ["Неизменное ядро", it.coreText],
-      ["Vida habitual · Imperfecto", it.stories.canon.imperfecto.ru],
-      ["El corte de ayer · Indefinido", it.stories.canon.indefinido.ru],
-      ["La huella de hoy · Perfecto compuesto", it.stories.canon.perfecto.ru],
+      ["Núcleo invariable", it.coreTextEs],
+      ["Vida habitual · Imperfecto", it.stories.canon.imperfecto.es],
+      ["El corte de ayer · Indefinido", it.stories.canon.indefinido.es],
+      ["La huella de hoy · Perfecto compuesto", it.stories.canon.perfecto.es],
     ],
     answers,
     // Короткая правда для пульта Канона: три слоя формулы, без внутренних улик.
-    canonVer: `Normalmente… ${it.stories.canon.imperfecto.ru} | Ayer… ${it.stories.canon.indefinido.ru} | Hoy… ${it.stories.canon.perfecto.ru}`,
+    canonVer: `Normalmente… ${it.stories.canon.imperfecto.es} | Ayer… ${it.stories.canon.indefinido.es} | Hoy… ${it.stories.canon.perfecto.es}`,
     fantVer: it.stories.fantasy.es,
     fantAns,
     trapId,
