@@ -1293,9 +1293,9 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
               <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>📋 CANON — qué hace el Jefe (правда)</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {v.dossier.map((d, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
-                    <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                  <div key={i} style={{ display: "flex", flexWrap: "wrap", columnGap: 10, rowGap: 3, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
+                    <span style={{ flexShrink: 0, maxWidth: "100%", fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
+                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
                   </div>
                 ))}
               </div>
@@ -1324,9 +1324,9 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
               <div style={{ fontSize: 12, fontWeight: 800, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>📋 CANON — qué hace el Jefe <span style={{ fontWeight: 600, color: C.inkSoft }}>(правда — от этого уводишь)</span></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {v.dossier.map((d, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
-                    <span style={{ flexShrink: 0, fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                    <span style={{ fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                  <div key={i} style={{ display: "flex", flexWrap: "wrap", columnGap: 10, rowGap: 3, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
+                    <span style={{ flexShrink: 0, maxWidth: "100%", fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
+                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
                   </div>
                 ))}
               </div>
