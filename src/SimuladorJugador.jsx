@@ -22,7 +22,7 @@ const C = {
   ink: "#3D2B1F", inkSoft: "#6B5544",
   gold: "#C9A24B", goldDeep: "#A67C2E", goldSoft: "#EBD9A8",
   raspberry: "#A81B3E", raspberryDeep: "#7E1430",
-  emerald: "#16795B", emeraldDeep: "#0F5E47", line: "#E6D6B8",
+  emerald: "#16795B", emeraldDeep: "#0F5E47", emeraldLight: "#3FAE86", line: "#E6D6B8",
 };
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 
@@ -2048,12 +2048,12 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
       </div>
       </Gate>
 
-      {/* Уровень 3 — малиновый: три прошедших времени */}
+      {/* Уровень 3 — светлый изумруд: три прошедших времени */}
       <Gate open={acc.cap3} title="Nivel 3" onOpen={() => onPick(PACKS.cap3)}>
       <div style={{
-        background: C.raspberry, borderRadius: 20, padding: "28px 24px",
+        background: C.emeraldLight, borderRadius: 20, padding: "28px 24px",
         marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(168,27,62,0.28)",
+        boxShadow: "0 6px 22px rgba(63,174,134,0.28)",
       }}>
         <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap3.emoji}</div>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 3 · {PACKS.cap3.grammar}</div>
