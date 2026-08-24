@@ -1714,7 +1714,7 @@ function LiveGame({ onHome }) {
 // ============================================================
 function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onBack }) {
   const isCapOne = pack.id === "cap1";
-  const maya = isCapOne ? MAYA : MAYA2;
+  const maya = pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
@@ -4109,6 +4109,50 @@ const MAYA2 = {
     ["preguntar", "спрашивать"], ["recibir", "принимать"], ["recordar", "вспоминать"],
     ["tocar", "трогать"], ["buscar", "искать"], ["llamar", "звать"],
   ],
+};
+
+// ============================================================
+// ИСТОРИЯ-МАЯК Главы 3 — El día en que las palabras no nacieron
+// Полный текст утверждён Оксаной, хранится в Notion (ID 3c64c9eb6e0081c9bc22f8eb2bcaf63b)
+// ============================================================
+const MAYA3 = {
+  es: [
+    "Cada mañana, Don Verbo llevaba su gorro blanco y su barba por todo el Palacio de Caramelo. A las seis y media desayunaba solo en su terraza favorita: tomaba café negro, comía tostadas con caramelo dorado y miraba la Ciudad de los Sentidos en silencio.",
+    "Después caminaba por los pasillos durante veinte minutos. Mientras caminaba, buscaba ideas para el menú, escuchaba el viento en las ventanas de azúcar y los primeros sonidos de la Cocina Mágica.",
+    "A las siete, los tres ayudantes cantaban La melodía del caramelo dorado. Don Verbo los llamaba desde la escalera dorada. En la gran sala, les hablaba del día; ellos le preguntaban qué necesitaba el palacio. Antes de salir, Don Verbo estudiaba una página de su antiguo libro de recetas. Después todos trabajaban: él en la cocina principal y los ayudantes entre flores de azúcar y velas de caramelo.",
+    "Cuando todo estaba listo, Don Verbo tomaba la varilla dorada con las dos manos. La cocina se quedaba en silencio. Entonces preparaba las palabras nuevas.",
+    "Pero ayer algo cambió. Don Verbo fue al mercado de caramelo y compró los ingredientes de siempre: caramelo líquido, azúcar dorado y especias mágicas. En el rincón secreto del señor Dulce también compró una bolsa de polvo de caramelo plateado. Volvió al palacio con su lista en la mano. Nadie vio nada extraño.",
+    "Esta mañana, el primer ayudante ha abierto la Sala y ha encendido las lámparas, como siempre. Después ha dejado los ingredientes gramaticales sobre la mesa y los ha mirado un segundo.",
+    "La segunda ayudante ha llevado la bandeja del desayuno desde el pasillo hasta la Sala. También ha lavado el cuenco de cristal y lo ha dejado limpio sobre la mesa. Más tarde, el viento ha movido los papeles de la Sala. Ella los ha recogido dos veces, pero todavía no ha terminado de ordenarlos.",
+    "El tercer ayudante ha revisado los documentos en el despacho. Los ha numerado del uno al cien con su lápiz rojo y luego los ha guardado en una caja. Esta semana ha trabajado allí durante muchos días; no ha vuelto a la Sala.",
+    "El guardia ha vigilado la puerta principal. La llave dorada no se ha perdido: Don Verbo la ha usado por la mañana y después la ha guardado en el bolsillo. El reloj de la Sala ha sonado seis veces por la tarde y no se ha parado. El antiguo libro de recetas sigue en su sitio.",
+    "Cuando llegó la noche, Don Verbo salió otra vez a la terraza. Como siempre, quería mirar la ciudad y escuchar el palacio antes de crear palabras. Pero esta vez no oyó la canción de los ayudantes.",
+    "Bajó a la Cocina Mágica. La varilla dorada estaba sobre la mesa, pero no brillaba. Don Verbo la ha tocado: estaba fría. El cuenco de cristal ha quedado vacío. Nadie lo ha llenado. Los ingredientes gramaticales ya no estaban allí.",
+    "Don Verbo no dijo nada durante un momento. Miró la bandeja de metal: no había llevado ingredientes. Miró los papeles: seguían en el suelo. Miró las lámparas: estaban encendidas. Miró la puerta: seguía cerrada. Miró la llave, el libro, los documentos y el lápiz rojo: todo estaba en su lugar.",
+    "Entonces el guardia ha traído un sobre lacrado. Lo ha recibido esta tarde en la puerta. Tiene un sello de cera roja. Nadie lo ha abierto.",
+    "Don Verbo ha cogido una lupa de cristal y ha buscado huellas sobre la mesa vacía. Los ayudantes han buscado con él en la Sala, en la cocina y en el jardín. Todavía no han encontrado los ingredientes.",
+    "Entonces el ayudante más joven recordó algo. A las nueve, vio una sombra junto a la Sala. Primero oyó un ruido. Después miró, pero no reconoció a nadie. No dijo nada porque tenía miedo y no estaba seguro.",
+    "Ahora todos han oído su historia. La varilla no brilla. El cuenco está vacío. Los ingredientes han desaparecido. El sobre sigue cerrado. Y una sombra pasó junto a la Sala. La investigación acaba de empezar.",
+    ],
+  ru: [
+    "Каждое утро Дон Вербо в белом колпаке и с бородой обходил Карамельный Дворец. В половине седьмого он завтракал один на своей любимой террасе: пил чёрный кофе, ел тосты с золотистой карамелью и молча смотрел на Город Смыслов.",
+    "Потом он двадцать минут гулял по коридорам. Пока шёл, искал идеи для меню, слушал ветер в сахарных окнах и первые звуки Волшебной Кухни.",
+    "В семь часов трое помощников пели «Мелодию золотой карамели». Дон Вербо звал их с золотой лестницы. В большом зале он рассказывал им о дне; они спрашивали, что нужно дворцу. Перед выходом Дон Вербо изучал страницу своей старинной книги рецептов. Потом все работали: он — на главной кухне, а помощники — среди сахарных цветов и карамельных свечей.",
+    "Когда всё было готово, Дон Вербо брал золотой венчик обеими руками. Кухня замирала в тишине. Тогда он творил новые слова.",
+    "Но вчера что-то изменилось. Дон Вербо пошёл на карамельный рынок и купил обычные ингредиенты: жидкую карамель, золотистый сахар и волшебные специи. В тайном уголке сеньора Дульсе он также купил мешочек серебристой карамельной пудры. Вернулся во дворец со списком в руке. Никто не заметил ничего странного.",
+    "Сегодня утром первый помощник открыл Зал и зажёг лампы, как всегда. Потом он выложил грамматические ингредиенты на стол и на секунду взглянул на них.",
+    "Вторая помощница принесла поднос с завтраком из коридора в Зал. Она также вымыла хрустальную чашу и оставила её чистой на столе. Позже ветер разметал бумаги по Залу. Она дважды их собирала, но так и не успела разложить по порядку.",
+    "Третий помощник проверял документы в кабинете. Он пронумеровал их от одного до ста своим красным карандашом и убрал в коробку. На этой неделе он работал там много дней подряд и не возвращался в Зал.",
+    "Охранник сторожил главную дверь. Золотой ключ не пропадал: Дон Вербо сам взял его утром, а потом убрал в карман. Часы в Зале пробили шесть раз вечером и не останавливались. Старинная книга рецептов оставалась на своём месте.",
+    "Когда наступила ночь, Дон Вербо снова вышел на террасу. Как всегда, он хотел посмотреть на город и послушать дворец перед тем, как творить слова. Но на этот раз он не услышал песню помощников.",
+    "Он спустился в Волшебную Кухню. Золотой венчик лежал на столе, но не светился. Дон Вербо коснулся его: он был холодным. Хрустальная чаша осталась пустой. Никто её не наполнил. Грамматических ингредиентов на месте не было.",
+    "Дон Вербо какое-то время молчал. Посмотрел на металлический поднос: ингредиентов на нём не приносили. Посмотрел на бумаги: они лежали на полу. Посмотрел на лампы: они горели. Посмотрел на дверь: она была закрыта. Посмотрел на ключ, книгу, документы и красный карандаш: всё было на своих местах.",
+    "Тогда охранник принёс запечатанный конверт. Он получил его сегодня днём у двери. На конверте — печать из красного сургуча. Никто его не вскрывал.",
+    "Дон Вербо взял хрустальную лупу и стал искать следы на пустом столе. Помощники искали вместе с ним — в Зале, на кухне и в саду. Ингредиенты пока не нашли.",
+    "Тогда самый младший помощник кое-что вспомнил. В девять часов он видел тень возле Зала. Сначала услышал шум. Потом посмотрел, но никого не узнал. Промолчал, потому что испугался и не был уверен.",
+    "Теперь все услышали его рассказ. Венчик не светится. Чаша пуста. Ингредиенты исчезли. Конверт по-прежнему закрыт. И тень мелькнула возле Зала. Расследование только начинается.",
+    ],
+  glos: [],
 };
 
 // ============================================================
