@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate:game3 && npm run liverun:game3 && vite build",
+    "build": "npm run validate:capsules && npm run validate:game3 && npm run liverun:game3 && vite build",
     "preview": "vite preview",
     "validate:game3": "node scripts/validate-game3.mjs",
-    "liverun:game3": "node scripts/liverun-game3.mjs"
+    "liverun:game3": "node scripts/liverun-game3.mjs",
+    "validate:capsules": "node scripts/validate-action-capsules.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
