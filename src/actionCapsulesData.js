@@ -6,28 +6,40 @@ export const CAPSULE_OPERATORS = [
   {
     id: "querer",
     infinitive: "querer",
-    yo: "quiero",
-    third: "quiere",
+    yo: "Yo quiero",
+    el: "Él quiere",
+    ella: "Ella quiere",
+    elRu: "он хочет",
+    ellaRu: "она хочет",
     meaning: "хотеть",
-    label: "ХОЧУ",
+    taskRu: "я хочу",
+    label: "Я ХОЧУ",
     color: "#A81B3E",
   },
   {
     id: "poder",
     infinitive: "poder",
-    yo: "puedo",
-    third: "puede",
+    yo: "Yo puedo",
+    el: "Él puede",
+    ella: "Ella puede",
+    elRu: "он может",
+    ellaRu: "она может",
     meaning: "мочь",
-    label: "МОГУ",
+    taskRu: "я могу",
+    label: "Я МОГУ",
     color: "#16795B",
   },
   {
     id: "tener_que",
     infinitive: "tener que",
-    yo: "tengo que",
-    third: "tiene que",
+    yo: "Yo tengo que",
+    el: "Él tiene que",
+    ella: "Ella tiene que",
+    elRu: "ему нужно",
+    ellaRu: "ей нужно",
     meaning: "быть должным",
-    label: "НУЖНО",
+    taskRu: "мне нужно",
+    label: "МНЕ НУЖНО",
     color: "#A67C2E",
   },
 ];
@@ -37,6 +49,7 @@ export const CAPSULE_ACTIONS = [
     id: "abrir",
     infinitive: "abrir",
     meaning: "открыть",
+    taskRu: "открыть дверь",
     object: "la puerta",
     objectRu: "дверь",
     scene: "La puerta principal está cerrada.",
@@ -45,6 +58,7 @@ export const CAPSULE_ACTIONS = [
     id: "llevar",
     infinitive: "llevar",
     meaning: "отнести",
+    taskRu: "отнести поднос в Зал",
     object: "la bandeja a la Sala",
     objectRu: "поднос в Зал",
     scene: "La bandeja tiene que llegar a la Sala.",
@@ -53,6 +67,7 @@ export const CAPSULE_ACTIONS = [
     id: "buscar",
     infinitive: "buscar",
     meaning: "искать",
+    taskRu: "искать золотую палочку",
     object: "la varilla dorada",
     objectRu: "золотую палочку",
     scene: "La varilla dorada ha desaparecido.",
@@ -61,6 +76,7 @@ export const CAPSULE_ACTIONS = [
     id: "recoger",
     infinitive: "recoger",
     meaning: "собрать",
+    taskRu: "собрать бумаги с пола",
     object: "los papeles del suelo",
     objectRu: "бумаги с пола",
     scene: "Hay papeles por todo el suelo.",
@@ -69,6 +85,7 @@ export const CAPSULE_ACTIONS = [
     id: "guardar",
     infinitive: "guardar",
     meaning: "убрать на хранение",
+    taskRu: "убрать золотой ключ",
     object: "la llave dorada",
     objectRu: "золотой ключ",
     scene: "La llave dorada no puede quedarse aquí.",
@@ -117,7 +134,7 @@ export function capsulePhrase(operatorId, actionId, person = "yo") {
   const operator = CAPSULE_OPERATORS.find((item) => item.id === operatorId);
   const action = CAPSULE_ACTIONS.find((item) => item.id === actionId);
   if (!operator || !action) return "";
-  const operatorForm = person === "third" ? operator.third : operator.yo;
+  const operatorForm = person === "el" ? operator.el : person === "ella" ? operator.ella : operator.yo;
   return `${operatorForm} ${action.infinitive} ${action.object}`;
 }
 
@@ -127,4 +144,3 @@ export function capsuleByIds(operatorId, actionId) {
     action: CAPSULE_ACTIONS.find((item) => item.id === actionId),
   };
 }
-

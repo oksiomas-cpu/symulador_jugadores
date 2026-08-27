@@ -55,15 +55,16 @@ function Capsule({ operator, action, compact = false }) {
 function LayerFeedback({ expected, selectedOperator, selectedAction }) {
   const operatorOk = selectedOperator === expected.operator.id;
   const actionOk = selectedAction === expected.action.id;
+  const expectedOperator = expected.person === "el" ? expected.operator.el : expected.person === "ella" ? expected.operator.ella : expected.operator.yo;
   return <div style={{ background: C.cream, borderRadius: 12, padding: "11px 12px", marginTop: 14, fontSize: 13.5, lineHeight: 1.55 }}>
-    <div>Оператор: <b style={{ color: operatorOk ? C.emerald : C.raspberry }}>{operatorOk ? "✓ верно" : `✕ нужен ${expected.operator.yo}`}</b></div>
+    <div>Оператор: <b style={{ color: operatorOk ? C.emerald : C.raspberry }}>{operatorOk ? "✓ верно" : `✕ нужен ${expectedOperator}`}</b></div>
     <div>Действие: <b style={{ color: actionOk ? C.emerald : C.raspberry }}>{actionOk ? "✓ infinitivo сохранён" : `✕ нужен ${expected.action.infinitive}`}</b></div>
     <div>Предмет: <b style={{ color: C.emerald }}>✓ остаётся частью сцены</b></div>
   </div>;
 }
 
 function Choice({ active, children, onClick, disabled }) {
-  return <button onClick={onClick} disabled={disabled} style={{ width: "100%", border: `1.5px solid ${active ? C.goldDeep : C.line}`, background: active ? C.gold : C.card, color: active ? "#fff" : C.ink, borderRadius: 12, padding: "11px 10px", fontFamily: SERIF, fontSize: 14.5, fontWeight: 800, cursor: disabled ? "default" : "pointer" }}>{children}</button>;
+  return <button onClick={onClick} disabled={disabled} style={{ width: "100%", minWidth: 0, border: `1.5px solid ${active ? C.goldDeep : C.line}`, background: active ? C.gold : C.card, color: active ? "#fff" : C.ink, borderRadius: 12, padding: "11px 8px", fontFamily: SERIF, fontSize: 14.5, fontWeight: 800, lineHeight: 1.2, overflowWrap: "anywhere", cursor: disabled ? "default" : "pointer" }}>{children}</button>;
 }
 
 function Progress({ index, total }) {
@@ -83,7 +84,11 @@ function Finish({ score, total, onAgain, onBack }) {
 }
 
 function Recognize({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({ action, operator: CAPSULE_OPERATORS[i % CAPSULE_OPERATORS.length] })), []);
+  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({
+    action,
+    operator: CAPSULE_OPERATORS[i % CAPSULE_OPERATORS.length],
+    person: i % 2 === 0 ? "el" : "ella",
+  })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setPicked(null); setScore(0); }} onBack={onBack} />;
   const task = tasks[i]; const ok = picked === task.operator.id;
@@ -92,11 +97,11 @@ function Recognize({ onBack }) {
     <Progress index={i} total={tasks.length} />
     <Card>
       <div style={{ color: C.inkSoft, fontSize: 13, textAlign: "center" }}>{task.action.scene}</div>
-      <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{task.operator.third} {task.action.infinitive} {task.action.object}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7 }}>
+      <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{capsulePhrase(task.operator.id, task.action.id, task.person)}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>
         {CAPSULE_OPERATORS.map(op => <Choice key={op.id} active={picked === op.id} disabled={!!picked} onClick={() => { setPicked(op.id); if (op.id === task.operator.id) setScore(s => s + 1); }}>{op.label}</Choice>)}
       </div>
-      {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.operator.third} = «${task.operator.meaning}».`}</div>}
+      {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.person === "el" ? task.operator.el : task.operator.ella} = «${task.person === "el" ? task.operator.elRu : task.operator.ellaRu}».`}</div>}
       {picked && <button onClick={() => { setI(i + 1); setPicked(null); }} style={{ marginTop: 14, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Следующий ход →</button>}
     </Card>
     <Back onClick={onBack} label="← К режимам" />
@@ -109,11 +114,11 @@ function Build({ onBack }) {
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setOp(null); setAct(null); setChecked(false); setScore(0); }} onBack={onBack} />;
   const task = tasks[i];
   return <div style={wrap}><div style={maxw}>
-    <Header small="2 · Собрать" title="Собери речевой ход" sub={`«Я ${task.operator.meaning}: ${task.action.meaning} ${task.action.objectRu}».`} />
+    <Header small="2 · Собрать" title="Собери речевой ход" sub={`Задание: «${task.operator.taskRu} ${task.action.taskRu}».`} />
     <Progress index={i} total={tasks.length} />
     <Card>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, marginBottom: 7 }}>1. ОПЕРАТОР</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, margin: "16px 0 7px" }}>2. ДЕЙСТВИЕ</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7 }}>{CAPSULE_ACTIONS.map(x => <Choice key={x.id} active={act === x.id} disabled={checked} onClick={() => setAct(x.id)}>{x.infinitive}</Choice>)}</div>
       {op && act && <Capsule {...capsuleByIds(op, act)} compact />}
@@ -171,7 +176,7 @@ function Start({ onMode, onBack }) {
     <Header small="El verbo · A1" title="Капсулы действия" sub="Одна знакомая сцена получает новую команду. Спрягается только первый глагол; действие остаётся в infinitivo." />
     <Card>
       <Capsule {...demo} />
-      <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
+      <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Yo quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
     </Card>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
       {MODE_INFO.map(([id, title, sub], i) => <button key={id} onClick={() => onMode(id)} style={{ minHeight: 118, background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 15, padding: 13, textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 3px 12px rgba(201,162,75,.12)" }}>
@@ -193,4 +198,3 @@ export default function ActionCapsules({ onBack }) {
   if (mode === "story") return <Story onBack={() => setMode("start")} />;
   return <Start onMode={setMode} onBack={onBack} />;
 }
-
