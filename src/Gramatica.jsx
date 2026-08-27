@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ActionCapsules from "./ActionCapsules.jsx";
 
 // ============================================================
 // GRAMÁTICA — грамматический справочник Ciudad.
@@ -710,6 +711,7 @@ const BRANCHES = [
     topics: [
       { id: "infinitivo", title: "Инфинитив и три спряжения: -AR, -ER, -IR", lvl: "A1", ready: true },
       { id: "personas", title: "Шесть лиц: корень + окончание", lvl: "A1", ready: true },
+      { id: "capsulas-a1", title: "Капсулы действия: querer / poder / tener que + infinitivo", lvl: "A1", ready: true },
     ],
   },
   {
@@ -826,7 +828,8 @@ export default function Gramatica({ onBack, startTema }) {
   // view: root | verbo | тема | drill:<set>
   // startTema (deep-link ?tema=): открываем сразу дрилл темы; «назад» ведёт на страницу темы.
   const startDrill = startTema && TEMA_TO_DRILL[startTema] ? "drill:" + TEMA_TO_DRILL[startTema] : null;
-  const [view, setView] = useState(startDrill || "root");
+  const startView = startTema === "capsulas-a1" ? "capsulas-a1" : startDrill;
+  const [view, setView] = useState(startView || "root");
   const [drillFrom, setDrillFrom] = useState(startDrill ? startTema : null);
 
   const openDrill = (set, from) => { setDrillFrom(from); setView("drill:" + set); };
@@ -835,6 +838,7 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "verbo") return <VerboIndex onOpen={(id) => setView(id)} onBack={() => setView("root")} />;
   if (view === "infinitivo") return <TemaInfinitivo onBack={() => setView("verbo")} onTrain={() => openDrill("grupos", "infinitivo")} />;
   if (view === "personas") return <TemaPersonas onBack={() => setView("verbo")} onTrain={() => openDrill("personas", "personas")} />;
+  if (view === "capsulas-a1") return <ActionCapsules onBack={() => setView("verbo")} />;
   if (view === "presente-reg") return <TemaPresenteRegulares onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "presente-reg")} />;
   if (view === "presente-orto") return <TemaPresenteOrto onBack={() => setView("verbo")} onTrain={() => openDrill("orto", "presente-orto")} />;
   if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
