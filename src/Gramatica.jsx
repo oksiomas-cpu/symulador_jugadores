@@ -752,14 +752,140 @@ function TemaIndefinidoIrr({ onBack, onTrain }) {
   );
 }
 
-function TrainBtn({ onClick }) {
+function TrainBtn({ onClick, label = "⚡ Тренировать", sub = "Проверь себя на глаголах Королевства", bg = C.raspberry, shadow = "rgba(168,27,62,0.22)" }) {
   return (
-    <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
-      <div style={{ fontSize: 17, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>⚡ Тренировать</div>
-      <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.8)", marginTop: 3 }}>Проверь себя на глаголах Королевства</div>
+    <div onClick={onClick} style={{ background: bg, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: `0 4px 16px ${shadow}`, marginTop: 6 }}>
+      <div style={{ fontSize: 17, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>{label}</div>
+      <div style={{ fontSize: 12.5, color: "rgba(255,255,255,0.8)", marginTop: 3 }}>{sub}</div>
     </div>
   );
 }
+
+// ============================================================
+// ВЕТКА IV — ГЛАГОЛЫ-ОПЕРАТОРЫ (решение Оксаны 28.08.2026)
+// Восемь операторов из «капсул действия» (querer/poder/tener que/ir a/
+// intentar/empezar a/dejar de/volver a) спрягаются здесь в трёх прошедших
+// временах — отдельная кросс-временная ветка, не слой внутри «Времена».
+// Капсульная игра сознательно НЕ содержит таблицу спряжения (решение
+// содержательной сессии 28.08.2026) — при ошибке формы игрок направляется
+// именно сюда через deep-link `?tema=op-<verb>-<tense>` (та же логистика,
+// что и у обычных капсул, канон 6 июля 2026).
+// Базовое действие в каждом упражнении остаётся в infinitivo — спрягается
+// только оператор (закон формы капсул: «спрягается только первый глагол»).
+// ============================================================
+const OPERATORS = [
+  {
+    id: "op-querer", verb: "querer", particle: "", meaning: "хотеть сделать",
+    action: "abrir la puerta", actionRu: "открыть дверь",
+    ppc: { forms: ["he querido", "has querido", "ha querido", "hemos querido", "habéis querido", "han querido"], endLen: [3, 3, 3, 3, 3, 3], note: "querido — регулярное причастие -ER: quer- + -ido." },
+    indefinido: { forms: ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: quis-, окончания без ударения — quise (не «querí»), quiso (не «querió»)." },
+    imperfecto: { forms: ["quería", "querías", "quería", "queríamos", "queríais", "querían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto querer полностью регулярный: quer- + -ía." },
+  },
+  {
+    id: "op-poder", verb: "poder", particle: "", meaning: "мочь сделать",
+    action: "abrir la caja", actionRu: "открыть шкатулку",
+    ppc: { forms: ["he podido", "has podido", "ha podido", "hemos podido", "habéis podido", "han podido"], endLen: [3, 3, 3, 3, 3, 3], note: "podido — регулярное причастие: pod- + -ido." },
+    indefinido: { forms: ["pude", "pudiste", "pudo", "pudimos", "pudisteis", "pudieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: pud- (не «pod-»), окончания без ударения — та же схема, что у querer." },
+    imperfecto: { forms: ["podía", "podías", "podía", "podíamos", "podíais", "podían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto poder регулярный: pod- + -ía." },
+  },
+  {
+    id: "op-tenerque", verb: "tener", particle: "que", meaning: "быть должным сделать",
+    action: "dar el libro a Marta", actionRu: "отдать книгу Марте",
+    ppc: { forms: ["he tenido", "has tenido", "ha tenido", "hemos tenido", "habéis tenido", "han tenido"], endLen: [3, 3, 3, 3, 3, 3], note: "tenido — регулярное причастие: ten- + -ido." },
+    indefinido: { forms: ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: tuv- (тот же приём, что у estar → estuv-)." },
+    imperfecto: { forms: ["tenía", "tenías", "tenía", "teníamos", "teníais", "tenían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto tener регулярный, несмотря на неправильный Presente (tengo)." },
+  },
+  {
+    id: "op-ira", verb: "ir", particle: "a", meaning: "собираться сделать",
+    action: "buscar la pista", actionRu: "искать улику",
+    ppc: { forms: ["he ido", "has ido", "ha ido", "hemos ido", "habéis ido", "han ido"], endLen: [3, 3, 3, 3, 3, 3], note: "ido — participio без своего корня: у ir от инфинитива в форме ничего не остаётся, как и в Presente (voy)." },
+    indefinido: { forms: ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"], endLen: [1, 4, 1, 4, 6, 4], note: "ir делит эти формы с ser целиком — fui значит и «пошёл», и «был», контекст решает." },
+    imperfecto: { forms: ["iba", "ibas", "iba", "íbamos", "ibais", "iban"], endLen: [3, 4, 3, 6, 5, 4], note: "ir — один из всего трёх неправильных глаголов в Imperfecto (вместе с ser и ver): особая основа ib-." },
+  },
+  {
+    id: "op-intentar", verb: "intentar", particle: "", meaning: "пытаться сделать",
+    action: "recoger la pista", actionRu: "собрать улику",
+    ppc: { forms: ["he intentado", "has intentado", "ha intentado", "hemos intentado", "habéis intentado", "han intentado"], endLen: [3, 3, 3, 3, 3, 3], note: "intentado — регулярное причастие -AR: intent- + -ado." },
+    indefinido: { forms: ["intenté", "intentaste", "intentó", "intentamos", "intentasteis", "intentaron"], endLen: [1, 4, 1, 4, 6, 4], note: "intentar полностью регулярный -AR — никаких сюрпризов ни в одном лице." },
+    imperfecto: { forms: ["intentaba", "intentabas", "intentaba", "intentábamos", "intentabais", "intentaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR: intent- + -aba." },
+  },
+  {
+    id: "op-empezara", verb: "empezar", particle: "a", meaning: "начинать делать",
+    action: "hablar con el Jefe", actionRu: "говорить с Шефом",
+    ppc: { forms: ["he empezado", "has empezado", "ha empezado", "hemos empezado", "habéis empezado", "han empezado"], endLen: [3, 3, 3, 3, 3, 3], note: "empezado — регулярное причастие: empez- + -ado." },
+    indefinido: { forms: ["empecé", "empezaste", "empezó", "empezamos", "empezasteis", "empezaron"], endLen: [1, 4, 1, 4, 6, 4], note: "меняется только форма yo — empecé, не «empezé»: z → c перед e, тот же приём, что g → j в Presente." },
+    imperfecto: { forms: ["empezaba", "empezabas", "empezaba", "empezábamos", "empezabais", "empezaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR во всех шести формах — орфография z/c в Imperfecto не нужна, после -aba гласная не e." },
+  },
+  {
+    id: "op-dejarde", verb: "dejar", particle: "de", meaning: "переставать делать",
+    action: "mirar la sombra", actionRu: "смотреть на тень",
+    ppc: { forms: ["he dejado", "has dejado", "ha dejado", "hemos dejado", "habéis dejado", "han dejado"], endLen: [3, 3, 3, 3, 3, 3], note: "dejado — регулярное причастие: dej- + -ado." },
+    indefinido: { forms: ["dejé", "dejaste", "dejó", "dejamos", "dejasteis", "dejaron"], endLen: [1, 4, 1, 4, 6, 4], note: "dejar полностью регулярный -AR." },
+    imperfecto: { forms: ["dejaba", "dejabas", "dejaba", "dejábamos", "dejabais", "dejaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR: dej- + -aba." },
+  },
+  {
+    id: "op-volvera", verb: "volver", particle: "a", meaning: "делать снова",
+    action: "guardar la llave", actionRu: "убрать ключ",
+    ppc: { forms: ["he vuelto", "has vuelto", "ha vuelto", "hemos vuelto", "habéis vuelto", "han vuelto"], endLen: [6, 6, 6, 6, 6, 6], note: "vuelto — неправильное причастие (не «volvido»): та же форма, что в теме «Причастия неправильные»." },
+    indefinido: { forms: ["volví", "volviste", "volvió", "volvimos", "volvisteis", "volvieron"], endLen: [1, 4, 2, 4, 6, 5], note: "в Indefinido volver полностью регулярный -ER — неправильность живёт только в причастии." },
+    imperfecto: { forms: ["volvía", "volvías", "volvía", "volvíamos", "volvíais", "volvían"], endLen: [2, 3, 2, 5, 4, 3], note: "регулярный -ER: volv- + -ía." },
+  },
+];
+const OP_TENSE_LABEL = { ppc: "Pretérito Perfecto Compuesto", indefinido: "Pretérito Indefinido", imperfecto: "Pretérito Imperfecto" };
+const OP_TENSE_KEY = { ppc: "perfecto", indefinido: "indefinido", imperfecto: "imperfecto" };
+function opTitle(op) { return op.verb.toUpperCase() + (op.particle ? " " + op.particle.toUpperCase() : ""); }
+function opGap(op) { return (op.particle ? op.particle + " " : "") + op.action + "."; }
+
+function TemaOperador({ data: op, onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · IV. Глаголы-операторы" title={`${opTitle(op)} + infinitivo`} sub={`${op.meaning} — та же капсула, что в игре Дона Вербо: оператор надевается сверху на действие, само действие (${op.action}) в infinitivo не меняется.`} />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2" /></div>
+
+      <RuleCard>
+        Здесь спрягается только оператор <b>{op.verb}</b>{op.particle && <> — не забывай частицу <b>{op.particle}</b> после него</>}. Три времени допроса Шефа: что уже случилось и связано с сегодня (Perfecto Compuesto), что случилось в конкретный момент (Indefinido), как было обычно (Imperfecto).
+      </RuleCard>
+
+      {["ppc", "indefinido", "imperfecto"].map(t => {
+        const pal = TENSE_PALETTE[OP_TENSE_KEY[t]];
+        return (
+          <div key={t}>
+            <RuleCard>
+              <TopicTitle title={OP_TENSE_LABEL[t]} tenseKey={OP_TENSE_KEY[t]} ready />
+            </RuleCard>
+            <ConjTable cols={[{ inf: op.verb, ru: op.meaning, forms: op[t].forms, endLen: op[t].endLen }]} />
+            <RuleCard><Nota>{op[t].note}</Nota></RuleCard>
+            <TrainBtn onClick={() => onTrain(t)} label={`⚡ Тренировать · ${OP_TENSE_LABEL[t]}`} sub={`${opTitle(op)} + ${op.action}`} bg={pal.strong} shadow="rgba(61,43,31,0.22)" />
+          </div>
+        );
+      })}
+
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
+// Программная сборка тренажёров: одно упражнение на каждое лицо (6) на
+// каждое время (3) на каждый оператор (8) = 144 карточки, «в хвост и в
+// гриву» (решение Оксаны 28.08.2026). Персонажи-подлежащие переиспользуют
+// голос Королевства (охранник, помощники) в порядке лиц PERSONS.
+const OP_SUBJ = ["Yo", "Tú", "El guardia", "Nosotros", "Vosotros", "Los ayudantes"];
+const OPERATOR_DRILLS = {};
+const OPERATOR_TITLES = {};
+OPERATORS.forEach(op => {
+  ["ppc", "indefinido", "imperfecto"].forEach(t => {
+    const key = op.id + "-" + t;
+    const set = op[t];
+    OPERATOR_DRILLS[key] = OP_SUBJ.map((subj, i) => ({
+      pre: subj,
+      gap: opGap(op),
+      inf: opTitle(op) + " + infinitivo",
+      ok: set.forms[i],
+      note: i === 0 ? set.note : undefined,
+    }));
+    OPERATOR_TITLES[key] = `${opTitle(op)} + infinitivo · ${OP_TENSE_LABEL[t]}`;
+  });
+});
 
 // ============================================================
 // МИНИ-ТРЕНАЖЁР — вставка форм (регулярные Presente)
@@ -891,10 +1017,11 @@ const DRILLS = {
     { pre: "Nosotros no", gap: "nada extraño esa noche.", inf: "traer", ok: "trajimos", note: "traer → traj-; ellos sería trajeron, no «trajieron» — la j se come la i." },
     { pre: "El tercer ayudante", gap: "los papeles en su caja.", inf: "poner", ok: "puso", note: "poner → pus- + -o en él." },
   ],
+  ...OPERATOR_DRILLS,
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto", "indefinido", "indefinido-irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto", "indefinido", "indefinido-irr"].includes(setKey) || setKey.startsWith("op-"); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -920,7 +1047,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму", imperfecto: "Pretérito Imperfecto: впиши форму", indefinido: "Pretérito Indefinido: впиши форму", "indefinido-irr": "Глагол исключение: впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму", imperfecto: "Pretérito Imperfecto: впиши форму", indefinido: "Pretérito Indefinido: впиши форму", "indefinido-irr": "Глагол исключение: впиши форму", ...OPERATOR_TITLES };
   const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " "); // схлопываем лишние пробелы: «habéis  trabajado» = «habéis trabajado»
   const pick = (o) => {
     if (picked) return;
@@ -1027,6 +1154,10 @@ const BRANCHES = [
       { id: "reflexivos", title: "Возвратные глаголы (verbos reflexivos)", lvl: "A2", ready: false },
     ],
   },
+  {
+    id: "operadores", num: "IV", title: "Глаголы-операторы", sub: "Восемь операторов из капсул Дона Вербо — спряжение в трёх прошедших временах",
+    topics: OPERATORS.map(op => ({ id: op.id, title: `${opTitle(op)} + infinitivo · ${op.meaning}`, lvl: "A2", ready: true })),
+  },
 ];
 
 function VerboIndex({ onOpen, onBack }) {
@@ -1123,12 +1254,19 @@ const TEMA_TO_DRILL = {
   "indefinido": "indefinido",
   "indefinido-irr": "indefinido-irr",
 };
+// Deep-link на конкретное время конкретного оператора — op-<verb>-<tense> —
+// приземляет сразу в дрилл (та же логистика, что у обычных капсул); topic-id
+// без времени (op-querer) открывает страницу оператора со всеми тремя.
+OPERATORS.forEach(op => { ["ppc", "indefinido", "imperfecto"].forEach(t => { TEMA_TO_DRILL[op.id + "-" + t] = op.id + "-" + t; }); });
+const OPERATOR_TOPIC_IDS = OPERATORS.map(op => op.id);
 
 export default function Gramatica({ onBack, startTema }) {
   // view: root | verbo | тема | drill:<set>
   // startTema (deep-link ?tema=): открываем сразу дрилл темы; «назад» ведёт на страницу темы.
   const startDrill = startTema && TEMA_TO_DRILL[startTema] ? "drill:" + TEMA_TO_DRILL[startTema] : null;
-  const startView = startTema === "capsulas-a1" ? "capsulas-a1" : startDrill;
+  const startView = startTema === "capsulas-a1" ? "capsulas-a1"
+    : OPERATOR_TOPIC_IDS.includes(startTema) ? startTema
+    : startDrill;
   const [view, setView] = useState(startView || "root");
   const [drillFrom, setDrillFrom] = useState(startDrill ? startTema : null);
 
@@ -1148,6 +1286,8 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "imperfecto") return <TemaImperfecto onBack={() => setView("verbo")} onTrain={() => openDrill("imperfecto", "imperfecto")} />;
   if (view === "indefinido") return <TemaIndefinido onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido", "indefinido")} />;
   if (view === "indefinido-irr") return <TemaIndefinidoIrr onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido-irr", "indefinido-irr")} />;
+  const opView = OPERATORS.find(o => o.id === view);
+  if (opView) return <TemaOperador data={opView} onBack={() => setView("verbo")} onTrain={(t) => openDrill(opView.id + "-" + t, opView.id)} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
