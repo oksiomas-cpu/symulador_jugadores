@@ -4,6 +4,9 @@ import Gramatica from "./Gramatica.jsx";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
+import {
+  QUESTIONS4, CATS4, TARGETS4, verbByKey4, fullAnswer4, fullAnswerRu4, BANK_NOTES4,
+} from "./game4Data.js";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -463,6 +466,25 @@ const PACKS = {
     fullAnswer: fullAnswer3,
     bankNotes: BANK_NOTES3,
   },
+  cap4: {
+    id: "cap4", num: 4, titulo: "El Libro Mágico de Don Verbo",
+    grammar: "Querer · poder · tener que + infinitivo", emoji: "📕",
+    desc: "La acción es la misma; cambia su estatus. 15 pistas, siete acciones y 21 preguntas de operadores.",
+    term: {
+      es: "pista", nom: "Улика", acc: "улику", gen2: "улик", revPart: "вскрыта",
+      other: "Другая улика", next: "Следующая улика",
+      fem: true, plural: "улики", objects: "предметов",
+    },
+    accent: "goldDeep", grammarRoute: "capsulas-a1",
+    grammarCta: "🧩 Тренируешь грамматику? Капсулы действия A1 →",
+    grammarCtaShort: "🧩 Капсулы действия A1 →",
+    grammarCtaShort2: "🧩 Капсулы действия A1 →",
+    VERBS: TARGETS4, QUESTIONS: QUESTIONS4, CATS: CATS4, verbByKey: verbByKey4,
+    fantAnsOf: (v) => v.fantAns,
+    fullAnswer: fullAnswer4,
+    fullAnswerRu: fullAnswerRu4,
+    bankNotes: BANK_NOTES4,
+  },
 };
 const DEFAULT_PACK = PACKS.cap1;
 
@@ -598,19 +620,20 @@ async function fetchAccess(tgId) {
 
 // Витрина замков: что открыто при данном статусе.
 //   cap1 — Nivel 1 (AR); cap2 — Nivel 2 (Perfecto); cap3 — Nivel 3 (три прошедших);
+//   cap4 — Nivel 4 (глаголы-операторы, первый этаж 3×7);
 //   libro — Живая книга;
 //   gramatica — раздел «Грамматика» (меню); live — Пульт живой игры;
 //   presente/perfecto — дрилл темы по deep-link из капсул Дона.
 function accessMap(status) {
   switch (status) {
     case "club":
-      return { cap1: true, cap2: true, cap3: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
+      return { cap1: true, cap2: true, cap3: true, cap4: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
     default: // none
-      return { cap1: false, cap2: false, cap3: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
+      return { cap1: false, cap2: false, cap3: false, cap4: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
   }
 }
 function temaAllowed(tema, acc) {
@@ -1712,9 +1735,10 @@ function LiveGame({ onHome }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onCapsules, onBack }) {
   const isCapOne = pack.id === "cap1";
-  const maya = pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
+  const isCapFour = pack.id === "cap4";
+  const maya = isCapFour ? MAYA4 : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
@@ -1762,7 +1786,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
       {/* ГЛОССАРИЙ ГЛАГОЛОВ */}
       <Block stripe={C.emerald}>
         <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>{pack.term.fem ? `🔍 ${pack.VERBS.length} ${pack.term.gen2} · тап — история ${pack.term.gen2.slice(0, -1)}и` : `📖 ${pack.VERBS.length} ${pack.term.gen2} · тап — история глагола`}</div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>{pack.term.fem ? `🔍 ${pack.VERBS.length} ${pack.term.gen2} · тап — открыть историю` : `📖 ${pack.VERBS.length} ${pack.term.gen2} · тап — история глагола`}</div>
           <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
         {glosOpen && (
@@ -1780,7 +1804,11 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
       {/* ТРЕНАЖЁР СПРЯЖЕНИЙ */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>📊 Тренажёр спряжений</div>
-        {isCapOne ? (
+        {isCapFour ? (
+          <button onClick={onCapsules} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть «Капсулы действия A1» →
+          </button>
+        ) : isCapOne ? (
           <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Открыть Mi Diario →
           </button>
@@ -1789,7 +1817,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
             Открыть тренажёр Pretérito Perfecto Compuesto →
           </button>
         )}
-        {!isCapOne && (
+        {!isCapOne && !isCapFour && (
           <button onClick={onPresenteErIr} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
             Presente · глаголы -ER / -IR →
           </button>
@@ -1914,7 +1942,9 @@ export default function SimuladorJugador() {
   const goDiario = () => { setRole("diario"); setEntered(true); };
   const goPerfecto = () => setShowPerfecto(true);
   const goDiario2 = () => setShowDiario2(true);
-  const grammarAction = (pack && pack.grammarRoute === "perfecto") ? goPerfecto : goDiario;
+  const grammarAction = pack && pack.grammarRoute === "capsulas-a1"
+    ? () => setDeepTema("capsulas-a1")
+    : (pack && pack.grammarRoute === "perfecto") ? goPerfecto : goDiario;
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
 
@@ -1963,6 +1993,7 @@ export default function SimuladorJugador() {
     onDiario={pack && pack.grammarRoute === "perfecto" ? goDiario2 : goDiario}
     onPerfecto={() => setShowPerfecto(true)}
     onPresenteErIr={() => setShowPresenteErIr(true)}
+    onCapsules={() => setDeepTema("capsulas-a1")}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
   if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
@@ -2063,6 +2094,21 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
       </div>
       </Gate>
 
+      {/* Уровень 4 — глаголы-операторы, первый этаж 3×7 */}
+      <Gate open={acc.cap4} title="Nivel 4" onOpen={() => onPick(PACKS.cap4)}>
+      <div style={{
+        background: C.goldDeep, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(166,124,46,0.30)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap4.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 4 · {PACKS.cap4.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap4.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap4.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.70)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap4.VERBS.length} улик · 21 вопрос · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
       {/* Gramática — справочник */}
       <Gate open={acc.gramatica} title="Грамматика" onOpen={onGramatica}>
       <div style={{
@@ -2111,15 +2157,15 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
 }
 
 // ============================================================
-// ВЫБОР ИГРЫ (картриджа) — Глава 1 / Глава 2
+// ВЫБОР ИГРЫ (картриджа)
 // ============================================================
 function ChapterPicker({ onPick, session, onBack, onDiario }) {
-  const list = [PACKS.cap1, PACKS.cap2, PACKS.cap3];
+  const list = [PACKS.cap1, PACKS.cap2, PACKS.cap3, PACKS.cap4];
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle="Elige el caso · выбери дело" />
       <ScoreBadge session={session} />
-      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Две игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Четыре игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
       {list.map((p) => (
         <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C[p.accent] || C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
           <div style={{ width: 7, background: C[p.accent] || C.gold, flexShrink: 0 }} />
@@ -2226,7 +2272,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
   function ask(witness) {
     if (askedInCurrent.has(witness)) return;
     const a = witness === "A" ? ansA : ansB;
-    setG(s => ({ ...s, log: [...s.log, { q: current.q, w: witness, a }] }));
+    setG(s => ({ ...s, log: [...s.log, { qid: current.id, q: current.q, w: witness, a }] }));
     setAskedInCurrent(s => new Set([...s, witness]));
   }
   function nextQ() {
@@ -2304,11 +2350,12 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {grp.entries.map((e, j) => (
-                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
+                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
                           <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
                             {e.w}
                           </span>
                           <SiNo v={e.a} />
+                          {pack.fullAnswer && <span style={{ fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{pack.fullAnswer(e.qid, e.a)}</span>}
                         </div>
                       ))}
                       {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
@@ -2595,6 +2642,12 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
                 <span>Tú: <SiNo v={feedback.my} /></span>
                 <span>· {isCanon ? "Канон" : "Легенда"}: <SiNo v={feedback.correctAns} /></span>
               </div>
+              {pack.fullAnswer && (
+                <div style={{ marginTop: 10, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 12px" }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{pack.fullAnswer(current.id, feedback.correctAns)}</div>
+                  {pack.fullAnswerRu && <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>{pack.fullAnswerRu(current.id, feedback.correctAns)}</div>}
+                </div>
+              )}
               <Btn bg={C.gold} onClick={next} style={{ marginTop: 14 }}>Siguiente pregunta →</Btn>
             </div>
           )}
@@ -2638,7 +2691,12 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
               const fa = liveFantAns(verb)[q.id];
               return (
                 <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
-                  <div style={{ flex: 1, fontSize: 13, color: C.ink }}>{q.q}</div>
+                  <div style={{ flex: 1, fontSize: 13, color: C.ink }}>
+                    <div>{q.q}</div>
+                    {q.ru && <div style={{ color: C.inkSoft, fontSize: 11.5, marginTop: 2 }}>{q.ru}</div>}
+                    {pack.fullAnswer && <div style={{ color: C.raspberryDeep, fontWeight: 700, marginTop: 4 }}>{pack.fullAnswer(q.id, fa)}</div>}
+                    {pack.fullAnswerRu && <div style={{ color: C.inkSoft, fontSize: 11.5, marginTop: 2 }}>{pack.fullAnswerRu(q.id, fa)}</div>}
+                  </div>
                   <BigSiNo v={fa} />
                 </div>
               );
@@ -4156,6 +4214,76 @@ const MAYA3 = {
 };
 
 // ============================================================
+// ИСТОРИЯ-МАЯК Главы 4 — El Libro Mágico de Don Verbo
+// Полный текст утверждён Оксаной 27.08.2026.
+// ============================================================
+const MAYA4 = {
+  es: [
+    "En el Reino de Caramelo ha desaparecido el Libro Mágico.",
+    "Los detectives empiezan inmediatamente la investigación.",
+    "—¿Quién ha abierto la puerta de la habitación del Libro?",
+    "Don Verbo los detiene. —Esa pregunta no es suficiente.",
+    "Mira a los habitantes del palacio reunidos delante de él.",
+    "Uno **quiere abrir la puerta**, pero ni siquiera se acerca a ella.",
+    "Otro **puede abrirla**: tiene una llave.",
+    "Un tercero **tiene que abrir la puerta**, porque es responsable de la habitación.",
+    "Alguien **va a entrar**, pero en el último momento se marcha.",
+    "Alguien **intenta abrir la puerta**, pero la cerradura no cede.",
+    "Y alguien abre la puerta, se va… y después **vuelve a hacerlo**.",
+    "Los detectives guardan silencio.",
+    "La puerta es la misma.",
+    "La acción también es la misma: **abrir**.",
+    "Pero delante de ellos hay seis historias completamente diferentes.",
+    "—Por eso una investigación normal no es suficiente —dice Don Verbo—. Si preguntamos solamente **quién hace qué**, veremos solo la superficie.",
+    "Coloca delante de los detectives el primer expediente.",
+    "—Para encontrar el Libro tendremos que descubrir algo más: qué quiere hacer una persona, qué puede hacer, qué tiene que hacer, qué solamente va a hacer, qué intenta hacer y a qué acción vuelve otra vez.",
+    "—¿Y cómo podemos saberlo?",
+    "Don Verbo sonríe.",
+    "—Para eso existen unos verbos especiales.",
+    "Hace una pausa.",
+    "—Los llamamos **verbos-operadores**.",
+    "Los habitantes del Reino de Caramelo oyen ese nombre por primera vez.",
+    "—Os presentaré a cada uno por separado —dice Don Verbo—. Cada uno tiene su propia historia. Y antes de continuar la búsqueda del Libro, tendréis que entender qué hace cada uno con una acción que ya conocéis.",
+    "Cierra el primer expediente.",
+    "—Empezaremos por lo más sencillo.",
+    "**¿Qué significa querer hacer algo?**",
+    "Así comienza la verdadera búsqueda del Libro Mágico.",
+  ],
+  ru: [
+    "В Карамельном Королевстве пропала Волшебная книга.",
+    "Детективы сразу начали расследование.",
+    "— Кто открыл дверь в комнату Книги?",
+    "Дон Вербо остановил их. — Этого вопроса недостаточно.",
+    "Он посмотрел на собравшихся жителей дворца.",
+    "Один из них хотел открыть дверь, но так к ней и не подошёл.",
+    "Другой мог её открыть — у него был ключ.",
+    "Третьему нужно было открыть дверь, потому что он отвечал за комнату.",
+    "Кто-то собирался войти, но в последний момент ушёл.",
+    "Кто-то попытался открыть дверь, но замок не поддался.",
+    "А кто-то открыл её, ушёл — и потом вернулся снова.",
+    "Детективы замолчали.",
+    "Дверь была одна.",
+    "Действие тоже одно — открыть.",
+    "Но перед ними оказалось шесть совершенно разных историй.",
+    "— Вот почему обычного поиска недостаточно, — сказал Дон Вербо. — Если мы будем спрашивать только, кто что сделал, мы увидим лишь поверхность.",
+    "Он положил перед детективами первое дело.",
+    "— Чтобы найти Книгу, придётся научиться выяснять больше: чего человек хотел, что мог, что ему было нужно сделать, что он только собирался сделать, что пытался сделать и к какому действию вернулся снова.",
+    "— Но как это узнать?",
+    "Дон Вербо улыбнулся.",
+    "— Для этого существуют особые глаголы.",
+    "Он сделал паузу.",
+    "— Глаголы-операторы.",
+    "Жители Карамельного Королевства услышали это название впервые.",
+    "— Я познакомлю вас с каждым отдельно, — сказал Дон Вербо. — У каждого из них своя история. И прежде чем мы продолжим поиски Книги, вам придётся понять, как каждый из них меняет знакомое действие.",
+    "Он закрыл первое дело.",
+    "— Начнём с самого простого.",
+    "Что значит хотеть что-то сделать?",
+    "Так начался настоящий поиск Волшебной книги.",
+  ],
+  glos: [],
+};
+
+// ============================================================
 // ТУР-ЗНАКОМСТВО — показывается при первом входе
 // ============================================================
 const TOUR_IMG = "https://i.ibb.co/LXwycrSh/Detective-game-app-characters-202606011428.jpg";
@@ -4355,6 +4483,3 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
     </div></div>
   );
 }
-
-
-

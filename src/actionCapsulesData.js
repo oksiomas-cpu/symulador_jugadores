@@ -1,6 +1,5 @@
-// Капсулы действия A1 · первый вертикальный срез.
-// Контент отделён от интерфейса: после живой проверки можно подключить usar / dar,
-// не меняя механику тренажёра.
+// Капсулы действия A1 · первый этаж 3 оператора × 7 действий.
+// Контент отделён от интерфейса; те же действия и ID использует Игра №4.
 
 export const CAPSULE_OPERATORS = [
   {
@@ -90,6 +89,24 @@ export const CAPSULE_ACTIONS = [
     objectRu: "золотой ключ",
     scene: "La llave dorada no puede quedarse aquí.",
   },
+  {
+    id: "usar",
+    infinitive: "usar",
+    meaning: "использовать",
+    taskRu: "использовать золотой венчик",
+    object: "la varilla dorada",
+    objectRu: "золотой венчик",
+    scene: "La varilla dorada activa las palabras.",
+  },
+  {
+    id: "dar",
+    infinitive: "dar",
+    meaning: "передать",
+    taskRu: "передать поднос ответственному помощнику",
+    object: "la bandeja al ayudante encargado",
+    objectRu: "поднос ответственному помощнику",
+    scene: "El ayudante encargado espera la bandeja en la Sala.",
+  },
 ];
 
 export const CAPSULE_STORIES = [
@@ -98,6 +115,7 @@ export const CAPSULE_STORIES = [
     actionId: "abrir",
     operatorId: "tener_que",
     story: "La puerta principal está cerrada. Es la única entrada a la Sala y la investigación empieza dentro.",
+    storyRu: "Главная дверь закрыта. Это единственный вход в Зал, а расследование начинается внутри.",
     prompt: "Какой ход продвигает расследование?",
   },
   {
@@ -105,6 +123,7 @@ export const CAPSULE_STORIES = [
     actionId: "llevar",
     operatorId: "poder",
     story: "La bandeja es ligera. El ayudante tiene las manos libres y el camino a la Sala está abierto.",
+    storyRu: "Поднос лёгкий. Руки помощника свободны, а путь в Зал открыт.",
     prompt: "Что помощник может сказать о своём действии?",
   },
   {
@@ -112,6 +131,7 @@ export const CAPSULE_STORIES = [
     actionId: "buscar",
     operatorId: "querer",
     story: "La varilla dorada ha desaparecido. El detective decide empezar por la Cocina.",
+    storyRu: "Золотой венчик исчез. Детектив решает начать поиски с Кухни.",
     prompt: "Как он формулирует своё намерение?",
   },
   {
@@ -119,6 +139,7 @@ export const CAPSULE_STORIES = [
     actionId: "recoger",
     operatorId: "tener_que",
     story: "Los papeles están por todo el suelo. Si se quedan allí, una parte de la pista puede perderse.",
+    storyRu: "Бумаги разбросаны по полу. Если оставить их там, часть улики может потеряться.",
     prompt: "Какое действие стало необходимым?",
   },
   {
@@ -126,7 +147,24 @@ export const CAPSULE_STORIES = [
     actionId: "guardar",
     operatorId: "querer",
     story: "La llave dorada ya está encontrada. La detective elige un lugar seguro para ella.",
+    storyRu: "Золотой ключ уже найден. Детектив выбирает для него безопасное место.",
     prompt: "Как она формулирует своё решение?",
+  },
+  {
+    id: "wand-use",
+    actionId: "usar",
+    operatorId: "tener_que",
+    story: "La varilla dorada está preparada. Sin ella, las palabras no se activan.",
+    storyRu: "Золотой венчик готов. Без него слова не активируются.",
+    prompt: "Какое действие необходимо для запуска слов?",
+  },
+  {
+    id: "tray-give",
+    actionId: "dar",
+    operatorId: "tener_que",
+    story: "La bandeja ha llegado a la Sala. El ayudante encargado espera recibirla.",
+    storyRu: "Поднос доставлен в Зал. Ответственный помощник ждёт, когда ему его передадут.",
+    prompt: "Какое действие теперь необходимо?",
   },
 ];
 
