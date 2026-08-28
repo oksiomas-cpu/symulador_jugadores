@@ -160,6 +160,7 @@ function Story({ onBack }) {
     <Progress index={i} total={CAPSULE_STORIES.length} />
     <Card>
       <div style={{ fontSize: 15, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{story.story}</div>
+      <div style={{ fontSize: 13, lineHeight: 1.6, color: C.inkSoft, borderLeft: `3px solid ${C.line}`, paddingLeft: 13, marginTop: 7 }}>{story.storyRu}</div>
       <div style={{ display: "grid", gap: 8, marginTop: 18 }}>
         {CAPSULE_OPERATORS.map(operator => <Choice key={operator.id} active={picked === operator.id} disabled={!!picked} onClick={() => { setPicked(operator.id); if (operator.id === story.operatorId) setScore(s => s + 1); }}>{capsulePhrase(operator.id, story.actionId)}</Choice>)}
       </div>
@@ -185,7 +186,7 @@ function Start({ onMode, onBack }) {
         <div style={{ color: C.inkSoft, fontSize: 12.5, lineHeight: 1.4 }}>{sub}</div>
       </button>)}
     </div>
-    <div style={{ textAlign: "center", color: C.inkSoft, fontSize: 12, lineHeight: 1.55, marginTop: 16 }}>Первый срез: abrir · llevar · buscar · recoger · guardar</div>
+    <div style={{ textAlign: "center", color: C.inkSoft, fontSize: 12, lineHeight: 1.55, marginTop: 16 }}>Первый этаж: abrir · llevar · buscar · recoger · guardar · usar · dar</div>
     <Back onClick={onBack} label="← К темам глагола" />
   </div></div>;
 }
