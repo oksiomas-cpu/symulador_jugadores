@@ -535,6 +535,86 @@ function Highlighted({ text }) {
     ? <strong key={i} style={{ color: C.raspberry, fontWeight: 700 }}>{p.slice(2, -2)}</strong>
     : <span key={i}>{p}</span>)}</span>;
 }
+
+/* ============================================================
+ТАП-ПЕРЕВОД ГЛАГОЛОВ ДЕЙСТВИЯ — Игра №4 · Матрица 15 предметов
+ТЗ (Notion 3ca4c9eb6e008131ae94d7e63b244052), утверждено 28.08.2026.
+Тап работает ТОЛЬКО по семи базовым глаголам действия банка 21 вопроса
+и их слитным местоимениям-дополнениям — не по любому слову текста.
+Два пополняемых словаря вместо одной длинной таблицы готовых фраз:
+новый предмет с уже известными глаголами новых записей не требует;
+новый базовый глагол — одна строка в ACTION_VERBS_RU; новое местоимение
+— одна строка в ACTION_CLITICS_RU. Область — тексты Canon/Fantasía
+Игры №4 (cap4); остальные главы Highlighted не трогает.
+============================================================ */
+const ACTION_VERBS_RU = {
+  abrir: "открыть",
+  llevar: "нести / унести",
+  buscar: "искать",
+  recoger: "поднять / забрать",
+  guardar: "сохранить, убрать",
+  usar: "использовать",
+  dar: "отдать",
+};
+const ACTION_CLITICS_RU = {
+  la: "её",
+  lo: "его",
+  las: "их",
+  los: "их",
+};
+// dar + se + местоимение (dársela/dárselo) — готовая составная фраза целиком;
+// разбивка на se + la — задача другого, более позднего уровня (вне этого ТЗ).
+const DAR_SE_RU = { la: "отдать её", lo: "отдать его", las: "отдать их", los: "отдать их" };
+
+function actionVerbTranslation(rawToken) {
+  const clean = rawToken.replace(/^[¿¡«»"'“„(]+/, "").replace(/[.,;:!?»"'”“)]+$/, "");
+  if (!clean) return null;
+  const lower = clean.toLowerCase();
+  const darSe = lower.match(/^d[aá]rse(la|lo|las|los)$/);
+  if (darSe) return DAR_SE_RU[darSe[1]];
+  if (lower === "dar") return ACTION_VERBS_RU.dar;
+  for (const verb of Object.keys(ACTION_VERBS_RU)) {
+    if (verb === "dar") continue;
+    if (lower === verb) return ACTION_VERBS_RU[verb];
+    const m = lower.match(new RegExp("^" + verb + "(la|lo|las|los)$"));
+    if (m) return `${ACTION_VERBS_RU[verb]} ${ACTION_CLITICS_RU[m[1]]}`;
+  }
+  return null;
+}
+
+// Тап по глаголу действия в тексте улики Canon/Fantasía — показывает составной
+// перевод всплывающей подсказкой прямо над словом.
+function TapActionText({ text }) {
+  const [openIdx, setOpenIdx] = useState(null);
+  const tokens = text.split(/(\s+)/);
+  return (
+    <span>
+      {tokens.map((tok, i) => {
+        if (/^\s*$/.test(tok)) return <span key={i}>{tok}</span>;
+        const tr = actionVerbTranslation(tok);
+        if (!tr) return <span key={i}>{tok}</span>;
+        return (
+          <span key={i} style={{ position: "relative", display: "inline-block" }}>
+            <span
+              onClick={() => setOpenIdx((o) => (o === i ? null : i))}
+              style={{ borderBottom: `1.5px dotted ${C.raspberry}`, color: C.raspberryDeep, fontWeight: 700, cursor: "pointer" }}
+            >{tok}</span>
+            {openIdx === i && (
+              <span style={{ position: "absolute", bottom: "125%", left: "50%", transform: "translateX(-50%)", background: C.ink, color: "#fff", fontSize: 12.5, padding: "5px 10px", borderRadius: 7, whiteSpace: "nowrap", zIndex: 30, boxShadow: "0 3px 12px rgba(0,0,0,0.28)" }}>{tr}</span>
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+// Единая точка входа: на Игре №4 текст улики получает тап-перевод глаголов
+// действия; на остальных главах — прежнее выделение **...** без изменений.
+function renderClue(text, pack) {
+  if (!text) return null;
+  return pack && pack.id === "cap4" ? <TapActionText text={text} /> : <Highlighted text={text} />;
+}
 function SiNo({ v }) {
   const yes = v === "sí";
   return <span style={{ background: yes ? C.emerald : C.raspberry, color: "#fff", borderRadius: 7, padding: "2px 12px", fontWeight: 700, fontSize: 14, letterSpacing: ".5px" }}>{yes ? "SÍ" : "NO"}</span>;
@@ -1183,13 +1263,13 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
                       </div>
                     </div>
                     <div style={{ fontSize: 14, color: C.ink, lineHeight: 1.6, marginBottom: 12 }}>
-                      <Highlighted text={sv.storyEs} />
+                      {renderClue(sv.storyEs, pack)}
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                       {sv.dossier.map((d, i) => (
                         <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 8, padding: "4px 10px", fontSize: 12.5 }}>
                           <span style={{ color: C.inkSoft }}>{d[0]} </span>
-                          <span style={{ color: C.ink, fontWeight: 600 }}>{d[1]}</span>
+                          <span style={{ color: C.ink, fontWeight: 600 }}>{renderClue(d[1], pack)}</span>
                         </div>
                       ))}
                     </div>
@@ -1319,7 +1399,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
                 {v.dossier.map((d, i) => (
                   <div key={i} style={{ display: "flex", flexWrap: "wrap", columnGap: 10, rowGap: 3, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
                     <span style={{ flexShrink: 0, maxWidth: "100%", fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{renderClue(d[1], pack)}</span>
                   </div>
                 ))}
               </div>
@@ -1336,7 +1416,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
               </div>
               {storyOpen && (
                 <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  <Highlighted text={v.storyEs} />
+                  {renderClue(v.storyEs, pack)}
                 </div>
               )}
             </div>
@@ -1350,7 +1430,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
                 {v.dossier.map((d, i) => (
                   <div key={i} style={{ display: "flex", flexWrap: "wrap", columnGap: 10, rowGap: 3, alignItems: "baseline", background: "rgba(45,122,90,0.06)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px" }}>
                     <span style={{ flexShrink: 0, maxWidth: "100%", fontSize: 13, fontWeight: 700, color: C.emeraldDeep, minWidth: 78 }}>{d[0]}</span>
-                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{d[1]}</span>
+                    <span style={{ flex: "1 1 165px", minWidth: 0, fontSize: 14.5, fontWeight: 600, color: C.ink, lineHeight: 1.35 }}>{renderClue(d[1], pack)}</span>
                   </div>
                 ))}
               </div>
@@ -1371,7 +1451,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
               </div>
               {lieOpen && (
                 <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  {liveFantVer(v)}
+                  {renderClue(liveFantVer(v), pack)}
                 </div>
               )}
             </div>
@@ -1384,7 +1464,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
               </div>
               {truthOpen && (
                 <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.6 }}>
-                  <Highlighted text={v.storyEs} />
+                  {renderClue(v.storyEs, pack)}
                 </div>
               )}
             </div>
@@ -1844,7 +1924,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       <Footer />
 
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
       </Sheet>
     </div></div>
   );
@@ -2280,7 +2360,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
       </Sheet>
     </div></div>
   );
@@ -2484,7 +2564,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
       </Sheet>
 
       {/* УГАДЫВАНИЕ — всплывает поверх экрана */}
@@ -2627,7 +2707,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
         {!isCanon && (
           <div style={{ marginTop: 12, background: "rgba(168,27,62,0.10)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "11px 13px" }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberry, letterSpacing: ".5px", marginBottom: 5 }}>🔴 ТВОЯ ЛЕГЕНДА — держись её до конца</div>
-            <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.45 }}>{liveFantVer(verb)}</div>
+            <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.45 }}>{renderClue(liveFantVer(verb), pack)}</div>
             <div style={{ marginTop: 8, fontSize: 12, color: C.inkSoft }}>Отвечай строго по этой версии. Каждое отклонение = ошибка.</div>
           </div>
         )}
@@ -2710,7 +2790,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
 
       {/* ИСТОРИЯ — поверх экрана */}
       <Sheet open={showStory} onClose={() => setShowStory(false)} title={`📖 ${verb.emoji} ${verb.inf} — historia`}>
-        <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={verb.storyEs} /></p>
+        <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(verb.storyEs, pack)}</p>
       </Sheet>
 
       {/* ШПАРГАЛКА — поверх экрана */}
@@ -2721,7 +2801,7 @@ function WitnessMode({ pack = DEFAULT_PACK, role, onHome, onScore, session, onDi
             {verb.dossier.map(([q, a], i) => (
               <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
                 <div style={{ width: 110, flexShrink: 0, color: C.emeraldDeep, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
-                <div style={{ fontSize: 13.5 }}>{a}</div>
+                <div style={{ fontSize: 13.5 }}>{renderClue(a, pack)}</div>
               </div>
             ))}
           </>
