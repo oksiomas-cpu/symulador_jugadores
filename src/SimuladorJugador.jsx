@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 79448)
-Total output lines: 4485
-
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
@@ -1484,1754 +1481,286 @@ function LiveGame({ onHome }) {
   // детектив заявляет СВОЙ вопрос: задаёт голосом в Zoom, ведущая оценивает ✅/❌
   async function sendOwn() {
     try {
-      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "own", code: conn.code,…19448 tokens truncated…🟢 CANON — solo esto es verdad</div>
-            {verb.dossier.map(([q, a], i) => (
-              <div key={i} style={{ display: "flex", padding: "5px 0", borderBottom: i < verb.dossier.length - 1 ? `1px dashed ${C.line}` : "none" }}>
-                <div style={{ width: 110, flexShrink: 0, color: C.emeraldDeep, fontWeight: 600, fontSize: 13.5 }}>{q}</div>
-                <div style={{ fontSize: 13.5 }}>{a}</div>
-              </div>
-            ))}
-          </>
-        ) : (
-          <>
-            <div style={{ background: C.raspberry, color: "#fff", borderRadius: 8, padding: "5px 12px", display: "inline-block", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>🔴 ОТВЕТЫ ПО ТВОЕЙ ЛЕГЕНДЕ</div>
-            {pack.QUESTIONS.map((q) => {
-              const fa = liveFantAns(verb)[q.id];
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "own", code: conn.code, playerId: conn.playerId }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось заявить свой вопрос";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
+  // Шаг 5: рука «готов назвать глагол» и тайный голос «Верю A/B»
+  async function sendHand(down) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "hand", code: conn.code, playerId: conn.playerId, down: !!down }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось поднять руку";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
+  async function sendVote(choice) {
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "vote", code: conn.code, playerId: conn.playerId, choice }) });
+      const d = await resp.json();
+      if (d.ok) { setGame(d.game); return null; }
+      return d.error || "Не получилось проголосовать";
+    } catch (e) { return "Сеть недоступна — попробуй ещё раз"; }
+  }
+  // Игрок выходит из партии НАВСЕГДА. Очки замораживаются и остаются видны.
+  // Сервер ставит флаг left; следующий опрос/ответ подхватит — экран сам сменится на «Ты вышел».
+  async function leaveGame() {
+    if (!conn) return;
+    if (!window.confirm("Точно выйти? Вернуться в эту партию не получится.")) return;
+    try {
+      const resp = await fetch("/api/game", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "leave", code: conn.code, playerId: conn.playerId }) });
+      const d = await resp.json();
+      if (d.ok && d.game) setGame(d.game);
+    } catch (e) { /* следующий опрос подхватит флаг left */ }
+  }
+  // Глава комнаты определяет картридж живой игры (вопросы + улики).
+  // 1) game.packId от ведущего (надёжный путь). 2) запасной — по verbKey раунда. 3) дефолт cap1.
+  const livePack = (() => {
+    const pid = game && game.packId;
+    if (pid && PACKS[pid]) return PACKS[pid];
+    const vk = game && game.round && game.round.verbKey;
+    if (vk) { for (const k in PACKS) { if (PACKS[k].verbByKey(vk)) return PACKS[k]; } }
+    return PACKS.cap1;
+  })();
+  const rdLive = game && game.round;
+  const mergedAns = { ...((rdLive && rdLive.answers) || {}) };
+  for (const k in ansOverlay) { const v = ansOverlay[k].v; if (v) mergedAns[k] = v; else delete mergedAns[k]; }
+  const liveDet = conn && rdLive && rdLive.witAName && rdLive.witBName ? {
+    witNames: { A: rdLive.witAName, B: rdLive.witBName },
+    asked: rdLive.asked || [],
+    answers: mergedAns,
+    onAsk: sendAsk,
+    onSetAns: sendAnswer,
+    onOwn: sendOwn,
+    pendingOwn: rdLive.pendingOwn || null,
+    myId: conn.playerId,
+    myScore: (game.scores || {})[conn.playerId] || null,
+    // Шаг 5
+    hands: rdLive.hands || [],
+    guess: rdLive.guess || null,
+    votedIds: rdLive.votedIds || [],
+    votersNeeded: ((rdLive.roles && rdLive.roles.detectives) || []).length,
+    eliminated: rdLive.eliminated || [],
+    revealed: rdLive.revealed || null,
+    lastElim: rdLive.lastElim || null,
+    onHand: sendHand,
+    onVote: sendVote,
+    mode: (() => {
+      const me = (game.players || []).find((p) => p.id === conn.playerId);
+      return (me && me.mode) || (conn && conn.mode) || "pad";
+    })(),
+  } : null;
+  // Шаг 5: что видит свидетель (голосование / называние / вскрытие)
+  const liveWitExtra = conn && rdLive ? {
+    guess: rdLive.guess || null,
+    revealed: rdLive.revealed || null,
+    myScore: (game.scores || {})[conn.playerId] || null,
+  } : null;
+  const myLetter = conn && rdLive ? (rdLive.witA === conn.playerId ? "A" : rdLive.witB === conn.playerId ? "B" : null) : null;
+  const liveAskedForMe = myLetter && rdLive ? new Set((rdLive.asked || []).filter((a) => a.to === myLetter && a.qid).map((a) => a.qid)) : null;
+  useEffect(() => {
+    if (!conn || !game || !game.round) return;
+    const rd = game.round;
+    if (rd.n === lastRound.current) return;
+    const my = myRoleIn(rd);
+    if (!my) return; // ведущий не нашёл это имя в комнате — открой роль вручную
+    lastRound.current = rd.n;
+    setLiveVerb(my === "detective" ? null : rd.verbKey);
+    setR(my);
+  }, [conn && conn.playerId, game && game.round && game.round.n]);
+
+  // опрос состояния игры раз в 2 сек
+  useEffect(() => {
+    if (!conn) return;
+    let dead = false;
+    const tick = async () => {
+      try {
+        const resp = await fetch(`/api/game?code=${conn.code}`);
+        const d = await resp.json();
+        if (!dead && d.ok) setGame(d.game);
+        if (!dead && !d.ok && /не найдена/.test(d.error || "")) leaveRoom();
+      } catch (e) { /* временный сбой — переживём */ }
+    };
+    tick();
+    const t = setInterval(tick, 2000);
+    return () => { dead = true; clearInterval(t); };
+  }, [conn && conn.code]);
+
+  // самоочистка оптимистичного слоя ответов: снимаем ключ ТОЛЬКО когда сервер
+  // подтвердил то же значение (выставил или снял). До подтверждения оптимистичный
+  // ответ держится — бейдж SÍ/NO не мигает и не пропадает после опроса.
+  useEffect(() => {
+    const sv = (game && game.round && game.round.answers) || {};
+    setAnsOverlay(prev => {
+      let ch = false; const next = { ...prev }; const now = Date.now();
+      for (const k in prev) {
+        const want = prev[k].v || null; const have = sv[k] || null; const age = now - prev[k].t;
+        if (want === have) { delete next[k]; ch = true; }          // сервер догнал — отдаём ответ серверу
+        else if (age > 15000) { delete next[k]; ch = true; }       // страховка от зависшего ключа при сетевом сбое
+      }
+      return ch ? next : prev;
+    });
+  }, [game]);
+
+  const roundKey = game && game.round ? game.round.n : "manual";
+
+  // Игрок вышел навсегда (сам или ведущая-страховка) — показываем замороженные очки, дальше не играет.
+  const meInRoom = conn && game ? (game.players || []).find((p) => p.id === conn.playerId) : null;
+  if (meInRoom && meInRoom.left) {
+    const frozen = (game.scores && game.scores[conn.playerId]) ? game.scores[conn.playerId].g : 0;
+    return (
+      <div style={wrap}>
+        <Header subtitle="🚪 Ты вышел из игры" />
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 16, padding: "26px 20px", textAlign: "center", boxShadow: "0 2px 14px rgba(61,43,31,0.12)" }}>
+            <div style={{ fontSize: 40 }}>🚪</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginTop: 8 }}>Ты вышел из игры</div>
+            <div style={{ fontSize: 14.5, color: C.inkSoft, marginTop: 8, lineHeight: 1.5 }}>Спасибо за партию! Дальше ты не участвуешь, но твои очки сохранены.</div>
+            <div style={{ marginTop: 18, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "14px 16px" }}>
+              <div style={{ fontSize: 12, color: C.inkSoft, textTransform: "uppercase", letterSpacing: 0.5 }}>Твои очки сохранены</div>
+              <div style={{ fontSize: 34, fontWeight: 800, color: C.goldDeep, marginTop: 4 }}>{frozen}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 16 }}><Footer onHome={onHome} /></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (r === "detective") return <LiveDetective key={roundKey} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} turn={turnInfo()} live={liveDet} pack={livePack} />;
+  if (r === "canon") return <LiveWitness key={"c" + roundKey} mode="canon" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} pack={livePack} />;
+  if (r === "fantasia") return <LiveWitness key={"f" + roundKey} mode="fantasia" initialVerbKey={liveVerb} onBack={() => setR(null)} onLeave={leaveGame} roundN={game && game.round ? game.round.n : null} liveAsked={liveAskedForMe} myLetter={myLetter} liveExtra={liveWitExtra} pack={livePack} />;
+
+  // --- Экран входа в комнату ---
+  if (!conn && !skipConn) {
+    return (
+      <div style={wrap}>
+        <Header subtitle="🎮 Живая игра · вход" />
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "18px 18px 16px" }}>
+            <div style={{ fontSize: 17, fontWeight: 800, color: C.raspberry, marginBottom: 6 }}>Код игры</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.5, marginBottom: 12 }}>Ведущий назовёт 4 цифры в Zoom — введи их и своё имя.</div>
+            <input value={codeIn} onChange={(e) => setCodeIn(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="0000" inputMode="numeric"
+              style={{ width: "100%", boxSizing: "border-box", fontSize: 30, fontWeight: 800, letterSpacing: 10, textAlign: "center", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${C.gold}`, fontFamily: SERIF, color: C.ink, marginBottom: 10 }} />
+            <input value={nameIn} onChange={(e) => setNameIn(e.target.value)} placeholder="Твоё имя"
+              style={{ width: "100%", boxSizing: "border-box", fontSize: 17, padding: "11px 12px", borderRadius: 12, border: `1.5px solid ${C.line}`, fontFamily: SERIF, color: C.ink, marginBottom: 12 }} />
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 7 }}>Как тебе удобнее играть?</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              {[
+                { k: "pad", t: "🎴 С вопросником", d: "Готовые вопросы и кнопки SÍ/NO на пульте" },
+                { k: "voice", t: "🎙 Сам, голосом", d: "Спрашиваешь своими словами, без списка вопросов" },
+              ].map((m) => {
+                const on = modeIn === m.k;
+                return (
+                  <button key={m.k} onClick={() => setModeIn(m.k)} style={{ flex: 1, textAlign: "left", cursor: "pointer", fontFamily: SERIF, background: on ? "#FBF3E0" : C.card, border: `1.5px solid ${on ? C.gold : C.line}`, borderRadius: 12, padding: "10px 11px", color: C.ink, boxShadow: on ? `0 0 0 2px ${C.gold}55` : "none" }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 800 }}>{m.t}</div>
+                    <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 3, lineHeight: 1.35 }}>{m.d}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={joinRoom} disabled={joinBusy} style={{ width: "100%", background: joinBusy ? "#D8CBB4" : C.raspberry, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 17, fontWeight: 700, fontFamily: SERIF, cursor: joinBusy ? "default" : "pointer" }}>
+              {joinBusy ? "Вхожу..." : "Войти в игру"}
+            </button>
+            {joinErr && <div style={{ color: C.raspberry, fontSize: 13.5, fontWeight: 600, marginTop: 8, textAlign: "center" }}>{joinErr}</div>}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <button onClick={() => setSkipConn(true)} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+              Открыть пульт без кода
+            </button>
+          </div>
+          <Footer onHome={onHome} />
+        </div>
+      </div>
+    );
+  }
+
+  const roles = [
+    { id: "detective", emoji: "🕵️", t: "Детектив", d: "Глагол скрыт. Вопросы по категориям + отметки кому задал.", c: C.goldDeep },
+    { id: "canon", emoji: "🟢", t: "Свидетель Канон", d: "Знаешь правду. История, досье и ответы Sí/No по всем вопросам.", c: C.emerald },
+    { id: "fantasia", emoji: "🔴", t: "Свидетель Фантазия", d: "Твоя легенда. Ответы Sí/No по версии — держись её до конца.", c: C.raspberry },
+  ];
+  return (
+    <div style={wrap}>
+      <Header subtitle="🎮 Живая игра · выбор роли" />
+      <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        {conn && (
+          <div style={{ background: C.card, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "11px 14px", marginBottom: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+              <span style={{ fontWeight: 800, color: C.emeraldDeep, fontSize: 15 }}>✅ Ты в игре {conn.code} как {conn.name}</span>
+              <button onClick={leaveRoom} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>выйти</button>
+            </div>
+            {(() => {
+              const me = game && (game.players || []).find((p) => p.id === conn.playerId);
+              const mm = (me && me.mode) || conn.mode || "pad";
               return (
-                <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "5px 0", borderBottom: `1px dashed ${C.line}` }}>
-                  <div style={{ flex: 1, fontSize: 13, color: C.ink }}>
-                    <div>{q.q}</div>
-                    {q.ru && <div style={{ color: C.inkSoft, fontSize: 11.5, marginTop: 2 }}>{q.ru}</div>}
-                    {pack.fullAnswer && <div style={{ color: C.raspberryDeep, fontWeight: 700, marginTop: 4 }}>{pack.fullAnswer(q.id, fa)}</div>}
-                    {pack.fullAnswerRu && <div style={{ color: C.inkSoft, fontSize: 11.5, marginTop: 2 }}>{pack.fullAnswerRu(q.id, fa)}</div>}
-                  </div>
-                  <BigSiNo v={fa} />
+                <div style={{ display: "inline-block", marginTop: 6, fontSize: 12.5, fontWeight: 700, color: mm === "voice" ? C.goldDeep : C.inkSoft, background: mm === "voice" ? "#FBF3E0" : "transparent", border: mm === "voice" ? `1px solid ${C.gold}` : "none", borderRadius: 8, padding: mm === "voice" ? "3px 9px" : 0 }}>
+                  {mm === "voice" ? "🎙 Играешь сам, без вопросника" : "🎴 С вопросником"}
                 </div>
               );
-            })}
-            <p style={{ ...pHint, marginTop: 8, color: C.raspberryDeep }}>Это ответы твоей версии. Тренируй их — не пытайся угадать "противоположность правды".</p>
-          </>
+            })()}
+            {game && (
+              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 5 }}>
+                В комнате ({(game.players || []).length}/5): {(game.players || []).map((p) => p.name).join(", ") || "—"}
+              </div>
+            )}
+            {game && game.round && myRoleIn(game.round) && (
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: C.raspberry, marginTop: 6 }}>
+                🎬 Раунд {game.round.n}: твоя роль — {myRoleIn(game.round) === "detective" ? "🕵️ Детектив" : myRoleIn(game.round) === "canon" ? "🟢 Свидетель Канон" : "🔴 Свидетель Фантазия"}
+              </div>
+            )}
+          </div>
         )}
-      </Sheet>
-    </div></div>
-  );
-}
-
-// ============================================================
-// ТРЕНАЖЁР PRETÉRITO PERFECTO — Уровень 2
-// 3 экрана: Правила → Дрилл причастий → Полное спряжение
-// ============================================================
-
-// 14 регулярных глаголов для дрилла (volver — исключение, только в правилах и спряжении)
-const NIVEL2_DRILL = [
-  { inf: "caminar",   part: "caminado",   suf: "ado" },
-  { inf: "buscar",    part: "buscado",    suf: "ado" },
-  { inf: "preguntar", part: "preguntado", suf: "ado" },
-  { inf: "trabajar",  part: "trabajado",  suf: "ado" },
-  { inf: "llamar",    part: "llamado",    suf: "ado" },
-  { inf: "tocar",     part: "tocado",     suf: "ado" },
-  { inf: "revisar",   part: "revisado",   suf: "ado" },
-  { inf: "ordenar",   part: "ordenado",   suf: "ado" },
-  { inf: "entrar",    part: "entrado",    suf: "ado" },
-  { inf: "llevar",    part: "llevado",    suf: "ado" },
-  { inf: "recordar",  part: "recordado",  suf: "ado" },
-  { inf: "encender",  part: "encendido",  suf: "ido" },
-  { inf: "recoger",   part: "recogido",   suf: "ido" },
-  { inf: "recibir",   part: "recibido",   suf: "ido" },
-];
-
-// Все 15 глаголов (+ volver) — для экрана спряжения
-const NIVEL2_ALL = [
-  ...NIVEL2_DRILL,
-  { inf: "volver", part: "vuelto", suf: null, irregular: true },
-];
-
-// ============================================================
-// GRAMMAR_PERFECTO — данные Grammar Base (Pretérito Perfecto Compuesto)
-// Архитектурно изолированы — легко переехать в Grammar Hub
-// ============================================================
-const GRAMMAR_PERFECTO = {
-  marcadores: [
-    {
-      grupo: "ESTE / ESTA — якорная группа",
-      emoji: "📅",
-      hint: "Период ещё не закончился — ты внутри него. Perfecto!",
-      items: [
-        { es: "hoy", ru: "сегодня" },
-        { es: "esta mañana", ru: "сегодня утром" },
-        { es: "esta tarde", ru: "сегодня днём / вечером" },
-        { es: "esta noche", ru: "сегодня ночью" },
-        { es: "este día", ru: "в этот день" },
-        { es: "esta semana", ru: "на этой неделе" },
-        { es: "este mes", ru: "в этом месяце" },
-        { es: "este año", ru: "в этом году" },
-      ],
-    },
-    {
-      grupo: "NUNCA / SIEMPRE — опыт за всю жизнь",
-      emoji: "🌌",
-      hint: "Не вчера и не сегодня — это вся твоя жизнь до этой секунды.",
-      items: [
-        { es: "nunca", ru: "никогда" },
-        { es: "siempre", ru: "всегда" },
-        { es: "alguna vez", ru: "когда-нибудь / однажды" },
-        { es: "jamás", ru: "никогда (усиленное)" },
-      ],
-    },
-    {
-      grupo: "YA / TODAVÍA — состояние сейчас",
-      emoji: "⏱",
-      hint: "Уже случилось или ещё нет — важен момент сейчас.",
-      items: [
-        { es: "ya", ru: "уже" },
-        { es: "todavía no", ru: "ещё не" },
-        { es: "últimamente", ru: "в последнее время" },
-        { es: "recientemente", ru: "недавно" },
-        { es: "hace un momento", ru: "только что" },
-      ],
-    },
-  ],
-  excepciones: [
-    { inf: "ver",      part: "visto",    ru: "видеть" },
-    { inf: "decir",    part: "dicho",    ru: "говорить" },
-    { inf: "hacer",    part: "hecho",    ru: "делать" },
-    { inf: "poner",    part: "puesto",   ru: "класть" },
-    { inf: "volver",   part: "vuelto",   ru: "возвращаться" },
-    { inf: "romper",   part: "roto",     ru: "ломать" },
-    { inf: "abrir",    part: "abierto",  ru: "открывать" },
-    { inf: "escribir", part: "escrito",  ru: "писать" },
-    { inf: "morir",    part: "muerto",   ru: "умирать" },
-    { inf: "cubrir",   part: "cubierto", ru: "покрывать" },
-  ],
-};
-
-const HABER2 = ["he", "has", "ha", "hemos", "habéis", "han"];
-const PRON2 = [
-  { key: "yo",  label: "yo" },
-  { key: "tu",  label: "tú" },
-  { key: "el",  label: "él / ella" },
-  { key: "nos", label: "nosotros" },
-  { key: "vos", label: "vosotros" },
-  { key: "ell", label: "ellos / ellas" },
-];
-
-function conjPerfecto(verb) {
-  const r = {};
-  PRON2.forEach((p, i) => { r[p.key] = `${HABER2[i]} ${verb.part}`; });
-  return r;
-}
-
-// ---------- Экран 1: Правила ----------
-function PerfectoRules({ onNext, onBack, tabBar }) {
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📚 Pretérito Perfecto Compuesto · Правила" />
-      {tabBar}
-
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, fontSize: 17, color: C.ink, marginBottom: 10 }}>
-          Как образуется Pretérito Perfecto Compuesto
+        <div style={{ textAlign: "center", fontSize: 14.5, color: C.inkSoft, marginBottom: 14, lineHeight: 1.5 }}>
+          Открой свою роль — тебе её назвал ведущий. Пульт держит всё перед глазами, ничего не нужно искать.
         </div>
-        <div style={{ fontSize: 15, color: C.ink, lineHeight: 1.6, marginBottom: 14 }}>
-          <strong style={{ color: C.emeraldDeep }}>haber</strong> + причастие (participio)
-        </div>
-
-        {/* Таблица haber */}
-        <div style={{ fontSize: 12, fontWeight: 700, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>ГЛАГОЛ HABER:</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 16 }}>
-          {PRON2.map((p, i) => (
-            <div key={p.key} style={{ background: "rgba(22,121,91,0.08)", border: `1px solid ${C.emerald}`, borderRadius: 9, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ color: C.inkSoft, fontSize: 13 }}>{p.label}</span>
-              <strong style={{ color: C.emeraldDeep, fontSize: 15 }}>{HABER2[i]}</strong>
+        {roles.map(c => (
+          <div key={c.id} onClick={() => setR(c.id)} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+            <div style={{ width: 7, background: c.c, flexShrink: 0 }} />
+            <div style={{ padding: "16px 18px" }}>
+              <div style={{ fontSize: 19, fontWeight: 800, color: c.c }}>{c.emoji} {c.t}</div>
+              <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{c.d}</div>
             </div>
-          ))}
-        </div>
-
-        {/* Правило причастий */}
-        <div style={{ fontSize: 12, fontWeight: 700, color: C.emeraldDeep, letterSpacing: ".5px", marginBottom: 8 }}>КАК ОБРАЗОВАТЬ ПРИЧАСТИЕ:</div>
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 13px", marginBottom: 8 }}>
-            <span style={{ color: C.inkSoft }}>глаголы <strong>-AR</strong>: убрать -AR → добавить </span>
-            <strong style={{ color: C.raspberry, fontSize: 16 }}>-ado</strong>
-            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>
-              caminar → camin<strong style={{ color: C.raspberry }}>ado</strong> · buscar → busc<strong style={{ color: C.raspberry }}>ado</strong> · llevar → llev<strong style={{ color: C.raspberry }}>ado</strong>
-            </div>
-          </div>
-          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 10, padding: "10px 13px" }}>
-            <span style={{ color: C.inkSoft }}>глаголы <strong>-ER / -IR</strong>: убрать окончание → добавить </span>
-            <strong style={{ color: C.raspberry, fontSize: 16 }}>-ido</strong>
-            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 4 }}>
-              encender → encend<strong style={{ color: C.raspberry }}>ido</strong> · recibir → recib<strong style={{ color: C.raspberry }}>ido</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* Исключение volver */}
-        <div style={{ background: "rgba(168,27,62,0.08)", border: `2px solid ${C.raspberry}`, borderRadius: 10, padding: "10px 13px" }}>
-          <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberryDeep, marginBottom: 6 }}>⚠️ ИСКЛЮЧЕНИЕ в нашем наборе:</div>
-          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-            <span style={{ fontSize: 15, fontWeight: 700 }}>volver</span>
-            <span style={{ color: C.inkSoft }}>→</span>
-            <strong style={{ color: C.raspberry, fontSize: 17 }}>vuelto</strong>
-            <span style={{ fontSize: 12, color: C.inkSoft }}>(не «volvido»!)</span>
-          </div>
-        </div>
-      </Block>
-
-      <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "13px 16px", marginBottom: 14, fontSize: 14, color: C.ink, lineHeight: 1.65 }}>
-        <strong>Hoy yo he caminado veinte minutos.</strong> — «Сегодня я ходил двадцать минут.»<br />
-        <strong>Esta semana ellos han recibido una carta.</strong> — «На этой неделе они получили письмо.»<br />
-        <strong>Hoy tú has vuelto muy tarde.</strong> — «Сегодня ты вернулся очень поздно.» <span style={{ color: C.raspberry, fontSize: 12 }}>← исключение!</span>
-      </div>
-
-      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← Назад</Btn>}
-      <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(22,121,91,.22)`, marginBottom: 16 }}>
-        Тренировать причастия →
-      </button>
-      <Footer />
-    </div></div>
-  );
-}
-
-// ---------- Экран 2: Дрилл причастий (вариант Б — кнопки суффиксов) ----------
-function ParticipioDrill({ onNext, onScore, onBack, tabBar }) {
-  const [deck] = useState(() => shuffle([...NIVEL2_DRILL]));
-  const [idx, setIdx] = useState(0);
-  const [feedback, setFeedback] = useState(null);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
-
-  const current = deck[idx];
-  // основа = инфинитив без последних 2 букв (-ar / -er / -ir)
-  const stem = current.inf.slice(0, -2);
-
-  function pick(suf) {
-    if (feedback) return;
-    const ok = suf === current.suf;
-    setFeedback({ ok, chosen: suf });
-    if (ok) {
-      setScore(s => s + 1);
-      if (onScore) onScore(1);
-    }
-  }
-
-  function next() {
-    setFeedback(null);
-    if (idx + 1 >= deck.length) setDone(true);
-    else setIdx(i => i + 1);
-  }
-
-  if (done) {
-    return (
-      <div style={wrap}><div style={maxw}>
-        <Header subtitle="📚 Дрилл причастий · итог" />
-        {tabBar}
-        <Block stripe={score >= 13 ? C.emerald : score >= 10 ? C.gold : C.raspberry}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: score >= 13 ? C.emeraldDeep : score >= 10 ? C.goldDeep : C.raspberryDeep, marginBottom: 8 }}>
-              {score === 14 ? "🏆 Идеально!" : score >= 12 ? "👍 Отлично!" : score >= 10 ? "✓ Хорошо!" : "❌ Потренируйся ещё"}
-            </div>
-            <div style={{ fontSize: 42, fontWeight: 800, color: C.raspberry, margin: "8px 0" }}>
-              {score}<span style={{ fontSize: 20, color: C.inkSoft }}>/14</span>
-            </div>
-            <div style={{ fontSize: 14, color: C.inkSoft }}>причастий верно</div>
-          </div>
-        </Block>
-        {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← К правилам</Btn>}
-        <button onClick={onNext} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", marginBottom: 16 }}>
-          Полное спряжение →
-        </button>
-        <Footer />
-      </div></div>
-    );
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📚 Дрилл причастий" />
-      {tabBar}
-
-      {/* Прогресс */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.inkSoft, marginBottom: 5 }}>
-          <span>Глагол {idx + 1} из {deck.length}</span>
-          <span style={{ color: C.emeraldDeep, fontWeight: 700 }}>Верно: {score}</span>
-        </div>
-        <div style={{ display: "flex", gap: 3 }}>
-          {deck.map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 6, borderRadius: 3, background: i < idx ? C.emerald : i === idx ? C.gold : C.line }} />
-          ))}
-        </div>
-      </div>
-
-      <Block stripe={C.emerald}>
-        <div style={{ textAlign: "center", padding: "8px 0" }}>
-          <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 6, fontWeight: 600 }}>Инфинитив:</div>
-          <div style={{ fontSize: 38, fontWeight: 800, color: C.ink, fontFamily: SERIF, marginBottom: 16 }}>{current.inf}</div>
-
-          {!feedback ? (
-            <>
-              <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 12 }}>Выбери суффикс причастия:</div>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-                {["ado", "ido"].map(suf => (
-                  <button key={suf} onClick={() => pick(suf)} style={{ flex: 1, maxWidth: 160, background: C.gold, color: "#fff", border: "none", borderRadius: 14, padding: "18px 8px", fontSize: 24, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 3px 12px rgba(201,162,75,.3)` }}>
-                    -{suf}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div>
-              <div style={{ background: feedback.ok ? C.emerald : C.raspberry, color: "#fff", borderRadius: 14, padding: "12px 18px", marginBottom: 12, fontSize: 16, fontWeight: 800 }}>
-                {feedback.ok ? "✓ Верно!" : `✗ Нет — правильно: -${current.suf}`}
-              </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginBottom: 6 }}>
-                {stem}<strong style={{ color: feedback.ok ? C.emeraldDeep : C.raspberryDeep }}>
-                  {current.suf}
-                </strong>
-              </div>
-              <div style={{ fontSize: 15, color: C.inkSoft, marginBottom: 16 }}>
-                = <strong>{current.part}</strong>
-              </div>
-              <button onClick={next} style={{ background: C.gold, color: "#fff", border: "none", borderRadius: 12, padding: "12px 28px", fontSize: 16, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-                {idx + 1 < deck.length ? "Следующий →" : "Итог →"}
-              </button>
-            </div>
-          )}
-        </div>
-      </Block>
-      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 10, color: C.goldDeep }}>← К правилам</Btn>}
-      <Footer />
-    </div></div>
-  );
-}
-
-// ---------- Экран 3: Полное спряжение Perfecto ----------
-function PerfectoConjugation({ startVerb, onScore, onBack, tabBar }) {
-  const [verbIdx, setVerbIdx] = useState(() => {
-    if (startVerb) { const i = NIVEL2_ALL.findIndex(v => v.inf === startVerb); return i >= 0 ? i : 0; }
-    return 0;
-  });
-  const [vals, setVals] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [awarded, setAwarded] = useState(() => new Set());
-
-  const verb = NIVEL2_ALL[verbIdx];
-  const correct = conjPerfecto(verb);
-  const allOk = PRON2.every(p => normES(vals[p.key]) === correct[p.key]);
-
-  function pick(i) { setVerbIdx(i); setVals({}); setChecked(false); }
-
-  function check() {
-    setChecked(true);
-    if (allOk && !awarded.has(verb.inf)) {
-      setAwarded(s => new Set([...s, verb.inf]));
-      if (onScore) onScore(1);
-    }
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📚 Pretérito Perfecto Compuesto · Спряжение" />
-      {tabBar}
-
-      {/* Выбор глагола */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16, justifyContent: "center" }}>
-        {NIVEL2_ALL.map((v, i) => (
-          <button key={v.inf} onClick={() => pick(i)} style={{ border: `1.5px solid ${i === verbIdx ? C.emerald : v.irregular ? C.raspberry : C.line}`, background: i === verbIdx ? C.emerald : v.irregular ? "rgba(168,27,62,0.06)" : C.card, color: i === verbIdx ? "#fff" : v.irregular ? C.raspberryDeep : C.inkSoft, borderRadius: 20, padding: "6px 12px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>
-            {v.irregular && i !== verbIdx ? "⚠ " : ""}{v.inf}{awarded.has(v.inf) ? " ✓" : ""}
-          </button>
-        ))}
-      </div>
-
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 800, fontSize: 19, color: C.ink, marginBottom: 2 }}>
-          {verb.inf}
-          {verb.irregular && <span style={{ fontSize: 13, color: C.raspberry, fontWeight: 600, marginLeft: 8 }}>исключение → <strong>{verb.part}</strong></span>}
-        </div>
-        <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 14 }}>
-          причастие: <strong style={{ color: C.emeraldDeep }}>{verb.part}</strong>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {PRON2.map((p, i) => {
-            const ok = checked && normES(vals[p.key]) === correct[p.key];
-            const bad = checked && normES(vals[p.key]) !== correct[p.key];
-            return (
-              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 120, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
-                <input value={vals[p.key] || ""} onChange={e => setVals(v => ({ ...v, [p.key]: e.target.value }))}
-                  placeholder={`${HABER2[i]} …`}
-                  style={{ flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF, border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`, background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none" }} />
-                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{correct[p.key]}</span>}
-              </div>
-            );
-          })}
-        </div>
-
-        {!checked && <Btn bg={C.gold} onClick={check} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
-        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
-        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 <span style={{ color: C.raspberry }}>+1 📊 в копилку</span></div>}
-      </Block>
-
-      {onBack && <Btn bg={C.goldSoft} onClick={onBack} style={{ width: "100%", marginBottom: 14, color: C.goldDeep }}>← Назад к Дриллу</Btn>}
-      <Footer />
-    </div></div>
-  );
-}
-
-
-// ============================================================
-// PerfectoTeoria — вкладка «Teoría»
-// ============================================================
-function PerfectoTeoria({ tabBar, onBack }) {
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="🌙 Pretérito Perfecto Compuesto · Teoría" />
-      {onBack && (
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
-        </div>
-      )}
-      {tabBar}
-
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, fontSize: 16, color: C.emeraldDeep, marginBottom: 10 }}>¿Qué es el Pretérito Perfecto Compuesto?</div>
-        <div style={{ fontSize: 14.5, color: C.ink, lineHeight: 1.75 }}>
-          Это время, которое <strong>соединяет прошлое с этой секундой</strong>. Действие случилось раньше, но оно ещё живёт в настоящем — потому что:
-        </div>
-        <ul style={{ fontSize: 14, color: C.ink, lineHeight: 1.9, marginTop: 10, paddingLeft: 20 }}>
-          <li>это произошло в <strong>период, который ещё не закончился</strong> — сегодня, на этой неделе, в этом месяце</li>
-          <li>или это часть твоего <strong>опыта за всю жизнь</strong> — когда-нибудь, никогда, всегда</li>
-        </ul>
-        <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 10, lineHeight: 1.6 }}>
-          В разговорной Испании это время используется каждый день — это живая речь, не учебник.
-        </div>
-      </Block>
-
-      <Block stripe={C.gold}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 10 }}>Формула: haber + participio</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 5, marginBottom: 14 }}>
-          {[["yo","he"],["tú","has"],["él / ella","ha"],["nosotros","hemos"],["vosotros","habéis"],["ellos / ellas","han"]].map(([p,h]) => (
-            <div key={p} style={{ background: "rgba(22,121,91,0.07)", border: `1px solid ${C.emerald}`, borderRadius: 8, padding: "7px 10px", display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: C.inkSoft, fontSize: 13 }}>{p}</span>
-              <strong style={{ color: C.emeraldDeep, fontSize: 15 }}>{h}</strong>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px" }}>
-            <span style={{ color: C.inkSoft, fontSize: 13.5 }}>Глаголы <strong>-AR</strong>: убрать -AR → добавить </span>
-            <strong style={{ color: C.raspberry, fontSize: 15 }}>-ado</strong>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 3 }}>caminar → caminado · llamar → llamado</div>
-          </div>
-          <div style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px" }}>
-            <span style={{ color: C.inkSoft, fontSize: 13.5 }}>Глаголы <strong>-ER / -IR</strong>: убрать окончание → добавить </span>
-            <strong style={{ color: C.raspberry, fontSize: 15 }}>-ido</strong>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 3 }}>recibir → recibido · encender → encendido</div>
-          </div>
-        </div>
-      </Block>
-
-      <Block stripe={C.raspberry}>
-        <div style={{ fontWeight: 700, fontSize: 15, color: C.ink, marginBottom: 10 }}>Примеры с маркерами</div>
-        {[
-          { es: "Hoy he comido paella.", ru: "Сегодня я ел паэлью." },
-          { es: "Esta semana ha llamado tres veces.", ru: "На этой неделе он звонил трижды." },
-          { es: "¿Alguna vez has visto esto?", ru: "Ты когда-нибудь видел такое?" },
-          { es: "Todavía no he terminado.", ru: "Я ещё не закончил." },
-          { es: "Nunca he estado en Madrid.", ru: "Я никогда не был в Мадриде." },
-        ].map(({ es, ru }, i) => (
-          <div key={i} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 12px", marginBottom: 7 }}>
-            <div style={{ fontSize: 14.5, fontWeight: 600, color: C.ink }}>{es}</div>
-            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2, fontStyle: "italic" }}>{ru}</div>
           </div>
         ))}
-      </Block>
-
-      <div style={{ background: "rgba(201,162,75,0.10)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "12px 15px", marginBottom: 16, fontSize: 13.5, color: C.inkSoft, lineHeight: 1.65 }}>
-        💡 На уровне A1–A2 работаем с маркерами как опорой. Бывают случаи без маркера — но это следующий уровень. <strong>Пока маркер = твой ориентир.</strong>
-      </div>
-
-      <Footer />
-    </div></div>
-  );
-}
-
-// ============================================================
-// PerfectoMarcadores — вкладка «Marcadores»
-// ============================================================
-function PerfectoMarcadores({ tabBar, onBack }) {
-  const [open, setOpen] = useState(null);
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="⏱ Marcadores de tiempo" />
-      {onBack && (
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
-        </div>
-      )}
-      {tabBar}
-
-      <div style={{ fontSize: 14, color: C.inkSoft, marginBottom: 14, lineHeight: 1.65 }}>
-        Маркеры — твой ориентир. Они сигнализируют: здесь нужен <strong>Pretérito Perfecto Compuesto</strong>. Учи группами — запоминается быстрее.
-      </div>
-
-      {GRAMMAR_PERFECTO.marcadores.map((g, gi) => {
-        const colors = [C.emerald, C.raspberry, C.gold];
-        const col = colors[gi];
-        const isOpen = open === gi;
-        return (
-          <Block key={gi} stripe={col}>
-            <div onClick={() => setOpen(isOpen ? null : gi)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 15.5, color: C.ink }}>{g.emoji} {g.grupo}</div>
-                <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2, fontStyle: "italic" }}>{g.hint}</div>
-              </div>
-              <span style={{ fontSize: 20, color: col, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .15s", marginLeft: 8 }}>›</span>
-            </div>
-            {isOpen && (
-              <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                {g.items.map(({ es, ru }) => (
-                  <div key={es} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 9, padding: "9px 11px" }}>
-                    <div style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{es}</div>
-                    <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{ru}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Block>
-        );
-      })}
-
-      <div style={{ background: "rgba(201,162,75,0.10)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "12px 15px", marginBottom: 16 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, color: C.goldDeep, marginBottom: 8 }}>Все маркеры одним взглядом:</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {GRAMMAR_PERFECTO.marcadores.flatMap(g => g.items).map(({ es }) => (
-            <span key={es} style={{ background: C.cream, border: `1px solid ${C.line}`, borderRadius: 20, padding: "4px 10px", fontSize: 13, color: C.ink, fontWeight: 600 }}>{es}</span>
-          ))}
-        </div>
-      </div>
-
-      <Footer />
-    </div></div>
-  );
-}
-
-// ============================================================
-// ExcepcionesFlash — вкладка «Excepciones» (список + флеш-карты)
-// ============================================================
-function ExcepcionesFlash({ tabBar, onScore, onBack }) {
-  const [mode, setMode] = useState("list");
-  const [deck, setDeck] = useState(() => shuffle([...GRAMMAR_PERFECTO.excepciones]));
-  const [idx, setIdx] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState(new Set());
-  const [done, setDone] = useState(false);
-
-  function startFlash() {
-    setDeck(shuffle([...GRAMMAR_PERFECTO.excepciones]));
-    setIdx(0); setFlipped(false); setKnown(new Set()); setDone(false); setMode("flash");
-  }
-
-  function handleKnow(isKnown) {
-    const nk = new Set(known);
-    if (isKnown) { nk.add(deck[idx].inf); if (onScore) onScore(1); }
-    setKnown(nk); setFlipped(false);
-    if (idx + 1 >= deck.length) setDone(true);
-    else setIdx(i => i + 1);
-  }
-
-  if (mode === "flash" && done) {
-    return (
-      <div style={wrap}><div style={maxw}>
-        <Header subtitle="⚡ Excepciones · Итог" />
-        {tabBar}
-        <Block stripe={known.size >= 8 ? C.emerald : known.size >= 5 ? C.gold : C.raspberry}>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: known.size >= 8 ? C.emeraldDeep : known.size >= 5 ? C.goldDeep : C.raspberryDeep, marginBottom: 6 }}>
-              {known.size === 10 ? "🏆 Идеально!" : known.size >= 8 ? "👍 Отлично!" : known.size >= 5 ? "✓ Хорошо!" : "Ещё потренируйся"}
-            </div>
-            <div style={{ fontSize: 42, fontWeight: 800, color: C.raspberry, margin: "8px 0" }}>{known.size}<span style={{ fontSize: 20, color: C.inkSoft }}>/10</span></div>
-            <div style={{ fontSize: 14, color: C.inkSoft }}>знаю причастий</div>
-          </div>
-        </Block>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 14 }}>
-          {GRAMMAR_PERFECTO.excepciones.map(({ inf, part, ru }) => (
-            <div key={inf} style={{ background: known.has(inf) ? "rgba(22,121,91,0.07)" : "rgba(168,27,62,0.05)", border: `1.5px solid ${known.has(inf) ? C.emerald : C.raspberry}`, borderRadius: 10, padding: "10px 12px" }}>
-              <div style={{ fontSize: 13, color: C.inkSoft }}>{inf}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: known.has(inf) ? C.emeraldDeep : C.raspberryDeep }}>{part}</div>
-              <div style={{ fontSize: 11, color: C.inkSoft }}>{ru}</div>
-            </div>
-          ))}
-        </div>
-        <button onClick={startFlash} style={{ width: "100%", background: C.gold, color: "#fff", border: "none", borderRadius: 14, padding: "14px", fontSize: 16, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginBottom: 10 }}>Повторить ещё раз</button>
-        <button onClick={() => setMode("list")} style={{ width: "100%", background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "10px", fontSize: 13, cursor: "pointer", fontFamily: SERIF, marginBottom: 14 }}>← К списку</button>
-        <Footer />
-      </div></div>
-    );
-  }
-
-  if (mode === "flash") {
-    const card = deck[idx];
-    return (
-      <div style={wrap}><div style={maxw}>
-        <Header subtitle="⚡ Excepciones · Флеш-карты" />
-        {tabBar}
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.inkSoft, marginBottom: 5 }}>
-            <span>Карточка {idx + 1} из {deck.length}</span>
-            <span style={{ color: C.emeraldDeep, fontWeight: 700 }}>Знаю: {known.size}</span>
-          </div>
-          <div style={{ display: "flex", gap: 3 }}>
-            {deck.map((_, i) => <div key={i} style={{ flex: 1, height: 6, borderRadius: 3, background: i < idx ? C.emerald : i === idx ? C.gold : C.line }} />)}
-          </div>
-        </div>
-        <Block stripe={C.gold}>
-          <div style={{ textAlign: "center", padding: "16px 0" }}>
-            <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 8, fontWeight: 600 }}>Инфинитив → причастие?</div>
-            <div style={{ fontSize: 42, fontWeight: 800, color: C.ink, fontFamily: SERIF, marginBottom: 20 }}>{card.inf}</div>
-            {!flipped ? (
-              <button onClick={() => setFlipped(true)} style={{ background: C.emerald, color: "#fff", border: "none", borderRadius: 14, padding: "14px 32px", fontSize: 17, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-                Показать причастие
-              </button>
-            ) : (
-              <div>
-                <div style={{ fontSize: 38, fontWeight: 800, color: C.raspberryDeep, marginBottom: 6 }}>{card.part}</div>
-                <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 20 }}>{card.ru}</div>
-                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-                  <button onClick={() => handleKnow(false)} style={{ flex: 1, maxWidth: 140, background: "rgba(168,27,62,0.09)", border: `2px solid ${C.raspberry}`, color: C.raspberryDeep, borderRadius: 12, padding: "12px 8px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>✗ Не знал</button>
-                  <button onClick={() => handleKnow(true)} style={{ flex: 1, maxWidth: 140, background: C.emerald, border: "none", color: "#fff", borderRadius: 12, padding: "12px 8px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>✓ Знаю</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </Block>
-        <button onClick={() => setMode("list")} style={{ width: "100%", background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "10px", fontSize: 13, cursor: "pointer", fontFamily: SERIF, marginBottom: 14 }}>← К списку всех</button>
-        <Footer />
-      </div></div>
-    );
-  }
-
-  // mode === "list"
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="⚡ Excepciones — топ 10" />
-      {onBack && (
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>← Назад</button>
-        </div>
-      )}
-      {tabBar}
-      <div style={{ fontSize: 14, color: C.inkSoft, marginBottom: 14, lineHeight: 1.65 }}>
-        Эти причастия не подчиняются правилу. Их нужно <strong>запомнить</strong> — не вычислить. Изучи список, потом тренируй с флеш-картами.
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 16 }}>
-        {GRAMMAR_PERFECTO.excepciones.map(({ inf, part, ru }) => (
-          <div key={inf} style={{ background: "rgba(168,27,62,0.05)", border: `1.5px solid ${C.raspberry}`, borderRadius: 10, padding: "11px 13px" }}>
-            <div style={{ fontSize: 13, color: C.inkSoft }}>{inf}</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberryDeep, margin: "2px 0" }}>{part}</div>
-            <div style={{ fontSize: 11, color: C.inkSoft }}>{ru}</div>
-          </div>
-        ))}
-      </div>
-      <button onClick={startFlash} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "16px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
-        Тренировать с флеш-картами →
-      </button>
-      <Footer />
-    </div></div>
-  );
-}
-
-// ---------- PerfectoTrainer — вкладки Teoría / Marcadores / Excepciones / Ejercicios ----------
-function PerfectoTrainer({ startVerb, onScore, onBack }) {
-  const TABS = [
-    { id: "teoria",      label: "Teoría" },
-    { id: "marcadores",  label: "Marcadores" },
-    { id: "excepciones", label: "Excepciones" },
-    { id: "ejercicios",  label: "Ejercicios" },
-  ];
-  const [tab, setTab] = useState(startVerb ? "ejercicios" : "teoria");
-  const [exScreen, setExScreen] = useState(startVerb ? "conj" : "rules");
-
-  const tabBar = (
-    <div style={{ display: "flex", gap: 3, marginBottom: 16, overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-      {TABS.map(t => (
-        <button key={t.id} onClick={() => setTab(t.id)} style={{
-          flex: 1, minWidth: 68, padding: "9px 3px", border: "none",
-          borderRadius: 10, fontSize: 12, fontWeight: tab === t.id ? 800 : 600,
-          background: tab === t.id ? C.raspberry : C.creamDeep,
-          color: tab === t.id ? "#fff" : C.inkSoft,
-          cursor: "pointer", fontFamily: SERIF,
-          borderBottom: tab === t.id ? `3px solid ${C.raspberryDeep}` : "3px solid transparent",
-          transition: "all .15s",
-        }}>
-          {t.label}
-        </button>
-      ))}
-    </div>
-  );
-
-  if (tab === "teoria")      return <PerfectoTeoria tabBar={tabBar} onBack={onBack} />;
-  if (tab === "marcadores")  return <PerfectoMarcadores tabBar={tabBar} onBack={onBack} />;
-  if (tab === "excepciones") return <ExcepcionesFlash tabBar={tabBar} onScore={onScore} onBack={onBack} />;
-
-  // ejercicios — существующий флоу rules → drill → conj
-  if (exScreen === "rules") return <PerfectoRules tabBar={tabBar} onNext={() => setExScreen("drill")} onBack={onBack} />;
-  if (exScreen === "drill") return <ParticipioDrill tabBar={tabBar} onNext={() => setExScreen("conj")} onScore={onScore} onBack={() => setExScreen("rules")} />;
-  return <PerfectoConjugation tabBar={tabBar} startVerb={startVerb} onScore={onScore} onBack={() => setExScreen("drill")} />;
-}
-
-// ============================================================
-// MI DIARIO — текст-дневник с пропусками + тренажёр спряжения
-// Умная проверка: принимаем ЛЮБОЙ подходящий по смыслу глагол
-// в ПРАВИЛЬНОМ лице. Отличаем ошибку спряжения от ошибки смысла.
-// 15 игровых глаголов -AR, все регулярные.
-// ============================================================
-const VERBS15 = ["desayunar", "tomar", "caminar", "mirar", "buscar", "escuchar", "cantar", "llamar", "hablar", "preparar", "preguntar", "comprar", "trabajar", "estudiar", "llevar"];
-
-const PRON = [
-  { key: "yo",       label: "yo",                       end: "o" },
-  { key: "tú",       label: "tú",                       end: "as" },
-  { key: "él",       label: "él / ella / usted",        end: "a" },
-  { key: "nosotros", label: "nosotros / nosotras",      end: "amos" },
-  { key: "vosotros", label: "vosotros / vosotras",      end: "áis" },
-  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "an" },
-];
-function conjugate(inf) {
-  const stem = inf.slice(0, -2);            // -AR регулярные
-  const m = {};
-  PRON.forEach((p) => { m[p.key] = stem + p.end; });
-  return m;
-}
-function normES(s) { return (s || "").trim().toLowerCase().replace(/\s+/g, " "); }
-
-const DIARIO = {
-  title: "Mi Diario · Una mañana en la Ciudad de los Sentidos",
-  segments: [
-    { t: "Por la mañana, yo " }, { blank: 0 },
-    { t: " en la cocina con mucho gusto. Mi mamá " }, { blank: 1 },
-    { t: " despacio y prepara la mesa. Si tú vienes a visitarnos, tú " }, { blank: 2 },
-    { t: " la ciudad por la ventana. Después, nosotros " }, { blank: 3 },
-    { t: " ingredientes frescos en el mercado de caramelo.\n\nMi papá " }, { blank: 4 },
-    { t: " sobre el plan del día, y yo " }, { blank: 5 },
-    { t: " un café dorado. Tú " }, { blank: 6 },
-    { t: " ideas nuevas para hoy, mientras nosotros " }, { blank: 7 },
-    { t: " juntos en la cocina, como una familia feliz.\n\nDe repente, los amigos llegan muy alegres. Ellos " }, { blank: 8 },
-    { t: " una canción de trabajo. Vosotros " }, { blank: 9 },
-    { t: " con atención y luego vosotros " }, { blank: 10 },
-    { t: " también. Al final, todos ellos " }, { blank: 11 },
-    { t: " y ríen todo el tiempo." },
-  ],
-  // person — требуемое лицо; accept — подходящие по смыслу глаголы (любой принимается)
-  blanks: [
-    { person: "yo",       accept: ["desayunar", "preparar", "trabajar", "cantar"] },
-    { person: "él",       accept: ["caminar", "trabajar", "cantar", "hablar"] },
-    { person: "tú",       accept: ["mirar", "escuchar"] },
-    { person: "nosotros", accept: ["comprar", "buscar", "tomar", "llevar"] },
-    { person: "él",       accept: ["hablar", "preguntar"] },
-    { person: "yo",       accept: ["tomar", "preparar", "comprar"] },
-    { person: "tú",       accept: ["buscar", "preparar", "estudiar"] },
-    { person: "nosotros", accept: ["trabajar", "cantar", "desayunar", "preparar"] },
-    { person: "ellos",    accept: ["cantar", "escuchar"] },
-    { person: "vosotros", accept: ["escuchar", "mirar", "estudiar", "trabajar", "buscar"] },
-    { person: "vosotros", accept: ["cantar", "escuchar", "trabajar"] },
-    { person: "ellos",    accept: ["hablar", "cantar", "trabajar"] },
-  ],
-};
-
-// Анализ одного ввода → статус
-// ok    — подходящий глагол в правильном лице
-// conj  — подходящий глагол, НО не то лицо → на тренажёр (verb)
-// sense — реальный глагол из 15, но не подходит сюда по смыслу
-// bad   — не распознано
-// empty — пусто
-function analyzeBlank(input, b) {
-  const v = normES(input);
-  if (!v) return { st: "empty" };
-  const okForms = b.accept.map((k) => conjugate(k)[b.person]);
-  if (okForms.includes(v)) return { st: "ok" };
-  // верный глагол, неверное лицо?
-  for (const k of b.accept) {
-    const f = conjugate(k);
-    if (Object.values(f).includes(v)) return { st: "conj", verb: k };
-  }
-  // глагол из 15, не подходящий по смыслу?
-  for (const k of VERBS15) {
-    const f = conjugate(k);
-    if (Object.values(f).includes(v)) return { st: "sense", verb: k };
-  }
-  return { st: "bad" };
-}
-
-// ---- Подсказка: спряжение -AR (сворачивается) ----
-function ConjHint() {
-  const [open, setOpen] = useState(true);
-  const ex = conjugate("hablar");
-  return (
-    <Block stripe={C.gold}>
-      <div onClick={() => setOpen((o) => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Presente · verbos -AR</span>
-        <span style={{ color: C.goldDeep, fontSize: 13 }}>{open ? "ocultar ▲" : "mostrar ▼"}</span>
-      </div>
-      {open && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ ...pHint, marginBottom: 9 }}>Ejemplo: <strong>hablar</strong> (говорить). Tiempo presente · окончания -o, -as, -a, -amos, -áis, -an.</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {[[0,3],[1,4],[2,5]].flatMap(([a,b]) => [
-              <div key={PRON[a].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-                <span style={{ color: C.inkSoft }}>{PRON[a].label.split(" / ")[0]}</span>{" "}
-                <strong style={{ color: C.raspberry }}>{ex[PRON[a].key]}</strong>
-              </div>,
-              <div key={PRON[b].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-                <span style={{ color: C.inkSoft }}>{PRON[b].label.split(" / ")[0]}</span>{" "}
-                <strong style={{ color: C.raspberry }}>{ex[PRON[b].key]}</strong>
-              </div>
-            ])}
-          </div>
-        </div>
-      )}
-    </Block>
-  );
-}
-
-// ---- Тренажёр спряжения конкретного глагола ----
-function ConjTrainer({ startVerb, errorVerbs = [], onBack, onScore }) {
-  const [verb, setVerb] = useState(startVerb || errorVerbs[0] || VERBS15[0]);
-  const [vals, setVals] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [awardedVerbs, setAwardedVerbs] = useState(() => new Set());
-  const correct = conjugate(verb);
-  const allOk = PRON.every((p) => normES(vals[p.key]) === correct[p.key]);
-
-  function pick(k) { setVerb(k); setVals({}); setChecked(false); }
-  function comprobar() {
-    setChecked(true);
-    // +1 в копилку за идеально заполненную таблицу (один раз на глагол за визит)
-    if (allOk && !awardedVerbs.has(verb)) {
-      setAwardedVerbs(s => new Set([...s, verb]));
-      if (onScore) onScore(1);
-    }
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📊 Entrenador de conjugación" />
-      <div style={{ ...pHint, textAlign: "center", marginBottom: 12 }}>Заполни все 6 форм глагола. Так ты увидишь, как он спрягается, и вернёшься к тексту.</div>
-
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, justifyContent: "center" }}>
-        {VERBS15.map((k) => {
-          const isErr = errorVerbs.includes(k);
-          const active = k === verb;
-          return (
-            <button key={k} onClick={() => pick(k)} style={{
-              border: `1.5px solid ${active ? C.raspberry : isErr ? C.raspberry : C.line}`,
-              background: active ? C.raspberry : isErr ? "#FBEAEE" : C.card,
-              color: active ? "#fff" : isErr ? C.raspberryDeep : C.inkSoft,
-              borderRadius: 20, padding: "6px 13px", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF,
-            }}>{isErr && !active ? "⚠ " : ""}{k}</button>
-          );
-        })}
-      </div>
-
-      <Block stripe={C.raspberry}>
-        <div style={{ fontWeight: 700, fontSize: 19, color: C.ink }}>{verb} <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 14 }}>· presente</span></div>
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          {PRON.map((p) => {
-            const ok = checked && normES(vals[p.key]) === correct[p.key];
-            const bad = checked && normES(vals[p.key]) !== correct[p.key];
-            return (
-              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 150, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
-                <input value={vals[p.key] || ""} onChange={(e) => setVals((v) => ({ ...v, [p.key]: e.target.value }))}
-                  placeholder="…" style={{
-                    flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF,
-                    border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`,
-                    background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none",
-                  }} />
-                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{correct[p.key]}</span>}
-              </div>
-            );
-          })}
-        </div>
-        {!checked && <Btn bg={C.gold} onClick={comprobar} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
-        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
-        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo. <span style={{ color: C.raspberry }}>+1 📔 в копилку</span></div>}
-      </Block>
-
-      <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Volver al diario</Btn>
-      <Footer />
-    </div></div>
-  );
-}
-
-// ============================================================
-// PRESENTE · -ER / -IR — тренажёр спряжения (доп. грамматика Гл.2)
-// Только РЕГУЛЯРНЫЕ глаголы. -ER = 2-я группа, -IR = 3-я группа.
-// ============================================================
-const VERBS_ER = [
-  { inf: "comer",      ru: "есть" },
-  { inf: "beber",      ru: "пить" },
-  { inf: "aprender",   ru: "учить(ся)" },
-  { inf: "comprender", ru: "понимать" },
-  { inf: "vender",     ru: "продавать" },
-  { inf: "correr",     ru: "бегать" },
-  { inf: "responder",  ru: "отвечать" },
-  { inf: "leer",       ru: "читать" },
-];
-const VERBS_IR = [
-  { inf: "vivir",     ru: "жить" },
-  { inf: "escribir",  ru: "писать" },
-  { inf: "recibir",   ru: "получать" },
-  { inf: "abrir",     ru: "открывать" },
-  { inf: "subir",     ru: "подниматься" },
-  { inf: "decidir",   ru: "решать" },
-  { inf: "partir",    ru: "уезжать" },
-  { inf: "describir", ru: "описывать" },
-];
-const PRON_ER = [
-  { key: "yo",       label: "yo",                       end: "o" },
-  { key: "tú",       label: "tú",                       end: "es" },
-  { key: "él",       label: "él / ella / usted",        end: "e" },
-  { key: "nosotros", label: "nosotros / nosotras",      end: "emos" },
-  { key: "vosotros", label: "vosotros / vosotras",      end: "éis" },
-  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "en" },
-];
-const PRON_IR = [
-  { key: "yo",       label: "yo",                       end: "o" },
-  { key: "tú",       label: "tú",                       end: "es" },
-  { key: "él",       label: "él / ella / usted",        end: "e" },
-  { key: "nosotros", label: "nosotros / nosotras",      end: "imos" },
-  { key: "vosotros", label: "vosotros / vosotras",      end: "ís" },
-  { key: "ellos",    label: "ellos / ellas / ustedes",  end: "en" },
-];
-function conjugateGroup(inf, pron) {
-  const stem = inf.slice(0, -2);
-  const m = {};
-  pron.forEach((p) => { m[p.key] = stem + p.end; });
-  return m;
-}
-const VERBS_ERIR_ALL = [...VERBS_ER.map(v => v.inf), ...VERBS_IR.map(v => v.inf)];
-
-// ---- Тренажёр Presente · -ER / -IR ----
-function PresenteErIrTrainer({ startVerb, onBack, onScore }) {
-  const initGroup = startVerb && VERBS_IR.some(v => v.inf === startVerb) ? "ir" : "er";
-  const [group, setGroup] = useState(initGroup);
-  const list = group === "er" ? VERBS_ER : VERBS_IR;
-  const pron = group === "er" ? PRON_ER : PRON_IR;
-  const [verb, setVerb] = useState(startVerb && VERBS_ERIR_ALL.includes(startVerb) ? startVerb : list[0].inf);
-  const [vals, setVals] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [awarded, setAwarded] = useState(() => new Set());
-
-  const correct = conjugateGroup(verb, pron);
-  const allOk = pron.every((p) => normES(vals[p.key]) === correct[p.key]);
-  const curRu = (list.find((v) => v.inf === verb) || {}).ru || "";
-  const exInf = group === "er" ? "comer" : "vivir";
-  const exRu = group === "er" ? "есть" : "жить";
-  const ex = conjugateGroup(exInf, pron);
-
-  function switchGroup(g) {
-    if (g === group) return;
-    const l = g === "er" ? VERBS_ER : VERBS_IR;
-    setGroup(g); setVerb(l[0].inf); setVals({}); setChecked(false);
-  }
-  function pick(inf) { setVerb(inf); setVals({}); setChecked(false); }
-  function comprobar() {
-    setChecked(true);
-    if (allOk && !awarded.has(group + ":" + verb)) {
-      setAwarded((s) => new Set([...s, group + ":" + verb]));
-      if (onScore) onScore(1);
-    }
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📊 Presente · verbos -ER / -IR" />
-
-      {/* Переключатель группы */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-        {[["er", "2-я группа · -ER"], ["ir", "3-я группа · -IR"]].map(([g, lbl]) => {
-          const on = group === g;
-          return (
-            <button key={g} onClick={() => switchGroup(g)} style={{
-              flex: 1, padding: "11px 6px", border: `2px solid ${on ? C.emerald : C.line}`,
-              borderRadius: 12, background: on ? C.emerald : C.card, color: on ? "#fff" : C.inkSoft,
-              fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: SERIF,
-            }}>{lbl}</button>
-          );
-        })}
-      </div>
-
-      {/* ОБЪЯСНЕНИЕ */}
-      <Block stripe={C.gold}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 8 }}>
-          Как спрягается <strong style={{ color: C.emeraldDeep }}>{exInf}</strong> <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 13 }}>· {exRu}</span>
-        </div>
-        <div style={{ ...pHint, marginBottom: 10 }}>
-          Убери <strong>-{group === "er" ? "ER" : "IR"}</strong>, добавь окончание:{" "}
-          <strong style={{ color: C.raspberry }}>
-            {group === "er" ? "-o, -es, -e, -emos, -éis, -en" : "-o, -es, -e, -imos, -ís, -en"}
-          </strong>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-          {pron.map((p) => (
-            <div key={p.key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-              <span style={{ color: C.inkSoft }}>{p.label.split(" / ")[0]}</span>{" "}
-              <strong style={{ color: C.raspberry }}>{ex[p.key]}</strong>
-            </div>
-          ))}
-        </div>
-        <div style={{ ...pHint, marginTop: 10, fontSize: 12.5 }}>
-          Разница -ER и -IR только в <strong>nosotros</strong> (-emos / -imos) и <strong>vosotros</strong> (-éis / -ís). Остальные формы одинаковые.
-        </div>
-      </Block>
-
-      {/* Плашка про исключения */}
-      <div style={{ background: "rgba(168,27,62,0.07)", border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "11px 14px", marginBottom: 14 }}>
-        <div style={{ fontSize: 12, fontWeight: 800, color: C.raspberryDeep, marginBottom: 4 }}>⚠️ Есть неправильные — но не здесь</div>
-        <div style={{ fontSize: 13, color: C.ink, lineHeight: 1.55 }}>
-          Некоторые -ER/-IR меняют основу: <strong>encender → enc<span style={{ color: C.raspberry }}>ie</span>nde</strong>, <strong>volver → v<span style={{ color: C.raspberry }}>ue</span>lve</strong>. Здесь тренируем <strong>только регулярные</strong> — сначала закрепим их.
-        </div>
-      </div>
-
-      {/* Выбор глагола */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, justifyContent: "center" }}>
-        {list.map((v) => {
-          const active = v.inf === verb;
-          return (
-            <button key={v.inf} onClick={() => pick(v.inf)} style={{
-              border: `1.5px solid ${active ? C.raspberry : C.line}`,
-              background: active ? C.raspberry : C.card,
-              color: active ? "#fff" : C.inkSoft,
-              borderRadius: 20, padding: "6px 13px", fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF,
-            }}>{v.inf}</button>
-          );
-        })}
-      </div>
-
-      {/* Таблица форм */}
-      <Block stripe={C.raspberry}>
-        <div style={{ fontWeight: 700, fontSize: 19, color: C.ink }}>{verb} <span style={{ color: C.inkSoft, fontWeight: 400, fontSize: 14 }}>· {curRu} · presente</span></div>
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-          {pron.map((p) => {
-            const ok = checked && normES(vals[p.key]) === correct[p.key];
-            const bad = checked && normES(vals[p.key]) !== correct[p.key];
-            return (
-              <div key={p.key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 150, fontSize: 13, color: C.inkSoft, flexShrink: 0 }}>{p.label}</span>
-                <input value={vals[p.key] || ""} onChange={(e) => setVals((v) => ({ ...v, [p.key]: e.target.value }))}
-                  placeholder="…" style={{
-                    flex: 1, minWidth: 0, padding: "9px 11px", borderRadius: 8, fontSize: 15, fontFamily: SERIF,
-                    border: `2px solid ${ok ? C.emerald : bad ? C.raspberry : C.line}`,
-                    background: ok ? "#EAF5F0" : bad ? "#FBEAEE" : "#fff", color: C.ink, outline: "none",
-                  }} />
-                {checked && bad && <span style={{ color: C.emeraldDeep, fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{correct[p.key]}</span>}
-              </div>
-            );
-          })}
-        </div>
-        {!checked && <Btn bg={C.gold} onClick={comprobar} style={{ marginTop: 14, width: "100%" }}>Comprobar</Btn>}
-        {checked && !allOk && <Btn bg={C.raspberry} onClick={() => setChecked(false)} style={{ marginTop: 14, width: "100%" }}>Intentar de nuevo</Btn>}
-        {checked && allOk && <div style={{ marginTop: 14, textAlign: "center", color: C.emeraldDeep, fontWeight: 700 }}>¡Perfecto! 🎉 Ya conoces este verbo. <span style={{ color: C.raspberry }}>+1 📔 в копилку</span></div>}
-      </Block>
-
-      <Btn bg={C.emerald} onClick={onBack} style={{ width: "100%" }}>← Назад</Btn>
-      <Footer />
-    </div></div>
-  );
-}
-
-// ---- Основной режим: Mi Diario ----
-function DiarioMode({ onHome, onScore, session }) {
-  const N = DIARIO.blanks.length;
-  const [vals, setVals] = useState({});
-  const [res, setRes] = useState({});          // i -> {st, verb?}
-  const [everFailed, setEverFailed] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [trainer, setTrainer] = useState(null);
-  const [awardedPts, setAwardedPts] = useState(null); // очки за этот дневник (начисляются один раз)
-
-  const allOk = checked && DIARIO.blanks.every((_, i) => res[i] && res[i].st === "ok");
-  const filledAll = DIARIO.blanks.every((_, i) => normES(vals[i]) !== "");
-  // на тренажёр идут только ошибки спряжения (conj)
-  const errorVerbs = [...new Set(Object.values(res).filter((r) => r.st === "conj").map((r) => r.verb))];
-  const hasConj = Object.values(res).some((r) => r.st === "conj");
-  const hasSense = Object.values(res).some((r) => r.st === "sense");
-  const hasBad = Object.values(res).some((r) => r.st === "bad");
-
-  function check() {
-    const r = {}; const ef = { ...everFailed };
-    DIARIO.blanks.forEach((b, i) => {
-      const a = analyzeBlank(vals[i], b);
-      r[i] = a;
-      if (a.st !== "ok") ef[i] = true;
-    });
-    setRes(r); setEverFailed(ef); setChecked(true);
-    // Начисление очков в копилку — один раз за заполненный дневник
-    const allNowOk = DIARIO.blanks.every((_, i) => r[i] && r[i].st === "ok");
-    if (allNowOk && awardedPts === null) {
-      const corrected = DIARIO.blanks.filter((_, i) => ef[i]).length;
-      const pts = corrected === 0 ? 5 : corrected <= 2 ? 3 : 1;
-      setAwardedPts(pts);
-      if (onScore) onScore(pts);
-    }
-  }
-
-  if (trainer) {
-    return <ConjTrainer startVerb={trainer.startVerb} errorVerbs={errorVerbs} onScore={onScore} onBack={() => { setTrainer(null); setChecked(false); }} />;
-  }
-
-  let scoreBlock = null;
-  if (allOk) {
-    const corrected = DIARIO.blanks.filter((_, i) => everFailed[i]).length;
-    const first = N - corrected;
-    const score10 = Math.round(((first + 0.5 * corrected) / N) * 10);
-    scoreBlock = (
-      <Block stripe={C.emerald}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
-          <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
-          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено: <strong>{corrected}</strong></div>
-          {awardedPts !== null && (
-            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "8px 16px", display: "inline-block" }}>
-              <span style={{ fontSize: 20, fontWeight: 800, color: C.raspberry }}>+{awardedPts}</span>
-              <span style={{ fontSize: 13, color: C.goldDeep }}> 📔 в копилку!</span>
-            </div>
-          )}
-        </div>
-      </Block>
-    );
-  }
-
-  // цвета по статусу
-  function blankStyle(st) {
-    if (st === "ok") return { bd: C.emerald, bg: "#EAF5F0", col: C.emeraldDeep };
-    if (st === "conj") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };       // спряжение → красный
-    if (st === "sense") return { bd: "#D98A2B", bg: "#FCF1E0", col: "#A85F12" };              // смысл → оранжевый
-    if (st === "bad") return { bd: "#3B7CB8", bg: "#E8F1F9", col: "#2C5F8A" };
-    return { bd: C.gold, bg: "#fff", col: C.ink };
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📔 Mi Diario · escribe los verbos" />
-      <ScoreBadge session={session} />
-
-      <ConjHint />
-
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO.title}</div>
-        <div style={pHint}>Это твой день в Ciudad. Впиши каждый глагол в правильном лице. Текст в настоящем времени (<strong>presente</strong>). Подходящих глаголов может быть несколько — выбирай любой по смыслу, главное — верное лицо. Подсказка со спряжением — сверху.</div>
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
-          <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 5, fontWeight: 600 }}>Verbos disponibles · выбирай из этих 15:</div>
-          <div style={{ fontSize: 13, color: C.raspberry, lineHeight: 1.7, fontWeight: 600 }}>{VERBS15.join(" · ")}</div>
-        </div>
-      </Block>
-
-      <Block stripe={C.gold}>
-        <div style={{ fontSize: 17, lineHeight: 2.1, color: C.ink }}>
-          {DIARIO.segments.map((seg, idx) => {
-            if (seg.t !== undefined) {
-              return seg.t.split("\n\n").map((para, pi, arr) => (
-                <span key={idx + "_" + pi}>{para}{pi < arr.length - 1 ? <span style={{ display: "block", height: 10 }} /> : null}</span>
-              ));
-            }
-            const i = seg.blank;
-            const st = res[i] ? res[i].st : undefined;
-            const locked = st === "ok";
-            const s = blankStyle(st);
-            return (
-              <input key={"b" + i} value={vals[i] || ""} disabled={locked}
-                onChange={(e) => setVals((v) => ({ ...v, [i]: e.target.value }))}
-                placeholder="…"
-                style={{
-                  width: 120, margin: "0 2px", padding: "3px 8px", fontSize: 16, fontFamily: SERIF, textAlign: "center",
-                  borderRadius: 7, outline: "none", verticalAlign: "middle",
-                  border: `2px solid ${s.bd}`, background: s.bg, color: s.col, fontWeight: st && st !== "empty" ? 700 : 400,
-                }} />
-            );
-          })}
-        </div>
-      </Block>
-
-      {/* статус ошибок — без показа правильного ответа */}
-      {checked && !allOk && (
-        <Block stripe={C.raspberry}>
-          {hasConj && <div style={{ marginBottom: hasSense || hasBad ? 8 : 0 }}>
-            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Ошибка спряжения</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Глагол подходит, но лицо неверное. Иди в тренажёр внизу, отработай — и вернись исправить.</div>
-          </div>}
-          {hasSense && <div style={{ marginBottom: hasBad ? 8 : 0 }}>
-            <div style={{ fontWeight: 700, color: "#A85F12" }}>🟠 Не по смыслу</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Глагол спрягается верно, но в это место не подходит. Перечитай фразу и выбери другой.</div>
-          </div>}
-          {hasBad && <div>
-            <div style={{ fontWeight: 700, color: "#2C5F8A" }}>🔵 Незнакомое слово</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Это не один из 15 глаголов или есть опечатка. Посмотри список глаголов сверху и проверь написание.</div>
-          </div>}
-        </Block>
-      )}
-
-      {!allOk && (
-        <Btn bg={filledAll ? C.gold : "#D8CBB4"} disabled={!filledAll} onClick={check} style={{ width: "100%", marginBottom: 12 }}>
-          {filledAll ? "Comprobar el diario" : "Rellena todos los huecos…"}
-        </Btn>
-      )}
-
-      {scoreBlock}
-
-      <Btn bg={C.raspberry} onClick={() => setTrainer({ startVerb: errorVerbs[0] || null })} style={{ width: "100%", marginBottom: 14 }}>
-        📊 Entrenador de conjugación{errorVerbs.length ? ` · ${errorVerbs.length} con errores` : ""}
-      </Btn>
-
-      <Footer onHome={onHome} />
-    </div></div>
-  );
-}
-
-
-
-// ============================================================
-// MI DIARIO v2 — Pretérito Perfecto Compuesto (cap2)
-// ============================================================
-
-const DIARIO2 = {
-  title: "Mi Diario · Esta semana con Ana",
-  segments: [
-    { t: "Esta semana ha sido especial. El lunes, mi amiga Ana me ha " }, { blank: 0 },
-    { t: " por teléfono. «¿Tú has " }, { blank: 1 },
-    { t: " mucho esta semana?», me ha dicho. Yo he " }, { blank: 2 },
-    { t: " que hacía tiempo que no nos veíamos.\n\nEl martes hemos " }, { blank: 3 },
-    { t: " juntas en una librería del centro. «¿Has " }, { blank: 4 },
-    { t: " ya ese libro que querías?», le he preguntado. Ella ha " }, { blank: 5 },
-    { t: " un mensaje importante y ha " }, { blank: 6 },
-    { t: " si podíamos parar un momento. Yo he " }, { blank: 7 },
-    { t: " mis notas mientras esperaba.\n\nDespués hemos " }, { blank: 8 },
-    { t: " hasta el parque y hemos " }, { blank: 9 },
-    { t: " algo de comer. Su hermana ha " }, { blank: 10 },
-    { t: " las luces del jardín cuando llegamos. Sus vecinos han " }, { blank: 11 },
-    { t: " todo el patio — estaba precioso.\n\nPor la tarde, he " }, { blank: 12 },
-    { t: " mis cosas y he " }, { blank: 13 },
-    { t: " el timbre de su portal para despedirme. Por la noche he " }, { blank: 14 },
-    { t: " a casa tarde. Ha sido una semana bonita pero cansada." },
-  ],
-  // person использует ключи PRON2: yo / tu / el / nos / vos / ell
-  blanks: [
-    { person: "el",  accept: ["llamar"] },
-    { person: "tu",  accept: ["trabajar"] },
-    { person: "yo",  accept: ["recordar"] },
-    { person: "nos", accept: ["entrar"] },
-    { person: "tu",  accept: ["buscar"] },
-    { person: "el",  accept: ["recibir"] },
-    { person: "el",  accept: ["preguntar"] },
-    { person: "yo",  accept: ["revisar"] },
-    { person: "nos", accept: ["caminar"] },
-    { person: "nos", accept: ["llevar"] },
-    { person: "el",  accept: ["encender"] },
-    { person: "ell", accept: ["ordenar"] },
-    { person: "yo",  accept: ["recoger"] },
-    { person: "yo",  accept: ["tocar"] },
-    { person: "yo",  accept: ["volver"] },
-  ],
-};
-
-// Проверка пропуска Pretérito Perfecto Compuesto: «haber(лицо) + participio»
-// ok    — правильный глагол + правильное лицо haber
-// conj  — правильный participio, но неверная форма haber
-// sense — другой participio из cap2, не по смыслу
-// bad   — не распознано
-// empty — пусто
-const PRON2_KEY_IDX = Object.fromEntries(PRON2.map((p, i) => [p.key, i]));
-function analyzeBlankPerfecto(input, b) {
-  const v = normES(input);
-  if (!v) return { st: "empty" };
-  const parts = v.split(" ");
-  if (parts.length !== 2) return { st: "bad" };
-  const [haberIn, partIn] = parts;
-  const expectedHaber = HABER2[PRON2_KEY_IDX[b.person]];
-  const acceptParts = b.accept.map(k => { const e = NIVEL2_ALL.find(x => x.inf === k); return e ? e.part : null; }).filter(Boolean);
-  if (haberIn === expectedHaber && acceptParts.includes(partIn)) return { st: "ok" };
-  if (acceptParts.includes(partIn)) return { st: "conj", verb: b.accept[0] };
-  const allParts2 = NIVEL2_ALL.map(x => x.part);
-  if (allParts2.includes(partIn)) { const ve = NIVEL2_ALL.find(x => x.part === partIn); return { st: "sense", verb: ve.inf }; }
-  return { st: "bad" };
-}
-
-function ConjHintPerfecto() {
-  const [open, setOpen] = useState(true);
-  return (
-    <Block stripe={C.gold}>
-      <div onClick={() => setOpen(o => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-        <span style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📊 Pretérito Perfecto Compuesto · haber</span>
-        <span style={{ color: C.goldDeep, fontSize: 13 }}>{open ? "ocultar ▲" : "mostrar ▼"}</span>
-      </div>
-      {open && (
-        <div style={{ marginTop: 10 }}>
-          <div style={{ ...pHint, marginBottom: 9 }}>Auxiliar <strong>haber</strong> + participio. Escribe las dos palabras: «he trabajado», «ha llamado»...</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-            {[[0,3],[1,4],[2,5]].flatMap(([a,bI]) => [
-              <div key={PRON2[a].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-                <span style={{ color: C.inkSoft }}>{PRON2[a].label}</span>{" "}
-                <strong style={{ color: C.raspberry }}>{HABER2[a]}</strong>
-              </div>,
-              <div key={PRON2[bI].key} style={{ background: C.creamDeep, borderRadius: 8, padding: "8px 10px", fontSize: 14 }}>
-                <span style={{ color: C.inkSoft }}>{PRON2[bI].label}</span>{" "}
-                <strong style={{ color: C.raspberry }}>{HABER2[bI]}</strong>
-              </div>
-            ])}
-          </div>
-        </div>
-      )}
-    </Block>
-  );
-}
-
-function DiarioMode2({ onHome, onScore, session }) {
-  const N = DIARIO2.blanks.length;
-  const [vals, setVals] = useState({});
-  const [res, setRes] = useState({});
-  const [everFailed, setEverFailed] = useState({});
-  const [checked, setChecked] = useState(false);
-  const [trainer, setTrainer] = useState(null);
-  const [awardedPts, setAwardedPts] = useState(null);
-
-  const allOk = checked && DIARIO2.blanks.every((_, i) => res[i] && res[i].st === "ok");
-  const filledAll = DIARIO2.blanks.every((_, i) => normES(vals[i]) !== "");
-  const errorVerbs = [...new Set(Object.values(res).filter(r => r.st === "conj").map(r => r.verb))];
-  const hasConj = Object.values(res).some(r => r.st === "conj");
-  const hasSense = Object.values(res).some(r => r.st === "sense");
-  const hasBad = Object.values(res).some(r => r.st === "bad");
-
-  function check() {
-    const r = {}; const ef = { ...everFailed };
-    DIARIO2.blanks.forEach((b, i) => { const a = analyzeBlankPerfecto(vals[i], b); r[i] = a; if (a.st !== "ok") ef[i] = true; });
-    setRes(r); setEverFailed(ef); setChecked(true);
-    const allNowOk = DIARIO2.blanks.every((_, i) => r[i] && r[i].st === "ok");
-    if (allNowOk && awardedPts === null) {
-      const corrected = DIARIO2.blanks.filter((_, i) => ef[i]).length;
-      const pts = corrected === 0 ? 5 : corrected <= 2 ? 3 : 1;
-      setAwardedPts(pts); if (onScore) onScore(pts);
-    }
-  }
-
-  if (trainer) {
-    return <PerfectoConjugation startVerb={trainer} onScore={onScore} onBack={() => { setTrainer(null); setChecked(false); }} />;
-  }
-
-  let scoreBlock = null;
-  if (allOk) {
-    const corrected = DIARIO2.blanks.filter((_, i) => everFailed[i]).length;
-    const first = N - corrected;
-    const score10 = Math.round(((first + 0.5 * corrected) / N) * 10);
-    scoreBlock = (
-      <Block stripe={C.emerald}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: C.emeraldDeep }}>¡Diario completo! 🎉</div>
-          <div style={{ fontSize: 44, fontWeight: 800, color: C.raspberry, margin: "6px 0", fontFamily: SERIF }}>{score10}<span style={{ fontSize: 22, color: C.inkSoft }}>/10</span></div>
-          <div style={{ ...pHint }}>С первого раза: <strong>{first}</strong> из {N} · Исправлено: <strong>{corrected}</strong></div>
-          {awardedPts !== null && (
-            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "8px 16px", display: "inline-block" }}>
-              <span style={{ fontSize: 20, fontWeight: 800, color: C.raspberry }}>+{awardedPts}</span>
-              <span style={{ fontSize: 13, color: C.goldDeep }}> 📔 в копилку!</span>
-            </div>
-          )}
-        </div>
-      </Block>
-    );
-  }
-
-  function blankStyle(st) {
-    if (st === "ok") return { bd: C.emerald, bg: "#EAF5F0", col: C.emeraldDeep };
-    if (st === "conj") return { bd: C.raspberry, bg: "#FBEAEE", col: C.raspberryDeep };
-    if (st === "sense") return { bd: "#D98A2B", bg: "#FCF1E0", col: "#A85F12" };
-    if (st === "bad") return { bd: "#3B7CB8", bg: "#E8F1F9", col: "#2C5F8A" };
-    return { bd: C.gold, bg: "#fff", col: C.ink };
-  }
-
-  return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle="📔 Mi Diario · Pretérito Perfecto Compuesto" />
-      <ScoreBadge session={session} />
-      <ConjHintPerfecto />
-      <Block stripe={C.emerald}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5, marginBottom: 4 }}>📔 {DIARIO2.title}</div>
-        <div style={pHint}>Впиши каждый глагол в форме <strong>Pretérito Perfecto Compuesto</strong>: haber + participio. Например: «he llamado», «hemos entrado». Лицо haber подсказывает контекст. Подсказка сверху.</div>
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
-          <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 5, fontWeight: 600 }}>Verbos disponibles · выбирай из этих 15:</div>
-          <div style={{ fontSize: 13, color: C.raspberry, lineHeight: 1.7, fontWeight: 600 }}>{NIVEL2_ALL.map(x => x.inf).join(" · ")}</div>
-        </div>
-      </Block>
-      <Block stripe={C.gold}>
-        <div style={{ fontSize: 17, lineHeight: 2.1, color: C.ink }}>
-          {DIARIO2.segments.map((seg, idx) => {
-            if (seg.t !== undefined) {
-              return seg.t.split("\n\n").map((para, pi, arr) => (
-                <span key={idx + "_" + pi}>{para}{pi < arr.length - 1 ? <span style={{ display: "block", height: 10 }} /> : null}</span>
-              ));
-            }
-            const i = seg.blank;
-            const st = res[i] ? res[i].st : undefined;
-            const locked = st === "ok";
-            const s = blankStyle(st);
-            return (
-              <input key={"b" + i} value={vals[i] || ""} disabled={locked}
-                onChange={e => setVals(v => ({ ...v, [i]: e.target.value }))}
-                placeholder="…"
-                style={{ width: 155, margin: "0 2px", padding: "3px 8px", fontSize: 15, fontFamily: SERIF, textAlign: "center",
-                  borderRadius: 7, outline: "none", verticalAlign: "middle",
-                  border: `2px solid ${s.bd}`, background: s.bg, color: s.col, fontWeight: st && st !== "empty" ? 700 : 400 }} />
-            );
-          })}
-        </div>
-      </Block>
-      {checked && !allOk && (
-        <Block stripe={C.raspberry}>
-          {hasConj && <div style={{ marginBottom: hasSense || hasBad ? 8 : 0 }}>
-            <div style={{ fontWeight: 700, color: C.raspberryDeep }}>🔴 Неверная форма haber</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Participio верный, но лицо haber не то. Иди в тренажёр — отработай спряжение и вернись исправить.</div>
-          </div>}
-          {hasSense && <div style={{ marginBottom: hasBad ? 8 : 0 }}>
-            <div style={{ fontWeight: 700, color: "#A85F12" }}>🟠 Не по смыслу</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Participio верный, но этот глагол сюда не подходит. Перечитай фразу и выбери другой.</div>
-          </div>}
-          {hasBad && <div>
-            <div style={{ fontWeight: 700, color: "#2C5F8A" }}>🔵 Не распознано</div>
-            <div style={{ ...pHint, marginTop: 2 }}>Проверь написание. Формат: «ha llamado», «hemos entrado» (haber + participio, две слова).</div>
-          </div>}
-        </Block>
-      )}
-      {!allOk && (
-        <Btn bg={filledAll ? C.gold : "#D8CBB4"} disabled={!filledAll} onClick={check} style={{ width: "100%", marginBottom: 12 }}>
-          {filledAll ? "Comprobar el diario" : "Rellena todos los huecos…"}
-        </Btn>
-      )}
-      {scoreBlock}
-      <Btn bg={C.raspberry} onClick={() => setTrainer(errorVerbs[0] || NIVEL2_ALL[0].inf)} style={{ width: "100%", marginBottom: 14 }}>
-        📊 Тренажёр спряжения{errorVerbs.length ? ` · ${errorVerbs.length} с ошибками` : ""}
-      </Btn>
-      <Footer onHome={onHome} />
-    </div></div>
-  );
-}
-
-// ============================================================
-// BIENVENIDA — вход в приложение: правила + История-маяк (15 -AR глаголов)
-// ============================================================
-const MAYA = {
-  // 15 глаголов выделены **...** — подсвечиваются через <Highlighted/>
-  es: [
-    "Cuando en la Ciudad de los Sentidos llega la mañana, en el Palacio de Caramelo se enciende la luz dorada. El Gran Jefe Alcalde abre los ojos y comienza su día mágico.",
-    "Primero, él debe **desayunar**. Se sienta en su silla favorita y **toma** una taza de café solo fuerte con caramelo espeso y dorado. Luego se levanta y comienza a **caminar** por los pasillos brillantes del palacio.",
-    "El Jefe se detiene en la terraza para **mirar** atentamente la ciudad que despierta. Necesita **buscar** ideas frescas para el menú de hoy. De repente, **escucha** voces alegres — sus ayudantes ya **cantan** una canción de trabajo en la cocina.",
-    "El Jefe decide **llamar** a su fiel equipo. Él está acostumbrado a **hablar** mucho y dar órdenes claras. «¡Buenos días, amigos! Hoy vamos a **preparar** algo especial», dice con una sonrisa.",
-    "Los ayudantes **preguntan**: «¿Qué necesitamos hoy, Jefe?» Él responde: «Primero, debemos **comprar** ingredientes frescos en el mercado de caramelo. Luego vamos a **trabajar** juntos».",
-    "Pero antes de salir, el Jefe **estudia** su libro antiguo de recetas mágicas. Él **lleva** el libro consigo siempre — es su tesoro más valioso. Ahora es momento de crear nuevas palabras dulces y brillantes.",
-  ],
-  ru: [
-    "Когда в Городе Чувств наступает утро, в Карамельном Дворце зажигается золотой свет. Великий Шеф-Мэр открывает глаза и начинает свой волшебный день.",
-    "Сначала он должен позавтракать. Он садится на свой любимый стул и берёт чашку крепкого чёрного кофе с густой золотистой карамелью. Затем встаёт и начинает идти по сверкающим коридорам дворца.",
-    "Шеф останавливается на террасе, чтобы внимательно смотреть на просыпающийся город. Ему нужно искать свежие идеи для меню. Вдруг он слышит весёлые голоса — помощники уже поют рабочую песню на кухне.",
-    "Шеф решает позвать свою верную команду. Он привык много говорить и раздавать чёткие приказы. «Доброе утро, друзья! Сегодня мы будем готовить что-то особенное», — говорит он с улыбкой.",
-    "Помощники спрашивают: «Что нам нужно сегодня, Шеф?» Он отвечает: «Сначала мы должны купить свежие ингредиенты на карамельном рынке. Потом будем работать вместе».",
-    "Но перед выходом Шеф изучает свою древнюю книгу волшебных рецептов. Он всегда носит эту книгу с собой — это его самое ценное сокровище. Теперь пора создавать новые сладкие и сверкающие слова.",
-  ],
-  // 15 игровых глаголов: инфинитив + перевод
-  glos: [
-    ["desayunar", "завтракать"], ["tomar", "брать / пить"], ["caminar", "идти / гулять"],
-    ["mirar", "смотреть"], ["buscar", "искать"], ["escuchar", "слушать"],
-    ["cantar", "петь"], ["llamar", "звать / звонить"], ["hablar", "говорить"],
-    ["preparar", "готовить"], ["preguntar", "спрашивать"], ["comprar", "покупать"],
-    ["trabajar", "работать"], ["estudiar", "изучать"], ["llevar", "носить с собой"],
-  ],
-};
-
-// ============================================================
-// ИСТОРИЯ-МАЯК Главы 2 — El Gran Misterio del Palacio de Caramelo
-// ============================================================
-const MAYA2 = {
-  es: [
-    "El Jefe toma su varilla dorada. Es el momento de crear. Pero las palabras no vienen. Mezcla, agita, espera. Nada. La varilla no brilla. El cuenco está vacío. Algo falta — algo esencial, algo sin lo cual las palabras no nacen.",
-    "El Jefe mira a sus ayudantes. Los ayudantes miran el cuenco. «Los ingredientes», dice el Jefe en voz baja. «¿Dónde están los ingredientes gramaticales?» Nadie responde. El Jefe deja la varilla sobre la mesa despacio.",
-    "«Bien. Esta noche nadie sale del palacio. Vamos a recordar juntos qué ha pasado hoy.» El primer ayudante habla: «Esta mañana **he encendido** las luces. He dejado los ingredientes sobre la mesa. Los he visto con mis propios ojos.»",
-    "La segunda ayudante añade: «Yo hoy **he entrado** dos veces. **He llevado** el desayuno del Jefe. **He recogido** los papeles del suelo. Pero no **he tocado** los ingredientes. Nunca los toco.»",
-    "El tercero dice en voz baja: «Esta semana **he revisado** todos los documentos. Los **he ordenado**, los he numerado. Pero hoy no **he vuelto** a la Sala. **He trabajado** en la cocina toda la tarde.»",
-    "El Jefe escucha. **Camina** despacio alrededor de la mesa vacía. Se detiene. «¿Alguien **ha recibido** una visita hoy?» Silencio. El ayudante más joven levanta la mano: «Yo... acabo de **recordar** algo. Esta tarde **he buscado** algo en la Sala. Vi una sombra. Pero no dije nada porque no estaba seguro.»",
-    "El Jefe lo mira fijamente. «Esta noche **he preguntado** lo que necesitaba saber. **He llamado** a todos». «Ahora ya estás seguro», dice. «Y nosotros acabamos de empezar la investigación.»",
-  ],
-  ru: [
-    "Шеф берёт свой золотой венчик. Настало время творить. Но слова не приходят. Он мешает, взбивает, ждёт. Ничего. Венчик не светится. Чаша пуста. Чего-то не хватает — чего-то важного, без чего слова не рождаются.",
-    "Шеф смотрит на помощников. Помощники смотрят на чашу. «Ингредиенты, — тихо говорит Шеф. — Где грамматические ингредиенты?» Никто не отвечает. Шеф медленно кладёт венчик на стол.",
-    "«Хорошо. Сегодня ночью никто не выходит из дворца. Давайте вместе вспомним, что произошло сегодня». Первый помощник: «Сегодня утром я зажёг свет. Я оставил ингредиенты на столе. Я видел их собственными глазами».",
-    "Вторая помощница: «Я сегодня входила дважды. Я приносила завтрак Шефа. Я подбирала бумаги с пола. Но я не трогала ингредиенты. Я их никогда не трогаю».",
-    "Третий говорит тихо: «На этой неделе я проверил все документы. Я их упорядочил, пронумеровал. Но сегодня я не возвращался в Зал. Я весь день работал на кухне».",
-    "Шеф слушает. Он медленно ходит вокруг пустого стола. Останавливается. «Кто-нибудь принимал сегодня гостя?» Тишина. Тогда самый младший помощник поднимает руку: «Я... я только что кое-что вспомнил. Сегодня вечером я искал кое-что в Зале. Я видел тень. Но я ничего не сказал, потому что не был уверен».",
-    "Шеф пристально смотрит на него. «Этой ночью я спросил всё, что нужно. Я позвал всех». «Теперь ты уверен, — говорит он. — А мы только что начали расследование».",
-  ],
-  glos: [
-    ["encender", "зажигать"], ["recoger", "подбирать"], ["llevar", "нести/принести"],
-    ["entrar", "входить"], ["revisar", "проверять"], ["ordenar", "упорядочивать"],
-    ["trabajar", "работать"], ["volver", "возвращаться"], ["caminar", "ходить"],
-    ["preguntar", "спрашивать"], ["recibir", "принимать"], ["recordar", "вспоминать"],
-    ["tocar", "трогать"], ["buscar", "искать"], ["llamar", "звать"],
-  ],
-};
-
-// ============================================================
-// ИСТОРИЯ-МАЯК Главы 3 — El día en que las palabras no nacieron
-// Полный текст утверждён Оксаной, хранится в Notion (ID 3c64c9eb6e0081c9bc22f8eb2bcaf63b)
-// ============================================================
-const MAYA3 = {
-  es: [
-    "Cada mañana, Don Verbo llevaba su gorro blanco y su barba por todo el Palacio de Caramelo. A las seis y media desayunaba solo en su terraza favorita: tomaba café negro, comía tostadas con caramelo dorado y miraba la Ciudad de los Sentidos en silencio.",
-    "Después caminaba por los pasillos durante veinte minutos. Mientras caminaba, buscaba ideas para el menú, escuchaba el viento en las ventanas de azúcar y los primeros sonidos de la Cocina Mágica.",
-    "A las siete, los tres ayudantes cantaban La melodía del caramelo dorado. Don Verbo los llamaba desde la escalera dorada. En la gran sala, les hablaba del día; ellos le preguntaban qué necesitaba el palacio. Antes de salir, Don Verbo estudiaba una página de su antiguo libro de recetas. Después todos trabajaban: él en la cocina principal y los ayudantes entre flores de azúcar y velas de caramelo.",
-    "Cuando todo estaba listo, Don Verbo tomaba la varilla dorada con las dos manos. La cocina se quedaba en silencio. Entonces preparaba las palabras nuevas.",
-    "Pero ayer algo cambió. Don Verbo fue al mercado de caramelo y compró los ingredientes de siempre: caramelo líquido, azúcar dorado y especias mágicas. En el rincón secreto del señor Dulce también compró una bolsa de polvo de caramelo plateado. Volvió al palacio con su lista en la mano. Nadie vio nada extraño.",
-    "Esta mañana, el primer ayudante ha abierto la Sala y ha encendido las lámparas, como siempre. Después ha dejado los ingredientes gramaticales sobre la mesa y los ha mirado un segundo.",
-    "La segunda ayudante ha llevado la bandeja del desayuno desde el pasillo hasta la Sala. También ha lavado el cuenco de cristal y lo ha dejado limpio sobre la mesa. Más tarde, el viento ha movido los papeles de la Sala. Ella los ha recogido dos veces, pero todavía no ha terminado de ordenarlos.",
-    "El tercer ayudante ha revisado los documentos en el despacho. Los ha numerado del uno al cien con su lápiz rojo y luego los ha guardado en una caja. Esta semana ha trabajado allí durante muchos días; no ha vuelto a la Sala.",
-    "El guardia ha vigilado la puerta principal. La llave dorada no se ha perdido: Don Verbo la ha usado por la mañana y después la ha guardado en el bolsillo. El reloj de la Sala ha sonado seis veces por la tarde y no se ha parado. El antiguo libro de recetas sigue en su sitio.",
-    "Cuando llegó la noche, Don Verbo salió otra vez a la terraza. Como siempre, quería mirar la ciudad y escuchar el palacio antes de crear palabras. Pero esta vez no oyó la canción de los ayudantes.",
-    "Bajó a la Cocina Mágica. La varilla dorada estaba sobre la mesa, pero no brillaba. Don Verbo la ha tocado: estaba fría. El cuenco de cristal ha quedado vacío. Nadie lo ha llenado. Los ingredientes gramaticales ya no estaban allí.",
-    "Don Verbo no dijo nada durante un momento. Miró la bandeja de metal: no había llevado ingredientes. Miró los papeles: seguían en el suelo. Miró las lámparas: estaban encendidas. Miró la puerta: seguía cerrada. Miró la llave, el libro, los documentos y el lápiz rojo: todo estaba en su lugar.",
-    "Entonces el guardia ha traído un sobre lacrado. Lo ha recibido esta tarde en la puerta. Tiene un sello de cera roja. Nadie lo ha abierto.",
-    "Don Verbo ha cogido una lupa de cristal y ha buscado huellas sobre la mesa vacía. Los ayudantes han buscado con él en la Sala, en la cocina y en el jardín. Todavía no han encontrado los ingredientes.",
-    "Entonces el ayudante más joven recordó algo. A las nueve, vio una sombra junto a la Sala. Primero oyó un ruido. Después miró, pero no reconoció a nadie. No dijo nada porque tenía miedo y no estaba seguro.",
-    "Ahora todos han oído su historia. La varilla no brilla. El cuenco está vacío. Los ingredientes han desaparecido. El sobre sigue cerrado. Y una sombra pasó junto a la Sala. La investigación acaba de empezar.",
-    ],
-  ru: [
-    "Каждое утро Дон Вербо в белом колпаке и с бородой обходил Карамельный Дворец. В половине седьмого он завтракал один на своей любимой террасе: пил чёрный кофе, ел тосты с золотистой карамелью и молча смотрел на Город Смыслов.",
-    "Потом он двадцать минут гулял по коридорам. Пока шёл, искал идеи для меню, слушал ветер в сахарных окнах и первые звуки Волшебной Кухни.",
-    "В семь часов трое помощников пели «Мелодию золотой карамели». Дон Вербо звал их с золотой лестницы. В большом зале он рассказывал им о дне; они спрашивали, что нужно дворцу. Перед выходом Дон Вербо изучал страницу своей старинной книги рецептов. Потом все работали: он — на главной кухне, а помощники — среди сахарных цветов и карамельных свечей.",
-    "Когда всё было готово, Дон Вербо брал золотой венчик обеими руками. Кухня замирала в тишине. Тогда он творил новые слова.",
-    "Но вчера что-то изменилось. Дон Вербо пошёл на карамельный рынок и купил обычные ингредиенты: жидкую карамель, золотистый сахар и волшебные специи. В тайном уголке сеньора Дульсе он также купил мешочек серебристой карамельной пудры. Вернулся во дворец со списком в руке. Никто не заметил ничего странного.",
-    "Сегодня утром первый помощник открыл Зал и зажёг лампы, как всегда. Потом он выложил грамматические ингредиенты на стол и на секунду взглянул на них.",
-    "Вторая помощница принесла поднос с завтраком из коридора в Зал. Она также вымыла хрустальную чашу и оставила её чистой на столе. Позже ветер разметал бумаги по Залу. Она дважды их собирала, но так и не успела разложить по порядку.",
-    "Третий помощник проверял документы в кабинете. Он пронумеровал их от одного до ста своим красным карандашом и убрал в коробку. На этой неделе он работал там много дней подряд и не возвращался в Зал.",
-    "Охранник сторожил главную дверь. Золотой ключ не пропадал: Дон Вербо сам взял его утром, а потом убрал в карман. Часы в Зале пробили шесть раз вечером и не останавливались. Старинная книга рецептов оставалась на своём месте.",
-    "Когда наступила ночь, Дон Вербо снова вышел на террасу. Как всегда, он хотел посмотреть на город и послушать дворец перед тем, как творить слова. Но на этот раз он не услышал песню помощников.",
-    "Он спустился в Волшебную Кухню. Золотой венчик лежал на столе, но не светился. Дон Вербо коснулся его: он был холодным. Хрустальная чаша осталась пустой. Никто её не наполнил. Грамматических ингредиентов на месте не было.",
-    "Дон Вербо какое-то время молчал. Посмотрел на металлический поднос: ингредиентов на нём не приносили. Посмотрел на бумаги: они лежали на полу. Посмотрел на лампы: они горели. Посмотрел на дверь: она была закрыта. Посмотрел на ключ, книгу, документы и красный карандаш: всё было на своих местах.",
-    "Тогда охранник принёс запечатанный конверт. Он получил его сегодня днём у двери. На конверте — печать из красного сургуча. Никто его не вскрывал.",
-    "Дон Вербо взял хрустальную лупу и стал искать следы на пустом столе. Помощники искали вместе с ним — в Зале, на кухне и в саду. Ингредиенты пока не нашли.",
-    "Тогда самый младший помощник кое-что вспомнил. В девять часов он видел тень возле Зала. Сначала услышал шум. Потом посмотрел, но никого не узнал. Промолчал, потому что испугался и не был уверен.",
-    "Теперь все услышали его рассказ. Венчик не светится. Чаша пуста. Ингредиенты исчезли. Конверт по-прежнему закрыт. И тень мелькнула возле Зала. Расследование только начинается.",
-    ],
-  glos: [],
-};
-
-// ============================================================
-// ИСТОРИЯ-МАЯК Главы 4 — El Libro Mágico de Don Verbo
-// Полный текст утверждён Оксаной 27.08.2026.
-// ============================================================
-const MAYA4 = {
-  es: [
-    "En el Reino de Caramelo ha desaparecido el Libro Mágico.",
-    "Los detectives empiezan inmediatamente la investigación.",
-    "—¿Quién ha abierto la puerta de la habitación del Libro?",
-    "Don Verbo los detiene. —Esa pregunta no es suficiente.",
-    "Mira a los habitantes del palacio reunidos delante de él.",
-    "Uno **quiere abrir la puerta**, pero ni siquiera se acerca a ella.",
-    "Otro **puede abrirla**: tiene una llave.",
-    "Un tercero **tiene que abrir la puerta**, porque es responsable de la habitación.",
-    "Alguien **va a entrar**, pero en el último momento se marcha.",
-    "Alguien **intenta abrir la puerta**, pero la cerradura no cede.",
-    "Y alguien abre la puerta, se va… y después **vuelve a hacerlo**.",
-    "Los detectives guardan silencio.",
-    "La puerta es la misma.",
-    "La acción también es la misma: **abrir**.",
-    "Pero delante de ellos hay seis historias completamente diferentes.",
-    "—Por eso una investigación normal no es suficiente —dice Don Verbo—. Si preguntamos solamente **quién hace qué**, veremos solo la superficie.",
-    "Coloca delante de los detectives el primer expediente.",
-    "—Para encontrar el Libro tendremos que descubrir algo más: qué quiere hacer una persona, qué puede hacer, qué tiene que hacer, qué solamente va a hacer, qué intenta hacer y a qué acción vuelve otra vez.",
-    "—¿Y cómo podemos saberlo?",
-    "Don Verbo sonríe.",
-    "—Para eso existen unos verbos especiales.",
-    "Hace una pausa.",
-    "—Los llamamos **verbos-operadores**.",
-    "Los habitantes del Reino de Caramelo oyen ese nombre por primera vez.",
-    "—Os presentaré a cada uno por separado —dice Don Verbo—. Cada uno tiene su propia historia. Y antes de continuar la búsqueda del Libro, tendréis que entender qué hace cada uno con una acción que ya conocéis.",
-    "Cierra el primer expediente.",
-    "—Empezaremos por lo más sencillo.",
-    "**¿Qué significa querer hacer algo?**",
-    "Así comienza la verdadera búsqueda del Libro Mágico.",
-  ],
-  ru: [
-    "В Карамельном Королевстве пропала Волшебная книга.",
-    "Детективы сразу начали расследование.",
-    "— Кто открыл дверь в комнату Книги?",
-    "Дон Вербо остановил их. — Этого вопроса недостаточно.",
-    "Он посмотрел на собравшихся жителей дворца.",
-    "Один из них хотел открыть дверь, но так к ней и не подошёл.",
-    "Другой мог её открыть — у него был ключ.",
-    "Третьему нужно было открыть дверь, потому что он отвечал за комнату.",
-    "Кто-то собирался войти, но в последний момент ушёл.",
-    "Кто-то попытался открыть дверь, но замок не поддался.",
-    "А кто-то открыл её, ушёл — и потом вернулся снова.",
-    "Детективы замолчали.",
-    "Дверь была одна.",
-    "Действие тоже одно — открыть.",
-    "Но перед ними оказалось шесть совершенно разных историй.",
-    "— Вот почему обычного поиска недостаточно, — сказал Дон Вербо. — Если мы будем спрашивать только, кто что сделал, мы увидим лишь поверхность.",
-    "Он положил перед детективами первое дело.",
-    "— Чтобы найти Книгу, придётся научиться выяснять больше: чего человек хотел, что мог, что ему было нужно сделать, что он только собирался сделать, что пытался сделать и к какому действию вернулся снова.",
-    "— Но как это узнать?",
-    "Дон Вербо улыбнулся.",
-    "— Для этого существуют особые глаголы.",
-    "Он сделал паузу.",
-    "— Глаголы-операторы.",
-    "Жители Карамельного Королевства услышали это название впервые.",
-    "— Я познакомлю вас с каждым отдельно, — сказал Дон Вербо. — У каждого из них своя история. И прежде чем мы продолжим поиски Книги, вам придётся понять, как каждый из них меняет знакомое действие.",
-    "Он закрыл первое дело.",
-    "— Начнём с самого простого.",
-    "Что значит хотеть что-то сделать?",
-    "Так начался настоящий поиск Волшебной книги.",
-  ],
-  glos: [],
-};
-
-// ============================================================
-// ТУР-ЗНАКОМСТВО — показывается при первом входе
-// ============================================================
-const TOUR_IMG = "https://i.ibb.co/LXwycrSh/Detective-game-app-characters-202606011428.jpg";
-
-function tourSeen() {
-  try { return localStorage.getItem("ciudad_tour_v1") === "1"; } catch { return false; }
-}
-function markTourSeen() {
-  try { localStorage.setItem("ciudad_tour_v1", "1"); } catch { /* приватный режим — просто покажем тур снова */ }
-}
-
-const tourH = { fontSize: 21, fontWeight: 800, color: C.ink, fontFamily: SERIF, textAlign: "center", marginBottom: 4 };
-const tourSub = { fontSize: 13, color: C.goldDeep, fontWeight: 600, textAlign: "center", letterSpacing: ".5px", marginBottom: 12 };
-const tourP = { fontSize: 14.5, color: C.inkSoft, lineHeight: 1.65, textAlign: "center", margin: "0 0 6px" };
-const tourEmoji = { fontSize: 46, textAlign: "center", marginBottom: 8, filter: "drop-shadow(0 4px 8px rgba(61,43,31,.18))" };
-
-function TourRow({ icon, color, title, when, text }) {
-  return (
-    <div style={{ display: "flex", gap: 12, alignItems: "flex-start", background: C.cream, border: `1px solid ${C.line}`, borderLeft: `5px solid ${color}`, borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
-      <div style={{ fontSize: 24, lineHeight: 1 }}>{icon}</div>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 14.5, fontWeight: 700, color }}>{title}</div>
-        {when && <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase", margin: "1px 0 2px" }}>{when}</div>}
-        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.45 }}>{text}</div>
+        <Footer onHome={onHome} />
       </div>
     </div>
   );
 }
 
-function Tour({ onDone }) {
-  const [i, setI] = useState(0);
-  const LAST = 3;
-  function finish() { markTourSeen(); onDone(); }
-
-  const slides = [
-    /* 0 — что это */
-    <div key="s0">
-      <img src={TOUR_IMG} alt="La Cata a Ciegas" style={{ width: "100%", borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 8px 26px rgba(61,43,31,.20)", marginBottom: 16, display: "block" }} />
-      <div style={tourH}>🕵️ La Cata a Ciegas</div>
-      <div style={tourSub}>ЛИНГВИСТИЧЕСКИЙ ДЕТЕКТИВ НА ИСПАНСКОМ</div>
-      <p style={tourP}>В каждом раунде загадан один глагол. Один свидетель говорит правду, другой — красиво выдумывает. Детектив задаёт вопросы «да / нет» и вычисляет истину.</p>
-    </div>,
-    /* 1 — как проходит игра */
-    <div key="s1">
-      <div style={tourEmoji}>🎮</div>
-      <div style={tourH}>Как проходит игра</div>
-      <div style={tourSub}>ВЖИВУЮ · В ZOOM · ВСЕЙ КОМПАНИЕЙ</div>
-      <p style={{ ...tourP, marginBottom: 14 }}>Встречаемся в Zoom и играем по ролям:</p>
-      <TourRow icon="🕵️" color={C.goldDeep} title="Detective" text="Задаёт вопросы «да / нет», сравнивает ответы свидетелей и угадывает глагол." />
-      <TourRow icon="🟢" color={C.emerald} title="Testigo Canon" text="Знает правду и отвечает строго по истории." />
-      <TourRow icon="🔴" color={C.raspberry} title="Testigo Fantasía" text="Красиво врёт и уводит детектива от правды." />
-    </div>,
-    /* 2 — что внутри тренажёра и когда чем пользоваться */
-    <div key="s2">
-      <div style={tourEmoji}>🧭</div>
-      <div style={tourH}>Что внутри тренажёра</div>
-      <div style={tourSub}>И КОГДА ЧЕМ ПОЛЬЗОВАТЬСЯ</div>
-      <TourRow icon="📖" color={C.gold} title="История и 15 глаголов" when="Начни отсюда" text="Все глаголы игры спрятаны в истории Карамельного дворца — прочитай её первой." />
-      <TourRow icon="🕵️" color={C.goldDeep} title="Тренировка ролей" when="Между играми" text="Прокачай Детектива и обоих Свидетелей, зарабатывай очки." />
-      <TourRow icon="📔" color={C.emeraldDeep} title="Mi Diario" when="Между играми" text="Дневник дня в Ciudad: впиши глаголы в правильной форме — тренировка спряжения." />
-      <TourRow icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры" text="Твой экран на самой игре. До игры сюда заходить не нужно." />
-    </div>,
-    /* 3 — старт */
-    <div key="s3">
-      <div style={tourEmoji}>✨</div>
-      <div style={tourH}>¿Listo? · Готов начать?</div>
-      <p style={{ ...tourP, marginTop: 10 }}>Начни с истории Карамельного дворца — в ней спрятаны все 15 глаголов игры. Потом выбирай роль и тренируйся.</p>
-      <p style={{ ...tourP, fontWeight: 700, color: C.raspberry }}>Увидимся на игре 🍬</p>
-    </div>,
-  ];
-
-  return (
-    <div style={wrap}><div style={{ ...maxw, maxWidth: 480 }}>
-      <style>{"@keyframes ciuFadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }"}</style>
-      <Header subtitle="Знакомство с тренажёром" />
-      <div key={i} style={{ background: C.card, borderRadius: 18, border: `1px solid ${C.line}`, boxShadow: "0 6px 22px rgba(61,43,31,.12)", padding: "22px 20px", animation: "ciuFadeUp .45s ease both" }}>
-        {slides[i]}
-      </div>
-      {/* точки прогресса */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 8, margin: "16px 0" }}>
-        {slides.map((_, d) => (
-          <div key={d} onClick={() => setI(d)} style={{ width: d === i ? 26 : 9, height: 9, borderRadius: 5, background: d === i ? C.gold : C.line, border: `1px solid ${d === i ? C.goldDeep : C.line}`, cursor: "pointer", transition: "all .25s" }} />
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 10 }}>
-        <button onClick={finish} style={{ flex: 1, background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "13px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>Пропустить</button>
-        <Btn bg={i === LAST ? C.raspberry : C.gold} onClick={() => (i === LAST ? finish() : setI(i + 1))} style={{ flex: 2, fontSize: 16, padding: "13px" }}>
-          {i === LAST ? "Empezar · начать →" : "Дальше →"}
-        </Btn>
-      </div>
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.37</div>
-    </div></div>
-  );
-}
-
 // ============================================================
-// ГЛАВНАЯ СТРАНИЦА (Bienvenida)
+// CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
+// Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function NavCard({ icon, color, title, when, text, onClick }) {
-  return (
-    <div onClick={onClick} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 12, cursor: "pointer", display: "flex", overflow: "hidden" }}>
-      <div style={{ width: 7, background: color, flexShrink: 0 }} />
-      <div style={{ padding: "14px 16px", display: "flex", gap: 13, alignItems: "center", flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 28, lineHeight: 1 }}>{icon}</div>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontSize: 16.5, fontWeight: 700, color }}>{title}</div>
-          {when && <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase", margin: "1px 0 2px" }}>{when}</div>}
-          <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.45 }}>{text}</div>
-        </div>
-        <div style={{ fontSize: 20, color: C.gold }}>›</div>
-      </div>
-    </div>
-  );
-}
-
-function Welcome({ onEnter, onDiario, onLive, onTour }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onCapsules, onBack }) {
+  const isCapOne = pack.id === "cap1";
+  const isCapFour = pack.id === "cap4";
+  const maya = isCapFour ? MAYA4 : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
   const [storyKey, setStoryKey] = useState(null);
-  const story = storyKey ? verbByKey(storyKey) : null;
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
+
   return (
     <div style={wrap}><div style={maxw}>
-      <Header subtitle="Bienvenido · добро пожаловать" />
+      <Header subtitle={`${pack.emoji} Capítulo ${pack.num} · ${pack.grammar}`} />
 
-      {/* Краткое напоминание сути + ссылка на тур */}
-      <Block stripe={C.raspberry}>
-        <div style={{ fontWeight: 700, color: C.ink, fontSize: 16, marginBottom: 6 }}>🕵️ La Cata a Ciegas — лингвистический детектив</div>
-        <div style={{ ...pHint, fontSize: 13.5 }}>
-          Один свидетель говорит правду (<strong style={{ color: C.emerald }}>Canon</strong>), другой красиво выдумывает (<strong style={{ color: C.raspberry }}>Fantasía</strong>). Детектив вопросами «да / нет» угадывает загаданный глагол. Здесь ты готовишься к живой игре в Zoom.
+      {onBack && (
+        <div style={{ textAlign: "center", marginBottom: 14 }}>
+          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую главу</button>
         </div>
-        <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13, fontWeight: 700, cursor: "pointer", padding: 0, marginTop: 8, fontFamily: SERIF, textDecoration: "underline" }}>❓ Как это работает — посмотреть знакомство</button>
-      </Block>
+      )}
 
-      {/* История-маяк — раскрывашка */}
+      {/* ИСТОРИЯ-МАЯК */}
       <Block stripe={C.gold}>
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
           <div>
-            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 El día en el Palacio de Caramelo</div>
-            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Прочитай историю — все 15 глаголов игры спрятаны в ней</div>
+            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 {pack.titulo}</div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>{pack.term.fem ? `${pack.term.nom}: ${pack.VERBS.length} ${pack.term.objects} для расследования` : `История-маяк · все ${pack.VERBS.length} ${pack.term.objects} спрятаны здесь`}</div>
           </div>
           <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
@@ -3242,11 +1771,11 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
                 {ru ? "ES ✓" : "RU перевод"}
               </button>
             </div>
-            <div style={{ fontSize: 16, lineHeight: 1.85, color: C.ink }}>
-              {MAYA.es.map((p, i) => (
+            <div style={{ fontSize: 15.5, lineHeight: 1.85, color: C.ink }}>
+              {maya.es.map((p, i) => (
                 <div key={i} style={{ marginBottom: 12 }}>
                   <div><Highlighted text={p} /></div>
-                  {ru && <div style={{ fontSize: 13.5, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{MAYA.ru[i]}</div>}
+                  {ru && <div style={{ fontSize: 13, color: C.inkSoft, fontStyle: "italic", marginTop: 4, lineHeight: 1.6 }}>{maya.ru[i]}</div>}
                 </div>
               ))}
             </div>
@@ -3254,35 +1783,459 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
         )}
       </Block>
 
-      {/* Глоссарий — раскрывашка */}
+      {/* ГЛОССАРИЙ ГЛАГОЛОВ */}
       <Block stripe={C.emerald}>
         <div onClick={() => setGlosOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
-          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>📖 Los 15 verbos · тап — история глагола</div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 15.5 }}>{pack.term.fem ? `🔍 ${pack.VERBS.length} ${pack.term.gen2} · тап — открыть историю` : `📖 ${pack.VERBS.length} ${pack.term.gen2} · тап — история глагола`}</div>
           <span style={{ fontSize: 20, color: C.gold, transform: glosOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
         </div>
         {glosOpen && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 12 }}>
-            {VERBS.map((v) => (
+            {pack.VERBS.map((v) => (
               <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 8, padding: "8px 10px", fontSize: 13.5, cursor: "pointer", fontFamily: SERIF, textAlign: "left" }}>
-                <strong style={{ color: C.raspberry }}>{v.emoji} {v.inf}</strong> <span style={{ color: C.inkSoft }}>— {v.ru}</span>
+                <strong style={{ color: C.raspberry }}>{v.emoji} {v.inf}</strong><br/>
+                <span style={{ color: C.inkSoft, fontSize: 12 }}>{v.ru}</span>
               </button>
             ))}
           </div>
         )}
       </Block>
 
-      {/* Навигация */}
-      <NavCard icon="🕵️" color={C.goldDeep} title="Тренировка ролей" when="Между играми"
-        text="Detective · Canon · Fantasía. Прокачай роль и заработай очки перед игрой." onClick={onEnter} />
-      <NavCard icon="📔" color={C.emeraldDeep} title="Mi Diario" when="Между играми"
-        text="Впиши глаголы дня в правильной форме — тренировка спряжения." onClick={onDiario} />
+      {/* ТРЕНАЖЁР СПРЯЖЕНИЙ */}
+      <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>📊 Тренажёр спряжений</div>
+        {isCapFour ? (
+          <button onClick={onCapsules} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть «Капсулы действия A1» →
+          </button>
+        ) : isCapOne ? (
+          <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть Mi Diario →
+          </button>
+        ) : (
+          <button onClick={onPerfecto} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Открыть тренажёр Pretérito Perfecto Compuesto →
+          </button>
+        )}
+        {!isCapOne && !isCapFour && (
+          <button onClick={onPresenteErIr} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            Presente · глаголы -ER / -IR →
+          </button>
+        )}
+      </div>
 
-      {/* Пульт — визуально отделён */}
-      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "16px 0 12px" }} />
-      <NavCard icon="🎮" color={C.raspberry} title="Пульт живой игры" when="Только во время Zoom-игры"
-        text="Твой экран на самой игре. До игры сюда заходить не нужно." onClick={onLive} />
+      {/* ГЛАВНАЯ КНОПКА */}
+      <button onClick={onEnter} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "17px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
+        Тренировать роли →
+      </button>
 
-      <div style={{ fontSize: 12, color: C.goldDeep, marginTop: 18, textAlign: "center" }}>La Ciudad de los Sentidos 🍬 · v2.37</div>
+      <Footer />
+
+      <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
+        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}><Highlighted text={story.storyEs} /></p>}
+      </Sheet>
+    </div></div>
+  );
+}
+
+export default function SimuladorJugador() {
+  const [entered, setEntered] = useState(false);
+  const [chapterShown, setChapterShown] = useState(false);
+  const [role, setRole] = useState(null);
+  const [session, setSession] = useState(loadScore);
+  // Облачный счёт: warmup — очки разминки Don Verbo, total — общий (тренажёр + разминка)
+  const [cloud, setCloud] = useState(null);
+  const tg = useRef(getTg());
+
+  // Доступ по Пропуску (ТЗ шаг 2): undefined = грузим; затем { status, expiresAt }.
+  const [access, setAccess] = useState(undefined);
+  useEffect(() => {
+    let t = tg.current;
+    // Превью в браузере (для тестов Оксаны): ?tgId=... подставляет личность вне Telegram.
+    if (!t) {
+      try {
+        const q = new URLSearchParams(window.location.search).get("tgId");
+        if (q && /^\d+$/.test(q)) t = { id: Number(q), name: "preview" };
+      } catch (e) { /* noop */ }
+    }
+    if (!t) { setAccess({ status: "notg" }); return; }
+    let alive = true;
+    fetchAccess(t.id)
+      .then((a) => { if (alive) setAccess(a); })
+      .catch(() => { if (alive) setAccess({ status: "none" }); });
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    const t = tg.current;
+    if (!t) return;
+    (async () => {
+      try {
+        let synced = false;
+        try { synced = !!localStorage.getItem(CLOUD_SYNC_KEY); } catch { /* приватный режим */ }
+        let sc;
+        if (!synced) {
+          // одноразовый переезд накопленной копилки в облако (HSETNX — без задвоения)
+          const s = loadScore();
+          sc = await cloudCall({ action: "sync", tgId: t.id, name: t.name, detective: s.detective, canon: s.canon, fantasia: s.fantasia, diario: s.diario });
+          try { localStorage.setItem(CLOUD_SYNC_KEY, "1"); } catch { /* приватный режим */ }
+        } else {
+          sc = await cloudCall({ action: "get", tgId: t.id });
+        }
+        setCloud(sc);
+        // облако — источник правды для общего счёта: подтягиваем локальную копилку,
+        // если в облаке больше (другое устройство / чистый localStorage)
+        setSession(prev => {
+          const n = { ...prev };
+          let changed = false;
+          for (const k of ["detective", "canon", "fantasia", "diario"]) {
+            if ((sc[k] || 0) > (n[k] || 0)) { n[k] = sc[k]; changed = true; }
+          }
+          if (changed) saveScore(n);
+          return changed ? n : prev;
+        });
+      } catch { /* офлайн или база недоступна — тренажёр работает локально */ }
+    })();
+  }, []);
+
+  function addScore(roleKey, pts) {
+    if (pts > 0) {
+      setSession(s => { const n = { ...s, [roleKey]: (s[roleKey] || 0) + pts }; saveScore(n); return n; });
+      const t = tg.current;
+      if (t) cloudCall({ action: "add", tgId: t.id, src: roleKey, pts, name: t.name }).then(setCloud).catch(() => {});
+    }
+  }
+  const [showTour, setShowTour] = useState(() => !tourSeen());
+  // Deep-link из бота Don Verbo: ?verbo=preguntar&nivel=N&grupo=erir открывает тренажёр.
+  // Если verbo пришёл — ВСЕГДА открываем тренажёр (тип выбирается ниже по nivel/grupo).
+  // Никакой проверки «глагол в списке» — иначе незнакомый глагол выкидывал на лицевой экран.
+  // Каждый тренажёр (ConjTrainer / PerfectoConjugation / PresenteErIrTrainer) сам делает
+  // fallback на первый глагол своего набора, если startVerb ему незнаком.
+  const [deepVerb, setDeepVerb] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("verbo") || null;
+    } catch { return null; }
+  });
+  const [deepNivel, setDeepNivel] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("nivel") || "1"; } catch { return "1"; }
+  });
+  const [deepGrupo, setDeepGrupo] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("grupo") || ""; } catch { return ""; }
+  });
+  // Deep-link ?tema=<id> из капсул Don Verbo: отработка глагола идёт через раздел Gramática —
+  // сразу в дрилл нужной темы (presente-reg / presente-orto / presente-raiz / perfecto…).
+  // Приоритетнее ?verbo= — новая логистика капсул Сезонов 1–2.
+  const [deepTema, setDeepTema] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("tema") || null; } catch { return null; }
+  });
+  // Показывать тренажёр Perfecto (Уровень 2)
+  const [showPerfecto, setShowPerfecto] = useState(false);
+  const [showDiario2, setShowDiario2] = useState(false);
+  const [showPresenteErIr, setShowPresenteErIr] = useState(false);
+  // Libro Vivo — живая книга «Королевство Карамели», третья самостоятельная активность
+  const [showLibro, setShowLibro] = useState(false);
+  // Gramática — грамматический справочник, четвёртая самостоятельная активность
+  const [showGramatica, setShowGramatica] = useState(false);
+
+  // Выбранная игра (картридж). null → показываем меню выбора главы.
+  const [pack, setPack] = useState(null);
+  const goDiario = () => { setRole("diario"); setEntered(true); };
+  const goPerfecto = () => setShowPerfecto(true);
+  const goDiario2 = () => setShowDiario2(true);
+  const grammarAction = pack && pack.grammarRoute === "capsulas-a1"
+    ? () => setDeepTema("capsulas-a1")
+    : (pack && pack.grammarRoute === "perfecto") ? goPerfecto : goDiario;
+  // session + очки разминки Don Verbo из облака — для бейджа копилки
+  const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
+
+  // --- Витрина доступа (ТЗ «Пропуск в Город», шаг 2) ---
+  if (access === undefined) return <AccessLoading />;
+  if (access.status === "notg") return <OpenInBot />;
+  const acc = accessMap(access.status);
+  if (access.status === "none") return <NoPassScreen />;
+
+  // Deep-link из капсул Дона: дрилл темы. Perfecto — только club; presente — trial1+.
+  if (deepTema) {
+    if (!temaAllowed(deepTema, acc)) return <LockedScreen status={access.status} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
+    return <Gramatica startTema={deepTema} onBack={() => { setDeepTema(null); setDeepVerb(null); }} />;
+  }
+  if (deepVerb && deepNivel === "2") {
+    if (!acc.perfecto) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <PerfectoTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => { setDeepVerb(null); }} />;
+  }
+  if (deepVerb && deepGrupo === "erir") {
+    if (!acc.perfecto) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <PresenteErIrTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
+  }
+  if (deepVerb) {
+    if (!acc.presente) return <LockedScreen status={access.status} onBack={() => setDeepVerb(null)} />;
+    return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
+  }
+  if (showTour) return <Tour onDone={() => setShowTour(false)} />;
+  if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
+  if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
+  if (!entered) return <LevelPicker
+    acc={acc} status={access.status}
+    onPick={(p) => { setPack(p); setEntered(true); }}
+    onLive={() => { setRole("live"); setEntered(true); }}
+    onLibro={() => setShowLibro(true)}
+    onGramatica={() => setShowGramatica(true)}
+    onTour={() => setShowTour(true)}
+  />;
+  if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
+  if (role === "diario") return <DiarioMode onHome={() => setRole(null)} onScore={p => addScore("diario", p)} session={sess} />;
+  if (showPerfecto) return <PerfectoTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPerfecto(false)} />;
+  if (showPresenteErIr) return <PresenteErIrTrainer onScore={p => addScore("diario", p)} onBack={() => setShowPresenteErIr(false)} />;
+  if (showDiario2) return <DiarioMode2 onHome={() => setShowDiario2(false)} onScore={p => addScore("diario", p)} session={sess} />;
+  if (!chapterShown) return <ChapterWelcome
+    pack={pack}
+    onEnter={() => setChapterShown(true)}
+    onDiario={pack && pack.grammarRoute === "perfecto" ? goDiario2 : goDiario}
+    onPerfecto={() => setShowPerfecto(true)}
+    onPresenteErIr={() => setShowPresenteErIr(true)}
+    onCapsules={() => setDeepTema("capsulas-a1")}
+    onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
+  />;
+  if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
+  if (role === "detective") return <DetectiveMode pack={pack} onHome={() => setRole(null)} onScore={p => addScore("detective", p)} session={sess} onDiario={grammarAction} />;
+  return <WitnessMode pack={pack} role={role} onHome={() => setRole(null)} onScore={p => addScore(role, p)} session={sess} onDiario={grammarAction} />;
+}
+
+// ============================================================
+// ВЫБОР УРОВНЯ — первый экран после тура
+// ============================================================
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour }) {
+  const [locked, setLocked] = useState(null);
+  const toClub = status === "trial1" || status === "trial2";
+  const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
+  const ctaLabel = toClub ? "🏛 Войти в клуб" : "📡 Открытый канал";
+
+  // Обёртка карточки: открыта → свой onClick; закрыта → витрина замка.
+  function Gate({ open, title, onOpen, children }) {
+    if (open) return <div onClick={onOpen}>{children}</div>;
+    return (
+      <div style={{ position: "relative" }} onClick={() => setLocked(title)}>
+        <div style={{ filter: "grayscale(0.9)", opacity: 0.5, pointerEvents: "none" }}>{children}</div>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <div style={{ background: "rgba(255,255,255,0.94)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "9px 15px", fontSize: 13, fontWeight: 800, color: C.goldDeep, fontFamily: SERIF, textAlign: "center", boxShadow: "0 4px 14px rgba(61,43,31,0.18)" }}>
+            🔒 Открывается жителям Города
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Bienvenido · добро пожаловать" />
+
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
+        Выбери уровень, который тренируешь, или подключайся к живой игре:
+      </p>
+
+      {/* Libro Vivo — живая книга */}
+      <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
+      <div style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.gold}`,
+        boxShadow: "0 6px 22px rgba(201,162,75,0.22)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📖</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 4 }}>Libro Vivo · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
+        <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
+      </div>
+      </Gate>
+
+      {/* Уровень 1 — золотой */}
+      <Gate open={acc.cap1} title="Nivel 1" onOpen={() => onPick(PACKS.cap1)}>
+      <div style={{
+        background: C.gold, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(201,162,75,0.30)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap1.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 1 · {PACKS.cap1.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap1.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap1.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap1.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      {/* Уровень 2 — изумрудный */}
+      <Gate open={acc.cap2} title="Nivel 2" onOpen={() => onPick(PACKS.cap2)}>
+      <div style={{
+        background: C.emerald, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(22,121,91,0.28)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap2.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 2 · {PACKS.cap2.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} улик · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      {/* Уровень 3 — светлый изумруд: три прошедших времени */}
+      <Gate open={acc.cap3} title="Nivel 3" onOpen={() => onPick(PACKS.cap3)}>
+      <div style={{
+        background: C.emeraldLight, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(63,174,134,0.28)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap3.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 3 · {PACKS.cap3.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap3.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap3.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap3.VERBS.length} улик · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      {/* Уровень 4 — глаголы-операторы, первый этаж 3×7 */}
+      <Gate open={acc.cap4} title="Nivel 4" onOpen={() => onPick(PACKS.cap4)}>
+      <div style={{
+        background: C.goldDeep, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(166,124,46,0.30)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap4.emoji}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 4 · {PACKS.cap4.grammar}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap4.titulo}</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap4.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.70)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap4.VERBS.length} улик · 21 вопрос · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      {/* Gramática — справочник */}
+      <Gate open={acc.gramatica} title="Грамматика" onOpen={onGramatica}>
+      <div style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.emerald}`,
+        boxShadow: "0 6px 22px rgba(22,121,91,0.18)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📐</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.emeraldDeep, textTransform: "uppercase", marginBottom: 4 }}>Gramática · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.emeraldDeep, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Грамматика</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Справочник Королевства: правила по-русски, примеры из наших историй и тренировка после каждой темы</div>
+        <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>El verbo · три спряжения · Presente</div>
+      </div>
+      </Gate>
+
+      {/* Живая игра — малиновая, отдельно */}
+      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "8px 0 16px" }} />
+      <Gate open={acc.live} title="Пульт живой игры" onOpen={onLive}>
+      <div style={{
+        background: C.raspberry, borderRadius: 20, padding: "22px 24px",
+        cursor: "pointer", textAlign: "center",
+        boxShadow: "0 4px 16px rgba(168,27,62,0.22)",
+      }}>
+        <div style={{ fontSize: 28, marginBottom: 6 }}>🎮</div>
+        <div style={{ fontSize: 19, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Пульт живой игры</div>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", marginTop: 6 }}>Только во время Zoom-игры</div>
+      </div>
+      </Gate>
+
+      <div style={{ textAlign: "center", marginTop: 18 }}>
+        <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          ❓ Правила игры — посмотреть снова
+        </button>
+      </div>
+
+      <Footer />
+
+      {/* CTA замка */}
+      <Sheet open={!!locked} onClose={() => setLocked(null)} title={locked ? `🔒 ${locked}` : ""}>
+        <p style={{ fontSize: 15, lineHeight: 1.7, margin: "0 0 16px" }}>{toClub ? "Эта часть Города открыта участникам клуба — там весь уровень, книга целиком и живые игры." : "Эта часть Города открывается жителям. Начни с Пропуска: осмотрись и попробуй, дальше двери откроются сами."}</p>
+        <button onClick={() => openTg(ctaUrl)} style={CTA_BTN}>{ctaLabel}</button>
+      </Sheet>
+    </div></div>
+  );
+}
+
+// ============================================================
+// ВЫБОР ИГРЫ (картриджа)
+// ============================================================
+function ChapterPicker({ onPick, session, onBack, onDiario }) {
+  const list = [PACKS.cap1, PACKS.cap2, PACKS.cap3, PACKS.cap4];
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="Elige el caso · выбери дело" />
+      <ScoreBadge session={session} />
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Четыре игры La Cata a Ciegas. Выбери, какую сегодня тренируешь:</p>
+      {list.map((p) => (
+        <div key={p.id} onClick={() => onPick(p)} style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C[p.accent] || C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+          <div style={{ width: 7, background: C[p.accent] || C.gold, flexShrink: 0 }} />
+          <div style={{ padding: "16px 18px", flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".7px", color: C.goldDeep, textTransform: "uppercase" }}>{p.emoji} Capítulo {p.num} · {p.grammar}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: C[p.accent] || C.goldDeep, marginTop: 3, lineHeight: 1.25 }}>{p.titulo}</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.5 }}>{p.desc}</div>
+            <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 6 }}>{p.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
+          </div>
+          <div style={{ fontSize: 22, color: C.gold, alignSelf: "center", paddingRight: 12 }}>›</div>
+        </div>
+      ))}
+      {onBack && <div style={{ textAlign: "center", marginTop: 6 }}><button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад</button></div>}
+      <div style={{ textAlign: "center", marginTop: 10 }}>
+        <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          📔 Тренируешь только грамматику? Mi Diario →
+        </button>
+      </div>
+      <Footer />
+    </div></div>
+  );
+}
+
+// ============================================================
+// ВЫБОР РОЛИ
+// ============================================================
+function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) {
+  const [storyKey, setStoryKey] = useState(null);
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
+  const cards = [
+    { id: "detective", emoji: "🕵️", t: "Detective", d: `Два свидетеля: один говорит правду, другой лжёт. Задавай вопросы, сравнивай ответы и угадай ${pack.term.acc}.`, c: C.goldDeep },
+    { id: "canon", emoji: "🟢", t: "Testigo Canon", d: "Ты знаешь правду. Отвечай строго по истории, не ошибись.", c: C.emerald },
+    { id: "fantasia", emoji: "🔴", t: "Testigo Fantasía", d: "Ты врёшь красиво. Запутай детектива и уведи его от правды.", c: C.raspberry },
+  ];
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle={`Cap. ${pack.num} · ${pack.grammar} · elige tu rol`} />
+      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую игру</button></div>}
+      <ScoreBadge session={session} />
+      <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
+      {cards.map((c) => (
+        <div key={c.id} onClick={() => onPick(c.id)} style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", marginBottom: 14, cursor: "pointer", display: "flex", overflow: "hidden" }}>
+          <div style={{ width: 7, background: c.c, flexShrink: 0 }} />
+          <div style={{ padding: "16px 18px" }}>
+            <div style={{ fontSize: 19, fontWeight: 700, color: c.c }}>{c.emoji} {c.t}</div>
+            <div style={{ fontSize: 14, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 }}>{c.d}</div>
+          </div>
+        </div>
+      ))}
+
+      {/* БИБЛИОТЕКА ГЛАГОЛОВ — глаголы выбранной главы */}
+      <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.gold}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "16px 18px", marginBottom: 14 }}>
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.goldDeep }}>📖 {pack.term.fem ? "Улики игры" : "Глаголы игры"} — истории</div>
+        <p style={{ ...pHint, marginTop: 4 }}>Тап по {pack.term.fem ? "улике" : "глаголу"} — история поверх экрана. Все {pack.VERBS.length} {pack.term.objects} главы.</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+          {pack.VERBS.map((v) => (
+            <button key={v.key} onClick={() => setStoryKey(v.key)} style={{ border: `1.5px solid ${C.line}`, background: C.card, color: C.ink, borderRadius: 12, padding: "8px 13px", fontSize: 14, fontFamily: SERIF, cursor: "pointer", fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>
+              <div>{v.emoji} {v.inf}</div>
+              <div style={{ fontSize: 11, opacity: 0.75, fontWeight: 400 }}>{v.ru}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", marginTop: 6 }}>
+        <button onClick={onDiario} style={{ background: "none", border: "none", color: C.emeraldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+          {pack.grammarCta}
+        </button>
+      </div>
+      <Footer />
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
@@ -3291,3 +2244,157 @@ function Welcome({ onEnter, onDiario, onLive, onTour }) {
     </div></div>
   );
 }
+
+// ============================================================
+// ДЕТЕКТИВ — подсчёт баллов по числу вопросов
+// ============================================================
+function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario }) {
+  function freshGame() {
+    const verb = pickTarget(pack);
+    const canonIsA = Math.random() < 0.5;
+    return { verb, canonIsA, deck: shuffle(pack.QUESTIONS), idx: 0, log: [], result: null };
+  }
+  const [g, setG] = useState(freshGame);
+  const [guessing, setGuessing] = useState(false);
+  const [storyKey, setStoryKey] = useState(null);
+  const [askedInCurrent, setAskedInCurrent] = useState(new Set());
+  const [ruledOut, setRuledOut] = useState(new Set()); // отметённые детективом глаголы (гашение вручную)
+  function toggleRuled(k) {
+    setRuledOut((prev) => { const s = new Set(prev); s.has(k) ? s.delete(k) : s.add(k); return s; });
+  }
+
+  const current = g.deck[g.idx % g.deck.length];
+  const canonAns = g.verb.answers[current.id];
+  const fantasyAns = pack.fantAnsOf(g.verb)[current.id];
+  const ansA = g.canonIsA ? canonAns : fantasyAns;
+  const ansB = g.canonIsA ? fantasyAns : canonAns;
+
+  function ask(witness) {
+    if (askedInCurrent.has(witness)) return;
+    const a = witness === "A" ? ansA : ansB;
+    setG(s => ({ ...s, log: [...s.log, { qid: current.id, q: current.q, w: witness, a }] }));
+    setAskedInCurrent(s => new Set([...s, witness]));
+  }
+  function nextQ() {
+    setG(s => ({ ...s, idx: (s.idx + 1) % s.deck.length }));
+    setAskedInCurrent(new Set());
+  }
+
+  function guess(k) {
+    const ok = k === g.verb.key;
+    const qCount = g.log.length;
+    let pts = 0;
+    if (ok) pts = qCount <= 9 ? 5 : qCount <= 18 ? 3 : 1;
+    if (ok) onScore(pts);
+    setG((s) => ({ ...s, result: { ok, picked: k, pts, qCount } }));
+    setGuessing(false);
+  }
+  function reset() { setG(freshGame()); setGuessing(false); setStoryKey(null); setAskedInCurrent(new Set()); setRuledOut(new Set()); }
+
+  const story = storyKey ? pack.verbByKey(storyKey) : null;
+
+  return (
+    <div style={wrap}><div style={maxw}>
+      <Header subtitle="🕵️ Детектив · один свидетель лжёт" />
+      <ScoreBadge session={session} />
+
+      {g.result && (
+        <Block stripe={g.result.ok ? C.emerald : C.raspberry}>
+          <h2 style={{ ...h2, color: g.result.ok ? C.emeraldDeep : C.raspberryDeep }}>
+            {g.result.ok ? "🎉 Верно!" : "❌ Почти..."}
+          </h2>
+          <p style={{ fontSize: 15, margin: "6px 0" }}>
+            {pack.term.nom} был{pack.term.fem ? "а" : ""}: <strong style={{ color: C.raspberry }}>{g.verb.emoji} {g.verb.inf}</strong> — {g.verb.ru}.
+            {!g.result.ok && <> Ты поверил не тому свидетелю. Назвал: <strong>{pack.verbByKey(g.result.picked).inf}</strong> — {pack.verbByKey(g.result.picked).ru}.</>}
+          </p>
+          {g.result.ok && (
+            <div style={{ marginTop: 10, background: C.goldSoft, border: `1px solid ${C.gold}`, borderRadius: 10, padding: "10px 14px", display: "inline-block" }}>
+              <span style={{ fontSize: 13, color: C.goldDeep }}>Угадал за {g.result.qCount} вопросов · </span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: C.raspberry }}>+{g.result.pts}</span>
+              <span style={{ fontSize: 13, color: C.goldDeep }}> {g.result.pts === 5 ? "🔥 Молниеносно!" : g.result.pts === 3 ? "👍 Хорошо!" : "✓ Угадал"}</span>
+            </div>
+          )}
+          <p style={pHint}>Свидетель {g.canonIsA ? "A" : "B"} говорил правду (Канон). Свидетель {g.canonIsA ? "B" : "A"} лгал (Фантазия).</p>
+          <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+            <Btn bg={C.gold} onClick={reset}>🔄 Новый раунд</Btn>
+            <Btn bg={C.emeraldDeep} onClick={onDiario}>{pack.grammarCtaShort}</Btn>
+          </div>
+          {!g.result.ok && <p style={{ ...pHint, marginTop: 8 }}>Совет: впиши глаголы дня в Mi Diario — после этого их легче различать на допросе.</p>}
+        </Block>
+      )}
+
+      {!g.result && (
+        <>
+          {/* ИСТОРИЯ ДОПРОСА */}
+          <Block stripe={C.emerald}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h2 style={h2}>📋 История допроса</h2>
+              <span style={{ fontSize: 13, color: C.inkSoft }}>{g.log.length} preguntas · новые сверху</span>
+            </div>
+            <div style={{ marginTop: 8, maxHeight: 200, overflowY: "auto" }}>
+              {g.log.length === 0 && <p style={pHint}>Ещё ни одного вопроса. Задавай — один свидетель лжёт. Сравнивай ответы A и B.</p>}
+              {(() => {
+                const groups = [];
+                g.log.forEach(e => {
+                  const last = groups[groups.length - 1];
+                  if (last && last.q === e.q && !last.entries.find(x => x.w === e.w)) {
+                    last.entries.push(e);
+                  } else {
+                    groups.push({ q: e.q, entries: [e], num: groups.length + 1 });
+                  }
+                });
+                return groups.slice().reverse().map((grp, i) => (
+                  <div key={i} style={{ marginBottom: 10, paddingBottom: 10, borderBottom: i < groups.length - 1 ? `1px dashed ${C.line}` : "none" }}>
+                    <div style={{ fontSize: 13.5, color: C.ink, marginBottom: 5 }}>
+                      <span style={{ color: C.goldDeep, fontWeight: 700 }}>#{grp.num}</span> {grp.q}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {grp.entries.map((e, j) => (
+                        <div key={j} style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", background: C.cream, borderRadius: 8, padding: "4px 10px", border: `1px solid ${C.line}` }}>
+                          <span style={{ fontSize: 13, color: "#fff", background: e.w === "A" ? C.goldDeep : C.inkSoft, borderRadius: 6, padding: "1px 8px", fontWeight: 600 }}>
+                            {e.w}
+                          </span>
+                          <SiNo v={e.a} />
+                          {pack.fullAnswer && <span style={{ fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{pack.fullAnswer(e.qid, e.a)}</span>}
+                        </div>
+                      ))}
+                      {grp.entries.length === 2 && grp.entries[0].a !== grp.entries[1].a && (
+                        <span style={{ fontSize: 12, color: C.raspberry, fontWeight: 700, alignSelf: "center" }}>⚡ Расходятся!</span>
+                      )}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+          </Block>
+
+          {/* ВОПРОС — главное действие, сразу под историей допроса */}
+          <Block stripe={C.goldDeep}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <div style={tag}>{qLabel(current, pack)}</div>
+              <button onClick={nextQ} style={{ background: "none", border: `1px solid ${C.line}`, borderRadius: 99, padding: "4px 12px", color: C.goldDeep, fontSize: 12.5, cursor: "pointer", fontFamily: SERIF, fontWeight: 600 }}>↻ Пропустить</button>
+            </div>
+            <div style={{ fontSize: 19, fontWeight: 600, color: C.ink, lineHeight: 1.4, background: C.cream, border: `1px solid ${C.line}`, borderRadius: 12, padding: "16px", margin: "8px 0 6px" }}>{current.q}</div>
+            <div style={{ ...pHint, marginBottom: 8 }}>{current.ru}</div>
+            {/* Счёт и правила баллов — сразу на виду */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: C.cream, borderRadius: 8, border: `1px dashed ${C.line}`, padding: "6px 11px", marginBottom: 12 }}>
+              <span style={{ fontSize: 12.5, color: C.goldDeep, fontWeight: 700 }}>Задано: {g.log.length}</span>
+              <span style={{ fontSize: 12, color: C.inkSoft }}>до 9 → <strong style={{ color: C.raspberry }}>+5</strong> · до 18 → <strong>+3</strong> · позже → <strong>+1</strong></span>
+            </div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, marginBottom: 8 }}>Кому задать вопрос?</div>
+            <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+              <Btn
+                bg={askedInCurrent.has("A") ? "#B0A48C" : C.goldDeep}
+                onClick={() => ask("A")}
+                disabled={askedInCurrent.has("A")}
+                style={{ flex: 1 }}
+              >
+                {askedInCurrent.has("A") ? "✓ A ответил" : "Спросить у A"}
+              </Btn>
+              <Btn
+                bg={askedInCurrent.has("B") ? "#B0A48C" : C.inkSoft}
+                onClick={() => ask("B")}
+                disabled={askedInCurrent.has("B")}
+                style={{ flex: 1 }}
+              >
+                {askedInCurrent.has("B") ? "✓ B ответил" : "Спросить у B"}
