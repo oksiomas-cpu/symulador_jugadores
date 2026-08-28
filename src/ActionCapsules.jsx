@@ -6,6 +6,7 @@ import {
   capsuleByIds,
   capsulePhrase,
 } from "./actionCapsulesData.js";
+import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -69,6 +70,162 @@ function Choice({ active, children, onClick, disabled }) {
 
 function Progress({ index, total }) {
   return <div style={{ display: "flex", gap: 5, marginBottom: 16 }}>{Array.from({ length: total }, (_, i) => <div key={i} style={{ height: 5, flex: 1, borderRadius: 999, background: i <= index ? C.gold : C.line }} />)}</div>;
+}
+
+function DialogueLine({ speaker, text, missing = false }) {
+  return <div style={{ marginBottom: 10 }}>
+    <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: ".5px", textTransform: "uppercase" }}>{speaker}</div>
+    <div style={{ marginTop: 3, padding: "10px 12px", borderRadius: 12, background: missing ? C.cream : "#fff", border: `1px solid ${missing ? C.gold : C.line}`, fontSize: 15, lineHeight: 1.5, fontWeight: missing ? 800 : 600 }}>{text}</div>
+  </div>;
+}
+
+function shuffledTokens(dialogue) {
+  const result = dialogue.answerTokens.map((text, index) => ({ id: `${dialogue.id}-${index}`, text, index }));
+  let seed = dialogue.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const j = Math.floor((seed / 233280) * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function DialogueExercise({ dialogue, onSolved }) {
+  const tokens = useMemo(() => shuffledTokens(dialogue), [dialogue]);
+  const [selected, setSelected] = useState([]);
+  const [feedback, setFeedback] = useState(null);
+  const answer = dialogue.answerTokens.join(" ");
+  const assembled = selected.map(id => tokens.find(token => token.id === id)?.text).filter(Boolean).join(" ");
+  const remaining = tokens.filter(token => !selected.includes(token.id));
+
+  function checkAnswer() {
+    if (assembled === answer) {
+      setFeedback({ ok: true });
+      return;
+    }
+    const selectedIndexes = selected.map(id => tokens.find(token => token.id === id)?.index);
+    const mismatch = selectedIndexes.findIndex((sourceIndex, targetIndex) => sourceIndex !== targetIndex);
+    const layer = dialogue.layers[Math.max(0, mismatch)] || "CAPSULA";
+    setFeedback({ ok: false, layer });
+  }
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 2 · ${dialogue.number} de ${QUERER_DIALOGUES.length}`} title={dialogue.title} sub={dialogue.context} />
+    <Progress index={dialogue.number - 1} total={QUERER_DIALOGUES.length} />
+    <Card>
+      {dialogue.before.map((line, index) => <DialogueLine key={`before-${index}`} {...line} />)}
+      <DialogueLine speaker={dialogue.answerSpeaker} text={feedback?.ok ? answer : assembled || "…"} missing={!feedback?.ok} />
+      {feedback?.ok && dialogue.after.map((line, index) => <DialogueLine key={`after-${index}`} {...line} />)}
+
+      {!feedback?.ok && <>
+        <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, margin: "18px 0 8px", letterSpacing: ".6px" }}>CONSTRUYE LA RESPUESTA</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {remaining.map(token => <button key={token.id} onClick={() => { setSelected(items => [...items, token.id]); setFeedback(null); }} style={{ border: `1.5px solid ${C.gold}`, borderRadius: 999, background: C.card, color: C.ink, padding: "9px 12px", fontFamily: SERIF, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>{token.text}</button>)}
+        </div>
+        {selected.length > 0 && <button onClick={() => { setSelected(items => items.slice(0, -1)); setFeedback(null); }} style={{ marginTop: 12, border: 0, background: "none", color: C.inkSoft, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Quitar la última parte</button>}
+        {feedback && !feedback.ok && <div style={{ marginTop: 14, background: "#FFF4F5", border: `1px solid ${C.raspberry}`, borderRadius: 12, padding: 12, color: C.raspberry, fontSize: 13.5, lineHeight: 1.55 }}><b>Revisa la capa: {feedback.layer}.</b><br />La acción debe conservarse en infinitivo y todos los participantes de la escena deben permanecer en la frase.</div>}
+        <button disabled={selected.length !== tokens.length} onClick={checkAnswer} style={{ marginTop: 14, width: "100%", background: selected.length === tokens.length ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: selected.length === tokens.length ? "pointer" : "default" }}>Comprobar la cápsula</button>
+      </>}
+
+      {feedback?.ok && <>
+        <div style={{ marginTop: 14, color: C.emeraldDeep, background: "#ECF8F3", borderRadius: 12, padding: 12, textAlign: "center", fontWeight: 900 }}>La intención está completa.</div>
+        <button onClick={onSolved} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{dialogue.number === QUERER_DIALOGUES.length ? "Ir al interrogatorio →" : "Continuar el diálogo →"}</button>
+      </>}
+    </Card>
+  </div></div>;
+}
+
+function pickReviewQuestions() {
+  const pool = [...QUERER_REVIEW];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 4);
+}
+
+function MeaningReview({ onFinish }) {
+  const questions = useMemo(() => pickReviewQuestions(), []);
+  const [index, setIndex] = useState(0);
+  const [picked, setPicked] = useState(null);
+  const [correct, setCorrect] = useState(0);
+  const [missed, setMissed] = useState([]);
+  const question = questions[index];
+  const isCorrect = picked === question?.answer;
+
+  function next() {
+    const nextCorrect = correct + (isCorrect ? 1 : 0);
+    const nextMissed = isCorrect ? missed : [...missed, question.sourceId];
+    if (index === questions.length - 1) {
+      onFinish({ correct: nextCorrect, total: questions.length, missed: nextMissed });
+      return;
+    }
+    setCorrect(nextCorrect);
+    setMissed(nextMissed);
+    setIndex(value => value + 1);
+    setPicked(null);
+  }
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Interrogatorio · ${index + 1} de ${questions.length}`} title="Don Verbo pregunta" sub="No repitas la frase: reconstruye el sentido." />
+    <Progress index={index} total={questions.length} />
+    <Card>
+      <div style={{ fontSize: 19, lineHeight: 1.5, fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{question.question}</div>
+      <div style={{ display: "grid", gap: 9 }}>
+        {question.options.map(option => <Choice key={option} active={picked === option} disabled={!!picked} onClick={() => setPicked(option)}>{option}</Choice>)}
+      </div>
+      {picked && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, textAlign: "center", background: isCorrect ? "#ECF8F3" : "#FFF4F5", color: isCorrect ? C.emeraldDeep : C.raspberry, fontWeight: 900 }}>{isCorrect ? "Sí. Has reconstruido la intención." : `La respuesta de la escena es: ${question.answer}.`}</div>}
+      {picked && <button onClick={next} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{index === questions.length - 1 ? "Cerrar el informe →" : "Siguiente pregunta →"}</button>}
+    </Card>
+  </div></div>;
+}
+
+function IntentionsFinish({ result, onAgain, onBack }) {
+  return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 2 · completada" title="Informe de intenciones" sub={`${result.correct} de ${result.total} respuestas reconstruidas con precisión.`} />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 38, marginBottom: 8 }}>{result.correct === result.total ? "✦" : "↻"}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>Ya sabemos <b>qué querían hacer</b> Tomás y Lucía.<br />Todavía no sabemos qué podían hacer realmente.</div>
+      {result.missed.length > 0 && <div style={{ marginTop: 14, background: C.cream, borderRadius: 12, padding: 12, color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5 }}>Don Verbo volverá a preguntar por: <b>{result.missed.join(" · ")}</b>.</div>}
+      <button onClick={onAgain} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Repetir la cápsula</button>
+      <button onClick={() => { window.location.search = "?tema=op-querer"; }} style={{ marginTop: 9, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>Practicar QUERER en Gramática</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+}
+
+function Intentions({ onBack }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 2 · QUERER" title={QUERER_INTRO.title} sub="Reconstruye una intención completa. No traduzcas: sigue la escena." />
+    <Card>
+      {QUERER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{QUERER_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = QUERER_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} onSolved={() => {
+      if (dialogueIndex === QUERER_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula2:querer", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish result={result || { correct: 0, total: 4, missed: [] }} onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }} onBack={onBack} />;
 }
 
 function Finish({ score, total, onAgain, onBack }) {
@@ -179,6 +336,11 @@ function Start({ onMode, onBack }) {
       <Capsule {...demo} />
       <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Yo quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
     </Card>
+    <button onClick={() => onMode("intentions")} style={{ width: "100%", marginBottom: 14, background: `linear-gradient(135deg, ${C.raspberry}, #74132D)`, color: "#fff", border: `1.5px solid ${C.gold}`, borderRadius: 16, padding: "16px 17px", textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 5px 16px rgba(116,19,45,.18)" }}>
+      <div style={{ color: "#F8DFA2", fontSize: 10.5, fontWeight: 900, letterSpacing: "1.2px", textTransform: "uppercase" }}>Cápsula 2 · QUERER</div>
+      <div style={{ fontSize: 20, fontWeight: 900, margin: "5px 0" }}>La Sala de las Intenciones</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.45, opacity: .94 }}>10 diálogos sin traducción · construye la frase · reconstruye el sentido</div>
+    </button>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
       {MODE_INFO.map(([id, title, sub], i) => <button key={id} onClick={() => onMode(id)} style={{ minHeight: 118, background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 15, padding: 13, textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 3px 12px rgba(201,162,75,.12)" }}>
         <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900 }}>{i + 1}</div>
@@ -197,5 +359,6 @@ export default function ActionCapsules({ onBack }) {
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
   if (mode === "story") return <Story onBack={() => setMode("start")} />;
+  if (mode === "intentions") return <Intentions onBack={() => setMode("start")} />;
   return <Start onMode={setMode} onBack={onBack} />;
 }

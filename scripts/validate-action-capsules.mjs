@@ -4,6 +4,7 @@ import {
   CAPSULE_STORIES,
   capsulePhrase,
 } from "../src/actionCapsulesData.js";
+import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -34,6 +35,15 @@ check("русские подсказки третьего лица естест�
 check("русские задания используют естественные операторы", CAPSULE_OPERATORS.map(op => op.taskRu).join("|") === "я хочу|я могу|мне нужно");
 check("у каждого действия есть цельное русское задание", CAPSULE_ACTIONS.every(action => action.taskRu && !action.taskRu.includes("  ")));
 
+check("Капсула 2 содержит ровно 10 диалогов", QUERER_DIALOGUES.length === 10);
+check("ID диалогов Капсулы 2 уникальны", new Set(QUERER_DIALOGUES.map(x => x.id)).size === QUERER_DIALOGUES.length);
+check("каждый диалог собирает законченную реплику", QUERER_DIALOGUES.every(x => x.answerTokens?.length >= 3 && x.answerTokens.length === x.layers?.length));
+check("опрос Капсулы 2 содержит 10 смысловых вопросов", QUERER_REVIEW.length === 10);
+check("каждый вопрос связан с существующим диалогом", QUERER_REVIEW.every(x => QUERER_DIALOGUES.some(d => d.id === x.sourceId)));
+check("в каждом вопросе один точный ответ", QUERER_REVIEW.every(x => x.options?.length === 3 && x.options.filter(option => option === x.answer).length === 1));
+const capsule2Text = JSON.stringify({ intro: QUERER_INTRO, dialogues: QUERER_DIALOGUES, review: QUERER_REVIEW });
+check("в Капсуле 2 нет русского перевода", !/[А-Яа-яЁё]/.test(capsule2Text));
+
 const gramatica = readFileSync(new URL("../src/Gramatica.jsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../src/SimuladorJugador.jsx", import.meta.url), "utf8");
 const trainer = readFileSync(new URL("../src/ActionCapsules.jsx", import.meta.url), "utf8");
@@ -41,6 +51,8 @@ check("тренажёр встроен в каталог Gramática", gramatica.
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
 check("сетки операторов безопасны для узкого экрана", trainer.includes('repeat(3, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
 check("старое общее поле third не осталось в интерфейсе", !trainer.includes("operator.third"));
+check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
+check("результат смыслового опроса сохраняется для Don Verbo", trainer.includes('ciudad:capsula2:querer'));
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
