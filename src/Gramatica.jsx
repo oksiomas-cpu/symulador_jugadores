@@ -494,6 +494,82 @@ function TemaParticipiosIrr({ onBack, onTrain }) {
   );
 }
 
+// ============================================================
+// ТЕМА II.6 — Pretérito Imperfecto (регулярные + 3 неправильных: ser, ir, ver)
+// Источник примеров — утверждённые карточки-улики «El Caso de las Tres Huellas»
+// (блок «Vida habitual · Imperfecto» в каждой карточке), плюс два новых
+// предложения для ir/ver, согласованные с Оксаной 28.08.2026.
+// ============================================================
+function TemaImperfecto({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена" title="Pretérito Imperfecto" sub="Третье время допроса Шефа: не «что случилось», а «как всё было обычно» — привычки, описания, фон, на котором произошла улика." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A1–A2" /></div>
+
+      <RuleCard>
+        Pretérito Imperfecto — самое простое время из всех прошедших: у него всего <b>два набора окончаний</b>, и корень глагола не меняется никогда (в отличие от Presente с его чередованиями).
+        <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
+          llev<span style={{ color: C.goldDeep, fontWeight: 800 }}>aba</span> · serv<span style={{ color: C.goldDeep, fontWeight: 800 }}>ía</span>
+        </div>
+        <div style={{ marginTop: 10 }}>
+          <b>-AR</b> получает окончания на <b>-aba</b> (llevar → llevaba). <b>-ER и -IR</b> получают одинаковые окончания на <b>-ía</b> (tener → tenía, servir → servía) — разницы между 2-й и 3-й группой здесь нет вообще.
+        </div>
+        <Nota>Даже <b>encender</b>, который в Presente превращается в enciendo (e→ie), в Imperfecto ведёт себя абсолютно регулярно: enc<b>e</b>ndía, без чередования. Чередования Presente в Imperfecto не работают ни у одного глагола.</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "llevar", ru: "носить", forms: ["llevaba", "llevabas", "llevaba", "llevábamos", "llevabais", "llevaban"], endLen: [3, 4, 3, 6, 5, 4] },
+        { inf: "tener", ru: "иметь", forms: ["tenía", "tenías", "tenía", "teníamos", "teníais", "tenían"], endLen: [2, 3, 2, 5, 4, 3] },
+        { inf: "servir", ru: "служить", forms: ["servía", "servías", "servía", "servíamos", "servíais", "servían"], endLen: [2, 3, 2, 5, 4, 3] },
+      ]} />
+
+      <RuleCard>
+        <Nota>Ударение: у -AR тильда стоит только в <b>nosotros</b> (llev<b>á</b>bamos) — остальные формы без знака. У -ER/-IR тильда есть во <b>всех</b> шести формах, на -í-: ten<b>í</b>a, serv<b>í</b>amos.</Nota>
+        <Nota>Маркеры Imperfecto — не «вчера», а <b>antes, siempre, cada día / mañana / semana, normalmente, mientras</b>. С «mientras» Imperfecto показывает два действия одновременно: пока один делал одно, другой — другое.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в улике «La llave dorada» и «El libro de recetas»:</b>
+        <Ejemplo es="La llave <b>era</b> de oro y <b>era</b> única. El guardia la <b>llevaba</b> y la <b>guardaba</b> cada día." ru="ключ был золотым и единственным; охранник носил и хранил его каждый день (обычная жизнь предмета — не то, что случилось вчера)" />
+        <Ejemplo es="<b>Servía</b> para cerrar la puerta principal y el despacho. El Jefe <b>podía</b> pedirla, pero después la <b>devolvía</b>." ru="служил, чтобы запирать главную дверь и кабинет; Шеф мог попросить его, но потом возвращал (-IR и модальный глагол в одной фразе)" />
+        <Ejemplo es="El libro de recetas <b>pertenecía</b> al Jefe y <b>era</b> su tesoro. <b>Tenía</b> letras doradas." ru="книга рецептов принадлежала Шефу и была его сокровищем; на ней были золотые буквы" />
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в улике «Las lámparas»:</b>
+        <Ejemplo es="Cada mañana, el primer ayudante <b>encendía</b> la luz antes de que llegaran los demás. Las <b>limpiaban</b> cada semana." ru="каждое утро первый помощник включал свет до прихода остальных; их чистили каждую неделю (cada mañana / cada semana — маркеры привычки)" />
+        <Ejemplo es="Los ayudantes <b>podían</b> mirarlo de lejos, pero normalmente no lo <b>tocaban</b>." ru="помощники могли смотреть на неё издалека, но обычно не прикасались (normalmente)" />
+        <Ejemplo es="Mientras el guardia <b>guardaba</b> la llave, el Jefe <b>estudiaba</b> el libro de recetas." ru="пока охранник хранил ключ, Шеф изучал книгу рецептов — два привычных действия одновременно (mientras)" />
+      </RuleCard>
+
+      <RuleCard>
+        <b>Только 3 неправильных глагола на всё время</b> — ser, ir, ver. Больше исключений в Imperfecto нет ни у одного глагола испанского языка.
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "ser", ru: "быть", forms: ["era", "eras", "era", "éramos", "erais", "eran"], endLen: [4, 4, 4, 6, 5, 4] },
+        { inf: "ir", ru: "идти", forms: ["iba", "ibas", "iba", "íbamos", "ibais", "iban"], endLen: [3, 4, 3, 6, 5, 4] },
+        { inf: "ver", ru: "видеть", forms: ["veía", "veías", "veía", "veíamos", "veíais", "veían"], endLen: [4, 5, 4, 7, 6, 5] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>ser</b> и <b>ir</b> делят одну особую основу окончаний: -a, -as, -a, -amos, -ais, -an — только корень разный (er- у ser, ib- у ir).</Nota>
+        <Nota><b>ver</b> почти регулярный: просто добавляет лишнюю -e- к корню (v- → ve-) и дальше спрягается как обычный -ER: ve-ía, ve-íamos.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в допросе Шефа:</b>
+        <Ejemplo es="—La llave <b>era</b> de oro —dice el guardia." ru="«Ключ был золотым», — говорит охранник (era — единственная неправильная форма во всей фразе)" />
+        <Ejemplo es="Cada tarde, Don Verbo <b>iba</b> al mercado a comprar los ingredientes." ru="каждый вечер Don Verbo ходил на рынок за ингредиентами (привычка — ir в Imperfecto)" />
+        <Ejemplo es="Desde la Sala, los ayudantes <b>veían</b> las lámparas encendidas cada noche." ru="из Sala помощники видели зажжённые лампы каждую ночь (ver → veían, ellos)" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -598,10 +674,21 @@ const DRILLS = {
     { pre: "¿Quién", gap: "la puerta de la Sala esta noche?", inf: "abrir", ok: "ha abierto", note: "¿quién? → 3-е лицо ед.: ha + abierto." },
     { pre: "Tú nunca", gap: "tan tarde antes.", inf: "volver", ok: "has vuelto", note: "tú: has + vuelto." },
   ],
+  // II.6 — Pretérito Imperfecto: сам впиши форму (canon «El Caso de las Tres Huellas»)
+  imperfecto: [
+    { pre: "El guardia", gap: "la llave cada día.", inf: "llevar", ok: "llevaba", note: "-AR → -aba: llev-aba." },
+    { pre: "El libro de recetas", gap: "letras doradas.", inf: "tener", ok: "tenía", note: "-ER → -ía: ten-ía. tener regular en Imperfecto (a diferencia de otros tiempos)." },
+    { pre: "La llave", gap: "para cerrar la puerta principal.", inf: "servir", ok: "servía", note: "-IR → -ía, igual que -ER: serv-ía." },
+    { pre: "Los ayudantes", gap: "el libro de lejos, pero normalmente no lo tocaban.", inf: "poder", ok: "podían", note: "ellos/ellas → -ían." },
+    { pre: "Cada mañana, el primer ayudante", gap: "la luz antes de que llegaran los demás.", inf: "encender", ok: "encendía", note: "en Imperfecto encender es regular: sin el cambio e→ie que tiene en Presente." },
+    { pre: "—La llave", gap: "de oro —dice el guardia.", inf: "ser", ok: "era", note: "ser: solo 3 verbos irregulares en todo el tiempo — ser, ir, ver." },
+    { pre: "Cada tarde, Don Verbo", gap: "al mercado a comprar los ingredientes.", inf: "ir", ok: "iba", note: "ir: raíz especial ib- + terminaciones -a, -as, -a, -amos, -ais, -an." },
+    { pre: "Desde la Sala, los ayudantes", gap: "las lámparas encendidas cada noche.", inf: "ver", ok: "veían", note: "ver: añade una -e- extra a la raíz: ve-ían." },
+  ],
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -627,7 +714,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму", imperfecto: "Pretérito Imperfecto: впиши форму" };
   const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " "); // схлопываем лишние пробелы: «habéis  trabajado» = «habéis trabajado»
   const pick = (o) => {
     if (picked) return;
@@ -723,6 +810,7 @@ const BRANCHES = [
       { id: "presente-irr", title: "Presente · полностью неправильные (estar, ir…)", lvl: "A1", ready: true },
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
       { id: "participios-irr", title: "Pretérito Perfecto Compuesto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
+      { id: "imperfecto", title: "Pretérito Imperfecto", lvl: "A1–A2", ready: true },
     ],
   },
   {
@@ -822,6 +910,7 @@ const TEMA_TO_DRILL = {
   "presente-irr": "irr",
   "perfecto": "perfecto",
   "participios-irr": "participios-irr",
+  "imperfecto": "imperfecto",
 };
 
 export default function Gramatica({ onBack, startTema }) {
@@ -845,6 +934,7 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "presente-irr") return <TemaPresenteIrr onBack={() => setView("verbo")} onTrain={() => openDrill("irr", "presente-irr")} />;
   if (view === "perfecto") return <TemaPerfecto onBack={() => setView("verbo")} onTrain={() => openDrill("perfecto", "perfecto")} />;
   if (view === "participios-irr") return <TemaParticipiosIrr onBack={() => setView("verbo")} onTrain={() => openDrill("participios-irr", "participios-irr")} />;
+  if (view === "imperfecto") return <TemaImperfecto onBack={() => setView("verbo")} onTrain={() => openDrill("imperfecto", "imperfecto")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
