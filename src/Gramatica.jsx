@@ -570,6 +570,144 @@ function TemaImperfecto({ onBack, onTrain }) {
   );
 }
 
+// ============================================================
+// ТЕМА II.7 — Pretérito Indefinido (регулярные глаголы)
+// Источник примеров — карточки-улики «El Caso de las Tres Huellas»,
+// блок «El corte de ayer · Indefinido» (game3Data.js).
+// ============================================================
+function TemaIndefinido({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена" title="Pretérito Indefinido" sub="Четвёртое время допроса Шефа: не «как было обычно», а «что случилось вчера, в конкретный момент» — законченное действие с чёткой границей." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2" /></div>
+
+      <RuleCard>
+        Pretérito Indefinido рассказывает о действии, которое <b>началось и закончилось</b> в прошлом, в конкретный момент времени — в отличие от Imperfecto, который описывает фон и привычки.
+        <div style={{ textAlign: "center", fontSize: 18, margin: "12px 0 4px", color: C.ink }}>
+          guard<span style={{ color: C.goldDeep, fontWeight: 800 }}>ó</span> · abr<span style={{ color: C.goldDeep, fontWeight: 800 }}>ió</span>
+        </div>
+        <div style={{ marginTop: 10 }}>
+          <b>-AR</b> получает окончания <b>-é, -aste, -ó, -amos, -asteis, -aron</b>. <b>-ER и -IR</b> получают ОБЩИЙ набор — <b>-í, -iste, -ió, -imos, -isteis, -ieron</b>: разницы между 2-й и 3-й группой здесь так же нет, как в Imperfecto.
+        </div>
+        <Nota><b>yo и él/ella всегда с ударением</b> — é, ó, í, ió. Без знака смысл меняется: <i>hablo</i> (говорю, сейчас) ≠ <i>habló</i> (сказал, вчера).</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "guardar", ru: "хранить", forms: ["guardé", "guardaste", "guardó", "guardamos", "guardasteis", "guardaron"], endLen: [1, 4, 1, 4, 6, 4] },
+        { inf: "volver", ru: "возвращаться", forms: ["volví", "volviste", "volvió", "volvimos", "volvisteis", "volvieron"], endLen: [1, 4, 2, 4, 6, 5] },
+        { inf: "abrir", ru: "открывать", forms: ["abrí", "abriste", "abrió", "abrimos", "abristeis", "abrieron"], endLen: [1, 4, 2, 4, 6, 5] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>-AR и -IR делят форму nosotros</b> с Presente: <i>guardamos</i> звучит одинаково «(мы) храним» и «(мы) сохранили» — различает контекст и маркер времени. У -ER формы разные: <i>volvemos</i> (Presente) ≠ <i>volvimos</i> (Indefinido).</Nota>
+        <Nota>Маркеры Indefinido — не «всегда», а <b>ayer, anteayer, el año/mes pasado, la semana pasada, hace + время, de repente, en ese momento</b>.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в улике «La lupa» и «Los ingredientes»:</b>
+        <Ejemplo es="<b>Ayer</b>, a las dos, el Jefe <b>sacó</b> la lupa del cajón y <b>examinó</b> una marca extraña sobre la mesa. Después la <b>guardó</b> otra vez." ru="вчера, в два часа, Шеф достал лупу из ящика и осмотрел странную отметину; потом убрал её обратно — три законченных действия подряд" />
+        <Ejemplo es="Don Verbo <b>compró</b> una nueva porción de ingredientes en el Mercado del Caramelo. <b>Salió</b> del mercado a las seis, <b>volvió</b> al palacio y <b>entregó</b> la bolsa al primer ayudante." ru="Don Verbo купил новую порцию ингредиентов; вышел с рынка в шесть, вернулся во дворец и отдал сумку первому помощнику" />
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в улике «La puerta»:</b>
+        <Ejemplo es="El guardia <b>abrió</b> la puerta para que Don Verbo saliera hacia el Mercado del Caramelo. A las seis la <b>abrió</b> otra vez para su regreso. Después <b>cerró</b> la puerta con llave." ru="охранник открыл дверь, чтобы Don Verbo вышел на рынок; в шесть открыл её снова для его возвращения; потом запер дверь на ключ (одна и та же форма abrió — дважды, в разные моменты)" />
+        <Ejemplo es="El tercer ayudante <b>revisó</b> los últimos diez documentos. <b>Numeró</b> el documento cien y <b>guardó</b> los papeles en su caja." ru="третий помощник проверил последние десять документов, пронумеровал сотый документ и убрал бумаги в свою коробку" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
+// ============================================================
+// ТЕМА II.7b — Pretérito Indefinido: глаголы исключения (слой внутри времени)
+// Отдельная вкладка (решение Оксаны 28.08.2026) — в отличие от Imperfecto,
+// где хватило 3 исключений внутри одной темы, здесь неправильных глаголов
+// на порядок больше и они образуют три разные группы со своей логикой.
+// Канон: estuvo, dio, fue — из карточек-улик «El Caso de las Tres Huellas».
+// Остальные глаголы группы raíz fuerte — примеры в голосе мира, отдельно
+// от прямых цитат карточек; согласовать с Оксаной при следующей сверке.
+// ============================================================
+function TemaIndefinidoIrr({ onBack, onTrain }) {
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="El verbo · II. Времена · Pretérito Indefinido" title="Глаголы исключения" sub="Здесь неправильность — не одна форма, а целая новая основа. Зато у всех этих глаголов ОДИН общий набор окончаний." />
+      <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2–B1" /></div>
+
+      <RuleCard>
+        Группа частых глаголов (raíz fuerte — «сильная основа») в Indefinido меняет весь корень целиком и получает окончания <b>-e, -iste, -o, -imos, -isteis, -ieron</b> — без единого знака ударения, и в yo не -í, а <b>-e</b>; в él/ella не -ió, а голое <b>-o</b>.
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "14px 0 6px", textAlign: "center" }}>
+          {[["estar", "estuv-"], ["tener", "tuv-"], ["andar", "anduv-"], ["poder", "pud-"], ["poner", "pus-"], ["saber", "sup-"], ["querer", "quis-"], ["venir", "vin-"], ["hacer", "hic-/hiz-"], ["decir", "dij-"], ["traer", "traj-"]].map(([inf, raiz]) => (
+            <div key={inf} style={{ flex: "1 1 auto", minWidth: 74, background: C.cream, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "10px 8px" }}>
+              <div style={{ fontSize: 14, color: C.inkSoft }}>{inf}</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.raspberry, marginTop: 2 }}>{raiz}</div>
+            </div>
+          ))}
+        </div>
+        <Nota>Это полный список частотных глаголов этой группы на уровне A2–B1 — других сюрпризов здесь не будет.</Nota>
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "estar", ru: "находиться", forms: ["estuve", "estuviste", "estuvo", "estuvimos", "estuvisteis", "estuvieron"], endLen: [1, 4, 1, 4, 6, 5] },
+        { inf: "tener", ru: "иметь", forms: ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"], endLen: [1, 4, 1, 4, 6, 5] },
+        { inf: "hacer", ru: "делать", forms: ["hice", "hiciste", "hizo", "hicimos", "hicisteis", "hicieron"], endLen: [1, 4, 2, 4, 6, 5] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>estar → estuv-, tener → tuv-</b> — та же добавка -uv- к укороченной основе; окончания у всей группы одинаковые, отличается только сама основа.</Nota>
+        <Nota><b>hacer</b> в él/ella пишется <b>hizo</b>, не «hico»: c → z перед o — тот же приём, что g → j в Presente (Тема II.2): буква меняется, чтобы звук остался тем же.</Nota>
+        <Nota><b>decir → dij-, traer → traj-</b>: у глаголов с основой на -j в ellos окончание теряет i — <b>dijeron, trajeron</b>, а не «dijieron», «trajieron».</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Отдельная короткая группа — dar и ver.</b> Формально они регулярные -AR и -ER, но получают чужие, «голые» окончания без ударения — как у raíz fuerte, только основа у них не меняется, а просто теряет гласную группы.
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "dar", ru: "давать", forms: ["di", "diste", "dio", "dimos", "disteis", "dieron"], endLen: [1, 4, 2, 4, 6, 5] },
+        { inf: "ver", ru: "видеть", forms: ["vi", "viste", "vio", "vimos", "visteis", "vieron"], endLen: [1, 4, 2, 4, 6, 5] },
+      ]} />
+
+      <RuleCard>
+        <Nota><b>dar</b> — глагол на -AR, но окончания как у -ER/-IR без ударения: di, diste, dio (не «dó»).</Nota>
+        <Nota><b>ver</b> — самый короткий регулярный: основа всего одна буква v-, дальше обычные -ER-окончания без знака: vi, viste, vio.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Последняя пара — ser и ir: РАЗНЫЕ глаголы, но ОДНА форма на двоих.</b> Контекст всегда подсказывает, какой из них имеется в виду.
+      </RuleCard>
+
+      <ConjTable cols={[
+        { inf: "ir / ser", ru: "идти / быть", forms: ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"], endLen: [1, 4, 1, 4, 6, 4] },
+      ]} />
+
+      <RuleCard>
+        <Nota>«<i>Fue al mercado</i>» — точно ir (движение). «<i>Fue una decisión difícil</i>» — точно ser (характеристика). Формы совпадают полностью — omónimos, не ошибка.</Nota>
+      </RuleCard>
+
+      <RuleCard>
+        <b>Так это звучало в улике «La llave» и в допросе:</b>
+        <Ejemplo es="—¿La pista <b>estuvo</b> fuera del Palacio ayer? —Sí, la pista <b>estuvo</b> fuera del Palacio ayer." ru="«Улика была вне дворца вчера?» — «Да, была» (estar, вопрос-ответ допроса)" />
+        <Ejemplo es="Ayer el guardia se la <b>dio</b> a Don Verbo y la llave <b>salió</b> del Palacio con él." ru="вчера охранник отдал его Don Verbo, и ключ покинул дворец вместе с ним (dar)" />
+        <Ejemplo es="El guardia utilizó la llave... Después cerró la puerta y guardó la llave en su bolsillo. La llave no <b>fue</b> al mercado." ru="охранник запер дверь и убрал ключ в карман; ключ на рынок не ходил (ir — движения не было)" />
+      </RuleCard>
+
+      <RuleCard>
+        <b>А так это могло бы прозвучать в допросе Шефа (примеры в голосе мира, для проверки Оксаны):</b>
+        <Ejemplo es="—<b>Tuve</b> la varilla en la mano un momento, nada más —dice el segundo ayudante." ru="«У меня венчик был в руке всего момент, не больше», — говорит второй помощник (tener)" />
+        <Ejemplo es="El Jefe <b>hizo</b> la última palabra del día antes de las ocho." ru="Шеф сделал последнее слово дня до восьми (hacer)" />
+        <Ejemplo es="—No <b>dije</b> nada sobre la sombra hasta hoy —dice el ayudante más joven." ru="«Я ничего не говорил о тени до сегодня», — говорит самый молодой помощник (decir)" />
+        <Ejemplo es="Don Verbo <b>pudo</b> volver al palacio antes de que cerraran la puerta." ru="Don Verbo успел вернуться во дворец до того, как закрыли дверь (poder)" />
+      </RuleCard>
+
+      <TrainBtn onClick={onTrain} />
+      <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
 function TrainBtn({ onClick }) {
   return (
     <div onClick={onClick} style={{ background: C.raspberry, borderRadius: 16, padding: "16px 20px", cursor: "pointer", textAlign: "center", boxShadow: "0 4px 16px rgba(168,27,62,0.22)", marginTop: 6 }}>
@@ -685,10 +823,34 @@ const DRILLS = {
     { pre: "Cada tarde, Don Verbo", gap: "al mercado a comprar los ingredientes.", inf: "ir", ok: "iba", note: "ir: raíz especial ib- + terminaciones -a, -as, -a, -amos, -ais, -an." },
     { pre: "Desde la Sala, los ayudantes", gap: "las lámparas encendidas cada noche.", inf: "ver", ok: "veían", note: "ver: añade una -e- extra a la raíz: ve-ían." },
   ],
+  // II.7 — Pretérito Indefinido regular: сам впиши форму (canon «El corte de ayer»)
+  indefinido: [
+    { pre: "El Jefe", gap: "la lupa del cajón. Después la guardó otra vez.", inf: "sacar", ok: "sacó", note: "-AR → -ó: sac-ó." },
+    { pre: "El guardia", gap: "la puerta a las cuatro y otra vez a las seis.", inf: "abrir", ok: "abrió", note: "-IR → -ió: abr-ió." },
+    { pre: "Don Verbo", gap: "una nueva porción de ingredientes en el mercado.", inf: "comprar", ok: "compró" },
+    { pre: "Yo", gap: "la puerta con llave. (слова охранника)", inf: "cerrar", ok: "cerré", note: "yo → -é: cerr-é." },
+    { pre: "El tercer ayudante", gap: "los últimos diez documentos.", inf: "revisar", ok: "revisó" },
+    { pre: "Nosotros", gap: "la bolsa al primer ayudante.", inf: "entregar", ok: "entregamos", note: "-AR, nosotros: forma совпадает с Presente — различает контекст «ayer»." },
+    { pre: "Don Verbo", gap: "al palacio a las seis.", inf: "volver", ok: "volvió", note: "-ER → -ió: volv-ió." },
+    { pre: "Tú no", gap: "nada extraño ayer. ¿Verdad?", inf: "escribir", ok: "escribiste", note: "tú → -iste: escrib-iste." },
+  ],
+  // II.7b — Pretérito Indefinido irregular (raíz fuerte + dar/ver + ser/ir): сам впиши форму
+  "indefinido-irr": [
+    { pre: "—¿La pista", gap: "fuera del Palacio ayer? —Sí, estuvo.", inf: "estar", ok: "estuvo", note: "estar → estuv- + -o (sin tilde, no «estuvó»)." },
+    { pre: "El guardia se la", gap: "a Don Verbo y la llave salió del Palacio con él.", inf: "dar", ok: "dio", note: "dar: forma corta, sin tilde — dio, no «dió»." },
+    { pre: "La llave no", gap: "al mercado.", inf: "ir", ok: "fue", note: "ir/ser comparten fui, fuiste, fue, fuimos, fuisteis, fueron." },
+    { pre: "Yo", gap: "la varilla en la mano un momento, nada más. (dice el segundo ayudante)", inf: "tener", ok: "tuve", note: "tener → tuv- + -e en yo." },
+    { pre: "El Jefe", gap: "la última palabra del día antes de las ocho.", inf: "hacer", ok: "hizo", note: "hacer → hic-, pero en él: c → z antes de o: hizo, no «hico»." },
+    { pre: "—No", gap: "nada sobre la sombra hasta hoy —dice el ayudante más joven.", inf: "decir", ok: "dije", note: "decir → dij- + -e en yo." },
+    { pre: "Don Verbo", gap: "volver al palacio antes de que cerraran la puerta.", inf: "poder", ok: "pudo", note: "poder → pud- + -o en él." },
+    { pre: "Los ayudantes", gap: "la lupa sobre la mesa de la Sala.", inf: "ver", ok: "vieron", note: "ver: forma corta sin tilde, ellos → vieron." },
+    { pre: "Nosotros no", gap: "nada extraño esa noche.", inf: "traer", ok: "trajimos", note: "traer → traj-; ellos sería trajeron, no «trajieron» — la j se come la i." },
+    { pre: "El tercer ayudante", gap: "los papeles en su caja.", inf: "poner", ok: "puso", note: "poner → pus- + -o en él." },
+  ],
 };
 
 function Drill({ setKey, onBack }) {
-  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
+  const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto", "indefinido", "indefinido-irr"].includes(setKey); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState(null);
@@ -714,7 +876,7 @@ function Drill({ setKey, onBack }) {
   );
 
   const it = items[i];
-  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму", imperfecto: "Pretérito Imperfecto: впиши форму" };
+  const TITLES = { grupos: "Определи группу глагола", personas: "Кто действует?", regulares: "Сам впиши форму", orto: "g или j? Впиши форму", raiz: "e или ie? Впиши форму", irr: "Неправильные: впиши форму", perfecto: "Haber + participio: впиши форму", "participios-irr": "Причастие неправильное: впиши форму", imperfecto: "Pretérito Imperfecto: впиши форму", indefinido: "Pretérito Indefinido: впиши форму", "indefinido-irr": "Глагол исключение: впиши форму" };
   const norm = (s) => s.trim().toLowerCase().replace(/\s+/g, " "); // схлопываем лишние пробелы: «habéis  trabajado» = «habéis trabajado»
   const pick = (o) => {
     if (picked) return;
@@ -811,6 +973,8 @@ const BRANCHES = [
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
       { id: "participios-irr", title: "Pretérito Perfecto Compuesto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
       { id: "imperfecto", title: "Pretérito Imperfecto", lvl: "A1–A2", ready: true },
+      { id: "indefinido", title: "Pretérito Indefinido · regulares", lvl: "A2", ready: true },
+      { id: "indefinido-irr", title: "Pretérito Indefinido · глаголы исключения", lvl: "A2–B1", ready: true },
     ],
   },
   {
@@ -911,6 +1075,8 @@ const TEMA_TO_DRILL = {
   "perfecto": "perfecto",
   "participios-irr": "participios-irr",
   "imperfecto": "imperfecto",
+  "indefinido": "indefinido",
+  "indefinido-irr": "indefinido-irr",
 };
 
 export default function Gramatica({ onBack, startTema }) {
@@ -935,6 +1101,8 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "perfecto") return <TemaPerfecto onBack={() => setView("verbo")} onTrain={() => openDrill("perfecto", "perfecto")} />;
   if (view === "participios-irr") return <TemaParticipiosIrr onBack={() => setView("verbo")} onTrain={() => openDrill("participios-irr", "participios-irr")} />;
   if (view === "imperfecto") return <TemaImperfecto onBack={() => setView("verbo")} onTrain={() => openDrill("imperfecto", "imperfecto")} />;
+  if (view === "indefinido") return <TemaIndefinido onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido", "indefinido")} />;
+  if (view === "indefinido-irr") return <TemaIndefinidoIrr onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido-irr", "indefinido-irr")} />;
   if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
