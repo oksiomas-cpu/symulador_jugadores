@@ -36,6 +36,20 @@ function SoonTag() {
     <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".6px", color: C.inkSoft, background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 999, padding: "3px 9px", verticalAlign: "middle" }}>скоро</span>
   );
 }
+// Название темы в списке — «имя времени · уточнение» сливались в одну строку одним цветом.
+// Делим по первому « · »: имя времени — акцентным цветом и чуть жирнее, уточнение — мягким инком.
+function TopicTitle({ title, ready }) {
+  const idx = title.indexOf(" · ");
+  if (idx === -1) return <>{title}</>;
+  const head = title.slice(0, idx);
+  const tail = title.slice(idx + 3);
+  return (
+    <>
+      <span style={{ color: ready ? C.raspberry : C.inkSoft, fontWeight: 800 }}>{head}</span>
+      <span style={{ color: C.inkSoft, fontWeight: 500 }}> · {tail}</span>
+    </>
+  );
+}
 function BackBtn({ onClick, label = "← Назад" }) {
   return (
     <div style={{ textAlign: "center", marginTop: 20 }}>
@@ -186,7 +200,8 @@ function TemaPersonas({ onBack, onTrain }) {
 
       <RuleCard>
         В каждом времени у глагола <b>шесть форм</b> — по одной на каждое грамматическое лицо:
-        <table style={{ borderCollapse: "collapse", width: "100%", margin: "12px 0 4px", fontSize: 14 }}>
+        <div style={{ overflowX: "auto", margin: "12px 0 4px" }}>
+        <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 420, fontSize: 14 }}>
           <tbody>
             {[
               ["yo", "я", "Томас о себе: «Enciendo la luz»"],
@@ -204,6 +219,7 @@ function TemaPersonas({ onBack, onTrain }) {
             ))}
           </tbody>
         </table>
+        </div>
       </RuleCard>
 
       <RuleCard>
@@ -973,7 +989,7 @@ const BRANCHES = [
       { id: "perfecto", title: "Pretérito Perfecto Compuesto", lvl: "A1–A2", ready: true },
       { id: "participios-irr", title: "Pretérito Perfecto Compuesto · причастия неправильные (vuelto, abierto…)", lvl: "A2", ready: true },
       { id: "imperfecto", title: "Pretérito Imperfecto", lvl: "A1–A2", ready: true },
-      { id: "indefinido", title: "Pretérito Indefinido · regulares", lvl: "A2", ready: true },
+      { id: "indefinido", title: "Pretérito Indefinido · регулярные глаголы", lvl: "A2", ready: true },
       { id: "indefinido-irr", title: "Pretérito Indefinido · глаголы исключения", lvl: "A2–B1", ready: true },
     ],
   },
@@ -1014,7 +1030,7 @@ function VerboIndex({ onOpen, onBack }) {
                     cursor: t.ready ? "pointer" : "default", opacity: t.ready ? 1 : 0.55,
                     display: "flex", alignItems: "center", gap: 10,
                   }}>
-                    <div style={{ flex: 1, fontSize: 14.5, fontWeight: t.ready ? 700 : 500, color: C.ink, lineHeight: 1.4 }}>{t.title}</div>
+                    <div style={{ flex: 1, fontSize: 14.5, fontWeight: t.ready ? 700 : 500, color: C.ink, lineHeight: 1.4 }}><TopicTitle title={t.title} ready={t.ready} /></div>
                     {t.ready ? <LevelTag lvl={t.lvl} /> : <SoonTag />}
                     {t.ready && <span style={{ color: C.gold, fontSize: 16 }}>›</span>}
                   </div>
