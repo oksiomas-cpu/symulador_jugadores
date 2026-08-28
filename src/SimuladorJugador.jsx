@@ -1735,8 +1735,9 @@ function LiveGame({ onHome }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, onCapsules, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onBack }) {
   const isCapOne = pack.id === "cap1";
+  const isCapThree = pack.id === "cap3";
   const isCapFour = pack.id === "cap4";
   const maya = isCapFour ? MAYA4 : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
@@ -1817,9 +1818,19 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onPresenteErIr, o
             Открыть тренажёр Pretérito Perfecto Compuesto →
           </button>
         )}
+        {isCapThree && (
+          <button onClick={onImperfecto} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            Открыть тренажёр Pretérito Imperfecto →
+          </button>
+        )}
         {!isCapOne && !isCapFour && (
           <button onClick={onPresenteErIr} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
             Presente · глаголы -ER / -IR →
+          </button>
+        )}
+        {!isCapFour && (
+          <button onClick={onCapsules} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            🧩 Капсулы действия A1 →
           </button>
         )}
       </div>
@@ -1992,6 +2003,7 @@ export default function SimuladorJugador() {
     onEnter={() => setChapterShown(true)}
     onDiario={pack && pack.grammarRoute === "perfecto" ? goDiario2 : goDiario}
     onPerfecto={() => setShowPerfecto(true)}
+    onImperfecto={() => setDeepTema("imperfecto")}
     onPresenteErIr={() => setShowPresenteErIr(true)}
     onCapsules={() => setDeepTema("capsulas-a1")}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
