@@ -37,7 +37,8 @@ function SoonTag() {
   );
 }
 // Название темы в списке — «имя времени · уточнение» сливались в одну строку одним цветом.
-// Делим по первому « · »: имя времени — акцентным цветом и чуть жирнее, уточнение — мягким инком.
+// Делим по первому « · »: имя времени — малиновым, уточнение — глубоким изумрудом.
+// Разные оттенки (не светлее/темнее одного цвета) — так различие видно даже при беглом взгляде.
 function TopicTitle({ title, ready }) {
   const idx = title.indexOf(" · ");
   if (idx === -1) return <>{title}</>;
@@ -46,7 +47,7 @@ function TopicTitle({ title, ready }) {
   return (
     <>
       <span style={{ color: ready ? C.raspberry : C.inkSoft, fontWeight: 800 }}>{head}</span>
-      <span style={{ color: C.inkSoft, fontWeight: 500 }}> · {tail}</span>
+      <span style={{ color: ready ? C.emeraldDeep : C.inkSoft, fontWeight: 700 }}> · {tail}</span>
     </>
   );
 }
