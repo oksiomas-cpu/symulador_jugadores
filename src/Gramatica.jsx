@@ -20,6 +20,23 @@ const C = {
   gold: "#C9A24B", goldDeep: "#A67C2E", goldSoft: "#EBD9A8",
   raspberry: "#A81B3E", raspberryDeep: "#7E1430",
   emerald: "#16795B", emeraldDeep: "#0F5E47", line: "#E6D6B8",
+  // Четыре акцента времён — прямо из канона Штурвала («бордовый · шоколадный · изумрудный · королевский синий»).
+  chocolate: "#8B5A2B", chocolateDeep: "#6B4226",
+  sapphire: "#3B7CB8", sapphireDeep: "#2C5F8A", // тот же синий, что уже используется в приложении (SimuladorJugador.jsx)
+};
+// Каждое время «Времена» — свой цвет, чтобы темы читались как вкладки, не сливались в один список.
+// Presente — шоколадный · Perfecto Compuesto — изумрудный · Imperfecto — бордовый · Indefinido — синий.
+const TENSE_OF_TOPIC = {
+  "presente-reg": "presente", "presente-orto": "presente", "presente-raiz": "presente", "presente-irr": "presente",
+  "perfecto": "perfecto", "participios-irr": "perfecto",
+  "imperfecto": "imperfecto",
+  "indefinido": "indefinido", "indefinido-irr": "indefinido",
+};
+const TENSE_PALETTE = {
+  presente:   { strong: C.chocolateDeep, soft: C.chocolate },
+  perfecto:   { strong: C.emeraldDeep,   soft: C.emerald },
+  imperfecto: { strong: C.raspberryDeep, soft: C.raspberry },
+  indefinido: { strong: C.sapphireDeep,  soft: C.sapphire },
 };
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 const wrap = { minHeight: "100vh", background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, fontFamily: SERIF, color: C.ink, padding: "18px 14px 90px", boxSizing: "border-box" };
@@ -36,20 +53,30 @@ function SoonTag() {
     <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: ".6px", color: C.inkSoft, background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 999, padding: "3px 9px", verticalAlign: "middle" }}>скоро</span>
   );
 }
-// Название темы в списке — «имя времени · уточнение» сливались в одну строку одним цветом.
-// Делим по первому « · »: имя времени — малиновым, уточнение — глубоким изумрудом.
-// Разные оттенки (не светлее/темнее одного цвета) — так различие видно даже при беглом взгляде.
-function TopicTitle({ title, ready }) {
+// Название темы в списке — раньше все темы «Времена» были одного цвета и сливались друг с другом.
+// Теперь каждое ВРЕМЯ красится целиком в свой акцент из TENSE_PALETTE (голова темнее/жирнее,
+// уточнение после « · » — тем же цветом чуть светлее) — так время видно на пробегающий взгляд,
+// а не только при чтении текста. Темы вне «Времена» (Устройство глагола и т.п.) остаются нейтральными.
+function TopicTitle({ title, tenseKey, ready }) {
+  const pal = ready ? TENSE_PALETTE[tenseKey] : null;
   const idx = title.indexOf(" · ");
-  if (idx === -1) return <>{title}</>;
+  if (idx === -1) {
+    return <span style={{ color: pal ? pal.strong : undefined, fontWeight: pal ? 800 : undefined }}>{title}</span>;
+  }
   const head = title.slice(0, idx);
   const tail = title.slice(idx + 3);
   return (
     <>
-      <span style={{ color: ready ? C.raspberry : C.inkSoft, fontWeight: 800 }}>{head}</span>
-      <span style={{ color: ready ? C.emeraldDeep : C.inkSoft, fontWeight: 700 }}> · {tail}</span>
+      <span style={{ color: pal ? pal.strong : C.raspberry, fontWeight: 800 }}>{head}</span>
+      <span style={{ color: pal ? pal.soft : C.emeraldDeep, fontWeight: 700 }}> · {tail}</span>
     </>
   );
+}
+// Цветная метка-«вкладка» слева от темы — тот же приём, что у Nivel 1–4 в выборе игры.
+function TenseDot({ tenseKey, ready }) {
+  const pal = ready ? TENSE_PALETTE[tenseKey] : null;
+  if (!pal) return null;
+  return <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", background: pal.strong, flexShrink: 0 }} />;
 }
 function BackBtn({ onClick, label = "← Назад" }) {
   return (
@@ -1031,7 +1058,8 @@ function VerboIndex({ onOpen, onBack }) {
                     cursor: t.ready ? "pointer" : "default", opacity: t.ready ? 1 : 0.55,
                     display: "flex", alignItems: "center", gap: 10,
                   }}>
-                    <div style={{ flex: 1, fontSize: 14.5, fontWeight: t.ready ? 700 : 500, color: C.ink, lineHeight: 1.4 }}><TopicTitle title={t.title} ready={t.ready} /></div>
+                    <TenseDot tenseKey={TENSE_OF_TOPIC[t.id]} ready={t.ready} />
+                    <div style={{ flex: 1, fontSize: 14.5, fontWeight: t.ready ? 700 : 500, color: C.ink, lineHeight: 1.4 }}><TopicTitle title={t.title} tenseKey={TENSE_OF_TOPIC[t.id]} ready={t.ready} /></div>
                     {t.ready ? <LevelTag lvl={t.lvl} /> : <SoonTag />}
                     {t.ready && <span style={{ color: C.gold, fontSize: 16 }}>›</span>}
                   </div>
