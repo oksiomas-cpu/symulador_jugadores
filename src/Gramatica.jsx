@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ActionCapsules from "./ActionCapsules.jsx";
 
 // ============================================================
 // GRAMÁTICA — грамматический справочник Ciudad.
@@ -777,6 +776,7 @@ const OPERATORS = [
   {
     id: "op-querer", verb: "querer", particle: "", meaning: "хотеть сделать",
     action: "abrir la puerta", actionRu: "открыть дверь",
+    presente: { forms: ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"], endLen: [4, 4, 4, 4, 4, 4], note: "В Presente корень e→ie меняется в yo, tú, él/ella и ellos/ellas. Nosotros и vosotros сохраняют quer-." },
     ppc: { forms: ["he querido", "has querido", "ha querido", "hemos querido", "habéis querido", "han querido"], endLen: [3, 3, 3, 3, 3, 3], note: "querido — регулярное причастие -ER: quer- + -ido." },
     indefinido: { forms: ["quise", "quisiste", "quiso", "quisimos", "quisisteis", "quisieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: quis-, окончания без ударения — quise (не «querí»), quiso (не «querió»)." },
     imperfecto: { forms: ["quería", "querías", "quería", "queríamos", "queríais", "querían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto querer полностью регулярный: quer- + -ía." },
@@ -831,8 +831,9 @@ const OPERATORS = [
     imperfecto: { forms: ["volvía", "volvías", "volvía", "volvíamos", "volvíais", "volvían"], endLen: [2, 3, 2, 5, 4, 3], note: "регулярный -ER: volv- + -ía." },
   },
 ];
-const OP_TENSE_LABEL = { ppc: "Pretérito Perfecto Compuesto", indefinido: "Pretérito Indefinido", imperfecto: "Pretérito Imperfecto" };
-const OP_TENSE_KEY = { ppc: "perfecto", indefinido: "indefinido", imperfecto: "imperfecto" };
+const OP_TENSE_LABEL = { presente: "Presente de indicativo", ppc: "Pretérito Perfecto Compuesto", indefinido: "Pretérito Indefinido", imperfecto: "Pretérito Imperfecto" };
+const OP_TENSE_KEY = { presente: "presente", ppc: "perfecto", indefinido: "indefinido", imperfecto: "imperfecto" };
+function operatorTenses(op) { return op.presente ? ["presente", "ppc", "indefinido", "imperfecto"] : ["ppc", "indefinido", "imperfecto"]; }
 function opTitle(op) { return op.verb.toUpperCase() + (op.particle ? " " + op.particle.toUpperCase() : ""); }
 function opGap(op) { return (op.particle ? op.particle + " " : "") + op.action + "."; }
 
@@ -846,7 +847,7 @@ function TemaOperador({ data: op, onBack, onTrain }) {
         Здесь спрягается только оператор <b>{op.verb}</b>{op.particle && <> — не забывай частицу <b>{op.particle}</b> после него</>}. Три времени допроса Шефа: что уже случилось и связано с сегодня (Perfecto Compuesto), что случилось в конкретный момент (Indefinido), как было обычно (Imperfecto).
       </RuleCard>
 
-      {["ppc", "indefinido", "imperfecto"].map(t => {
+      {operatorTenses(op).map(t => {
         const pal = TENSE_PALETTE[OP_TENSE_KEY[t]];
         return (
           <div key={t}>
@@ -873,12 +874,12 @@ const OP_SUBJ = ["Yo", "Tú", "El guardia", "Nosotros", "Vosotros", "Los ayudant
 const OPERATOR_DRILLS = {};
 const OPERATOR_TITLES = {};
 OPERATORS.forEach(op => {
-  ["ppc", "indefinido", "imperfecto"].forEach(t => {
+  operatorTenses(op).forEach(t => {
     const key = op.id + "-" + t;
     const set = op[t];
     OPERATOR_DRILLS[key] = OP_SUBJ.map((subj, i) => ({
-      pre: subj,
-      gap: opGap(op),
+      pre: t === "presente" && [1, 4].includes(i) ? `${i === 1 ? "Tú" : "Vosotros"} no` : (t === "presente" && [2, 5].includes(i) ? `¿${subj}` : subj),
+      gap: t === "presente" && [2, 5].includes(i) ? `${opGap(op).replace(/\.$/, "")}?` : opGap(op),
       inf: opTitle(op) + " + infinitivo",
       ok: set.forms[i],
       note: i === 0 ? set.note : undefined,
@@ -1020,7 +1021,7 @@ const DRILLS = {
   ...OPERATOR_DRILLS,
 };
 
-function Drill({ setKey, onBack }) {
+function Drill({ setKey, onBack, onComplete }) {
   const isInput = ["regulares", "orto", "raiz", "irr", "perfecto", "participios-irr", "imperfecto", "indefinido", "indefinido-irr"].includes(setKey) || setKey.startsWith("op-"); // спряжение = всегда текстовый ввод (решение Оксаны, 6 июля)
   const items = DRILLS[setKey];
   const [i, setI] = useState(0);
@@ -1042,7 +1043,7 @@ function Drill({ setKey, onBack }) {
       <div onClick={() => { setI(0); setScore(0); setPicked(null); setTyped(""); }} style={{ background: C.emerald, borderRadius: 14, padding: "14px", cursor: "pointer", textAlign: "center", marginTop: 14 }}>
         <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>↻ Ещё раз</div>
       </div>
-      <BackBtn onClick={onBack} label="← К теме" />
+      <BackBtn onClick={onComplete || onBack} label={onComplete ? "← Вернуться в ту же сцену" : "← К теме"} />
     </div></div>
   );
 
@@ -1131,7 +1132,6 @@ const BRANCHES = [
     topics: [
       { id: "infinitivo", title: "Инфинитив и три спряжения: -AR, -ER, -IR", lvl: "A1", ready: true },
       { id: "personas", title: "Шесть лиц: корень + окончание", lvl: "A1", ready: true },
-      { id: "capsulas-a1", title: "Капсулы действия: querer / poder / tener que + infinitivo", lvl: "A1", ready: true },
     ],
   },
   {
@@ -1155,7 +1155,7 @@ const BRANCHES = [
     ],
   },
   {
-    id: "operadores", num: "IV", title: "Глаголы-операторы", sub: "Восемь операторов из капсул Дона Вербо — спряжение в трёх прошедших временах",
+    id: "operadores", num: "IV", title: "Глаголы-операторы", sub: "Форма операторов по временам; сюжетные капсулы живут в Главе 4",
     topics: OPERATORS.map(op => ({ id: op.id, title: `${opTitle(op)} + infinitivo · ${op.meaning}`, lvl: "A2", ready: true })),
   },
 ];
@@ -1257,15 +1257,14 @@ const TEMA_TO_DRILL = {
 // Deep-link на конкретное время конкретного оператора — op-<verb>-<tense> —
 // приземляет сразу в дрилл (та же логистика, что у обычных капсул); topic-id
 // без времени (op-querer) открывает страницу оператора со всеми тремя.
-OPERATORS.forEach(op => { ["ppc", "indefinido", "imperfecto"].forEach(t => { TEMA_TO_DRILL[op.id + "-" + t] = op.id + "-" + t; }); });
+OPERATORS.forEach(op => { operatorTenses(op).forEach(t => { TEMA_TO_DRILL[op.id + "-" + t] = op.id + "-" + t; }); });
 const OPERATOR_TOPIC_IDS = OPERATORS.map(op => op.id);
 
-export default function Gramatica({ onBack, startTema }) {
+export default function Gramatica({ onBack, startTema, onComplete }) {
   // view: root | verbo | тема | drill:<set>
   // startTema (deep-link ?tema=): открываем сразу дрилл темы; «назад» ведёт на страницу темы.
   const startDrill = startTema && TEMA_TO_DRILL[startTema] ? "drill:" + TEMA_TO_DRILL[startTema] : null;
-  const startView = startTema === "capsulas-a1" ? "capsulas-a1"
-    : OPERATOR_TOPIC_IDS.includes(startTema) ? startTema
+  const startView = OPERATOR_TOPIC_IDS.includes(startTema) ? startTema
     : startDrill;
   const [view, setView] = useState(startView || "root");
   const [drillFrom, setDrillFrom] = useState(startDrill ? startTema : null);
@@ -1276,7 +1275,6 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "verbo") return <VerboIndex onOpen={(id) => setView(id)} onBack={() => setView("root")} />;
   if (view === "infinitivo") return <TemaInfinitivo onBack={() => setView("verbo")} onTrain={() => openDrill("grupos", "infinitivo")} />;
   if (view === "personas") return <TemaPersonas onBack={() => setView("verbo")} onTrain={() => openDrill("personas", "personas")} />;
-  if (view === "capsulas-a1") return <ActionCapsules onBack={() => setView("verbo")} />;
   if (view === "presente-reg") return <TemaPresenteRegulares onBack={() => setView("verbo")} onTrain={() => openDrill("regulares", "presente-reg")} />;
   if (view === "presente-orto") return <TemaPresenteOrto onBack={() => setView("verbo")} onTrain={() => openDrill("orto", "presente-orto")} />;
   if (view === "presente-raiz") return <TemaPresenteRaiz onBack={() => setView("verbo")} onTrain={() => openDrill("raiz", "presente-raiz")} />;
@@ -1288,6 +1286,6 @@ export default function Gramatica({ onBack, startTema }) {
   if (view === "indefinido-irr") return <TemaIndefinidoIrr onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido-irr", "indefinido-irr")} />;
   const opView = OPERATORS.find(o => o.id === view);
   if (opView) return <TemaOperador data={opView} onBack={() => setView("verbo")} onTrain={(t) => openDrill(opView.id + "-" + t, opView.id)} />;
-  if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} />;
+  if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} onComplete={onComplete} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }

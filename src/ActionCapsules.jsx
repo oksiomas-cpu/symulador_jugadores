@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CAPSULE_ACTIONS,
   CAPSULE_OPERATORS,
@@ -7,6 +7,12 @@ import {
   capsulePhrase,
 } from "./actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
+import {
+  CAPSULE_LINE,
+  QUERER_CAPSULE_1,
+  QUERER_CAPSULE_1_STEPS,
+  QUERER_PRESENT,
+} from "./quererCapsule1Data.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -17,6 +23,19 @@ const C = {
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 const wrap = { minHeight: "100vh", background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, fontFamily: SERIF, color: C.ink, padding: "18px 14px 90px", boxSizing: "border-box" };
 const maxw = { maxWidth: 560, margin: "0 auto" };
+const PROGRESS_KEY = "ciudad:operator-capsules:v1";
+
+function readProgress() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(PROGRESS_KEY) || "null");
+    if (saved && Array.isArray(saved.completed)) return saved;
+  } catch (_) { /* localStorage может быть недоступен внутри webview. */ }
+  return { currentId: "querer-1", completed: [], stepByCapsule: {} };
+}
+
+function writeProgress(next) {
+  try { window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(next)); } catch (_) { /* UI остаётся рабочим без storage. */ }
+}
 
 const MODE_INFO = [
   ["recognize", "Узнать", "Что изменилось в статусе действия"],
@@ -135,6 +154,110 @@ function DialogueExercise({ dialogue, onSolved }) {
   </div></div>;
 }
 
+function normalizeAnswer(value) {
+  return String(value || "").trim().toLowerCase().replace(/[¿?¡!.,]/g, "").replace(/\s+/g, " ");
+}
+
+function QuererOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, QUERER_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === QUERER_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+
+  const grammarButton = (label = "Точечно потренировать QUERER") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "querer-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 1 de 16 · QUERER" title={QUERER_CAPSULE_1.title} sub={QUERER_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{QUERER_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{QUERER_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять намерение, вступить в диалог и самому открыть дверь репликой.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = QUERER_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${QUERER_PRESENT.length}`} title="Шесть лиц QUERER" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={QUERER_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> abrir la puerta.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма querer" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм QUERER")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === QUERER_PRESENT.length - 1) {
+            onComplete?.("querer-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === QUERER_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 1 de 16 · completada" title="Дверь открыта" sub="QUERER управляет намерением; ABRIR остаётся действием; LA PUERTA остаётся частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{QUERER_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = QUERER_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("la puerta")) layer = "ПРЕДМЕТ";
+    else if (/\b(abro|abres|abre|abrimos|abrís|abren)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 1 · ${stepIndex + 1} из ${QUERER_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={QUERER_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма querer" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
 function pickReviewQuestions() {
   const pool = [...QUERER_REVIEW];
   for (let i = pool.length - 1; i > 0; i -= 1) {
@@ -186,7 +309,7 @@ function IntentionsFinish({ result, onAgain, onBack }) {
     <Card style={{ textAlign: "center" }}>
       <div style={{ fontSize: 38, marginBottom: 8 }}>{result.correct === result.total ? "✦" : "↻"}</div>
       <div style={{ fontSize: 16, lineHeight: 1.65 }}>Ya sabemos <b>qué querían hacer</b> Tomás y Lucía.<br />Todavía no sabemos qué podían hacer realmente.</div>
-      {result.missed.length > 0 && <div style={{ marginTop: 14, background: C.cream, borderRadius: 12, padding: 12, color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5 }}>Don Verbo volverá a preguntar por: <b>{result.missed.join(" · ")}</b>.</div>}
+      {result.missed.length > 0 && <div style={{ marginTop: 14, background: C.cream, borderRadius: 12, padding: 12, color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5 }}>В App стоит повторить сцены: <b>{result.missed.join(" · ")}</b>.</div>}
       <button onClick={onAgain} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Repetir la cápsula</button>
       <button onClick={() => { window.location.search = "?tema=op-querer"; }} style={{ marginTop: 9, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>Practicar QUERER en Gramática</button>
     </Card>
@@ -194,7 +317,7 @@ function IntentionsFinish({ result, onAgain, onBack }) {
   </div></div>;
 }
 
-function Intentions({ onBack }) {
+function Intentions({ onBack, onComplete }) {
   const [phase, setPhase] = useState("intro");
   const [dialogueIndex, setDialogueIndex] = useState(0);
   const [result, setResult] = useState(null);
@@ -222,6 +345,7 @@ function Intentions({ onBack }) {
     try {
       window.localStorage.setItem("ciudad:capsula2:querer", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
     } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("querer-2");
     setPhase("finish");
   }} />;
 
@@ -328,37 +452,47 @@ function Story({ onBack }) {
   </div></div>;
 }
 
-function Start({ onMode, onBack }) {
-  const demo = capsuleByIds("querer", "abrir");
+function Start({ progress, onOpen, onBack }) {
+  const completed = CAPSULE_LINE.filter(item => progress.completed.includes(item.id));
+  const currentIndex = Math.max(0, CAPSULE_LINE.findIndex(item => item.id === progress.currentId));
+  const current = CAPSULE_LINE[currentIndex];
+  const currentReady = current?.ready && !progress.completed.includes(current.id);
   return <div style={wrap}><div style={maxw}>
-    <Header small="El verbo · A1" title="Капсулы действия" sub="Одна знакомая сцена получает новую команду. Спрягается только первый глагол; действие остаётся в infinitivo." />
+    <Header small="Capítulo 4 · App" title="Капсулы Дона Вербо" sub={`${Math.min(currentIndex + 1, 16)} из 16 · App хранит этот прогресс самостоятельно.`} />
     <Card>
-      <Capsule {...demo} />
-      <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Yo quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
+      <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase" }}>{currentReady ? "Текущая капсула" : "Следующая капсула"}</div>
+      <div style={{ color: C.raspberry, fontSize: 21, fontWeight: 900, marginTop: 6 }}>{current?.operator} · {current?.title}</div>
+      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "Первые две капсулы QUERER пройдены. Следующий оператор появится после проверки эталона."}</div>
+      {currentReady && <button onClick={() => onOpen(current.id)} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>{progress.stepByCapsule?.[current.id] ? "Продолжить капсулу →" : "Начать капсулу →"}</button>}
     </Card>
-    <button onClick={() => onMode("intentions")} style={{ width: "100%", marginBottom: 14, background: `linear-gradient(135deg, ${C.raspberry}, #74132D)`, color: "#fff", border: `1.5px solid ${C.gold}`, borderRadius: 16, padding: "16px 17px", textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 5px 16px rgba(116,19,45,.18)" }}>
-      <div style={{ color: "#F8DFA2", fontSize: 10.5, fontWeight: 900, letterSpacing: "1.2px", textTransform: "uppercase" }}>Cápsula 2 · QUERER</div>
-      <div style={{ fontSize: 20, fontWeight: 900, margin: "5px 0" }}>La Sala de las Intenciones</div>
-      <div style={{ fontSize: 13.5, lineHeight: 1.45, opacity: .94 }}>10 diálogos sin traducción · construye la frase · reconstruye el sentido</div>
-    </button>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-      {MODE_INFO.map(([id, title, sub], i) => <button key={id} onClick={() => onMode(id)} style={{ minHeight: 118, background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 15, padding: 13, textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 3px 12px rgba(201,162,75,.12)" }}>
-        <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900 }}>{i + 1}</div>
-        <div style={{ color: C.raspberry, fontSize: 17, fontWeight: 900, margin: "4px 0" }}>{title}</div>
-        <div style={{ color: C.inkSoft, fontSize: 12.5, lineHeight: 1.4 }}>{sub}</div>
-      </button>)}
-    </div>
-    <div style={{ textAlign: "center", color: C.inkSoft, fontSize: 12, lineHeight: 1.55, marginTop: 16 }}>Первый этаж: abrir · llevar · buscar · recoger · guardar · usar · dar</div>
-    <Back onClick={onBack} label="← К темам глагола" />
+    {completed.length > 0 && <details style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 15px", marginBottom: 14 }}>
+      <summary style={{ cursor: "pointer", color: C.goldDeep, fontWeight: 800 }}>Пройдено: {completed.length} из 16</summary>
+      <div style={{ display: "grid", gap: 8, marginTop: 12 }}>{completed.map(item => <button key={item.id} onClick={() => onOpen(item.id)} style={{ width: "100%", background: C.cream, color: C.ink, border: `1px solid ${C.line}`, borderRadius: 10, padding: 11, textAlign: "left", fontFamily: SERIF, cursor: "pointer" }}><b>{item.operator}</b> · {item.title}</button>)}</div>
+    </details>}
+    <Back onClick={onBack} label="← В Главу 4" />
   </div></div>;
 }
 
-export default function ActionCapsules({ onBack }) {
-  const [mode, setMode] = useState("start");
+export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsuleId = null, resumeStep = 0 }) {
+  const [progress, setProgress] = useState(readProgress);
+  const [mode, setMode] = useState(initialCapsuleId || "start");
+  const saveStep = (capsuleId, stepIndex) => setProgress(previous => {
+    const next = { ...previous, currentId: capsuleId, stepByCapsule: { ...previous.stepByCapsule, [capsuleId]: stepIndex } };
+    writeProgress(next); return next;
+  });
+  const complete = (capsuleId) => setProgress(previous => {
+    const completed = Array.from(new Set([...previous.completed, capsuleId]));
+    const index = CAPSULE_LINE.findIndex(item => item.id === capsuleId);
+    const nextItem = CAPSULE_LINE[index + 1];
+    const next = { ...previous, completed, currentId: nextItem?.id || capsuleId, stepByCapsule: { ...previous.stepByCapsule, [capsuleId]: 0 } };
+    writeProgress(next); return next;
+  });
+  if (mode === "querer-1") return <QuererOne initialStep={resumeStep || progress.stepByCapsule?.["querer-1"] || 0} onStep={(step) => saveStep("querer-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "querer-2") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
   if (mode === "story") return <Story onBack={() => setMode("start")} />;
-  if (mode === "intentions") return <Intentions onBack={() => setMode("start")} />;
-  return <Start onMode={setMode} onBack={onBack} />;
+  if (mode === "intentions") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
+  return <Start progress={progress} onOpen={setMode} onBack={onBack} />;
 }

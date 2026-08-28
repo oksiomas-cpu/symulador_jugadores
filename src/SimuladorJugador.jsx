@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
+import ActionCapsules from "./ActionCapsules.jsx";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
@@ -475,10 +476,10 @@ const PACKS = {
       other: "Другая улика", next: "Следующая улика",
       fem: true, plural: "улики", objects: "предметов",
     },
-    accent: "goldDeep", grammarRoute: "capsulas-a1",
-    grammarCta: "🧩 Тренируешь грамматику? Капсулы действия A1 →",
-    grammarCtaShort: "🧩 Капсулы действия A1 →",
-    grammarCtaShort2: "🧩 Капсулы действия A1 →",
+    accent: "goldDeep", grammarRoute: "op-querer-presente",
+    grammarCta: "📊 Ошибка в форме? Тренировать QUERER в Presente →",
+    grammarCtaShort: "📊 Тренировать QUERER в Presente →",
+    grammarCtaShort2: "📊 Тренировать QUERER в Presente →",
     VERBS: TARGETS4, QUESTIONS: QUESTIONS4, CATS: CATS4, verbByKey: verbByKey4,
     fantAnsOf: (v) => v.fantAns,
     fullAnswer: fullAnswer4,
@@ -1802,13 +1803,18 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         )}
       </Block>
 
-      {/* ТРЕНАЖЁР СПРЯЖЕНИЙ */}
+      {/* УЧЕБНЫЕ МАРШРУТЫ ГЛАВЫ */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>📊 Тренажёр спряжений</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "📕 Два маршрута Главы 4" : "📊 Тренажёр спряжений"}</div>
         {isCapFour ? (
-          <button onClick={onCapsules} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-            Открыть «Капсулы действия A1» →
-          </button>
+          <>
+            <button onClick={onCapsules} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+              Капсулы Дона Вербо →
+            </button>
+            <button onClick={onEnter} style={{ width: "100%", background: C.card, color: C.raspberry, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+              Тренировать роли →
+            </button>
+          </>
         ) : isCapOne ? (
           <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Открыть Mi Diario →
@@ -1828,17 +1834,12 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
             Presente · глаголы -ER / -IR →
           </button>
         )}
-        {!isCapFour && (
-          <button onClick={onCapsules} style={{ width: "100%", background: C.card, color: C.emeraldDeep, border: `1.5px solid ${C.emerald}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
-            🧩 Капсулы действия A1 →
-          </button>
-        )}
       </div>
 
       {/* ГЛАВНАЯ КНОПКА */}
-      <button onClick={onEnter} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "17px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
+      {!isCapFour && <button onClick={onEnter} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "17px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
         Тренировать роли →
-      </button>
+      </button>}
 
       <Footer />
 
@@ -1939,6 +1940,11 @@ export default function SimuladorJugador() {
   const [deepTema, setDeepTema] = useState(() => {
     try { return new URLSearchParams(window.location.search).get("tema") || null; } catch { return null; }
   });
+  // Обычная ссылка из Don Verbo: App открывает точную капсулу, но не получает
+  // от бота никаких результатов или статусов.
+  const [deepCapsule, setDeepCapsule] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("capsula") || null; } catch { return null; }
+  });
   // Показывать тренажёр Perfecto (Уровень 2)
   const [showPerfecto, setShowPerfecto] = useState(false);
   const [showDiario2, setShowDiario2] = useState(false);
@@ -1947,14 +1953,16 @@ export default function SimuladorJugador() {
   const [showLibro, setShowLibro] = useState(false);
   // Gramática — грамматический справочник, четвёртая самостоятельная активность
   const [showGramatica, setShowGramatica] = useState(false);
+  const [showCapsules, setShowCapsules] = useState(false);
+  const [capsuleGrammar, setCapsuleGrammar] = useState(null);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
   const [pack, setPack] = useState(null);
   const goDiario = () => { setRole("diario"); setEntered(true); };
   const goPerfecto = () => setShowPerfecto(true);
   const goDiario2 = () => setShowDiario2(true);
-  const grammarAction = pack && pack.grammarRoute === "capsulas-a1"
-    ? () => setDeepTema("capsulas-a1")
+  const grammarAction = pack && String(pack.grammarRoute || "").startsWith("op-")
+    ? () => setDeepTema(pack.grammarRoute)
     : (pack && pack.grammarRoute === "perfecto") ? goPerfecto : goDiario;
   // session + очки разминки Don Verbo из облака — для бейджа копилки
   const sess = cloud && cloud.warmup > 0 ? { ...session, warmup: cloud.warmup } : session;
@@ -1964,6 +1972,26 @@ export default function SimuladorJugador() {
   if (access.status === "notg") return <OpenInBot />;
   const acc = accessMap(access.status);
   if (access.status === "none") return <NoPassScreen />;
+
+  if (capsuleGrammar) {
+    return <Gramatica
+      startTema="op-querer-presente"
+      onComplete={() => setCapsuleGrammar(null)}
+      onBack={() => setCapsuleGrammar(null)}
+    />;
+  }
+
+  if (deepCapsule) {
+    if (!acc.cap4) return <LockedScreen status={access.status} onBack={() => setDeepCapsule(null)} />;
+    return <ActionCapsules
+      initialCapsuleId={deepCapsule}
+      onPracticeGrammar={setCapsuleGrammar}
+      onBack={() => {
+        setDeepCapsule(null);
+        try { const url = new URL(window.location.href); url.searchParams.delete("capsula"); window.history.replaceState({}, "", url); } catch (_) { /* noop */ }
+      }}
+    />;
+  }
 
   // Deep-link из капсул Дона: дрилл темы. Perfecto — только club; presente — trial1+.
   if (deepTema) {
@@ -1985,6 +2013,7 @@ export default function SimuladorJugador() {
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
+  if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} onBack={() => setShowCapsules(false)} />;
   if (!entered) return <LevelPicker
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
@@ -2005,7 +2034,7 @@ export default function SimuladorJugador() {
     onPerfecto={() => setShowPerfecto(true)}
     onImperfecto={() => setDeepTema("imperfecto")}
     onPresenteErIr={() => setShowPresenteErIr(true)}
-    onCapsules={() => setDeepTema("capsulas-a1")}
+    onCapsules={() => setShowCapsules(true)}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
   if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
