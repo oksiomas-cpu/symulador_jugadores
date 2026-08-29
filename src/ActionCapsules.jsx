@@ -24,6 +24,31 @@ import {
   TENER_QUE_CAPSULE_1_STEPS,
   TENER_QUE_PRESENT,
 } from "./tenerQueCapsule1Data.js";
+import {
+  IR_A_CAPSULE_1,
+  IR_A_CAPSULE_1_STEPS,
+  IR_A_PRESENT,
+} from "./irACapsule1Data.js";
+import {
+  INTENTAR_CAPSULE_1,
+  INTENTAR_CAPSULE_1_STEPS,
+  INTENTAR_PRESENT,
+} from "./intentarCapsule1Data.js";
+import {
+  EMPEZAR_A_CAPSULE_1,
+  EMPEZAR_A_CAPSULE_1_STEPS,
+  EMPEZAR_A_PRESENT,
+} from "./empezarACapsule1Data.js";
+import {
+  DEJAR_DE_CAPSULE_1,
+  DEJAR_DE_CAPSULE_1_STEPS,
+  DEJAR_DE_PRESENT,
+} from "./dejarDeCapsule1Data.js";
+import {
+  VOLVER_A_CAPSULE_1,
+  VOLVER_A_CAPSULE_1_STEPS,
+  VOLVER_A_PRESENT,
+} from "./volverACapsule1Data.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -482,6 +507,540 @@ function TenerQueOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
   </div></div>;
 }
 
+// Капсула 7 · IR A. Та же механика, что у предыдущих капсул —
+// меняются только данные (irACapsule1Data.js) и точки, привязанные к сцене: объект
+// EL LIBRO DE RECETAS, спрягаемый глагол IR A, ошибочные формы соответствующего
+// действия.
+function IrAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, IR_A_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === IR_A_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+
+  const grammarButton = (label = "Точечно потренировать IR A") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "ir-a-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 7 de 16 · IR A" title={IR_A_CAPSULE_1.title} sub={IR_A_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{IR_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{IR_A_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, что Томас только планирует, вступить в диалог и самому сказать, собираешься ли ты отнести книгу рецептов.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = IR_A_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${IR_A_PRESENT.length}`} title="Шесть лиц IR A" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={IR_A_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> a llevar el libro de recetas.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма ir a" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм IR A")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === IR_A_PRESENT.length - 1) {
+            onComplete?.("ir-a-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === IR_A_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 7 de 16 · completada" title="Путь уже начат" sub="IR A управляет планом действия; LLEVAR остаётся действием; EL LIBRO DE RECETAS остаётся частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{IR_A_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = IR_A_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("el libro de recetas")) layer = "ПРЕДМЕТ";
+    else if (/\b(llevo|llevas|lleva|llevamos|lleváis|llevan)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 7 · ${stepIndex + 1} из ${IR_A_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={IR_A_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма ir a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
+
+// Капсула 9 · INTENTAR. Та же механика, что у предыдущих капсул —
+// меняются только данные (intentarCapsule1Data.js) и точки, привязанные к сцене: объект
+// EL LIBRO, спрягаемый глагол INTENTAR, ошибочные формы соответствующего
+// действия.
+function IntentarOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, INTENTAR_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === INTENTAR_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+
+  const grammarButton = (label = "Точечно потренировать INTENTAR") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "intentar-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 9 de 16 · INTENTAR" title={INTENTAR_CAPSULE_1.title} sub={INTENTAR_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{INTENTAR_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{INTENTAR_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто пытается передать книгу, вступить в диалог и самому сказать, пытаешься ли ты передать книгу Дону Вербо.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = INTENTAR_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${INTENTAR_PRESENT.length}`} title="Шесть лиц INTENTAR" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={INTENTAR_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> dar el libro a Don Verbo.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма intentar" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм INTENTAR")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === INTENTAR_PRESENT.length - 1) {
+            onComplete?.("intentar-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === INTENTAR_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 9 de 16 · completada" title="Попытка сделана" sub="INTENTAR управляет попыткой; DAR остаётся действием; EL LIBRO и A DON VERBO остаются частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{INTENTAR_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = INTENTAR_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("el libro")) layer = "ПРЕДМЕТ";
+    else if (/\b(doy|das|da|damos|dais|dan)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 9 · ${stepIndex + 1} из ${INTENTAR_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={INTENTAR_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма intentar" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
+
+// Капсула 11 · EMPEZAR A. Та же механика, что у предыдущих капсул —
+// меняются только данные (empezarACapsule1Data.js) и точки, привязанные к сцене: объект
+// LAS PISTAS, спрягаемый глагол EMPEZAR A, ошибочные формы соответствующего
+// действия.
+function EmpezarAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, EMPEZAR_A_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === EMPEZAR_A_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+
+  const grammarButton = (label = "Точечно потренировать EMPEZAR A") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "empezar-a-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 11 de 16 · EMPEZAR A" title={EMPEZAR_A_CAPSULE_1.title} sub={EMPEZAR_A_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{EMPEZAR_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{EMPEZAR_A_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто начинает действие, вступить в диалог и самому сказать, начинаешь ли ты убирать улики.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = EMPEZAR_A_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${EMPEZAR_A_PRESENT.length}`} title="Шесть лиц EMPEZAR A" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={EMPEZAR_A_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> a guardar las pistas.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма empezar a" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм EMPEZAR A")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === EMPEZAR_A_PRESENT.length - 1) {
+            onComplete?.("empezar-a-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === EMPEZAR_A_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 11 de 16 · completada" title="Первая улика убрана" sub="EMPEZAR A управляет началом действия; GUARDAR остаётся действием; LAS PISTAS остаются частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{EMPEZAR_A_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = EMPEZAR_A_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("las pistas")) layer = "ПРЕДМЕТ";
+    else if (/\b(guardo|guardas|guarda|guardamos|guardáis|guardan)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 11 · ${stepIndex + 1} из ${EMPEZAR_A_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={EMPEZAR_A_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма empezar a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
+
+// Капсула 13 · DEJAR DE. Та же механика, что у предыдущих капсул —
+// меняются только данные (dejarDeCapsule1Data.js) и точки, привязанные к сцене: объект
+// LA LLAVE DORADA, спрягаемый глагол DEJAR DE, ошибочные формы соответствующего
+// действия.
+function DejarDeOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, DEJAR_DE_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === DEJAR_DE_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+
+  const grammarButton = (label = "Точечно потренировать DEJAR DE") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "dejar-de-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 13 de 16 · DEJAR DE" title={DEJAR_DE_CAPSULE_1.title} sub={DEJAR_DE_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{DEJAR_DE_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{DEJAR_DE_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто прекращает действие, вступить в диалог и самому сказать, перестаёшь ли ты искать золотой ключ.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = DEJAR_DE_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${DEJAR_DE_PRESENT.length}`} title="Шесть лиц DEJAR DE" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={DEJAR_DE_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> de buscar la llave dorada.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма dejar de" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм DEJAR DE")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === DEJAR_DE_PRESENT.length - 1) {
+            onComplete?.("dejar-de-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === DEJAR_DE_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 13 de 16 · completada" title="Поиск завершён" sub="DEJAR DE управляет прекращением действия; BUSCAR остаётся действием; LA LLAVE DORADA остаётся частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{DEJAR_DE_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = DEJAR_DE_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("la llave dorada")) layer = "ПРЕДМЕТ";
+    else if (/\b(busco|buscas|busca|buscamos|buscáis|buscan)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 13 · ${stepIndex + 1} из ${DEJAR_DE_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={DEJAR_DE_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма dejar de" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
+
+// Капсула 15 · VOLVER A. Та же механика, что у предыдущих капсул —
+// меняются только данные (volverACapsule1Data.js) и точки, привязанные к сцене: объект
+// EN LA SALA, спрягаемый глагол VOLVER A, ошибочные формы соответствующего
+// действия.
+function VolverAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, VOLVER_A_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === VOLVER_A_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+
+  const grammarButton = (label = "Точечно потренировать VOLVER A") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "volver-a-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 15 de 16 · VOLVER A" title={VOLVER_A_CAPSULE_1.title} sub={VOLVER_A_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{VOLVER_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{VOLVER_A_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто повторяет действие, вступить в диалог и самому сказать, входишь ли ты снова в Зал.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = VOLVER_A_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${VOLVER_A_PRESENT.length}`} title="Шесть лиц VOLVER A" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={VOLVER_A_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> a entrar en la Sala.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма volver a" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм VOLVER A")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === VOLVER_A_PRESENT.length - 1) {
+            onComplete?.("volver-a-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === VOLVER_A_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 15 de 16 · completada" title="Порог пройден снова" sub="VOLVER A управляет повторением действия; ENTRAR остаётся действием; EN LA SALA остаётся частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{VOLVER_A_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = VOLVER_A_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("en la sala")) layer = "ПРЕДМЕТ";
+    else if (/\b(entro|entras|entra|entramos|entráis|entran)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 15 · ${stepIndex + 1} из ${VOLVER_A_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={VOLVER_A_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма volver a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
 function pickReviewQuestions(sourcePool = QUERER_REVIEW) {
   const pool = [...sourcePool];
   for (let i = pool.length - 1; i > 0; i -= 1) {
@@ -779,6 +1338,11 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "poder-2") return <PoderIntentions onComplete={complete} onBack={() => setMode("start")} />;
     if (mode === "tener-que-1") return <TenerQueOne initialStep={resumeStep || progress.stepByCapsule?.["tener-que-1"] || 0} onStep={(step) => saveStep("tener-que-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "ir-a-1") return <IrAOne initialStep={resumeStep || progress.stepByCapsule?.["ir-a-1"] || 0} onStep={(step) => saveStep("ir-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "intentar-1") return <IntentarOne initialStep={resumeStep || progress.stepByCapsule?.["intentar-1"] || 0} onStep={(step) => saveStep("intentar-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "empezar-a-1") return <EmpezarAOne initialStep={resumeStep || progress.stepByCapsule?.["empezar-a-1"] || 0} onStep={(step) => saveStep("empezar-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "dejar-de-1") return <DejarDeOne initialStep={resumeStep || progress.stepByCapsule?.["dejar-de-1"] || 0} onStep={(step) => saveStep("dejar-de-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
