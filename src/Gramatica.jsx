@@ -784,6 +784,7 @@ const OPERATORS = [
   {
     id: "op-poder", verb: "poder", particle: "", meaning: "мочь сделать",
     action: "abrir la caja", actionRu: "открыть шкатулку",
+    presente: { forms: ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"], endLen: [4, 4, 4, 4, 4, 4], note: "В Presente корень o→ue меняется в yo, tú, él/ella и ellos/ellas. Nosotros и vosotros сохраняют pod-." },
     ppc: { forms: ["he podido", "has podido", "ha podido", "hemos podido", "habéis podido", "han podido"], endLen: [3, 3, 3, 3, 3, 3], note: "podido — регулярное причастие: pod- + -ido." },
     indefinido: { forms: ["pude", "pudiste", "pudo", "pudimos", "pudisteis", "pudieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: pud- (не «pod-»), окончания без ударения — та же схема, что у querer." },
     imperfecto: { forms: ["podía", "podías", "podía", "podíamos", "podíais", "podían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto poder регулярный: pod- + -ía." },

@@ -1930,6 +1930,15 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   );
 }
 
+// Капсула → точный дрилл Presente в Gramática, куда ведёт "Точечно
+// потренировать <OPERADOR>" при ошибке формы (та же логистика, что и у
+// deep-link op-<verb>-<tense>, канон 6 июля 2026). Каждая новая капсула
+// с собственным гейтом (poder-1 и далее) добавляет сюда одну строку.
+const CAPSULE_GRAMMAR_TEMA = {
+  "querer-1": "op-querer-presente",
+  "poder-1": "op-poder-presente",
+};
+
 export default function SimuladorJugador() {
   const [entered, setEntered] = useState(false);
   const [chapterShown, setChapterShown] = useState(false);
@@ -2055,7 +2064,7 @@ export default function SimuladorJugador() {
 
   if (capsuleGrammar) {
     return <Gramatica
-      startTema="op-querer-presente"
+      startTema={CAPSULE_GRAMMAR_TEMA[capsuleGrammar.capsuleId] || "op-querer-presente"}
       onComplete={() => setCapsuleGrammar(null)}
       onBack={() => setCapsuleGrammar(null)}
     />;
