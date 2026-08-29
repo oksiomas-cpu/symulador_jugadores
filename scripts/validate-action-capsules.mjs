@@ -130,6 +130,12 @@ const trainer = readFileSync(new URL("../src/ActionCapsules.jsx", import.meta.ur
 check("сюжетные капсулы удалены из каталога Gramática", !gramatica.includes('id: "capsulas-a1"') && !gramatica.includes("<ActionCapsules"));
 check("Gramática содержит точный Presente QUERER", gramatica.includes('presente: { forms: ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"]'));
 check("Gramática содержит точный Presente PODER", gramatica.includes('presente: { forms: ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"]'));
+check("Gramática содержит точный Presente TENER QUE", gramatica.includes('presente: { forms: ["tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen"]'));
+check("Gramática содержит точный Presente IR A", gramatica.includes('presente: { forms: ["voy", "vas", "va", "vamos", "vais", "van"]'));
+check("Gramática содержит точный Presente INTENTAR", gramatica.includes('presente: { forms: ["intento", "intentas", "intenta", "intentamos", "intentáis", "intentan"]'));
+check("Gramática содержит точный Presente EMPEZAR A", gramatica.includes('presente: { forms: ["empiezo", "empiezas", "empieza", "empezamos", "empezáis", "empiezan"]'));
+check("Gramática содержит точный Presente DEJAR DE", gramatica.includes('presente: { forms: ["dejo", "dejas", "deja", "dejamos", "dejáis", "dejan"]'));
+check("Gramática содержит точный Presente VOLVER A", gramatica.includes('presente: { forms: ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"]'));
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
 check("обычная ссылка ?capsula= открывает App-капсулу", shell.includes('get("capsula")') && shell.includes("<ActionCapsules"));
 check("в Главе 4 две отдельные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Тренировать роли →"));
@@ -146,7 +152,16 @@ check("Капсула dejar-de-1 подключена отдельным реж�
 check("Капсула volver-a-1 подключена отдельным режимом", trainer.includes('mode === "volver-a-1"') && trainer.includes("<VolverAOne"));
 check("App хранит собственный прогресс линейки", trainer.includes('ciudad:operator-capsules:v1'));
 check("App не обещает передать ошибки Don Verbo", !trainer.includes("Don Verbo volverá a preguntar"));
-check("ошибка формы ведёт в точный Presente QUERER и PODER", shell.includes('"querer-1": "op-querer-presente"') && shell.includes('"poder-1": "op-poder-presente"'));
+check("ошибка формы ведёт в точный Presente для всех восьми операторов (починка 29.08)", [
+  '"querer-1": "op-querer-presente"',
+  '"poder-1": "op-poder-presente"',
+  '"tener-que-1": "op-tenerque-presente"',
+  '"ir-a-1": "op-ira-presente"',
+  '"intentar-1": "op-intentar-presente"',
+  '"empezar-a-1": "op-empezara-presente"',
+  '"dejar-de-1": "op-dejarde-presente"',
+  '"volver-a-1": "op-volvera-presente"',
+].every(line => shell.includes(line)));
 check("возврат из Gramática ведёт обратно в капсулу, а не на линейку", shell.includes("setDeepCapsule(capsuleGrammar.capsuleId)"));
 check("«следующая капсула» считается из completed, а не из отдельного currentId (регресс 29.08)", trainer.includes("CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id))"));
 check("просмотр уже пройденной капсулы не откатывает currentId назад", trainer.includes("previous.completed.includes(capsuleId) ? previous.currentId : capsuleId"));
