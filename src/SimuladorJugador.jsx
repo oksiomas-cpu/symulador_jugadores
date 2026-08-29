@@ -2088,6 +2088,7 @@ export default function SimuladorJugador() {
     return <ActionCapsules
       initialCapsuleId={deepCapsule}
       onPracticeGrammar={setCapsuleGrammar}
+      tgId={tg.current?.id || null}
       onBack={() => {
         setDeepCapsule(null);
         try { const url = new URL(window.location.href); url.searchParams.delete("capsula"); window.history.replaceState({}, "", url); } catch (_) { /* noop */ }
@@ -2115,7 +2116,7 @@ export default function SimuladorJugador() {
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
-  if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} onBack={() => setShowCapsules(false)} />;
+  if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
   if (!entered) return <LevelPicker
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
