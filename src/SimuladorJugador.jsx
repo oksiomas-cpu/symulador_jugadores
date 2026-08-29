@@ -1937,6 +1937,12 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
 const CAPSULE_GRAMMAR_TEMA = {
   "querer-1": "op-querer-presente",
   "poder-1": "op-poder-presente",
+  "tener-que-1": "op-tenerque-presente",
+  "ir-a-1": "op-ira-presente",
+  "intentar-1": "op-intentar-presente",
+  "empezar-a-1": "op-empezara-presente",
+  "dejar-de-1": "op-dejarde-presente",
+  "volver-a-1": "op-volvera-presente",
 };
 
 export default function SimuladorJugador() {
