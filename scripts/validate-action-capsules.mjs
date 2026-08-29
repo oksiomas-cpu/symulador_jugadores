@@ -9,6 +9,11 @@ import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogue
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
 import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
 import { TENER_QUE_CAPSULE_1, TENER_QUE_CAPSULE_1_STEPS, TENER_QUE_PRESENT } from "../src/tenerQueCapsule1Data.js";
+import { IR_A_CAPSULE_1, IR_A_CAPSULE_1_STEPS, IR_A_PRESENT } from "../src/irACapsule1Data.js";
+import { INTENTAR_CAPSULE_1, INTENTAR_CAPSULE_1_STEPS, INTENTAR_PRESENT } from "../src/intentarCapsule1Data.js";
+import { EMPEZAR_A_CAPSULE_1, EMPEZAR_A_CAPSULE_1_STEPS, EMPEZAR_A_PRESENT } from "../src/empezarACapsule1Data.js";
+import { DEJAR_DE_CAPSULE_1, DEJAR_DE_CAPSULE_1_STEPS, DEJAR_DE_PRESENT } from "../src/dejarDeCapsule1Data.js";
+import { VOLVER_A_CAPSULE_1, VOLVER_A_CAPSULE_1_STEPS, VOLVER_A_PRESENT } from "../src/volverACapsule1Data.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -78,6 +83,36 @@ check("Капсула tener-que-1 проходит смысл, диалог, с�
 check("объект EL RELOJ не пропущен в репликах tener-que-1", TENER_QUE_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /el reloj/i.test(x.answer) || x.kind === "form"));
 check("Presente TENER QUE содержит шесть лиц", TENER_QUE_PRESENT.map(x => x.form).join("|") === "tengo|tienes|tiene|tenemos|tenéis|tienen");
 
+check("ir-a-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "ir-a-1")?.ready === true);
+check("Капсула ir-a-1 — IR A + LLEVAR EL LIBRO DE RECETAS", IR_A_CAPSULE_1.id === "ir-a-1" && IR_A_CAPSULE_1.linkTitle === "IR A + LLEVAR EL LIBRO DE RECETAS");
+check("Капсула ir-a-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => IR_A_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект EL LIBRO DE RECETAS не пропущен в репликах ir-a-1", IR_A_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /el libro de recetas/i.test(x.answer) || x.kind === "form"));
+check("Presente IR содержит шесть лиц", IR_A_PRESENT.map(x => x.form).join("|") === "voy|vas|va|vamos|vais|van");
+
+check("intentar-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "intentar-1")?.ready === true);
+check("Капсула intentar-1 — INTENTAR + DAR EL LIBRO A DON VERBO", INTENTAR_CAPSULE_1.id === "intentar-1" && INTENTAR_CAPSULE_1.linkTitle === "INTENTAR + DAR EL LIBRO A DON VERBO");
+check("Капсула intentar-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => INTENTAR_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект EL LIBRO не пропущен в репликах intentar-1", INTENTAR_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /el libro/i.test(x.answer) || x.kind === "form"));
+check("Presente INTENTAR содержит шесть лиц", INTENTAR_PRESENT.map(x => x.form).join("|") === "intento|intentas|intenta|intentamos|intentáis|intentan");
+
+check("empezar-a-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "empezar-a-1")?.ready === true);
+check("Капсула empezar-a-1 — EMPEZAR A + GUARDAR LAS PISTAS", EMPEZAR_A_CAPSULE_1.id === "empezar-a-1" && EMPEZAR_A_CAPSULE_1.linkTitle === "EMPEZAR A + GUARDAR LAS PISTAS");
+check("Капсула empezar-a-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => EMPEZAR_A_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект LAS PISTAS не пропущен в репликах empezar-a-1", EMPEZAR_A_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /las pistas/i.test(x.answer) || x.kind === "form"));
+check("Presente EMPEZAR содержит шесть лиц", EMPEZAR_A_PRESENT.map(x => x.form).join("|") === "empiezo|empiezas|empieza|empezamos|empezáis|empiezan");
+
+check("dejar-de-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "dejar-de-1")?.ready === true);
+check("Капсула dejar-de-1 — DEJAR DE + BUSCAR LA LLAVE DORADA", DEJAR_DE_CAPSULE_1.id === "dejar-de-1" && DEJAR_DE_CAPSULE_1.linkTitle === "DEJAR DE + BUSCAR LA LLAVE DORADA");
+check("Капсула dejar-de-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => DEJAR_DE_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект LA LLAVE DORADA не пропущен в репликах dejar-de-1", DEJAR_DE_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /la llave dorada/i.test(x.answer) || x.kind === "form"));
+check("Presente DEJAR содержит шесть лиц", DEJAR_DE_PRESENT.map(x => x.form).join("|") === "dejo|dejas|deja|dejamos|dejáis|dejan");
+
+check("volver-a-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "volver-a-1")?.ready === true);
+check("Капсула volver-a-1 — VOLVER A + ENTRAR EN LA SALA", VOLVER_A_CAPSULE_1.id === "volver-a-1" && VOLVER_A_CAPSULE_1.linkTitle === "VOLVER A + ENTRAR EN LA SALA");
+check("Капсула volver-a-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => VOLVER_A_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("дополнение EN LA SALA не пропущено в репликах volver-a-1", VOLVER_A_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /en la sala/i.test(x.answer) || x.kind === "form"));
+check("Presente VOLVER содержит шесть лиц", VOLVER_A_PRESENT.map(x => x.form).join("|") === "vuelvo|vuelves|vuelve|volvemos|volvéis|vuelven");
+
 check("poder-2 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "poder-2")?.ready === true);
 check("Капсула poder-2 содержит ровно 10 диалогов", PODER_DIALOGUES.length === 10);
 check("ID диалогов poder-2 уникальны", new Set(PODER_DIALOGUES.map(x => x.id)).size === PODER_DIALOGUES.length);
@@ -104,13 +139,18 @@ check("Капсула 2 подключена отдельным режимом",
 check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
 check("Капсула poder-2 подключена отдельным режимом", trainer.includes('mode === "poder-2"') && trainer.includes("<PoderIntentions"));
 check("Капсула tener-que-1 подключена отдельным режимом", trainer.includes('mode === "tener-que-1"') && trainer.includes("<TenerQueOne"));
+check("Капсула ir-a-1 подключена отдельным режимом", trainer.includes('mode === "ir-a-1"') && trainer.includes("<IrAOne"));
+check("Капсула intentar-1 подключена отдельным режимом", trainer.includes('mode === "intentar-1"') && trainer.includes("<IntentarOne"));
+check("Капсула empezar-a-1 подключена отдельным режимом", trainer.includes('mode === "empezar-a-1"') && trainer.includes("<EmpezarAOne"));
+check("Капсула dejar-de-1 подключена отдельным режимом", trainer.includes('mode === "dejar-de-1"') && trainer.includes("<DejarDeOne"));
+check("Капсула volver-a-1 подключена отдельным режимом", trainer.includes('mode === "volver-a-1"') && trainer.includes("<VolverAOne"));
 check("App хранит собственный прогресс линейки", trainer.includes('ciudad:operator-capsules:v1'));
 check("App не обещает передать ошибки Don Verbo", !trainer.includes("Don Verbo volverá a preguntar"));
 check("ошибка формы ведёт в точный Presente QUERER и PODER", shell.includes('"querer-1": "op-querer-presente"') && shell.includes('"poder-1": "op-poder-presente"'));
 check("возврат из Gramática ведёт обратно в капсулу, а не на линейку", shell.includes("setDeepCapsule(capsuleGrammar.capsuleId)"));
 check("«следующая капсула» считается из completed, а не из отдельного currentId (регресс 29.08)", trainer.includes("CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id))"));
 check("просмотр уже пройденной капсулы не откатывает currentId назад", trainer.includes("previous.completed.includes(capsuleId) ? previous.currentId : capsuleId"));
-check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 3);
+check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 8);
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
