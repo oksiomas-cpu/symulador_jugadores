@@ -19,6 +19,11 @@ import {
   PODER_CAPSULE_1_STEPS,
   PODER_PRESENT,
 } from "./poderCapsule1Data.js";
+import {
+  TENER_QUE_CAPSULE_1,
+  TENER_QUE_CAPSULE_1_STEPS,
+  TENER_QUE_PRESENT,
+} from "./tenerQueCapsule1Data.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -372,6 +377,111 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
   </div></div>;
 }
 
+// Капсула 5 · TENER QUE. Та же механика, что у QuererOne/PoderOne —
+// меняются только данные (tenerQueCapsule1Data.js) и точки, привязанные к
+// сцене: объект EL RELOJ, спрягаемый глагол TENER QUE, ошибочные формы USAR.
+function TenerQueOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep }) {
+  const [phase, setPhase] = useState(initialStep > 0 ? "steps" : "scene");
+  const [stepIndex, setStepIndex] = useState(Math.min(initialStep, TENER_QUE_CAPSULE_1_STEPS.length - 1));
+  const [picked, setPicked] = useState(null);
+  const [typed, setTyped] = useState("");
+  const [feedback, setFeedback] = useState(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
+  
+  useEffect(() => { onStep?.(stepIndex); }, [stepIndex]);
+  
+  const resetAnswer = () => { setPicked(null); setTyped(""); setFeedback(null); };
+  const goNext = () => {
+    resetAnswer();
+    if (stepIndex === TENER_QUE_CAPSULE_1_STEPS.length - 1) setPhase("review");
+    else setStepIndex(value => value + 1);
+  };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
+  
+    const grammarButton = (label = "Точечно потренировать TENER QUE") => (
+    <button onClick={() => onPracticeGrammar?.({ capsuleId: "tener-que-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
+  );
+
+  if (phase === "scene") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 5 de 16 · TENER QUE" title={TENER_QUE_CAPSULE_1.title} sub={TENER_QUE_CAPSULE_1.linkTitle} />
+    <Card>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{TENER_QUE_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{TENER_QUE_CAPSULE_1.scene.ru}</div>
+      <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, что необходимо сделать, вступить в диалог и самому сказать, должен ли ты завести часы.</div>
+      <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+
+  if (phase === "review") {
+    const item = TENER_QUE_PRESENT[reviewIndex];
+    const correct = feedback?.ok;
+    const submit = () => {
+      if (!typed.trim()) return;
+      setFeedback({ ok: normalizeAnswer(typed) === item.form });
+    };
+    return <div style={wrap}><div style={maxw}>
+      <Header small={`Закрепление · ${reviewIndex + 1} из ${TENER_QUE_PRESENT.length}`} title="Шесть лиц TENER QUE" sub="Смысл уже понятен. Теперь закрепляем форму, чтобы реплика держалась уверенно." />
+      <Progress index={reviewIndex} total={TENER_QUE_PRESENT.length} />
+      <Card>
+        <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.6 }}><b>{item.person}</b> <span style={{ color: C.goldDeep }}>___</span> que usar el reloj.</div>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit()} disabled={!!feedback} placeholder="форма tener que" autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={submit} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить</button>}
+        {feedback && <div style={{ marginTop: 13, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{correct ? `${item.person} — ${item.form}.` : `Нужна форма ${item.form}. Ошибка в слое ОПЕРАТОР.`}</div>}
+        {feedback && !correct && grammarButton("Отработать шесть форм TENER QUE")}
+        {feedback && <button onClick={() => {
+          if (!correct) { setTyped(""); setFeedback(null); return; }
+          if (reviewIndex === TENER_QUE_PRESENT.length - 1) {
+            onComplete?.("tener-que-1");
+            setPhase("finish");
+          } else {
+            setReviewIndex(value => value + 1); setTyped(""); setFeedback(null);
+          }
+        }} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? (reviewIndex === TENER_QUE_PRESENT.length - 1 ? "Завершить капсулу →" : "Следующее лицо →") : "Исправить форму ↻"}</button>}
+      </Card>
+    </div></div>;
+  }
+
+  if (phase === "finish") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 5 de 16 · completada" title="Часы снова идут" sub="TENER QUE управляет необходимостью; USAR остаётся действием; EL RELOJ остаётся частью сцены." />
+    <Card style={{ textAlign: "center" }}>
+      <div style={{ fontSize: 40, marginBottom: 8 }}>✦</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{TENER_QUE_CAPSULE_1.law}</div>
+      <button onClick={onBack} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Вернуться к линейке →</button>
+    </Card>
+  </div></div>;
+
+  const step = TENER_QUE_CAPSULE_1_STEPS[stepIndex];
+  const correct = feedback?.ok;
+  const selectedValue = step.kind === "choice" ? picked : typed;
+  const submit = (value = selectedValue) => {
+    if (!String(value || "").trim()) return;
+    const ok = normalizeAnswer(value) === normalizeAnswer(step.answer);
+    let layer = "ОПЕРАТОР";
+    const normalized = normalizeAnswer(value);
+    if (!normalized.includes("el reloj")) layer = "ПРЕДМЕТ";
+    else if (/\b(uso|usas|usa|usamos|usáis|usan)\b/.test(normalized)) layer = "ДЕЙСТВИЕ";
+    setFeedback({ ok, layer, grammar: step.kind === "form" || step.grammarErrorOptions?.includes(value) || layer === "ОПЕРАТОР" });
+  };
+
+  return <div style={wrap}><div style={maxw}>
+    <Header small={`Cápsula 5 · ${stepIndex + 1} из ${TENER_QUE_CAPSULE_1_STEPS.length}`} title={step.stage} sub={step.ru} />
+    <Progress index={stepIndex} total={TENER_QUE_CAPSULE_1_STEPS.length} />
+    <Card>
+      <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+        <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма tener que" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
+        {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
+      </>}
+      {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
+      {feedback && !correct && feedback.grammar && grammarButton()}
+      {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
+    </Card>
+    <Back onClick={onBack} label="← К линейке капсул" />
+  </div></div>;
+}
+
 function pickReviewQuestions(sourcePool = QUERER_REVIEW) {
   const pool = [...sourcePool];
   for (let i = pool.length - 1; i > 0; i -= 1) {
@@ -668,6 +778,7 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "querer-2") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "poder-2") return <PoderIntentions onComplete={complete} onBack={() => setMode("start")} />;
+    if (mode === "tener-que-1") return <TenerQueOne initialStep={resumeStep || progress.stepByCapsule?.["tener-que-1"] || 0} onStep={(step) => saveStep("tener-que-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
