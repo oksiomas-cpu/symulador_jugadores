@@ -8,6 +8,7 @@ import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDial
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogueData.js";
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
 import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
+import { TENER_QUE_CAPSULE_1, TENER_QUE_CAPSULE_1_STEPS, TENER_QUE_PRESENT } from "../src/tenerQueCapsule1Data.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -71,6 +72,12 @@ check("Капсула poder-1 проходит смысл, диалог, сме�
 check("объект LOS PAPELES не пропущен в репликах poder-1", PODER_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /los papeles/i.test(x.answer) || x.kind === "form"));
 check("Presente PODER содержит шесть лиц", PODER_PRESENT.map(x => x.form).join("|") === "puedo|puedes|puede|podemos|podéis|pueden");
 
+check("tener-que-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "tener-que-1")?.ready === true);
+check("Капсула tener-que-1 — TENER QUE + USAR EL RELOJ", TENER_QUE_CAPSULE_1.id === "tener-que-1" && TENER_QUE_CAPSULE_1.linkTitle === "TENER QUE + USAR EL RELOJ");
+check("Капсула tener-que-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => TENER_QUE_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект EL RELOJ не пропущен в репликах tener-que-1", TENER_QUE_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /el reloj/i.test(x.answer) || x.kind === "form"));
+check("Presente TENER QUE содержит шесть лиц", TENER_QUE_PRESENT.map(x => x.form).join("|") === "tengo|tienes|tiene|tenemos|tenéis|tienen");
+
 check("poder-2 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "poder-2")?.ready === true);
 check("Капсула poder-2 содержит ровно 10 диалогов", PODER_DIALOGUES.length === 10);
 check("ID диалогов poder-2 уникальны", new Set(PODER_DIALOGUES.map(x => x.id)).size === PODER_DIALOGUES.length);
@@ -85,7 +92,7 @@ check("в репликах до ответа poder-2 готовый ответ �
 const gramatica = readFileSync(new URL("../src/Gramatica.jsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../src/SimuladorJugador.jsx", import.meta.url), "utf8");
 const trainer = readFileSync(new URL("../src/ActionCapsules.jsx", import.meta.url), "utf8");
-check("сюжетные капсулы удалены из каталога Gramática", !gramatica.includes('id: "capsulas-a1"') && !gramatica.includes('<ActionCapsules'));
+check("сюжетные капсулы удалены из каталога Gramática", !gramatica.includes('id: "capsulas-a1"') && !gramatica.includes("<ActionCapsules"));
 check("Gramática содержит точный Presente QUERER", gramatica.includes('presente: { forms: ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"]'));
 check("Gramática содержит точный Presente PODER", gramatica.includes('presente: { forms: ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"]'));
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
@@ -96,13 +103,14 @@ check("старое общее поле third не осталось в инте�
 check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
 check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
 check("Капсула poder-2 подключена отдельным режимом", trainer.includes('mode === "poder-2"') && trainer.includes("<PoderIntentions"));
+check("Капсула tener-que-1 подключена отдельным режимом", trainer.includes('mode === "tener-que-1"') && trainer.includes("<TenerQueOne"));
 check("App хранит собственный прогресс линейки", trainer.includes('ciudad:operator-capsules:v1'));
 check("App не обещает передать ошибки Don Verbo", !trainer.includes("Don Verbo volverá a preguntar"));
 check("ошибка формы ведёт в точный Presente QUERER и PODER", shell.includes('"querer-1": "op-querer-presente"') && shell.includes('"poder-1": "op-poder-presente"'));
 check("возврат из Gramática ведёт обратно в капсулу, а не на линейку", shell.includes("setDeepCapsule(capsuleGrammar.capsuleId)"));
 check("«следующая капсула» считается из completed, а не из отдельного currentId (регресс 29.08)", trainer.includes("CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id))"));
 check("просмотр уже пройденной капсулы не откатывает currentId назад", trainer.includes("previous.completed.includes(capsuleId) ? previous.currentId : capsuleId"));
-check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 2);
+check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 3);
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);

@@ -29,7 +29,7 @@ export const CAPSULE_LINE = [
   { id: "querer-2", operator: "QUERER", title: "La Sala de las Intenciones", ready: true },
   { id: "poder-1", operator: "PODER", title: "Los papeles del suelo", ready: true },
   { id: "poder-2", operator: "PODER", title: "La Sala de las Posibilidades", ready: true },
-  { id: "tener-que-1", operator: "TENER QUE", title: "Cápsula 1", ready: false },
+    { id: "tener-que-1", operator: "TENER QUE", title: "El reloj detenido", ready: true },
   { id: "tener-que-2", operator: "TENER QUE", title: "Cápsula 2", ready: false },
   { id: "ir-a-1", operator: "IR A", title: "Cápsula 1", ready: false },
   { id: "ir-a-2", operator: "IR A", title: "Cápsula 2", ready: false },
