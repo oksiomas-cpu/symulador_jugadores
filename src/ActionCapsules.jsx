@@ -180,6 +180,7 @@ function QuererOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onS
     if (stepIndex === QUERER_CAPSULE_1_STEPS.length - 1) setPhase("review");
     else setStepIndex(value => value + 1);
   };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
 
   const grammarButton = (label = "Точечно потренировать QUERER") => (
     <button onClick={() => onPracticeGrammar?.({ capsuleId: "querer-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
@@ -259,6 +260,7 @@ function QuererOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onS
       {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
       {feedback && !correct && feedback.grammar && grammarButton()}
       {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
     </Card>
     <Back onClick={onBack} label="← К линейке капсул" />
   </div></div>;
@@ -284,6 +286,7 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
     if (stepIndex === PODER_CAPSULE_1_STEPS.length - 1) setPhase("review");
     else setStepIndex(value => value + 1);
   };
+  const goPrev = () => { resetAnswer(); setStepIndex(value => Math.max(0, value - 1)); };
 
   const grammarButton = (label = "Точечно потренировать PODER") => (
     <button onClick={() => onPracticeGrammar?.({ capsuleId: "poder-1", stepIndex })} style={{ marginTop: 10, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{label} →</button>
@@ -363,6 +366,7 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
       {feedback && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: correct ? "#ECF8F3" : "#FFF4F5", color: correct ? C.emeraldDeep : C.raspberry, fontSize: 13.5, lineHeight: 1.55, textAlign: "center" }}>{correct ? <b>Реплика собрана точно.</b> : <><b>Ошибка в слое: {feedback.layer}.</b><br />Правильная реплика: {step.answer}</>}</div>}
       {feedback && !correct && feedback.grammar && grammarButton()}
       {feedback && <button onClick={correct ? goNext : resetAnswer} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{correct ? "Продолжить →" : "Исправить этот ход ↻"}</button>}
+      {stepIndex > 0 && <button onClick={goPrev} style={{ marginTop: 10, width: "100%", background: "none", color: C.inkSoft, border: `1px solid ${C.line}`, borderRadius: 12, padding: 11, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>← Предыдущий шаг</button>}
     </Card>
     <Back onClick={onBack} label="← К линейке капсул" />
   </div></div>;
@@ -621,15 +625,18 @@ function Story({ onBack }) {
 
 function Start({ progress, onOpen, onBack }) {
   const completed = CAPSULE_LINE.filter(item => progress.completed.includes(item.id));
-  const currentIndex = Math.max(0, CAPSULE_LINE.findIndex(item => item.id === progress.currentId));
-  const current = CAPSULE_LINE[currentIndex];
+  // «Следующая капсула» всегда выводится из фактического completed, а не из
+  // отдельно хранимого currentId — так открытие уже пройденной капсулы для
+  // повтора (из списка ниже) не может откатить указатель линейки назад.
+  const currentIndex = Math.max(0, CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id)));
+  const current = CAPSULE_LINE[currentIndex] || CAPSULE_LINE[CAPSULE_LINE.length - 1];
   const currentReady = current?.ready && !progress.completed.includes(current.id);
   return <div style={wrap}><div style={maxw}>
     <Header small="Capítulo 4 · App" title="Капсулы Дона Вербо" sub={`${Math.min(currentIndex + 1, 16)} из 16 · App хранит этот прогресс самостоятельно.`} />
     <Card>
       <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase" }}>{currentReady ? "Текущая капсула" : "Следующая капсула"}</div>
       <div style={{ color: C.raspberry, fontSize: 21, fontWeight: 900, marginTop: 6 }}>{current?.operator} · {current?.title}</div>
-      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "QUERER-1, QUERER-2, PODER-1 и PODER-2 пройдены. Следующая капсула появится после проверки этого эталона."}</div>
+      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "Эта капсула откроется после проверки текущего эталона."}</div>
       {currentReady && <button onClick={() => onOpen(current.id)} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>{progress.stepByCapsule?.[current.id] ? "Продолжить капсулу →" : "Начать капсулу →"}</button>}
     </Card>
     {completed.length > 0 && <details style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 15px", marginBottom: 14 }}>
@@ -644,7 +651,10 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   const [progress, setProgress] = useState(readProgress);
   const [mode, setMode] = useState(initialCapsuleId || "start");
   const saveStep = (capsuleId, stepIndex) => setProgress(previous => {
-    const next = { ...previous, currentId: capsuleId, stepByCapsule: { ...previous.stepByCapsule, [capsuleId]: stepIndex } };
+    // Открытие уже пройденной капсулы для повтора не должно двигать currentId
+    // назад — линейка сама выводит «следующую» из completed (см. Start).
+    const currentId = previous.completed.includes(capsuleId) ? previous.currentId : capsuleId;
+    const next = { ...previous, currentId, stepByCapsule: { ...previous.stepByCapsule, [capsuleId]: stepIndex } };
     writeProgress(next); return next;
   });
   const complete = (capsuleId) => setProgress(previous => {
