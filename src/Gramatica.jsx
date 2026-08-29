@@ -792,6 +792,7 @@ const OPERATORS = [
   {
     id: "op-tenerque", verb: "tener", particle: "que", meaning: "быть должным сделать",
     action: "dar el libro a Marta", actionRu: "отдать книгу Марте",
+    presente: { forms: ["tengo", "tienes", "tiene", "tenemos", "tenéis", "tienen"], endLen: [4, 4, 4, 4, 4, 4], note: "В Presente корень e→ie меняется в tú, él/ella и ellos/ellas, а форма yo — tengo — дополнительно вставляет g (не «tenio»). Nosotros и vosotros сохраняют ten-." },
     ppc: { forms: ["he tenido", "has tenido", "ha tenido", "hemos tenido", "habéis tenido", "han tenido"], endLen: [3, 3, 3, 3, 3, 3], note: "tenido — регулярное причастие: ten- + -ido." },
     indefinido: { forms: ["tuve", "tuviste", "tuvo", "tuvimos", "tuvisteis", "tuvieron"], endLen: [1, 4, 1, 4, 6, 5], note: "raíz fuerte: tuv- (тот же приём, что у estar → estuv-)." },
     imperfecto: { forms: ["tenía", "tenías", "tenía", "teníamos", "teníais", "tenían"], endLen: [2, 3, 2, 5, 4, 3], note: "в Imperfecto tener регулярный, несмотря на неправильный Presente (tengo)." },
@@ -799,6 +800,7 @@ const OPERATORS = [
   {
     id: "op-ira", verb: "ir", particle: "a", meaning: "собираться сделать",
     action: "buscar la pista", actionRu: "искать улику",
+    presente: { forms: ["voy", "vas", "va", "vamos", "vais", "van"], endLen: [3, 3, 2, 5, 4, 3], note: "ir — один из самых неправильных глаголов в Presente: voy, vas, va, vamos, vais, van не образуются от основы infinitivo обычным способом, поэтому подсвечивается форма целиком." },
     ppc: { forms: ["he ido", "has ido", "ha ido", "hemos ido", "habéis ido", "han ido"], endLen: [3, 3, 3, 3, 3, 3], note: "ido — participio без своего корня: у ir от инфинитива в форме ничего не остаётся, как и в Presente (voy)." },
     indefinido: { forms: ["fui", "fuiste", "fue", "fuimos", "fuisteis", "fueron"], endLen: [1, 4, 1, 4, 6, 4], note: "ir делит эти формы с ser целиком — fui значит и «пошёл», и «был», контекст решает." },
     imperfecto: { forms: ["iba", "ibas", "iba", "íbamos", "ibais", "iban"], endLen: [3, 4, 3, 6, 5, 4], note: "ir — один из всего трёх неправильных глаголов в Imperfecto (вместе с ser и ver): особая основа ib-." },
@@ -806,6 +808,7 @@ const OPERATORS = [
   {
     id: "op-intentar", verb: "intentar", particle: "", meaning: "пытаться сделать",
     action: "recoger la pista", actionRu: "собрать улику",
+    presente: { forms: ["intento", "intentas", "intenta", "intentamos", "intentáis", "intentan"], endLen: [1, 2, 1, 4, 3, 2], note: "intentar — полностью регулярный глагол -AR: стандартные окончания -o/-as/-a/-amos/-áis/-an без изменений в корне intent-." },
     ppc: { forms: ["he intentado", "has intentado", "ha intentado", "hemos intentado", "habéis intentado", "han intentado"], endLen: [3, 3, 3, 3, 3, 3], note: "intentado — регулярное причастие -AR: intent- + -ado." },
     indefinido: { forms: ["intenté", "intentaste", "intentó", "intentamos", "intentasteis", "intentaron"], endLen: [1, 4, 1, 4, 6, 4], note: "intentar полностью регулярный -AR — никаких сюрпризов ни в одном лице." },
     imperfecto: { forms: ["intentaba", "intentabas", "intentaba", "intentábamos", "intentabais", "intentaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR: intent- + -aba." },
@@ -813,6 +816,7 @@ const OPERATORS = [
   {
     id: "op-empezara", verb: "empezar", particle: "a", meaning: "начинать делать",
     action: "hablar con el Jefe", actionRu: "говорить с Шефом",
+    presente: { forms: ["empiezo", "empiezas", "empieza", "empezamos", "empezáis", "empiezan"], endLen: [4, 4, 4, 4, 4, 4], note: "В Presente корень e→ie меняется в yo, tú, él/ella и ellos/ellas (empiezo, не «empezo»). Nosotros и vosotros сохраняют empez-; орфография z→c нужна только в Indefinido (empecé)." },
     ppc: { forms: ["he empezado", "has empezado", "ha empezado", "hemos empezado", "habéis empezado", "han empezado"], endLen: [3, 3, 3, 3, 3, 3], note: "empezado — регулярное причастие: empez- + -ado." },
     indefinido: { forms: ["empecé", "empezaste", "empezó", "empezamos", "empezasteis", "empezaron"], endLen: [1, 4, 1, 4, 6, 4], note: "меняется только форма yo — empecé, не «empezé»: z → c перед e, тот же приём, что g → j в Presente." },
     imperfecto: { forms: ["empezaba", "empezabas", "empezaba", "empezábamos", "empezabais", "empezaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR во всех шести формах — орфография z/c в Imperfecto не нужна, после -aba гласная не e." },
@@ -820,6 +824,7 @@ const OPERATORS = [
   {
     id: "op-dejarde", verb: "dejar", particle: "de", meaning: "переставать делать",
     action: "mirar la sombra", actionRu: "смотреть на тень",
+    presente: { forms: ["dejo", "dejas", "deja", "dejamos", "dejáis", "dejan"], endLen: [1, 2, 1, 4, 3, 2], note: "dejar — полностью регулярный глагол -AR: стандартные окончания без изменений в корне dej-." },
     ppc: { forms: ["he dejado", "has dejado", "ha dejado", "hemos dejado", "habéis dejado", "han dejado"], endLen: [3, 3, 3, 3, 3, 3], note: "dejado — регулярное причастие: dej- + -ado." },
     indefinido: { forms: ["dejé", "dejaste", "dejó", "dejamos", "dejasteis", "dejaron"], endLen: [1, 4, 1, 4, 6, 4], note: "dejar полностью регулярный -AR." },
     imperfecto: { forms: ["dejaba", "dejabas", "dejaba", "dejábamos", "dejabais", "dejaban"], endLen: [3, 4, 3, 6, 5, 4], note: "регулярный -AR: dej- + -aba." },
@@ -827,6 +832,7 @@ const OPERATORS = [
   {
     id: "op-volvera", verb: "volver", particle: "a", meaning: "делать снова",
     action: "guardar la llave", actionRu: "убрать ключ",
+    presente: { forms: ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"], endLen: [4, 4, 4, 4, 4, 4], note: "В Presente корень o→ue меняется в yo, tú, él/ella и ellos/ellas (vuelvo, не «volvo»). Nosotros и vosotros сохраняют volv-." },
     ppc: { forms: ["he vuelto", "has vuelto", "ha vuelto", "hemos vuelto", "habéis vuelto", "han vuelto"], endLen: [6, 6, 6, 6, 6, 6], note: "vuelto — неправильное причастие (не «volvido»): та же форма, что в теме «Причастия неправильные»." },
     indefinido: { forms: ["volví", "volviste", "volvió", "volvimos", "volvisteis", "volvieron"], endLen: [1, 4, 2, 4, 6, 5], note: "в Indefinido volver полностью регулярный -ER — неправильность живёт только в причастии." },
     imperfecto: { forms: ["volvía", "volvías", "volvía", "volvíamos", "volvíais", "volvían"], endLen: [2, 3, 2, 5, 4, 3], note: "регулярный -ER: volv- + -ía." },
@@ -868,9 +874,12 @@ function TemaOperador({ data: op, onBack, onTrain }) {
 }
 
 // Программная сборка тренажёров: одно упражнение на каждое лицо (6) на
-// каждое время (3) на каждый оператор (8) = 144 карточки, «в хвост и в
-// гриву» (решение Оксаны 28.08.2026). Персонажи-подлежащие переиспользуют
-// голос Королевства (охранник, помощники) в порядке лиц PERSONS.
+// каждое время (3, у querer/poder/tenerque/ira/intentar/empezara/dejarde/
+// volvera — теперь у всех восьми — 4 с учётом Presente) на каждый оператор
+// (8) = 192 карточки, «в хвост и в гриву» (решение Оксаны 28.08.2026;
+// Presente для всех восьми операторов — починка 29.08.2026, тот же приём,
+// что и у querer/poder). Персонажи-подлежащие переиспользуют голос
+// Королевства (охранник, помощники) в порядке лиц PERSONS.
 const OP_SUBJ = ["Yo", "Tú", "El guardia", "Nosotros", "Vosotros", "Los ayudantes"];
 const OPERATOR_DRILLS = {};
 const OPERATOR_TITLES = {};
