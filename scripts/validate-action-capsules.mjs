@@ -163,7 +163,8 @@ check("ошибка формы ведёт в точный Presente для все
   '"volver-a-1": "op-volvera-presente"',
 ].every(line => shell.includes(line)));
 check("возврат из Gramática ведёт обратно в капсулу, а не на линейку", shell.includes("setDeepCapsule(capsuleGrammar.capsuleId)"));
-check("«следующая капсула» считается из completed, а не из отдельного currentId (регресс 29.08)", trainer.includes("CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id))"));
+check("«следующая капсула» считается из completed, а не из отдельного currentId (регресс 29.08)", trainer.includes("CAPSULE_LINE.findIndex(item => item.ready && !progress.completed.includes(item.id))"));
+check("«следующая капсула» пропускает неготовые заглушки Cápsula 2 (регресс 29.08, вторая часть)", trainer.includes("const nextReadyIndex = CAPSULE_LINE.findIndex(item => item.ready"));
 check("просмотр уже пройденной капсулы не откатывает currentId назад", trainer.includes("previous.completed.includes(capsuleId) ? previous.currentId : capsuleId"));
 check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 8);
 
