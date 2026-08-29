@@ -73,7 +73,7 @@ export const PODER_DIALOGUES = [
     title: "GUARDAR",
     context: "Entre los papeles aparece una llave pequeña.",
     before: [
-      { speaker: "Lucía", text: "Puedo guardar la llave en la caja fuerte." },
+      { speaker: "Lucía", text: "Tengo la llave pequeña, pero no puedo dejarla en cualquier sitio." },
       { speaker: "Detective", text: "¿Dónde puedes guardarla?" },
     ],
     answerSpeaker: "Lucía",
@@ -106,8 +106,8 @@ export const PODER_DIALOGUES = [
     title: "DAR",
     context: "Alguien debe entregar la llave a Don Verbo.",
     before: [
-      { speaker: "Lucía", text: "Puedo dar la llave a Don Verbo." },
-      { speaker: "Detective", text: "¿Cuándo puedes dársela?" },
+      { speaker: "Lucía", text: "Tengo la llave pequeña." },
+      { speaker: "Detective", text: "¿A quién puedes dársela?" },
     ],
     answerSpeaker: "Lucía",
     answerTokens: ["Puedo", "dar", "la llave", "a Don Verbo."],
