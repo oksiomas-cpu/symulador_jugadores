@@ -2063,10 +2063,17 @@ export default function SimuladorJugador() {
   if (access.status === "none") return <NoPassScreen />;
 
   if (capsuleGrammar) {
+    // Возврат из "поспрягать в Gramática" — не на линейку капсул, а в ту же
+    // капсулу: используем существующий маршрут deepCapsule (initialCapsuleId),
+    // он уже читает точный шаг из сохранённого прогресса (stepByCapsule).
+    const closeCapsuleGrammar = () => {
+      setDeepCapsule(capsuleGrammar.capsuleId);
+      setCapsuleGrammar(null);
+    };
     return <Gramatica
       startTema={CAPSULE_GRAMMAR_TEMA[capsuleGrammar.capsuleId] || "op-querer-presente"}
-      onComplete={() => setCapsuleGrammar(null)}
-      onBack={() => setCapsuleGrammar(null)}
+      onComplete={closeCapsuleGrammar}
+      onBack={closeCapsuleGrammar}
     />;
   }
 
