@@ -73,6 +73,19 @@ function writeProgress(next) {
   try { window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(next)); } catch (_) { /* UI остаётся рабочим без storage. */ }
 }
 
+// ---- Облачный прогресс линейки (Mini App, по Telegram ID) ----
+// Тот же приём, что у общей копилки очков (api/score.js): localStorage —
+// мгновенный кэш на устройстве, Redis (SADD в capsules:{tgId}) — источник
+// правды между устройствами. SADD идемпотентен, поэтому синк безопасно
+// гонять на каждом открытии экрана, без флага «уже переехало» — просто
+// объединение множеств, прогресс никогда не откатывается назад.
+async function capsulesCloudCall(payload) {
+  const resp = await fetch("/api/capsules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const d = await resp.json();
+  if (!resp.ok || !d.ok) throw new Error(d.error || "capsules api error");
+  return d.completed;
+}
+
 const MODE_INFO = [
   ["recognize", "Узнать", "Что изменилось в статусе действия"],
   ["build", "Собрать", "Оператор + действие + предмет"],
@@ -1293,35 +1306,59 @@ function Story({ onBack }) {
 }
 
 function Start({ progress, onOpen, onBack }) {
-  const completed = CAPSULE_LINE.filter(item => progress.completed.includes(item.id));
   // «Следующая капсула» всегда выводится из фактического completed, а не из
   // отдельно хранимого currentId — так открытие уже пройденной капсулы для
-  // повтора (из списка ниже) не может откатить указатель линейки назад.
+  // повтора (из оглавления ниже) не может откатить указатель линейки назад.
   // Пропускает неготовые «Капсула 2»-заглушки (регресс 29.08: прежняя версия
   // брала первую НЕ ПРОЙДЕННУЮ без учёта ready и после tener-que-1 упиралась
   // в неготовую tener-que-2, блокируя пять уже задеплоенных капсул
   // ir-a-1…volver-a-1, стоящих в линейке дальше).
   const nextReadyIndex = CAPSULE_LINE.findIndex(item => item.ready && !progress.completed.includes(item.id));
-  const currentIndex = nextReadyIndex >= 0 ? nextReadyIndex : CAPSULE_LINE.length - 1;
-  const current = CAPSULE_LINE[currentIndex] || CAPSULE_LINE[CAPSULE_LINE.length - 1];
-  const currentReady = nextReadyIndex >= 0;
+  const current = nextReadyIndex >= 0 ? CAPSULE_LINE[nextReadyIndex] : null;
   return <div style={wrap}><div style={maxw}>
-    <Header small="Capítulo 4 · App" title="Капсулы Дона Вербо" sub={`${Math.min(currentIndex + 1, 16)} из 16 · App хранит этот прогресс самостоятельно.`} />
-    <Card>
-      <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase" }}>{currentReady ? "Текущая капсула" : "Следующая капсула"}</div>
-      <div style={{ color: C.raspberry, fontSize: 21, fontWeight: 900, marginTop: 6 }}>{current?.operator} · {current?.title}</div>
-      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "Эта капсула откроется после проверки текущего эталона."}</div>
-      {currentReady && <button onClick={() => onOpen(current.id)} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>{progress.stepByCapsule?.[current.id] ? "Продолжить капсулу →" : "Начать капсулу →"}</button>}
-    </Card>
-    {completed.length > 0 && <details style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 15px", marginBottom: 14 }}>
-      <summary style={{ cursor: "pointer", color: C.goldDeep, fontWeight: 800 }}>Пройдено: {completed.length} из 16</summary>
-      <div style={{ display: "grid", gap: 8, marginTop: 12 }}>{completed.map(item => <button key={item.id} onClick={() => onOpen(item.id)} style={{ width: "100%", background: C.cream, color: C.ink, border: `1px solid ${C.line}`, borderRadius: 10, padding: 11, textAlign: "left", fontFamily: SERIF, cursor: "pointer" }}><b>{item.operator}</b> · {item.title}</button>)}</div>
-    </details>}
+    <Header small="Capítulo 4 · App" title="Капсулы Дона Вербо" sub={`Пройдено ${progress.completed.length} из 16 · выбирай любую доступную капсулу в оглавлении ниже.`} />
+    {current && <Card>
+      <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase" }}>Рекомендуем дальше</div>
+      <div style={{ color: C.raspberry, fontSize: 21, fontWeight: 900, marginTop: 6 }}>{current.operator} · {current.title}</div>
+      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>Контекст → диалог → собственная реплика → закрепление формы.</div>
+      <button onClick={() => onOpen(current.id)} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>{progress.stepByCapsule?.[current.id] ? "Продолжить капсулу →" : "Начать капсулу →"}</button>
+    </Card>}
+    {/* Оглавление: видны все 16 слотов линейки — пройденные, доступные для
+        начала и ещё не готовые — а не только «текущая» и список пройденных
+        (запрос Оксаны 29.08: «хочу видеть не только пройденные, но и
+        непройденные»). Открыто по умолчанию, но сворачиваемо. */}
+    <details open style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 15px", marginBottom: 14 }}>
+      <summary style={{ cursor: "pointer", color: C.goldDeep, fontWeight: 800 }}>Оглавление · все 16 капсул</summary>
+      <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+        {CAPSULE_LINE.map(item => {
+          const done = progress.completed.includes(item.id);
+          const available = item.ready && !done;
+          const locked = !item.ready;
+          return <button
+            key={item.id}
+            onClick={() => { if (!locked) onOpen(item.id); }}
+            disabled={locked}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: 9,
+              background: locked ? C.cream : C.card,
+              color: locked ? C.inkSoft : C.ink,
+              border: `1px solid ${done ? C.emerald : available ? C.gold : C.line}`,
+              opacity: locked ? 0.55 : 1,
+              borderRadius: 10, padding: 11, textAlign: "left", fontFamily: SERIF,
+              cursor: locked ? "default" : "pointer",
+            }}
+          >
+            <span>{done ? "✅" : available ? "▶️" : "🔒"}</span>
+            <span><b>{item.operator}</b> · {item.title}{locked && <span style={{ fontStyle: "italic" }}> · скоро</span>}</span>
+          </button>;
+        })}
+      </div>
+    </details>
     <Back onClick={onBack} label="← В Главу 4" />
   </div></div>;
 }
 
-export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsuleId = null, resumeStep = 0 }) {
+export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsuleId = null, resumeStep = 0, tgId = null }) {
   const [progress, setProgress] = useState(readProgress);
   const [mode, setMode] = useState(initialCapsuleId || "start");
   const saveStep = (capsuleId, stepIndex) => setProgress(previous => {
@@ -1338,20 +1375,48 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
     const next = { ...previous, completed, currentId: nextItem?.id || capsuleId, stepByCapsule: { ...previous.stepByCapsule, [capsuleId]: 0 } };
     writeProgress(next); return next;
   });
-  if (mode === "querer-1") return <QuererOne initialStep={resumeStep || progress.stepByCapsule?.["querer-1"] || 0} onStep={(step) => saveStep("querer-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "querer-2") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "poder-2") return <PoderIntentions onComplete={complete} onBack={() => setMode("start")} />;
-    if (mode === "tener-que-1") return <TenerQueOne initialStep={resumeStep || progress.stepByCapsule?.["tener-que-1"] || 0} onStep={(step) => saveStep("tener-que-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "ir-a-1") return <IrAOne initialStep={resumeStep || progress.stepByCapsule?.["ir-a-1"] || 0} onStep={(step) => saveStep("ir-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "intentar-1") return <IntentarOne initialStep={resumeStep || progress.stepByCapsule?.["intentar-1"] || 0} onStep={(step) => saveStep("intentar-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "empezar-a-1") return <EmpezarAOne initialStep={resumeStep || progress.stepByCapsule?.["empezar-a-1"] || 0} onStep={(step) => saveStep("empezar-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "dejar-de-1") return <DejarDeOne initialStep={resumeStep || progress.stepByCapsule?.["dejar-de-1"] || 0} onStep={(step) => saveStep("dejar-de-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
-  if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  // Прогресс между устройствами: при открытии из Telegram (tgId есть) —
+  // сначала отдаём в облако то, что накопилось локально (SADD, задвоения
+  // не бывает), затем подтягиваем полное облачное множество и объединяем
+  // с локальным. Другое устройство/чистый localStorage подтягивает то, что
+  // уже прошли где-то ещё, вместо старта с нуля.
+  useEffect(() => {
+    if (!tgId) return;
+    let alive = true;
+    (async () => {
+      try {
+        if (progress.completed.length) await capsulesCloudCall({ action: "sync", tgId, completed: progress.completed });
+        const cloud = await capsulesCloudCall({ action: "get", tgId });
+        if (!alive || !Array.isArray(cloud) || !cloud.length) return;
+        setProgress(previous => {
+          const merged = Array.from(new Set([...previous.completed, ...cloud]));
+          if (merged.length === previous.completed.length) return previous;
+          const next = { ...previous, completed: merged };
+          writeProgress(next); return next;
+        });
+      } catch (_) { /* офлайн или база недоступна — линейка работает локально */ }
+    })();
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tgId]);
+  const completeSynced = (capsuleId) => {
+    complete(capsuleId);
+    if (tgId) capsulesCloudCall({ action: "add", tgId, capsuleId }).catch(() => { /* уедет при следующем sync */ });
+  };
+  if (mode === "querer-1") return <QuererOne initialStep={resumeStep || progress.stepByCapsule?.["querer-1"] || 0} onStep={(step) => saveStep("querer-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "querer-2") return <Intentions onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "poder-2") return <PoderIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
+    if (mode === "tener-que-1") return <TenerQueOne initialStep={resumeStep || progress.stepByCapsule?.["tener-que-1"] || 0} onStep={(step) => saveStep("tener-que-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "ir-a-1") return <IrAOne initialStep={resumeStep || progress.stepByCapsule?.["ir-a-1"] || 0} onStep={(step) => saveStep("ir-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "intentar-1") return <IntentarOne initialStep={resumeStep || progress.stepByCapsule?.["intentar-1"] || 0} onStep={(step) => saveStep("intentar-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "empezar-a-1") return <EmpezarAOne initialStep={resumeStep || progress.stepByCapsule?.["empezar-a-1"] || 0} onStep={(step) => saveStep("empezar-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "dejar-de-1") return <DejarDeOne initialStep={resumeStep || progress.stepByCapsule?.["dejar-de-1"] || 0} onStep={(step) => saveStep("dejar-de-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
   if (mode === "story") return <Story onBack={() => setMode("start")} />;
-  if (mode === "intentions") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "intentions") return <Intentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   return <Start progress={progress} onOpen={setMode} onBack={onBack} />;
 }
