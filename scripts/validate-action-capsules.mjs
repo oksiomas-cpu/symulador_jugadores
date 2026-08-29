@@ -5,6 +5,7 @@ import {
   capsulePhrase,
 } from "../src/actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
+import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogueData.js";
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
 import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
 import { readFileSync } from "node:fs";
@@ -59,6 +60,16 @@ check("Капсула poder-1 проходит смысл, диалог, сме�
 check("объект LOS PAPELES не пропущен в репликах poder-1", PODER_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /los papeles/i.test(x.answer) || x.kind === "form"));
 check("Presente PODER содержит шесть лиц", PODER_PRESENT.map(x => x.form).join("|") === "puedo|puedes|puede|podemos|podéis|pueden");
 
+check("poder-2 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "poder-2")?.ready === true);
+check("Капсула poder-2 содержит ровно 10 диалогов", PODER_DIALOGUES.length === 10);
+check("ID диалогов poder-2 уникальны", new Set(PODER_DIALOGUES.map(x => x.id)).size === PODER_DIALOGUES.length);
+check("каждый диалог poder-2 собирает законченную реплику", PODER_DIALOGUES.every(x => x.answerTokens?.length >= 3 && x.answerTokens.length === x.layers?.length));
+check("опрос poder-2 содержит 10 смысловых вопросов", PODER_REVIEW.length === 10);
+check("каждый вопрос poder-2 связан с существующим диалогом", PODER_REVIEW.every(x => PODER_DIALOGUES.some(d => d.id === x.sourceId)));
+check("в каждом вопросе poder-2 один точный ответ", PODER_REVIEW.every(x => x.options?.length === 3 && x.options.filter(option => option === x.answer).length === 1));
+const capsule4Text = JSON.stringify({ intro: PODER_INTRO, dialogues: PODER_DIALOGUES, review: PODER_REVIEW });
+check("в poder-2 нет русского перевода", !/[А-Яа-яЁё]/.test(capsule4Text));
+
 const gramatica = readFileSync(new URL("../src/Gramatica.jsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../src/SimuladorJugador.jsx", import.meta.url), "utf8");
 const trainer = readFileSync(new URL("../src/ActionCapsules.jsx", import.meta.url), "utf8");
@@ -72,9 +83,11 @@ check("сетки операторов безопасны для узкого э
 check("старое общее поле third не осталось в интерфейсе", !trainer.includes("operator.third"));
 check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
 check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
+check("Капсула poder-2 подключена отдельным режимом", trainer.includes('mode === "poder-2"') && trainer.includes("<PoderIntentions"));
 check("App хранит собственный прогресс линейки", trainer.includes('ciudad:operator-capsules:v1'));
 check("App не обещает передать ошибки Don Verbo", !trainer.includes("Don Verbo volverá a preguntar"));
 check("ошибка формы ведёт в точный Presente QUERER и PODER", shell.includes('"querer-1": "op-querer-presente"') && shell.includes('"poder-1": "op-poder-presente"'));
+check("возврат из Gramática ведёт обратно в капсулу, а не на линейку", shell.includes("setDeepCapsule(capsuleGrammar.capsuleId)"));
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
