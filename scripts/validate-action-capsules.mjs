@@ -6,6 +6,7 @@ import {
 } from "../src/actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
+import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -52,20 +53,28 @@ check("Капсула 1 проходит смысл, диалог, смену п
 check("объект LA PUERTA не пропущен в репликах Капсулы 1", QUERER_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /la puerta/i.test(x.answer) || x.kind === "form"));
 check("Presente QUERER содержит шесть лиц", QUERER_PRESENT.map(x => x.form).join("|") === "quiero|quieres|quiere|queremos|queréis|quieren");
 
+check("poder-1 помечена ready в линейке", CAPSULE_LINE.find(x => x.id === "poder-1")?.ready === true);
+check("Капсула poder-1 — PODER + RECOGER LOS PAPELES", PODER_CAPSULE_1.id === "poder-1" && PODER_CAPSULE_1.linkTitle === "PODER + RECOGER LOS PAPELES");
+check("Капсула poder-1 проходит смысл, диалог, смену персонажа и собственную реплику", ["meaning", "dialogue", "speaker", "own-line"].every(id => PODER_CAPSULE_1_STEPS.some(x => x.id === id)));
+check("объект LOS PAPELES не пропущен в репликах poder-1", PODER_CAPSULE_1_STEPS.filter(x => x.answer && x.id !== "meaning").every(x => /los papeles/i.test(x.answer) || x.kind === "form"));
+check("Presente PODER содержит шесть лиц", PODER_PRESENT.map(x => x.form).join("|") === "puedo|puedes|puede|podemos|podéis|pueden");
+
 const gramatica = readFileSync(new URL("../src/Gramatica.jsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../src/SimuladorJugador.jsx", import.meta.url), "utf8");
 const trainer = readFileSync(new URL("../src/ActionCapsules.jsx", import.meta.url), "utf8");
 check("сюжетные капсулы удалены из каталога Gramática", !gramatica.includes('id: "capsulas-a1"') && !gramatica.includes('<ActionCapsules'));
 check("Gramática содержит точный Presente QUERER", gramatica.includes('presente: { forms: ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"]'));
+check("Gramática содержит точный Presente PODER", gramatica.includes('presente: { forms: ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"]'));
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
 check("обычная ссылка ?capsula= открывает App-капсулу", shell.includes('get("capsula")') && shell.includes("<ActionCapsules"));
 check("в Главе 4 две отдельные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Тренировать роли →"));
 check("сетки операторов безопасны для узкого экрана", trainer.includes('repeat(3, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
 check("старое общее поле third не осталось в интерфейсе", !trainer.includes("operator.third"));
 check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
+check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
 check("App хранит собственный прогресс линейки", trainer.includes('ciudad:operator-capsules:v1'));
 check("App не обещает передать ошибки Don Verbo", !trainer.includes("Don Verbo volverá a preguntar"));
-check("ошибка формы ведёт в точный Presente QUERER", trainer.includes('op-querer-presente') || shell.includes('startTema="op-querer-presente"'));
+check("ошибка формы ведёт в точный Presente QUERER и PODER", shell.includes('"querer-1": "op-querer-presente"') && shell.includes('"poder-1": "op-poder-presente"'));
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
