@@ -176,6 +176,43 @@ const apiCapsules = readFileSync(new URL("../api/capsules.js", import.meta.url),
 check("api/capsules.js существует и поддерживает get/add/sync", ['"get"', '"add"', '"sync"'].every(a => apiCapsules.includes(a)) && apiCapsules.includes("SADD") && apiCapsules.includes("SMEMBERS"));
 check("api/capsules.js валидирует capsuleId перед записью в Redis", apiCapsules.includes("VALID_ID"));
 
+// Регресс 29.08 (живая проверка Оксаны): правильный ответ в data почти
+// везде стоял первым элементом options, а рендер выводил массив как есть —
+// упражнение решалось не читая. Проверяем на двух уровнях: 1) рендер
+// использует перетасовку, а не сырой .options.map/.answerOptions.map;
+// 2) сама перетасовка (тот же seed-алгоритм, что в ActionCapsules.jsx)
+// реально разносит правильный ответ по позициям, а не держит его на месте.
+check("choice-шаги капсулы 1 рендерятся через shuffledStepOptions, не сырой step.options.map", !/step\.options\.map/.test(trainer) && (trainer.match(/shuffledStepOptions\(step\)\.map/g) || []).length === 8);
+check("контрольные вопросы Cápsula 2 рендерятся через shuffledReviewOptions, не сырой question.options.map", !/question\.options\.map/.test(trainer) && trainer.includes("shuffledReviewOptions(question).map"));
+
+function seededShuffleCheck(seedKey, items) {
+  const result = items.slice();
+  let seed = String(seedKey).split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const j = Math.floor((seed / 233280) * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+const ALL_CAPSULE_1_STEPS = [
+  QUERER_CAPSULE_1_STEPS, PODER_CAPSULE_1_STEPS, TENER_QUE_CAPSULE_1_STEPS, IR_A_CAPSULE_1_STEPS,
+  INTENTAR_CAPSULE_1_STEPS, EMPEZAR_A_CAPSULE_1_STEPS, DEJAR_DE_CAPSULE_1_STEPS, VOLVER_A_CAPSULE_1_STEPS,
+].flatMap(steps => steps.filter(s => s.kind === "choice"));
+const shuffledFirstCount = ALL_CAPSULE_1_STEPS.filter(s => seededShuffleCheck(`${s.id}::${s.prompt}`, s.options)[0] === s.answer).length;
+check(
+  "перетасовка реально уводит правильный ответ с первой позиции хотя бы в половине choice-шагов капсулы 1",
+  shuffledFirstCount <= Math.ceil(ALL_CAPSULE_1_STEPS.length / 2),
+  `осталось на первом месте: ${shuffledFirstCount} из ${ALL_CAPSULE_1_STEPS.length}`,
+);
+const ALL_REVIEW = [...QUERER_REVIEW, ...PODER_REVIEW];
+const shuffledReviewFirstCount = ALL_REVIEW.filter(q => seededShuffleCheck(`${q.id}::${q.question}`, q.options)[0] === q.answer).length;
+check(
+  "перетасовка реально уводит правильный ответ с первой позиции хотя бы в половине вопросов Cápsula 2",
+  shuffledReviewFirstCount <= Math.ceil(ALL_REVIEW.length / 2),
+  `осталось на первом месте: ${shuffledReviewFirstCount} из ${ALL_REVIEW.length}`,
+);
+
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
   process.exit(1);
