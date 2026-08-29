@@ -47,6 +47,17 @@ check("в каждом вопросе один точный ответ", QUERER_
 const capsule2Text = JSON.stringify({ intro: QUERER_INTRO, dialogues: QUERER_DIALOGUES, review: QUERER_REVIEW });
 check("в Капсуле 2 нет русского перевода", !/[А-Яа-яЁё]/.test(capsule2Text));
 
+// Регресс 29.08 (найден Оксаной живьём): реплика ДО вопроса не должна дословно
+// совпадать с готовым ответом — иначе игрок собирает уже показанную фразу, а
+// не отвечает на заданный вопрос (баг диалогов DAR и GUARDAR в poder-2).
+function beforeDoesNotLeakAnswer(dialogues) {
+  return dialogues.every(d => {
+    const answer = d.answerTokens.join(" ").trim();
+    return d.before.every(line => line.text.trim() !== answer);
+  });
+}
+check("в репликах до ответа QUERER-2 готовый ответ не показан заранее", beforeDoesNotLeakAnswer(QUERER_DIALOGUES));
+
 check("линейка содержит 16 капсул", CAPSULE_LINE.length === 16);
 check("в линейке ровно по две капсулы на оператор", new Set(CAPSULE_LINE.map(x => x.operator)).size === 8 && [...new Set(CAPSULE_LINE.map(x => x.operator))].every(op => CAPSULE_LINE.filter(x => x.operator === op).length === 2));
 check("Капсула 1 — QUERER + ABRIR LA PUERTA", QUERER_CAPSULE_1.id === "querer-1" && QUERER_CAPSULE_1.linkTitle === "QUERER + ABRIR LA PUERTA");
@@ -69,6 +80,7 @@ check("каждый вопрос poder-2 связан с существующи�
 check("в каждом вопросе poder-2 один точный ответ", PODER_REVIEW.every(x => x.options?.length === 3 && x.options.filter(option => option === x.answer).length === 1));
 const capsule4Text = JSON.stringify({ intro: PODER_INTRO, dialogues: PODER_DIALOGUES, review: PODER_REVIEW });
 check("в poder-2 нет русского перевода", !/[А-Яа-яЁё]/.test(capsule4Text));
+check("в репликах до ответа poder-2 готовый ответ не показан заранее (баг DAR/GUARDAR)", beforeDoesNotLeakAnswer(PODER_DIALOGUES));
 
 const gramatica = readFileSync(new URL("../src/Gramatica.jsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../src/SimuladorJugador.jsx", import.meta.url), "utf8");
