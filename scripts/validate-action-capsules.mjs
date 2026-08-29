@@ -167,6 +167,14 @@ check("«следующая капсула» считается из completed, 
 check("«следующая капсула» пропускает неготовые заглушки Cápsula 2 (регресс 29.08, вторая часть)", trainer.includes("const nextReadyIndex = CAPSULE_LINE.findIndex(item => item.ready"));
 check("просмотр уже пройденной капсулы не откатывает currentId назад", trainer.includes("previous.completed.includes(capsuleId) ? previous.currentId : capsuleId"));
 check("внутри шага капсулы есть кнопка «Предыдущий шаг»", (trainer.match(/← Предыдущий шаг/g) || []).length === 8);
+check("оглавление линейки показывает все 16 слотов (пройдено/доступно/скоро), не только пройденные (запрос 29.08)", trainer.includes("Оглавление · все 16 капсул") && trainer.includes("CAPSULE_LINE.map(item =>") && trainer.includes('locked && <span'));
+check("ActionCapsules принимает tgId и вызывает облачный синк капсул", trainer.includes("tgId = null") && trainer.includes('fetch("/api/capsules"') && trainer.includes('action: "sync", tgId, completed: progress.completed') && trainer.includes('action: "get", tgId'));
+check("завершение капсулы уходит в облако (completeSynced), а не только в localStorage", (trainer.match(/onComplete=\{completeSynced\}/g) || []).length >= 10 && trainer.includes('action: "add", tgId, capsuleId'));
+check("оба вызова <ActionCapsules> в SimuladorJugador передают tgId", (shell.match(/tgId=\{tg\.current\?\.id \|\| null\}/g) || []).length === 2);
+
+const apiCapsules = readFileSync(new URL("../api/capsules.js", import.meta.url), "utf8");
+check("api/capsules.js существует и поддерживает get/add/sync", ['"get"', '"add"', '"sync"'].every(a => apiCapsules.includes(a)) && apiCapsules.includes("SADD") && apiCapsules.includes("SMEMBERS"));
+check("api/capsules.js валидирует capsuleId перед записью в Redis", apiCapsules.includes("VALID_ID"));
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
