@@ -1297,9 +1297,14 @@ function Start({ progress, onOpen, onBack }) {
   // «Следующая капсула» всегда выводится из фактического completed, а не из
   // отдельно хранимого currentId — так открытие уже пройденной капсулы для
   // повтора (из списка ниже) не может откатить указатель линейки назад.
-  const currentIndex = Math.max(0, CAPSULE_LINE.findIndex(item => !progress.completed.includes(item.id)));
+  // Пропускает неготовые «Капсула 2»-заглушки (регресс 29.08: прежняя версия
+  // брала первую НЕ ПРОЙДЕННУЮ без учёта ready и после tener-que-1 упиралась
+  // в неготовую tener-que-2, блокируя пять уже задеплоенных капсул
+  // ir-a-1…volver-a-1, стоящих в линейке дальше).
+  const nextReadyIndex = CAPSULE_LINE.findIndex(item => item.ready && !progress.completed.includes(item.id));
+  const currentIndex = nextReadyIndex >= 0 ? nextReadyIndex : CAPSULE_LINE.length - 1;
   const current = CAPSULE_LINE[currentIndex] || CAPSULE_LINE[CAPSULE_LINE.length - 1];
-  const currentReady = current?.ready && !progress.completed.includes(current.id);
+  const currentReady = nextReadyIndex >= 0;
   return <div style={wrap}><div style={maxw}>
     <Header small="Capítulo 4 · App" title="Капсулы Дона Вербо" sub={`${Math.min(currentIndex + 1, 16)} из 16 · App хранит этот прогресс самостоятельно.`} />
     <Card>
