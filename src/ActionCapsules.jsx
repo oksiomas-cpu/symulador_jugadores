@@ -147,15 +147,37 @@ function DialogueLine({ speaker, text, missing = false }) {
   </div>;
 }
 
-function shuffledTokens(dialogue) {
-  const result = dialogue.answerTokens.map((text, index) => ({ id: `${dialogue.id}-${index}`, text, index }));
-  let seed = dialogue.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+// Детерминированная перетасовка: НЕ Math.random, потому что порядок должен
+// быть стабилен между ре-рендерами одного и того же шага (иначе кнопки
+// прыгали бы местами сразу после клика) — тот же линейный конгруэнтный
+// генератор, что уже отвечал за порядок токенов в DialogueExercise.
+function seededShuffle(seedKey, items) {
+  const result = items.slice();
+  let seed = String(seedKey).split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
   for (let i = result.length - 1; i > 0; i -= 1) {
     seed = (seed * 9301 + 49297) % 233280;
     const j = Math.floor((seed / 233280) * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+function shuffledTokens(dialogue) {
+  const items = dialogue.answerTokens.map((text, index) => ({ id: `${dialogue.id}-${index}`, text, index }));
+  return seededShuffle(dialogue.id, items);
+}
+
+// Регресс 29.08 (живая проверка Оксаны): в шагах-choice капсулы 1 и в
+// контрольных вопросах Cápsula 2 правильный ответ в data почти всегда стоял
+// первым элементом options, а рендер выводил массив как есть — упражнение
+// решалось не читая. Перемешиваем варианты стабильно (seed от id+текста
+// шага/вопроса), чтобы позиция ответа не была предсказуемой ни в одной
+// капсуле.
+function shuffledStepOptions(step) {
+  return seededShuffle(`${step.id}::${step.prompt}`, step.options);
+}
+function shuffledReviewOptions(question) {
+  return seededShuffle(`${question.id}::${question.question}`, question.options);
 }
 
 function DialogueExercise({ dialogue, onSolved, capsuleLabel = "Cápsula 2", total = QUERER_DIALOGUES.length }) {
@@ -296,7 +318,7 @@ function QuererOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onS
     <Progress index={stepIndex} total={QUERER_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма querer" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -402,7 +424,7 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
     <Progress index={stepIndex} total={PODER_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма poder" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -507,7 +529,7 @@ function TenerQueOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
     <Progress index={stepIndex} total={TENER_QUE_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма tener que" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -613,7 +635,7 @@ function IrAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep
     <Progress index={stepIndex} total={IR_A_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма ir a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -720,7 +742,7 @@ function IntentarOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
     <Progress index={stepIndex} total={INTENTAR_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма intentar" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -827,7 +849,7 @@ function EmpezarAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
     <Progress index={stepIndex} total={EMPEZAR_A_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма empezar a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -934,7 +956,7 @@ function DejarDeOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, on
     <Progress index={stepIndex} total={DEJAR_DE_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма dejar de" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -1041,7 +1063,7 @@ function VolverAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, on
     <Progress index={stepIndex} total={VOLVER_A_CAPSULE_1_STEPS.length} />
     <Card>
       <div style={{ textAlign: "center", fontSize: 19, lineHeight: 1.55, fontWeight: 800 }}>{step.prompt}</div>
-      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{step.options.map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
+      {step.kind === "choice" ? <div style={{ display: "grid", gap: 9, marginTop: 18 }}>{shuffledStepOptions(step).map(option => <Choice key={option} active={picked === option} disabled={!!feedback} onClick={() => { setPicked(option); submit(option); }}>{option}</Choice>)}</div> : <>
         <input value={typed} onChange={event => { setTyped(event.target.value); setFeedback(null); }} onKeyDown={event => event.key === "Enter" && submit(event.currentTarget.value)} disabled={!!feedback} placeholder={step.kind === "form" ? "форма volver a" : "твоя реплика по-испански"} autoCapitalize="none" autoCorrect="off" spellCheck={false} style={{ width: "100%", boxSizing: "border-box", marginTop: 18, padding: "13px 14px", borderRadius: 12, border: `2px solid ${feedback ? (correct ? C.emerald : C.raspberry) : C.gold}`, background: C.cream, color: C.ink, fontFamily: SERIF, fontSize: 17, textAlign: "center", outline: "none" }} />
         {!feedback && <button onClick={() => submit()} disabled={!typed.trim()} style={{ marginTop: 12, width: "100%", background: typed.trim() ? C.emerald : C.line, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: typed.trim() ? "pointer" : "default" }}>Проверить реплику</button>}
       </>}
@@ -1091,7 +1113,7 @@ function MeaningReview({ onFinish, pool = QUERER_REVIEW }) {
     <Card>
       <div style={{ fontSize: 19, lineHeight: 1.5, fontWeight: 900, textAlign: "center", marginBottom: 18 }}>{question.question}</div>
       <div style={{ display: "grid", gap: 9 }}>
-        {question.options.map(option => <Choice key={option} active={picked === option} disabled={!!picked} onClick={() => setPicked(option)}>{option}</Choice>)}
+        {shuffledReviewOptions(question).map(option => <Choice key={option} active={picked === option} disabled={!!picked} onClick={() => setPicked(option)}>{option}</Choice>)}
       </div>
       {picked && <div style={{ marginTop: 14, padding: 12, borderRadius: 12, textAlign: "center", background: isCorrect ? "#ECF8F3" : "#FFF4F5", color: isCorrect ? C.emeraldDeep : C.raspberry, fontWeight: 900 }}>{isCorrect ? "Sí. Has reconstruido la intención." : `La respuesta de la escena es: ${question.answer}.`}</div>}
       {picked && <button onClick={next} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{index === questions.length - 1 ? "Cerrar el informe →" : "Siguiente pregunta →"}</button>}
