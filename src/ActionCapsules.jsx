@@ -7,6 +7,7 @@ import {
   capsulePhrase,
 } from "./actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
+import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "./poderDialogueData.js";
 import {
   CAPSULE_LINE,
   QUERER_CAPSULE_1,
@@ -114,7 +115,7 @@ function shuffledTokens(dialogue) {
   return result;
 }
 
-function DialogueExercise({ dialogue, onSolved }) {
+function DialogueExercise({ dialogue, onSolved, capsuleLabel = "Cápsula 2", total = QUERER_DIALOGUES.length }) {
   const tokens = useMemo(() => shuffledTokens(dialogue), [dialogue]);
   const [selected, setSelected] = useState([]);
   const [feedback, setFeedback] = useState(null);
@@ -134,8 +135,8 @@ function DialogueExercise({ dialogue, onSolved }) {
   }
 
   return <div style={wrap}><div style={maxw}>
-    <Header small={`Cápsula 2 · ${dialogue.number} de ${QUERER_DIALOGUES.length}`} title={dialogue.title} sub={dialogue.context} />
-    <Progress index={dialogue.number - 1} total={QUERER_DIALOGUES.length} />
+    <Header small={`${capsuleLabel} · ${dialogue.number} de ${total}`} title={dialogue.title} sub={dialogue.context} />
+    <Progress index={dialogue.number - 1} total={total} />
     <Card>
       {dialogue.before.map((line, index) => <DialogueLine key={`before-${index}`} {...line} />)}
       <DialogueLine speaker={dialogue.answerSpeaker} text={feedback?.ok ? answer : assembled || "…"} missing={!feedback?.ok} />
@@ -153,7 +154,7 @@ function DialogueExercise({ dialogue, onSolved }) {
 
       {feedback?.ok && <>
         <div style={{ marginTop: 14, color: C.emeraldDeep, background: "#ECF8F3", borderRadius: 12, padding: 12, textAlign: "center", fontWeight: 900 }}>La intención está completa.</div>
-        <button onClick={onSolved} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{dialogue.number === QUERER_DIALOGUES.length ? "Ir al interrogatorio →" : "Continuar el diálogo →"}</button>
+        <button onClick={onSolved} style={{ marginTop: 12, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>{dialogue.number === total ? "Ir al interrogatorio →" : "Continuar el diálogo →"}</button>
       </>}
     </Card>
   </div></div>;
@@ -367,8 +368,8 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
   </div></div>;
 }
 
-function pickReviewQuestions() {
-  const pool = [...QUERER_REVIEW];
+function pickReviewQuestions(sourcePool = QUERER_REVIEW) {
+  const pool = [...sourcePool];
   for (let i = pool.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -376,8 +377,8 @@ function pickReviewQuestions() {
   return pool.slice(0, 4);
 }
 
-function MeaningReview({ onFinish }) {
-  const questions = useMemo(() => pickReviewQuestions(), []);
+function MeaningReview({ onFinish, pool = QUERER_REVIEW }) {
+  const questions = useMemo(() => pickReviewQuestions(pool), [pool]);
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState(null);
   const [correct, setCorrect] = useState(0);
@@ -412,15 +413,24 @@ function MeaningReview({ onFinish }) {
   </div></div>;
 }
 
-function IntentionsFinish({ result, onAgain, onBack }) {
+function IntentionsFinish({
+  result,
+  onAgain,
+  onBack,
+  capsuleLabel = "Cápsula 2",
+  title = "Informe de intenciones",
+  closingLine = <>Ya sabemos <b>qué querían hacer</b> Tomás y Lucía.<br />Todavía no sabemos qué podían hacer realmente.</>,
+  gramaticaTema = "op-querer",
+  gramaticaLabel = "Practicar QUERER en Gramática",
+}) {
   return <div style={wrap}><div style={maxw}>
-    <Header small="Cápsula 2 · completada" title="Informe de intenciones" sub={`${result.correct} de ${result.total} respuestas reconstruidas con precisión.`} />
+    <Header small={`${capsuleLabel} · completada`} title={title} sub={`${result.correct} de ${result.total} respuestas reconstruidas con precisión.`} />
     <Card style={{ textAlign: "center" }}>
       <div style={{ fontSize: 38, marginBottom: 8 }}>{result.correct === result.total ? "✦" : "↻"}</div>
-      <div style={{ fontSize: 16, lineHeight: 1.65 }}>Ya sabemos <b>qué querían hacer</b> Tomás y Lucía.<br />Todavía no sabemos qué podían hacer realmente.</div>
+      <div style={{ fontSize: 16, lineHeight: 1.65 }}>{closingLine}</div>
       {result.missed.length > 0 && <div style={{ marginTop: 14, background: C.cream, borderRadius: 12, padding: 12, color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5 }}>В App стоит повторить сцены: <b>{result.missed.join(" · ")}</b>.</div>}
       <button onClick={onAgain} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Repetir la cápsula</button>
-      <button onClick={() => { window.location.search = "?tema=op-querer"; }} style={{ marginTop: 9, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>Practicar QUERER en Gramática</button>
+      <button onClick={() => { window.location.search = `?tema=${gramaticaTema}`; }} style={{ marginTop: 9, width: "100%", background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: 12, fontFamily: SERIF, fontSize: 14, fontWeight: 800, cursor: "pointer" }}>{gramaticaLabel}</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
   </div></div>;
@@ -459,6 +469,54 @@ function Intentions({ onBack, onComplete }) {
   }} />;
 
   return <IntentionsFinish result={result || { correct: 0, total: 4, missed: [] }} onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }} onBack={onBack} />;
+}
+
+// Капсула 4 · PODER. Та же механика, что у Intentions (Капсула 2, QUERER) —
+// меняются только данные (poderDialogueData.js) и закрывающая реплика/ссылка
+// на Gramática. DialogueExercise/MeaningReview/IntentionsFinish уже приняли
+// параметры capsuleLabel/total/pool, поэтому движок не копируется.
+function PoderIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 4 · PODER" title={PODER_INTRO.title} sub="Reconstruye una posibilidad completa. No traduzcas: sigue la escena." />
+    <Card>
+      {PODER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{PODER_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = PODER_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 4" total={PODER_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === PODER_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={PODER_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula4:poder", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("poder-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 4"
+    title="Informe de posibilidades"
+    closingLine={<>Ya sabemos <b>qué podían hacer</b> Tomás y Lucía.<br />Poder no siempre significa hacerlo.</>}
+    gramaticaTema="op-poder"
+    gramaticaLabel="Practicar PODER en Gramática"
+  />;
 }
 
 function Finish({ score, total, onAgain, onBack }) {
@@ -571,7 +629,7 @@ function Start({ progress, onOpen, onBack }) {
     <Card>
       <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: "1px", textTransform: "uppercase" }}>{currentReady ? "Текущая капсула" : "Следующая капсула"}</div>
       <div style={{ color: C.raspberry, fontSize: 21, fontWeight: 900, marginTop: 6 }}>{current?.operator} · {current?.title}</div>
-      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "QUERER-1, QUERER-2 и PODER-1 пройдены. Следующая капсула появится после проверки этого эталона."}</div>
+      <div style={{ color: C.inkSoft, fontSize: 13.5, lineHeight: 1.5, marginTop: 7 }}>{currentReady ? "Контекст → диалог → собственная реплика → закрепление формы." : "QUERER-1, QUERER-2, PODER-1 и PODER-2 пройдены. Следующая капсула появится после проверки этого эталона."}</div>
       {currentReady && <button onClick={() => onOpen(current.id)} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>{progress.stepByCapsule?.[current.id] ? "Продолжить капсулу →" : "Начать капсулу →"}</button>}
     </Card>
     {completed.length > 0 && <details style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 15px", marginBottom: 14 }}>
@@ -599,6 +657,7 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "querer-1") return <QuererOne initialStep={resumeStep || progress.stepByCapsule?.["querer-1"] || 0} onStep={(step) => saveStep("querer-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "querer-2") return <Intentions onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={complete} onBack={() => setMode("start")} />;
+  if (mode === "poder-2") return <PoderIntentions onComplete={complete} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
