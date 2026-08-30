@@ -1818,6 +1818,24 @@ function LiveGame({ onHome }) {
 // каждом входе в отдел. Текст утверждён Оксаной 30.08.2026 —
 // не менять смысл/формулировки без отдельного решения, только вёрстку.
 // ============================================================
+const rumbosP = { fontSize: 14.5, color: C.ink, lineHeight: 1.65, margin: "0 0 12px" };
+const rumbosImpulseList = { margin: "0 0 12px" };
+const rumbosImpulseItem = { fontSize: 16, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, padding: "6px 0", borderBottom: `1px dashed ${C.line}` };
+const rumbosOperatorGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "4px 0 12px" };
+const rumbosOperatorChip = { background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 10px" };
+const rumbosOperatorEs = { fontSize: 13.5, fontWeight: 800, color: C.goldDeep, letterSpacing: "0.3px" };
+const rumbosOperatorRu = { fontSize: 12, color: C.inkSoft, marginTop: 2 };
+const rumbosExampleList = { margin: "4px 0 12px" };
+const rumbosExampleRow = { display: "flex", flexDirection: "column", padding: "8px 0", borderBottom: `1px dashed ${C.line}` };
+const rumbosExampleEs = { fontSize: 15, fontWeight: 700, color: C.emeraldDeep, fontStyle: "italic" };
+const rumbosExampleRu = { fontSize: 13, color: C.inkSoft, marginTop: 2 };
+const rumbosQuoteBlock = { background: C.creamDeep, borderLeft: `3px solid ${C.gold}`, borderRadius: 8, padding: "10px 12px", margin: "0 0 12px" };
+const rumbosQuoteEs = { fontSize: 14, fontStyle: "italic", color: C.ink, lineHeight: 1.5 };
+const rumbosQuoteRu = { fontSize: 12.5, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 };
+const rumbosFormulaWrap = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, padding: "6px 0 2px" };
+const rumbosFormulaChip = { background: C.emerald, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: "0.3px", borderRadius: 8, padding: "8px 10px", lineHeight: 1.3 };
+const rumbosFormulaArrow = { color: C.goldDeep, fontSize: 15, fontWeight: 700 };
+
 const RUMBOS_SLIDES = [
   {
     kicker: "С чего начинается разговорная речь",
@@ -1919,24 +1937,6 @@ const RUMBOS_SLIDES = [
     ),
   },
 ];
-
-const rumbosP = { fontSize: 14.5, color: C.ink, lineHeight: 1.65, margin: "0 0 12px" };
-const rumbosImpulseList = { margin: "0 0 12px" };
-const rumbosImpulseItem = { fontSize: 16, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, padding: "6px 0", borderBottom: `1px dashed ${C.line}` };
-const rumbosOperatorGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "4px 0 12px" };
-const rumbosOperatorChip = { background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 10px" };
-const rumbosOperatorEs = { fontSize: 13.5, fontWeight: 800, color: C.goldDeep, letterSpacing: "0.3px" };
-const rumbosOperatorRu = { fontSize: 12, color: C.inkSoft, marginTop: 2 };
-const rumbosExampleList = { margin: "4px 0 12px" };
-const rumbosExampleRow = { display: "flex", flexDirection: "column", padding: "8px 0", borderBottom: `1px dashed ${C.line}` };
-const rumbosExampleEs = { fontSize: 15, fontWeight: 700, color: C.emeraldDeep, fontStyle: "italic" };
-const rumbosExampleRu = { fontSize: 13, color: C.inkSoft, marginTop: 2 };
-const rumbosQuoteBlock = { background: C.creamDeep, borderLeft: `3px solid ${C.gold}`, borderRadius: 8, padding: "10px 12px", margin: "0 0 12px" };
-const rumbosQuoteEs = { fontSize: 14, fontStyle: "italic", color: C.ink, lineHeight: 1.5 };
-const rumbosQuoteRu = { fontSize: 12.5, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 };
-const rumbosFormulaWrap = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, padding: "6px 0 2px" };
-const rumbosFormulaChip = { background: C.emerald, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: "0.3px", borderRadius: 8, padding: "8px 10px", lineHeight: 1.3 };
-const rumbosFormulaArrow = { color: C.goldDeep, fontSize: 15, fontWeight: 700 };
 
 function RumbosCarousel() {
   const n = RUMBOS_SLIDES.length;
