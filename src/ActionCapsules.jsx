@@ -5,7 +5,6 @@ import {
   CAPSULE_STORIES,
   capsuleByIds,
   capsulePhrase,
-  capsuleTaskRu,
 } from "./actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "./poderDialogueData.js";
@@ -56,6 +55,7 @@ import {
   VOLVER_A_CAPSULE_1_STEPS,
   VOLVER_A_PRESENT,
 } from "./volverACapsule1Data.js";
+import { capsuleTapSegments } from "./capsuleVerbTap.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -66,6 +66,35 @@ const C = {
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
 const wrap = { minHeight: "100vh", background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, fontFamily: SERIF, color: C.ink, padding: "18px 14px 90px", boxSizing: "border-box" };
 const maxw = { maxWidth: 560, margin: "0 auto" };
+
+/* ============================================================
+ТАП-ПЕРЕВОД ГЛАГОЛОВ — 16 капсул Дона Вербо. ТЗ (сессия автоматизации
+методологии, 30.08.2026). Тот же принцип, что и у TapActionText в Игре №4
+(SimuladorJugador.jsx): тап по известной глагольной конструкции, не по
+любому слову. Словари и разбор текста — в capsuleVerbTap.js (проверяются
+напрямую в scripts/validate-action-capsules.mjs). Область применения —
+только тексты сцен и историй-диалогов внутри капсул (scene.es, context,
+before/after); упражнения, прогресс и навигация не затронуты.
+============================================================ */
+function TapVerbText({ text }) {
+  const [openKey, setOpenKey] = useState(null);
+  const segments = useMemo(() => capsuleTapSegments(text), [text]);
+  return <span>{segments.map((seg, i) => {
+    if (!seg.tap) return <span key={i}>{seg.text}</span>;
+    return (
+      <span key={i} style={{ position: "relative", display: "inline-block" }}>
+        <span
+          onClick={() => setOpenKey((o) => (o === i ? null : i))}
+          style={{ borderBottom: `1.5px dotted ${C.raspberry}`, color: C.raspberry, fontWeight: 700, cursor: "pointer" }}
+        >{seg.text}</span>
+        {openKey === i && (
+          <span style={{ position: "absolute", bottom: "125%", left: "50%", transform: "translateX(-50%)", background: C.ink, color: "#fff", fontSize: 12.5, padding: "5px 10px", borderRadius: 7, whiteSpace: "nowrap", zIndex: 30, boxShadow: "0 3px 12px rgba(0,0,0,0.28)" }}>{seg.tap}</span>
+        )}
+      </span>
+    );
+  })}</span>;
+}
+
 const PROGRESS_KEY = "ciudad:operator-capsules:v1";
 
 function readProgress() {
@@ -147,10 +176,13 @@ function Progress({ index, total }) {
   return <div style={{ display: "flex", gap: 5, marginBottom: 16 }}>{Array.from({ length: total }, (_, i) => <div key={i} style={{ height: 5, flex: 1, borderRadius: 999, background: i <= index ? C.gold : C.line }} />)}</div>;
 }
 
-function DialogueLine({ speaker, text, missing = false }) {
+// translate=true — реплика тапается по глаголам-конструкциям (чистая
+// история, тексты before/after); реплика-ответ, которую собирает игрок из
+// токенов, translate не получает — упражнение не меняется.
+function DialogueLine({ speaker, text, missing = false, translate = false }) {
   return <div style={{ marginBottom: 10 }}>
     <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, letterSpacing: ".5px", textTransform: "uppercase" }}>{speaker}</div>
-    <div style={{ marginTop: 3, padding: "10px 12px", borderRadius: 12, background: missing ? C.cream : "#fff", border: `1px solid ${missing ? C.gold : C.line}`, fontSize: 15, lineHeight: 1.5, fontWeight: missing ? 800 : 600 }}>{text}</div>
+    <div style={{ marginTop: 3, padding: "10px 12px", borderRadius: 12, background: missing ? C.cream : "#fff", border: `1px solid ${missing ? C.gold : C.line}`, fontSize: 15, lineHeight: 1.5, fontWeight: missing ? 800 : 600 }}>{translate ? <TapVerbText text={text} /> : text}</div>
   </div>;
 }
 
@@ -207,12 +239,12 @@ function DialogueExercise({ dialogue, onSolved, capsuleLabel = "Cápsula 2", tot
   }
 
   return <div style={wrap}><div style={maxw}>
-    <Header small={`${capsuleLabel} · ${dialogue.number} de ${total}`} title={dialogue.title} sub={dialogue.context} />
+    <Header small={`${capsuleLabel} · ${dialogue.number} de ${total}`} title={dialogue.title} sub={<TapVerbText text={dialogue.context} />} />
     <Progress index={dialogue.number - 1} total={total} />
     <Card>
-      {dialogue.before.map((line, index) => <DialogueLine key={`before-${index}`} {...line} />)}
+      {dialogue.before.map((line, index) => <DialogueLine key={`before-${index}`} {...line} translate />)}
       <DialogueLine speaker={dialogue.answerSpeaker} text={feedback?.ok ? answer : assembled || "…"} missing={!feedback?.ok} />
-      {feedback?.ok && dialogue.after.map((line, index) => <DialogueLine key={`after-${index}`} {...line} />)}
+      {feedback?.ok && dialogue.after.map((line, index) => <DialogueLine key={`after-${index}`} {...line} translate />)}
 
       {!feedback?.ok && <>
         <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900, margin: "18px 0 8px", letterSpacing: ".6px" }}>CONSTRUYE LA RESPUESTA</div>
@@ -261,7 +293,7 @@ function QuererOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onS
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 1 de 16 · QUERER" title={QUERER_CAPSULE_1.title} sub={QUERER_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{QUERER_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={QUERER_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{QUERER_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять намерение, вступить в диалог и самому открыть дверь репликой.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -367,7 +399,7 @@ function PoderOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onSt
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 3 de 16 · PODER" title={PODER_CAPSULE_1.title} sub={PODER_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{PODER_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={PODER_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{PODER_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, у кого есть возможность, вступить в диалог и самому сказать, можешь ли ты собрать бумаги.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -472,7 +504,7 @@ function TenerQueOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 5 de 16 · TENER QUE" title={TENER_QUE_CAPSULE_1.title} sub={TENER_QUE_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{TENER_QUE_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={TENER_QUE_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{TENER_QUE_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, что необходимо сделать, вступить в диалог и самому сказать, должен ли ты завести часы.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -578,7 +610,7 @@ function IrAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, onStep
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 7 de 16 · IR A" title={IR_A_CAPSULE_1.title} sub={IR_A_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{IR_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={IR_A_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{IR_A_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, что Томас только планирует, вступить в диалог и самому сказать, собираешься ли ты отнести книгу рецептов.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -685,7 +717,7 @@ function IntentarOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 9 de 16 · INTENTAR" title={INTENTAR_CAPSULE_1.title} sub={INTENTAR_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{INTENTAR_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={INTENTAR_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{INTENTAR_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто пытается передать книгу, вступить в диалог и самому сказать, пытаешься ли ты передать книгу Дону Вербо.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -792,7 +824,7 @@ function EmpezarAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, o
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 11 de 16 · EMPEZAR A" title={EMPEZAR_A_CAPSULE_1.title} sub={EMPEZAR_A_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{EMPEZAR_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={EMPEZAR_A_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{EMPEZAR_A_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто начинает действие, вступить в диалог и самому сказать, начинаешь ли ты убирать улики.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -899,7 +931,7 @@ function DejarDeOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, on
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 13 de 16 · DEJAR DE" title={DEJAR_DE_CAPSULE_1.title} sub={DEJAR_DE_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{DEJAR_DE_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={DEJAR_DE_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{DEJAR_DE_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто прекращает действие, вступить в диалог и самому сказать, перестаёшь ли ты искать золотой ключ.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -1006,7 +1038,7 @@ function VolverAOne({ onBack, onPracticeGrammar, onComplete, initialStep = 0, on
   if (phase === "scene") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 15 de 16 · VOLVER A" title={VOLVER_A_CAPSULE_1.title} sub={VOLVER_A_CAPSULE_1.linkTitle} />
     <Card>
-      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}>{VOLVER_A_CAPSULE_1.scene.es}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.7, borderLeft: `3px solid ${C.gold}`, paddingLeft: 13 }}><TapVerbText text={VOLVER_A_CAPSULE_1.scene.es} /></div>
       <div style={{ fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, marginTop: 9, borderLeft: `3px solid ${C.line}`, paddingLeft: 13 }}>{VOLVER_A_CAPSULE_1.scene.ru}</div>
       <div style={{ marginTop: 16, background: C.cream, borderRadius: 12, padding: 12, fontSize: 13.5, lineHeight: 1.55 }}><b>Задача:</b> понять, кто повторяет действие, вступить в диалог и самому сказать, входишь ли ты снова в Зал.</div>
       <button onClick={() => setPhase("steps")} style={{ marginTop: 16, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Войти в диалог →</button>
@@ -1530,9 +1562,9 @@ function Finish({ score, total, onAgain, onBack }) {
 }
 
 function Recognize({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_OPERATORS.map((operator, i) => ({
-    action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length],
-    operator,
+  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({
+    action,
+    operator: CAPSULE_OPERATORS[i % CAPSULE_OPERATORS.length],
     person: i % 2 === 0 ? "el" : "ella",
   })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
@@ -1544,7 +1576,7 @@ function Recognize({ onBack }) {
     <Card>
       <div style={{ color: C.inkSoft, fontSize: 13, textAlign: "center" }}>{task.action.scene}</div>
       <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{capsulePhrase(task.operator.id, task.action.id, task.person)}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>
         {CAPSULE_OPERATORS.map(op => <Choice key={op.id} active={picked === op.id} disabled={!!picked} onClick={() => { setPicked(op.id); if (op.id === task.operator.id) setScore(s => s + 1); }}>{op.label}</Choice>)}
       </div>
       {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.person === "el" ? task.operator.el : task.operator.ella} = «${task.person === "el" ? task.operator.elRu : task.operator.ellaRu}».`}</div>}
@@ -1555,16 +1587,16 @@ function Recognize({ onBack }) {
 }
 
 function Build({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_OPERATORS.map((operator, i) => ({ action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length], operator })), []);
+  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({ action, operator: CAPSULE_OPERATORS[(i + 1) % CAPSULE_OPERATORS.length] })), []);
   const [i, setI] = useState(0); const [op, setOp] = useState(null); const [act, setAct] = useState(null); const [checked, setChecked] = useState(false); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setOp(null); setAct(null); setChecked(false); setScore(0); }} onBack={onBack} />;
   const task = tasks[i];
   return <div style={wrap}><div style={maxw}>
-    <Header small="2 · Собрать" title="Собери речевой ход" sub={`Задание: «${capsuleTaskRu(task.operator.id, task.action.id)}».`} />
+    <Header small="2 · Собрать" title="Собери речевой ход" sub={`Задание: «${task.operator.taskRu} ${task.action.taskRu}».`} />
     <Progress index={i} total={tasks.length} />
     <Card>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, marginBottom: 7 }}>1. ОПЕРАТОР</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, margin: "16px 0 7px" }}>2. ДЕЙСТВИЕ</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7 }}>{CAPSULE_ACTIONS.map(x => <Choice key={x.id} active={act === x.id} disabled={checked} onClick={() => setAct(x.id)}>{x.infinitive}</Choice>)}</div>
       {op && act && <Capsule {...capsuleByIds(op, act)} compact />}
@@ -1577,11 +1609,7 @@ function Build({ onBack }) {
 }
 
 function Transform({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_OPERATORS.map((from, i) => ({
-    action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length],
-    from,
-    to: CAPSULE_OPERATORS[(i + 1) % CAPSULE_OPERATORS.length],
-  })), []);
+  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({ action, from: CAPSULE_OPERATORS[i % 3], to: CAPSULE_OPERATORS[(i + 1) % 3] })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setPicked(null); setScore(0); }} onBack={onBack} />;
   const task = tasks[i];
@@ -1619,35 +1647,6 @@ function Story({ onBack }) {
     </Card>
     <Back onClick={onBack} label="← К режимам" />
   </div></div>;
-}
-
-function ActionTrainerStart({ onMode, onBack }) {
-  const demo = capsuleByIds("querer", "abrir");
-  return <div style={wrap}><div style={maxw}>
-    <Header small="El verbo · A1" title="Капсулы действия" sub="Отдельный тренажёр: 8 операторов × 7 действий. Спрягается оператор; действие остаётся в infinitivo." />
-    <Card>
-      <Capsule {...demo} />
-      <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Yo quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
-    </Card>
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-      {MODE_INFO.map(([id, title, sub], i) => <button key={id} onClick={() => onMode(id)} style={{ minHeight: 118, background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 15, padding: 13, textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 3px 12px rgba(201,162,75,.12)" }}>
-        <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900 }}>{i + 1}</div>
-        <div style={{ color: C.raspberry, fontSize: 17, fontWeight: 900, margin: "4px 0" }}>{title}</div>
-        <div style={{ color: C.inkSoft, fontSize: 12.5, lineHeight: 1.4 }}>{sub}</div>
-      </button>)}
-    </div>
-    <div style={{ textAlign: "center", color: C.inkSoft, fontSize: 12, lineHeight: 1.55, marginTop: 16 }}>56 сочетаний · abrir · llevar · buscar · recoger · guardar · usar · dar</div>
-    <Back onClick={onBack} label="← В Архитектуру живой речи" />
-  </div></div>;
-}
-
-export function ActionCapsulesTrainer({ onBack }) {
-  const [mode, setMode] = useState("start");
-  if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
-  if (mode === "build") return <Build onBack={() => setMode("start")} />;
-  if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
-  if (mode === "story") return <Story onBack={() => setMode("start")} />;
-  return <ActionTrainerStart onMode={setMode} onBack={onBack} />;
 }
 
 function Start({ progress, onOpen, onBack }) {
@@ -1764,6 +1763,10 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "dejar-de-2") return <DejarDeIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "volver-a-2") return <VolverAIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
+  if (mode === "build") return <Build onBack={() => setMode("start")} />;
+  if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
+  if (mode === "story") return <Story onBack={() => setMode("start")} />;
   if (mode === "intentions") return <Intentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   return <Start progress={progress} onOpen={setMode} onBack={onBack} />;
 }
