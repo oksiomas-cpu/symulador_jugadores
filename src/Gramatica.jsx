@@ -847,7 +847,7 @@ function opGap(op) { return (op.particle ? op.particle + " " : "") + op.action +
 function TemaOperador({ data: op, onBack, onTrain }) {
   return (
     <div style={wrap}><div style={maxw}>
-      <GHeader kicker="El verbo · IV. Глаголы-операторы" title={`${opTitle(op)} + infinitivo`} sub={`${op.meaning} — та же капсула, что в игре Дона Вербо: оператор надевается сверху на действие, само действие (${op.action}) в infinitivo не меняется.`} />
+      <GHeader kicker="Rumbos con Don Verbo · Глаголы-операторы" title={`${opTitle(op)} + infinitivo`} sub={`${op.meaning} — та же капсула, что в игре Дона Вербо: оператор надевается сверху на действие, само действие (${op.action}) в infinitivo не меняется.`} />
       <div style={{ textAlign: "center", marginBottom: 14 }}><LevelTag lvl="A2" /></div>
 
       <RuleCard>
@@ -869,6 +869,31 @@ function TemaOperador({ data: op, onBack, onTrain }) {
       })}
 
       <BackBtn onClick={onBack} />
+    </div></div>
+  );
+}
+
+// Отдельный вход «Спряжение глаголов операторов» — не ветка общей грамматики,
+// а прямой список всех восьми операторов, открывается из карточки
+// «Rumbos con Don Verbo» (решение Оксаны 30.08.2026), минуя El verbo/Времена.
+function OperatorsIndex({ onOpen, onBack }) {
+  const topics = OPERATORS.map(op => ({ id: op.id, title: `${opTitle(op)} + infinitivo · ${op.meaning}`, lvl: "A2" }));
+  return (
+    <div style={wrap}><div style={maxw}>
+      <GHeader kicker="Rumbos con Don Verbo" title="Глаголы-операторы" sub="Форма каждого оператора по временам — отдельно от общей грамматики, чтобы не отвлекаться на другие темы." />
+      <div style={{ border: `1.5px solid ${C.gold}`, borderRadius: 14, overflow: "hidden", background: C.card }}>
+        {topics.map((t, i) => (
+          <div key={t.id} onClick={() => onOpen(t.id)} style={{
+            padding: "13px 16px", borderTop: i ? `1px solid ${C.line}` : "none",
+            cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <div style={{ flex: 1, fontSize: 14.5, fontWeight: 700, color: C.ink, lineHeight: 1.4 }}>{t.title}</div>
+            <LevelTag lvl={t.lvl} />
+            <span style={{ color: C.gold, fontSize: 16 }}>›</span>
+          </div>
+        ))}
+      </div>
+      <BackBtn onClick={onBack} label="← Назад" />
     </div></div>
   );
 }
@@ -1164,10 +1189,9 @@ const BRANCHES = [
       { id: "reflexivos", title: "Возвратные глаголы (verbos reflexivos)", lvl: "A2", ready: false },
     ],
   },
-  {
-    id: "operadores", num: "IV", title: "Глаголы-операторы", sub: "Форма операторов по временам; сюжетные капсулы живут в Главе 4",
-    topics: OPERATORS.map(op => ({ id: op.id, title: `${opTitle(op)} + infinitivo · ${op.meaning}`, lvl: "A2", ready: true })),
-  },
+  // Ветка «Глаголы-операторы» больше не живёт здесь (решение Оксаны 30.08.2026):
+  // это не классическая грамматика, а свой отдельный вход из карточки
+  // «Rumbos con Don Verbo» — см. OperatorsIndex ниже и startTema === "operadores".
 ];
 
 function VerboIndex({ onOpen, onBack }) {
@@ -1274,7 +1298,8 @@ export default function Gramatica({ onBack, startTema, onComplete }) {
   // view: root | verbo | тема | drill:<set>
   // startTema (deep-link ?tema=): открываем сразу дрилл темы; «назад» ведёт на страницу темы.
   const startDrill = startTema && TEMA_TO_DRILL[startTema] ? "drill:" + TEMA_TO_DRILL[startTema] : null;
-  const startView = OPERATOR_TOPIC_IDS.includes(startTema) ? startTema
+  const startView = startTema === "operadores" ? "operadores-index"
+    : OPERATOR_TOPIC_IDS.includes(startTema) ? startTema
     : startDrill;
   const [view, setView] = useState(startView || "root");
   const [drillFrom, setDrillFrom] = useState(startDrill ? startTema : null);
@@ -1294,8 +1319,9 @@ export default function Gramatica({ onBack, startTema, onComplete }) {
   if (view === "imperfecto") return <TemaImperfecto onBack={() => setView("verbo")} onTrain={() => openDrill("imperfecto", "imperfecto")} />;
   if (view === "indefinido") return <TemaIndefinido onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido", "indefinido")} />;
   if (view === "indefinido-irr") return <TemaIndefinidoIrr onBack={() => setView("verbo")} onTrain={() => openDrill("indefinido-irr", "indefinido-irr")} />;
+  if (view === "operadores-index") return <OperatorsIndex onOpen={(id) => setView(id)} onBack={onBack} />;
   const opView = OPERATORS.find(o => o.id === view);
-  if (opView) return <TemaOperador data={opView} onBack={() => setView("verbo")} onTrain={(t) => openDrill(opView.id + "-" + t, opView.id)} />;
-  if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "verbo")} onComplete={onComplete} />;
+  if (opView) return <TemaOperador data={opView} onBack={() => setView("operadores-index")} onTrain={(t) => openDrill(opView.id + "-" + t, opView.id)} />;
+  if (view.startsWith("drill:")) return <Drill setKey={view.slice(6)} onBack={() => setView(drillFrom || "operadores-index")} onComplete={onComplete} />;
   return <GramaticaRoot onVerbo={() => setView("verbo")} onBack={onBack} />;
 }
