@@ -2116,13 +2116,20 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       </Block>
 
       {/* УЧЕБНЫЕ МАРШРУТЫ ГЛАВЫ */}
+      {isCapFour ? (
+        <Block stripe={C.raspberry}>
+          <div onClick={onEnter} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+            <div>
+              <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>Тренировка ролей</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Подготовь свою роль к расследованию</div>
+            </div>
+            <span style={{ fontSize: 20, color: C.gold, flexShrink: 0, marginLeft: 8 }}>›</span>
+          </div>
+        </Block>
+      ) : (
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "Тренировка ролей" : "📊 Тренажёр спряжений"}</div>
-        {isCapFour ? (
-          <button onClick={onEnter} style={{ width: "100%", background: C.card, color: C.raspberry, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-            Тренировать роли →
-          </button>
-        ) : isCapOne ? (
+        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>📊 Тренажёр спряжений</div>
+        {isCapOne ? (
           <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Открыть Mi Diario →
           </button>
@@ -2142,6 +2149,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
           </button>
         )}
       </div>
+      )}
       </div>
 
       {/* ГЛАВНАЯ КНОПКА */}
