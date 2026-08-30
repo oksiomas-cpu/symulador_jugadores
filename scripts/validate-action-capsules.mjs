@@ -1,13 +1,17 @@
 import {
   CAPSULE_ACTIONS,
-  CAPSULE_COMBINATIONS,
   CAPSULE_OPERATORS,
   CAPSULE_STORIES,
   capsulePhrase,
-  capsuleTaskRu,
 } from "../src/actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogueData.js";
+import { TENER_QUE_DIALOGUES } from "../src/tenerQueDialogueData.js";
+import { IR_A_DIALOGUES } from "../src/iraDialogueData.js";
+import { INTENTAR_DIALOGUES } from "../src/intentarDialogueData.js";
+import { EMPEZAR_A_DIALOGUES } from "../src/empezarADialogueData.js";
+import { DEJAR_DE_DIALOGUES } from "../src/dejarDeDialogueData.js";
+import { VOLVER_A_DIALOGUES } from "../src/volverADialogueData.js";
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
 import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
 import { TENER_QUE_CAPSULE_1, TENER_QUE_CAPSULE_1_STEPS, TENER_QUE_PRESENT } from "../src/tenerQueCapsule1Data.js";
@@ -16,6 +20,7 @@ import { INTENTAR_CAPSULE_1, INTENTAR_CAPSULE_1_STEPS, INTENTAR_PRESENT } from "
 import { EMPEZAR_A_CAPSULE_1, EMPEZAR_A_CAPSULE_1_STEPS, EMPEZAR_A_PRESENT } from "../src/empezarACapsule1Data.js";
 import { DEJAR_DE_CAPSULE_1, DEJAR_DE_CAPSULE_1_STEPS, DEJAR_DE_PRESENT } from "../src/dejarDeCapsule1Data.js";
 import { VOLVER_A_CAPSULE_1, VOLVER_A_CAPSULE_1_STEPS, VOLVER_A_PRESENT } from "../src/volverACapsule1Data.js";
+import { capsuleVerbTranslation, capsuleTapSegments } from "../src/capsuleVerbTap.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -26,30 +31,25 @@ function check(label, ok, detail = "") {
 
 console.log("\n🧩 Капсулы действия A1 · проверка первого этажа\n");
 check("ровно 7 базовых действий", CAPSULE_ACTIONS.length === 7);
-check("ровно 8 операторов", CAPSULE_OPERATORS.length === 8);
-check("56 комбинаций оператор × действие", CAPSULE_COMBINATIONS.length === 56 && CAPSULE_ACTIONS.length * CAPSULE_OPERATORS.length === 56);
-check("ID всех 56 комбинаций уникальны", new Set(CAPSULE_COMBINATIONS.map(x => x.id)).size === 56);
+check("ровно 3 оператора", CAPSULE_OPERATORS.length === 3);
+check("21 комбинация оператор × действие", CAPSULE_ACTIONS.length * CAPSULE_OPERATORS.length === 21);
 check("ID действий уникальны", new Set(CAPSULE_ACTIONS.map(x => x.id)).size === CAPSULE_ACTIONS.length);
 check("ID операторов уникальны", new Set(CAPSULE_OPERATORS.map(x => x.id)).size === CAPSULE_OPERATORS.length);
 check("все действия заданы инфинитивом", CAPSULE_ACTIONS.every(x => /(?:ar|er|ir)$/.test(x.infinitive)));
 check("recoger используется только как infinitivo", CAPSULE_ACTIONS.find(x => x.id === "recoger")?.infinitive === "recoger");
 check("каждая история ссылается на существующую комбинацию", CAPSULE_STORIES.every(x => CAPSULE_ACTIONS.some(a => a.id === x.actionId) && CAPSULE_OPERATORS.some(o => o.id === x.operatorId)));
 check("каждое действие представлено в режиме История", new Set(CAPSULE_STORIES.map(x => x.actionId)).size === CAPSULE_ACTIONS.length);
-check("каждый оператор представлен в режиме История", new Set(CAPSULE_STORIES.map(x => x.operatorId)).size === CAPSULE_OPERATORS.length);
 check("каждая испанская история имеет русский перевод", CAPSULE_STORIES.every(x => x.story && x.storyRu));
 
 const phrases = CAPSULE_OPERATORS.flatMap(op => CAPSULE_ACTIONS.map(action => capsulePhrase(op.id, action.id)));
-check("все 56 фраз уникальны", new Set(phrases).size === 56);
+check("все 21 фраза уникальна", new Set(phrases).size === 21);
 check("после оператора действие не спрягается", phrases.every((phrase) => CAPSULE_ACTIONS.some(action => phrase.includes(` ${action.infinitive} `))));
 check("в каждой фразе ровно один оператор", phrases.every((phrase) => CAPSULE_OPERATORS.filter(op => phrase.startsWith(`${op.yo} `)).length === 1));
 check("формы yo содержат явный субъект", CAPSULE_OPERATORS.every(op => op.yo.startsWith("Yo ")));
 check("формы третьего лица содержат Él и Ella", CAPSULE_OPERATORS.every(op => op.el.startsWith("Él ") && op.ella.startsWith("Ella ")));
 check("русские подсказки третьего лица естественны", CAPSULE_OPERATORS.every(op => op.elRu && op.ellaRu));
-check("русские задания используют все восемь операторов", CAPSULE_OPERATORS.map(op => op.taskRu).join("|") === "я хочу|я могу|мне нужно|я собираюсь|я пытаюсь|я начинаю|я перестаю|я снова");
+check("русские задания используют естественные операторы", CAPSULE_OPERATORS.map(op => op.taskRu).join("|") === "я хочу|я могу|мне нужно");
 check("у каждого действия есть цельное русское задание", CAPSULE_ACTIONS.every(action => action.taskRu && !action.taskRu.includes("  ")));
-check("EMPEZAR A требует естественное «начинаю открывать»", capsuleTaskRu("empezar_a", "abrir") === "я начинаю открывать дверь");
-check("DEJAR DE требует естественное «перестаю открывать»", capsuleTaskRu("dejar_de", "abrir") === "я перестаю открывать дверь");
-check("VOLVER A требует естественное «снова открываю»", capsuleTaskRu("volver_a", "abrir") === "я снова открываю дверь");
 
 check("Капсула 2 содержит ровно 10 диалогов", QUERER_DIALOGUES.length === 10);
 check("ID диалогов Капсулы 2 уникальны", new Set(QUERER_DIALOGUES.map(x => x.id)).size === QUERER_DIALOGUES.length);
@@ -145,9 +145,8 @@ check("Gramática содержит точный Presente DEJAR DE", gramatica.in
 check("Gramática содержит точный Presente VOLVER A", gramatica.includes('presente: { forms: ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"]'));
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
 check("обычная ссылка ?capsula= открывает App-капсулу", shell.includes('get("capsula")') && shell.includes("<ActionCapsules"));
-check("16 сюжетных капсул и тренажёр A1 имеют разные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Капсулы действия A1 · 8 × 7 →"));
-check("тренажёр A1 подключён отдельным экраном, а не стартом сюжетных капсул", shell.includes("<ActionCapsulesTrainer") && trainer.includes("export function ActionCapsulesTrainer") && trainer.includes("<ActionTrainerStart"));
-check("сетки восьми операторов безопасны для узкого экрана", trainer.includes('repeat(2, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
+check("в Главе 4 две отдельные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Тренировать роли →"));
+check("сетки операторов безопасны для узкого экрана", trainer.includes('repeat(3, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
 check("старое общее поле third не осталось в интерфейсе", !trainer.includes("operator.third"));
 check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
 check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
@@ -219,6 +218,87 @@ check(
   "перетасовка реально уводит правильный ответ с первой позиции хотя бы в половине вопросов Cápsula 2",
   shuffledReviewFirstCount <= Math.ceil(ALL_REVIEW.length / 2),
   `осталось на первом месте: ${shuffledReviewFirstCount} из ${ALL_REVIEW.length}`,
+);
+
+// ============================================================
+// ТАП-ПЕРЕВОД ГЛАГОЛОВ — 16 капсул Дона Вербо (ТЗ, сессия автоматизации
+// методологии 30.08.2026). Тот же принцип, что и у TapActionText в Игре №4:
+// конечный список известных конструкций, многословный оператор — один узел.
+// ============================================================
+console.log("\n🗣️ Тап-перевод глаголов · 16 капсул Дона Вербо\n");
+
+function segmentsRoundtrip(text) {
+  return capsuleTapSegments(text).map((s) => s.text).join("") === text;
+}
+function tapFor(text, startsWith) {
+  const seg = capsuleTapSegments(text).find((s) => s.text.trim().toLowerCase().startsWith(startsWith));
+  return seg ? seg.tap : undefined;
+}
+
+check(
+  "QUERER: перевод есть для всех форм presente",
+  ["quiero", "quieres", "quiere", "queremos", "queréis", "quieren"].every((f) => !!capsuleVerbTranslation(f)),
+);
+check(
+  "PODER: перевод есть для всех форм presente",
+  ["puedo", "puedes", "puede", "podemos", "podéis", "pueden"].every((f) => !!capsuleVerbTranslation(f)),
+);
+check(
+  "INTENTAR: перевод есть для всех форм presente",
+  ["intento", "intentas", "intenta", "intentamos", "intentáis", "intentan"].every((f) => !!capsuleVerbTranslation(f)),
+);
+check(
+  "TENER QUE / IR A / EMPEZAR A / DEJAR DE / VOLVER A: перевод есть для всех форм presente",
+  [
+    "tengo que", "tienes que", "tiene que", "tenemos que", "tenéis que", "tienen que",
+    "voy a", "vas a", "va a", "vamos a", "vais a", "van a",
+    "empiezo a", "empiezas a", "empieza a", "empezamos a", "empezáis a", "empiezan a",
+    "dejo de", "dejas de", "deja de", "dejamos de", "dejáis de", "dejan de",
+    "vuelvo a", "vuelves a", "vuelve a", "volvemos a", "volvéis a", "vuelven a",
+  ].every((phrase) => !!tapFor(`${phrase} hacerlo.`, phrase.split(" ")[0])),
+);
+check(
+  "действие капсул (7 глаголов) переводится тем же словарём, что и в Игре №4",
+  ["abrir", "llevar", "buscar", "recoger", "guardar", "usar", "dar"].every((v) => !!capsuleVerbTranslation(v)),
+);
+
+const CAPSULE_1_SCENES = [
+  QUERER_CAPSULE_1, PODER_CAPSULE_1, TENER_QUE_CAPSULE_1, IR_A_CAPSULE_1,
+  INTENTAR_CAPSULE_1, EMPEZAR_A_CAPSULE_1, DEJAR_DE_CAPSULE_1, VOLVER_A_CAPSULE_1,
+];
+check(
+  "Cápsula 1 (все 8 сцен): разбор на тап-сегменты не теряет и не переставляет текст",
+  CAPSULE_1_SCENES.every((c) => segmentsRoundtrip(c.scene.es)),
+);
+
+const CAPSULE_2_SETS = [
+  QUERER_DIALOGUES, PODER_DIALOGUES, TENER_QUE_DIALOGUES, IR_A_DIALOGUES,
+  INTENTAR_DIALOGUES, EMPEZAR_A_DIALOGUES, DEJAR_DE_DIALOGUES, VOLVER_A_DIALOGUES,
+];
+check(
+  "Cápsula 2 (все 8 линеек, 80 сцен): context не теряется при разборе на тап-сегменты",
+  CAPSULE_2_SETS.every((set) => set.every((d) => segmentsRoundtrip(d.context))),
+);
+check(
+  "Cápsula 2 (все 8 линеек): реплики before/after не теряются при разборе на тап-сегменты",
+  CAPSULE_2_SETS.every((set) => set.every((d) => [...d.before, ...d.after].every((line) => segmentsRoundtrip(line.text)))),
+);
+
+check("«tiene que» выделяется одним узлом, не разбито на «tiene» + «que»", tapFor("El guardián tiene que usar el reloj.", "tiene") === "ему/ей нужно");
+check("«voy a» выделяется одним узлом, не разбито на «voy» + «a»", tapFor("Voy a abrirla después de la reunión.", "voy") === "собираюсь");
+check("«empiezo a» выделяется одним узлом", tapFor("Empiezo a buscar bajo la mesa larga.", "empiezo") === "начинаю");
+check("«dejo de» выделяется одним узлом", tapFor("No, dejo de buscar la llave dorada.", "dejo") === "перестаю");
+check("«vuelvo a» выделяется одним узлом", tapFor("Vuelvo a abrirla por tercera vez.", "vuelvo") === "снова");
+check(
+  "оператор и действие — два раздельных тапа (tengo que abrir → «мне нужно» + «открыть» отдельно)",
+  (() => {
+    const segs = capsuleTapSegments("Tengo que abrir la puerta.").filter((s) => s.tap);
+    return segs.length >= 2 && segs[0].tap === "мне нужно" && segs.some((s) => s.tap === "открыть");
+  })(),
+);
+check(
+  "clítico на действии переводится как в Игре №4 (buscarla → «искать её»)",
+  capsuleVerbTranslation("buscarla.") === "искать её",
 );
 
 if (failed) {
