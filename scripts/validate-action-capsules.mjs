@@ -1,8 +1,10 @@
 import {
   CAPSULE_ACTIONS,
+  CAPSULE_COMBINATIONS,
   CAPSULE_OPERATORS,
   CAPSULE_STORIES,
   capsulePhrase,
+  capsuleTaskRu,
 } from "../src/actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogueData.js";
@@ -31,25 +33,30 @@ function check(label, ok, detail = "") {
 
 console.log("\n🧩 Капсулы действия A1 · проверка первого этажа\n");
 check("ровно 7 базовых действий", CAPSULE_ACTIONS.length === 7);
-check("ровно 3 оператора", CAPSULE_OPERATORS.length === 3);
-check("21 комбинация оператор × действие", CAPSULE_ACTIONS.length * CAPSULE_OPERATORS.length === 21);
+check("ровно 8 операторов", CAPSULE_OPERATORS.length === 8);
+check("56 комбинаций оператор × действие", CAPSULE_COMBINATIONS.length === 56 && CAPSULE_ACTIONS.length * CAPSULE_OPERATORS.length === 56);
+check("ID всех 56 комбинаций уникальны", new Set(CAPSULE_COMBINATIONS.map(x => x.id)).size === 56);
 check("ID действий уникальны", new Set(CAPSULE_ACTIONS.map(x => x.id)).size === CAPSULE_ACTIONS.length);
 check("ID операторов уникальны", new Set(CAPSULE_OPERATORS.map(x => x.id)).size === CAPSULE_OPERATORS.length);
 check("все действия заданы инфинитивом", CAPSULE_ACTIONS.every(x => /(?:ar|er|ir)$/.test(x.infinitive)));
 check("recoger используется только как infinitivo", CAPSULE_ACTIONS.find(x => x.id === "recoger")?.infinitive === "recoger");
 check("каждая история ссылается на существующую комбинацию", CAPSULE_STORIES.every(x => CAPSULE_ACTIONS.some(a => a.id === x.actionId) && CAPSULE_OPERATORS.some(o => o.id === x.operatorId)));
 check("каждое действие представлено в режиме История", new Set(CAPSULE_STORIES.map(x => x.actionId)).size === CAPSULE_ACTIONS.length);
+check("каждый оператор представлен в режиме История", new Set(CAPSULE_STORIES.map(x => x.operatorId)).size === CAPSULE_OPERATORS.length);
 check("каждая испанская история имеет русский перевод", CAPSULE_STORIES.every(x => x.story && x.storyRu));
 
 const phrases = CAPSULE_OPERATORS.flatMap(op => CAPSULE_ACTIONS.map(action => capsulePhrase(op.id, action.id)));
-check("все 21 фраза уникальна", new Set(phrases).size === 21);
+check("все 56 фраз уникальны", new Set(phrases).size === 56);
 check("после оператора действие не спрягается", phrases.every((phrase) => CAPSULE_ACTIONS.some(action => phrase.includes(` ${action.infinitive} `))));
 check("в каждой фразе ровно один оператор", phrases.every((phrase) => CAPSULE_OPERATORS.filter(op => phrase.startsWith(`${op.yo} `)).length === 1));
 check("формы yo содержат явный субъект", CAPSULE_OPERATORS.every(op => op.yo.startsWith("Yo ")));
 check("формы третьего лица содержат Él и Ella", CAPSULE_OPERATORS.every(op => op.el.startsWith("Él ") && op.ella.startsWith("Ella ")));
 check("русские подсказки третьего лица естественны", CAPSULE_OPERATORS.every(op => op.elRu && op.ellaRu));
-check("русские задания используют естественные операторы", CAPSULE_OPERATORS.map(op => op.taskRu).join("|") === "я хочу|я могу|мне нужно");
+check("русские задания используют все восемь операторов", CAPSULE_OPERATORS.map(op => op.taskRu).join("|") === "я хочу|я могу|мне нужно|я собираюсь|я пытаюсь|я начинаю|я перестаю|я снова");
 check("у каждого действия есть цельное русское задание", CAPSULE_ACTIONS.every(action => action.taskRu && !action.taskRu.includes("  ")));
+check("EMPEZAR A требует естественное «начинаю открывать»", capsuleTaskRu("empezar_a", "abrir") === "я начинаю открывать дверь");
+check("DEJAR DE требует естественное «перестаю открывать»", capsuleTaskRu("dejar_de", "abrir") === "я перестаю открывать дверь");
+check("VOLVER A требует естественное «снова открываю»", capsuleTaskRu("volver_a", "abrir") === "я снова открываю дверь");
 
 check("Капсула 2 содержит ровно 10 диалогов", QUERER_DIALOGUES.length === 10);
 check("ID диалогов Капсулы 2 уникальны", new Set(QUERER_DIALOGUES.map(x => x.id)).size === QUERER_DIALOGUES.length);
@@ -145,8 +152,9 @@ check("Gramática содержит точный Presente DEJAR DE", gramatica.in
 check("Gramática содержит точный Presente VOLVER A", gramatica.includes('presente: { forms: ["vuelvo", "vuelves", "vuelve", "volvemos", "volvéis", "vuelven"]'));
 check("прямой маршрут ?tema= проходит через оболочку приложения", shell.includes("if (deepTema)") && shell.includes("<Gramatica startTema={deepTema}"));
 check("обычная ссылка ?capsula= открывает App-капсулу", shell.includes('get("capsula")') && shell.includes("<ActionCapsules"));
-check("в Главе 4 две отдельные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Тренировать роли →"));
-check("сетки операторов безопасны для узкого экрана", trainer.includes('repeat(3, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
+check("16 сюжетных капсул и тренажёр A1 имеют разные кнопки", shell.includes("Капсулы Дона Вербо →") && shell.includes("Капсулы действия A1 · 8 × 7 →"));
+check("тренажёр A1 подключён отдельным экраном, а не стартом сюжетных капсул", shell.includes("<ActionCapsulesTrainer") && trainer.includes("export function ActionCapsulesTrainer") && trainer.includes("<ActionTrainerStart"));
+check("сетки восьми операторов безопасны для узкого экрана", trainer.includes('repeat(2, minmax(0, 1fr))') && trainer.includes('overflowWrap: "anywhere"'));
 check("старое общее поле third не осталось в интерфейсе", !trainer.includes("operator.third"));
 check("Капсула 2 подключена отдельным режимом", trainer.includes('mode === "intentions"') && trainer.includes("<Intentions"));
 check("Капсула poder-1 подключена отдельным режимом", trainer.includes('mode === "poder-1"') && trainer.includes("<PoderOne"));
@@ -219,6 +227,7 @@ check(
   shuffledReviewFirstCount <= Math.ceil(ALL_REVIEW.length / 2),
   `осталось на первом месте: ${shuffledReviewFirstCount} из ${ALL_REVIEW.length}`,
 );
+
 
 // ============================================================
 // ТАП-ПЕРЕВОД ГЛАГОЛОВ — 16 капсул Дона Вербо (ТЗ, сессия автоматизации
