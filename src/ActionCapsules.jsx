@@ -56,7 +56,7 @@ import {
   VOLVER_A_CAPSULE_1_STEPS,
   VOLVER_A_PRESENT,
 } from "./volverACapsule1Data.js";
-import { capsuleTapSegments } from "./capsuleVerbTap.js";
+import { capsuleTapSegments, capsuleSplitTrailing } from "./capsuleVerbTap.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -82,15 +82,23 @@ function TapVerbText({ text }) {
   const segments = useMemo(() => capsuleTapSegments(text), [text]);
   return <span>{segments.map((seg, i) => {
     if (!seg.tap) return <span key={i}>{seg.text}</span>;
+    // Хвостовой пробел сегмента рендерится ОТДЕЛЬНО, вне inline-block —
+    // иначе браузер обрезает его как пробел на конце строки блочного
+    // контейнера, и тапаемое слово визуально слипается со следующим
+    // (добыто кровью 30.08 вечером: «dar cuerda» → «darcuerda»).
+    const { core, trailing } = capsuleSplitTrailing(seg.text);
     return (
-      <span key={i} style={{ position: "relative", display: "inline-block" }}>
-        <span
-          onClick={() => setOpenKey((o) => (o === i ? null : i))}
-          style={{ borderBottom: `1.5px dotted ${C.raspberry}`, color: C.raspberry, fontWeight: 700, cursor: "pointer" }}
-        >{seg.text}</span>
-        {openKey === i && (
-          <span style={{ position: "absolute", bottom: "125%", left: "50%", transform: "translateX(-50%)", background: C.ink, color: "#fff", fontSize: 12.5, padding: "5px 10px", borderRadius: 7, whiteSpace: "nowrap", zIndex: 30, boxShadow: "0 3px 12px rgba(0,0,0,0.28)" }}>{seg.tap}</span>
-        )}
+      <span key={i}>
+        <span style={{ position: "relative", display: "inline-block" }}>
+          <span
+            onClick={() => setOpenKey((o) => (o === i ? null : i))}
+            style={{ borderBottom: `1.5px dotted ${C.raspberry}`, color: C.raspberry, fontWeight: 700, cursor: "pointer" }}
+          >{core}</span>
+          {openKey === i && (
+            <span style={{ position: "absolute", bottom: "125%", left: "50%", transform: "translateX(-50%)", background: C.ink, color: "#fff", fontSize: 12.5, padding: "5px 10px", borderRadius: 7, whiteSpace: "nowrap", zIndex: 30, boxShadow: "0 3px 12px rgba(0,0,0,0.28)" }}>{seg.tap}</span>
+          )}
+        </span>
+        {trailing}
       </span>
     );
   })}</span>;
@@ -1192,8 +1200,8 @@ function Intentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 2 · QUERER" title={QUERER_INTRO.title} sub="Reconstruye una intención completa. No traduzcas: sigue la escena." />
     <Card>
-      {QUERER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{QUERER_INTRO.mission}</div>
+      {QUERER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={QUERER_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1231,8 +1239,8 @@ function PoderIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 4 · PODER" title={PODER_INTRO.title} sub="Reconstruye una posibilidad completa. No traduzcas: sigue la escena." />
     <Card>
-      {PODER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{PODER_INTRO.mission}</div>
+      {PODER_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={PODER_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1278,8 +1286,8 @@ function TenerQueIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 6 · TENER QUE" title={TENER_QUE_INTRO.title} sub="Reconstruye una obligación completa. No traduzcas: sigue la escena." />
     <Card>
-      {TENER_QUE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{TENER_QUE_INTRO.mission}</div>
+      {TENER_QUE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={TENER_QUE_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1325,8 +1333,8 @@ function IrAIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 8 · IR A" title={IR_A_INTRO.title} sub="Reconstruye un plan completo. No traduzcas: sigue la escena." />
     <Card>
-      {IR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{IR_A_INTRO.mission}</div>
+      {IR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={IR_A_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1372,8 +1380,8 @@ function IntentarIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 10 · INTENTAR" title={INTENTAR_INTRO.title} sub="Reconstruye un intento completo. No traduzcas: sigue la escena." />
     <Card>
-      {INTENTAR_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{INTENTAR_INTRO.mission}</div>
+      {INTENTAR_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={INTENTAR_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1419,8 +1427,8 @@ function EmpezarAIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 12 · EMPEZAR A" title={EMPEZAR_A_INTRO.title} sub="Reconstruye un comienzo completo. No traduzcas: sigue la escena." />
     <Card>
-      {EMPEZAR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{EMPEZAR_A_INTRO.mission}</div>
+      {EMPEZAR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={EMPEZAR_A_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1466,8 +1474,8 @@ function DejarDeIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 14 · DEJAR DE" title={DEJAR_DE_INTRO.title} sub="Reconstruye una pausa completa. No traduzcas: sigue la escena." />
     <Card>
-      {DEJAR_DE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{DEJAR_DE_INTRO.mission}</div>
+      {DEJAR_DE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={DEJAR_DE_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
@@ -1514,8 +1522,8 @@ function VolverAIntentions({ onBack, onComplete }) {
   if (phase === "intro") return <div style={wrap}><div style={maxw}>
     <Header small="Cápsula 16 · VOLVER A" title={VOLVER_A_INTRO.title} sub="Reconstruye una repetición completa. No traduzcas: sigue la escena." />
     <Card>
-      {VOLVER_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
-      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{VOLVER_A_INTRO.mission}</div>
+      {VOLVER_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}><TapVerbText text={paragraph} /></p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{<TapVerbText text={VOLVER_A_INTRO.mission} />}</div>
       <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
     </Card>
     <Back onClick={onBack} label="← Volver a las cápsulas" />
