@@ -8,12 +8,12 @@ import {
 } from "../src/actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "../src/quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "../src/poderDialogueData.js";
-import { TENER_QUE_DIALOGUES } from "../src/tenerQueDialogueData.js";
-import { IR_A_DIALOGUES } from "../src/iraDialogueData.js";
-import { INTENTAR_DIALOGUES } from "../src/intentarDialogueData.js";
-import { EMPEZAR_A_DIALOGUES } from "../src/empezarADialogueData.js";
-import { DEJAR_DE_DIALOGUES } from "../src/dejarDeDialogueData.js";
-import { VOLVER_A_DIALOGUES } from "../src/volverADialogueData.js";
+import { TENER_QUE_DIALOGUES, TENER_QUE_INTRO } from "../src/tenerQueDialogueData.js";
+import { IR_A_DIALOGUES, IR_A_INTRO } from "../src/iraDialogueData.js";
+import { INTENTAR_DIALOGUES, INTENTAR_INTRO } from "../src/intentarDialogueData.js";
+import { EMPEZAR_A_DIALOGUES, EMPEZAR_A_INTRO } from "../src/empezarADialogueData.js";
+import { DEJAR_DE_DIALOGUES, DEJAR_DE_INTRO } from "../src/dejarDeDialogueData.js";
+import { VOLVER_A_DIALOGUES, VOLVER_A_INTRO } from "../src/volverADialogueData.js";
 import { CAPSULE_LINE, QUERER_CAPSULE_1, QUERER_CAPSULE_1_STEPS, QUERER_PRESENT } from "../src/quererCapsule1Data.js";
 import { PODER_CAPSULE_1, PODER_CAPSULE_1_STEPS, PODER_PRESENT } from "../src/poderCapsule1Data.js";
 import { TENER_QUE_CAPSULE_1, TENER_QUE_CAPSULE_1_STEPS, TENER_QUE_PRESENT } from "../src/tenerQueCapsule1Data.js";
@@ -22,7 +22,7 @@ import { INTENTAR_CAPSULE_1, INTENTAR_CAPSULE_1_STEPS, INTENTAR_PRESENT } from "
 import { EMPEZAR_A_CAPSULE_1, EMPEZAR_A_CAPSULE_1_STEPS, EMPEZAR_A_PRESENT } from "../src/empezarACapsule1Data.js";
 import { DEJAR_DE_CAPSULE_1, DEJAR_DE_CAPSULE_1_STEPS, DEJAR_DE_PRESENT } from "../src/dejarDeCapsule1Data.js";
 import { VOLVER_A_CAPSULE_1, VOLVER_A_CAPSULE_1_STEPS, VOLVER_A_PRESENT } from "../src/volverACapsule1Data.js";
-import { capsuleVerbTranslation, capsuleTapSegments } from "../src/capsuleVerbTap.js";
+import { capsuleVerbTranslation, capsuleTapSegments, capsuleSplitTrailing } from "../src/capsuleVerbTap.js";
 import { readFileSync } from "node:fs";
 
 let failed = 0;
@@ -308,6 +308,44 @@ check(
 check(
   "clítico на действии переводится как в Игре №4 (buscarla → «искать её»)",
   capsuleVerbTranslation("buscarla.") === "искать её",
+);
+
+// ============================================================
+// Исправление 30.08 вечером (жалоба Оксаны на живых скриншотах): вступление
+// каждой Cápsula 2 («La Sala de los Planes» и т.п., paragraphs + mission)
+// вообще не было обёрнуто тап-переводом — 0 тапов на первом же экране всех
+// 8 линеек. И «dar cuerda al reloj» (Cápsula 1 · tener-que) переводилось
+// как «отдать» по одному слову «dar», хотя это идиома «завести часы».
+// ============================================================
+const CAPSULE_2_INTROS = [
+  QUERER_INTRO, PODER_INTRO, TENER_QUE_INTRO, IR_A_INTRO,
+  INTENTAR_INTRO, EMPEZAR_A_INTRO, DEJAR_DE_INTRO, VOLVER_A_INTRO,
+];
+check(
+  "Cápsula 2 (все 8 вступлений): paragraphs + mission не теряются при разборе на тап-сегменты",
+  CAPSULE_2_INTROS.every((intro) => [...intro.paragraphs, intro.mission].every(segmentsRoundtrip)),
+);
+check(
+  "Cápsula 2 (все 8 вступлений): хотя бы одна конструкция оператора реально тапается во вступлении",
+  CAPSULE_2_INTROS.every((intro) => intro.paragraphs.concat(intro.mission).some((p) => capsuleTapSegments(p).some((s) => s.tap))),
+);
+check(
+  "«dar cuerda al reloj» — идиома «завести (часы)», не разбита на «dar»=«отдать» + «cuerda»",
+  (() => {
+    const segs = capsuleTapSegments(TENER_QUE_CAPSULE_1.scene.es).filter((s) => s.tap);
+    return segs.some((s) => s.tap === "завести (часы)") && !segs.some((s) => s.tap === "отдать");
+  })(),
+);
+check(
+  "capsuleSplitTrailing отделяет хвостовой пробел, не теряя и не искажая символы (core+trailing === исходный текст)",
+  ["dar ", "abrir", "vas a ", "empiezo a"].every((t) => {
+    const { core, trailing } = capsuleSplitTrailing(t);
+    return core + trailing === t && !/\s$/.test(core);
+  }),
+);
+check(
+  "тапаемый сегмент с хвостовым пробелом («dar » перед «cuerda») даёт непустой trailing — иначе слова визуально слипнутся",
+  capsuleSplitTrailing(capsuleTapSegments(TENER_QUE_CAPSULE_1.scene.es).find((s) => s.tap === "завести (часы)").text).trailing.length > 0,
 );
 
 if (failed) {

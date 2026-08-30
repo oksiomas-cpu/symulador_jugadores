@@ -35,6 +35,16 @@ export const CAPSULE_ACTION_CLITICS_RU = { la: "её", lo: "его", las: "их"
 // dar + se + местоимение (dársela/dárselo) — готовая составная фраза целиком.
 export const CAPSULE_DAR_SE_RU = { la: "отдать её", lo: "отдать его", las: "отдать их", los: "отдать их" };
 
+// Устойчивые сочетания глагол+существительное, где значение целиком уходит
+// от однословного перевода того же глагола (добыто кровью 30.08 вечером:
+// «dar cuerda al reloj» — «завести часы» — по одному слову «dar» превращался
+// в «отдать», хотя здесь это не про «отдать», а про «завести/заводить»).
+// Проверяется ДО однословного словаря действий, тем же двухтокенным проходом,
+// что и CAPSULE_OPERATOR_PREP_RU — узел не разрывается на два тапа.
+export const CAPSULE_ACTION_IDIOM_RU = {
+  "dar cuerda": "завести (часы)",
+};
+
 // Однословные операторы капсул — QUERER/PODER/INTENTAR не требуют предлога
 // перед действием, поэтому форма сама по себе уже целый узел. Presente и
 // Pretérito Imperfecto — в историях капсул оба времени встречаются (пара
@@ -141,7 +151,8 @@ export function capsuleTapSegments(text) {
   while (i < raw.length) {
     const word1 = capsuleCleanToken(raw[i]).toLowerCase();
     const word2 = i + 1 < raw.length ? capsuleCleanToken(raw[i + 1]).toLowerCase() : "";
-    const phraseTr = word2 ? CAPSULE_OPERATOR_PREP_RU[`${word1} ${word2}`] : undefined;
+    const key2 = word2 ? `${word1} ${word2}` : "";
+    const phraseTr = word2 ? (CAPSULE_ACTION_IDIOM_RU[key2] ?? CAPSULE_OPERATOR_PREP_RU[key2]) : undefined;
     if (phraseTr) {
       segments.push({ text: raw[i] + raw[i + 1], tap: phraseTr });
       i += 2;
@@ -157,4 +168,17 @@ export function capsuleTapSegments(text) {
     i += 1;
   }
   return segments;
+}
+
+// Разделяет сегмент на «ядро» (без хвостовых пробелов) и сам хвостовой
+// пробел (добыто кровью 30.08 вечером: `display:inline-block` в TapVerbText
+// обрезает пробел на конце своего содержимого — как в конце строки блочного
+// контейнера, — и тапаемое слово визуально склеивалось со следующим:
+// «dar cuerda» превращалось в «darcuerda»). Тапаемый span должен получать
+// только core; trailing рендерится ПОСЛЕ span'а, обычным текстовым узлом.
+export function capsuleSplitTrailing(segText) {
+  const m = segText.match(/\s+$/);
+  const trailing = m ? m[0] : "";
+  const core = trailing ? segText.slice(0, segText.length - trailing.length) : segText;
+  return { core, trailing };
 }
