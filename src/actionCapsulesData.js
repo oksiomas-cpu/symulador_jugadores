@@ -1,4 +1,4 @@
-// Капсулы действия A1 · первый этаж 3 оператора × 7 действий.
+// Капсулы действия A1 · отдельный тренажёр 8 операторов × 7 действий.
 // Контент отделён от интерфейса; те же действия и ID использует Игра №4.
 
 export const CAPSULE_OPERATORS = [
@@ -41,6 +41,74 @@ export const CAPSULE_OPERATORS = [
     label: "МНЕ НУЖНО",
     color: "#A67C2E",
   },
+  {
+    id: "ir_a",
+    infinitive: "ir a",
+    yo: "Yo voy a",
+    el: "Él va a",
+    ella: "Ella va a",
+    elRu: "он собирается",
+    ellaRu: "она собирается",
+    meaning: "собираться",
+    taskRu: "я собираюсь",
+    label: "Я СОБИРАЮСЬ",
+    color: "#2F5DA8",
+  },
+  {
+    id: "intentar",
+    infinitive: "intentar",
+    yo: "Yo intento",
+    el: "Él intenta",
+    ella: "Ella intenta",
+    elRu: "он пытается",
+    ellaRu: "она пытается",
+    meaning: "пытаться",
+    taskRu: "я пытаюсь",
+    label: "Я ПЫТАЮСЬ",
+    color: "#7A4E9D",
+  },
+  {
+    id: "empezar_a",
+    infinitive: "empezar a",
+    yo: "Yo empiezo a",
+    el: "Él empieza a",
+    ella: "Ella empieza a",
+    elRu: "он начинает",
+    ellaRu: "она начинает",
+    meaning: "начинать",
+    taskRu: "я начинаю",
+    taskStyle: "process",
+    label: "Я НАЧИНАЮ",
+    color: "#B86B2B",
+  },
+  {
+    id: "dejar_de",
+    infinitive: "dejar de",
+    yo: "Yo dejo de",
+    el: "Él deja de",
+    ella: "Ella deja de",
+    elRu: "он перестаёт",
+    ellaRu: "она перестаёт",
+    meaning: "переставать",
+    taskRu: "я перестаю",
+    taskStyle: "process",
+    label: "Я ПЕРЕСТАЮ",
+    color: "#6B5544",
+  },
+  {
+    id: "volver_a",
+    infinitive: "volver a",
+    yo: "Yo vuelvo a",
+    el: "Él vuelve a",
+    ella: "Ella vuelve a",
+    elRu: "он снова",
+    ellaRu: "она снова",
+    meaning: "снова делать",
+    taskRu: "я снова",
+    taskStyle: "again",
+    label: "Я СНОВА",
+    color: "#008A83",
+  },
 ];
 
 export const CAPSULE_ACTIONS = [
@@ -49,6 +117,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "abrir",
     meaning: "открыть",
     taskRu: "открыть дверь",
+    taskRuProcess: "открывать дверь",
+    taskRuAgain: "открываю дверь",
     object: "la puerta",
     objectRu: "дверь",
     scene: "La puerta principal está cerrada.",
@@ -58,6 +128,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "llevar",
     meaning: "отнести",
     taskRu: "отнести поднос в Зал",
+    taskRuProcess: "нести поднос в Зал",
+    taskRuAgain: "отношу поднос в Зал",
     object: "la bandeja a la Sala",
     objectRu: "поднос в Зал",
     scene: "La bandeja tiene que llegar a la Sala.",
@@ -67,6 +139,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "buscar",
     meaning: "искать",
     taskRu: "искать золотую палочку",
+    taskRuProcess: "искать золотую палочку",
+    taskRuAgain: "ищу золотую палочку",
     object: "la varilla dorada",
     objectRu: "золотую палочку",
     scene: "La varilla dorada ha desaparecido.",
@@ -76,6 +150,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "recoger",
     meaning: "собрать",
     taskRu: "собрать бумаги с пола",
+    taskRuProcess: "собирать бумаги с пола",
+    taskRuAgain: "собираю бумаги с пола",
     object: "los papeles del suelo",
     objectRu: "бумаги с пола",
     scene: "Hay papeles por todo el suelo.",
@@ -85,6 +161,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "guardar",
     meaning: "убрать на хранение",
     taskRu: "убрать золотой ключ",
+    taskRuProcess: "убирать золотой ключ",
+    taskRuAgain: "убираю золотой ключ",
     object: "la llave dorada",
     objectRu: "золотой ключ",
     scene: "La llave dorada no puede quedarse aquí.",
@@ -94,6 +172,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "usar",
     meaning: "использовать",
     taskRu: "использовать золотой венчик",
+    taskRuProcess: "использовать золотой венчик",
+    taskRuAgain: "использую золотой венчик",
     object: "la varilla dorada",
     objectRu: "золотой венчик",
     scene: "La varilla dorada activa las palabras.",
@@ -103,6 +183,8 @@ export const CAPSULE_ACTIONS = [
     infinitive: "dar",
     meaning: "передать",
     taskRu: "передать поднос ответственному помощнику",
+    taskRuProcess: "передавать поднос ответственному помощнику",
+    taskRuAgain: "передаю поднос ответственному помощнику",
     object: "la bandeja al ayudante encargado",
     objectRu: "поднос ответственному помощнику",
     scene: "El ayudante encargado espera la bandeja en la Sala.",
@@ -166,7 +248,55 @@ export const CAPSULE_STORIES = [
     storyRu: "Поднос доставлен в Зал. Ответственный помощник ждёт, когда ему его передадут.",
     prompt: "Какое действие теперь необходимо?",
   },
+  {
+    id: "door-plan",
+    actionId: "abrir",
+    operatorId: "ir_a",
+    story: "La puerta se abrirá en cuanto llegue el grupo. La detective ya tiene la llave en la mano.",
+    storyRu: "Дверь откроют, как только подойдёт группа. Ключ уже в руке у детектива.",
+    prompt: "Как она сообщает о ближайшем действии?",
+  },
+  {
+    id: "wand-attempt",
+    actionId: "usar",
+    operatorId: "intentar",
+    story: "La varilla dorada todavía no responde. El ayudante decide probar una vez más.",
+    storyRu: "Золотой венчик пока не реагирует. Помощник решает попробовать ещё раз.",
+    prompt: "Как он говорит о своей попытке?",
+  },
+  {
+    id: "key-start",
+    actionId: "guardar",
+    operatorId: "empezar_a",
+    story: "Todas las pistas están clasificadas. La detective toma la llave para ponerla en un lugar seguro.",
+    storyRu: "Все улики разобраны. Детектив берёт ключ, чтобы убрать его в безопасное место.",
+    prompt: "Как она сообщает, что действие начинается?",
+  },
+  {
+    id: "papers-stop",
+    actionId: "recoger",
+    operatorId: "dejar_de",
+    story: "Don Verbo avisa que esos papeles no son pistas. El ayudante interrumpe la tarea.",
+    storyRu: "Дон Вербо сообщает, что эти бумаги не являются уликами. Помощник прекращает работу.",
+    prompt: "Как он сообщает о прекращении действия?",
+  },
+  {
+    id: "tray-again",
+    actionId: "llevar",
+    operatorId: "volver_a",
+    story: "La bandeja regresó a la Cocina por error. El ayudante la lleva otra vez a la Sala.",
+    storyRu: "Поднос по ошибке вернули на Кухню. Помощник снова несёт его в Зал.",
+    prompt: "Как он сообщает о повторном действии?",
+  },
 ];
+
+export const CAPSULE_COMBINATIONS = CAPSULE_OPERATORS.flatMap((operator) =>
+  CAPSULE_ACTIONS.map((action) => ({
+    id: `${operator.id}:${action.id}`,
+    operatorId: operator.id,
+    actionId: action.id,
+  })),
+);
 
 export function capsulePhrase(operatorId, actionId, person = "yo") {
   const operator = CAPSULE_OPERATORS.find((item) => item.id === operatorId);
@@ -181,4 +311,12 @@ export function capsuleByIds(operatorId, actionId) {
     operator: CAPSULE_OPERATORS.find((item) => item.id === operatorId),
     action: CAPSULE_ACTIONS.find((item) => item.id === actionId),
   };
+}
+
+export function capsuleTaskRu(operatorId, actionId) {
+  const { operator, action } = capsuleByIds(operatorId, actionId);
+  if (!operator || !action) return "";
+  if (operator.taskStyle === "process") return `${operator.taskRu} ${action.taskRuProcess}`;
+  if (operator.taskStyle === "again") return `${operator.taskRu} ${action.taskRuAgain}`;
+  return `${operator.taskRu} ${action.taskRu}`;
 }
