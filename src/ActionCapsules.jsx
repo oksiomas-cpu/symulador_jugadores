@@ -8,6 +8,12 @@ import {
 } from "./actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "./poderDialogueData.js";
+import { TENER_QUE_DIALOGUES, TENER_QUE_INTRO, TENER_QUE_REVIEW } from "./tenerQueDialogueData.js";
+import { IR_A_DIALOGUES, IR_A_INTRO, IR_A_REVIEW } from "./iraDialogueData.js";
+import { INTENTAR_DIALOGUES, INTENTAR_INTRO, INTENTAR_REVIEW } from "./intentarDialogueData.js";
+import { EMPEZAR_A_DIALOGUES, EMPEZAR_A_INTRO, EMPEZAR_A_REVIEW } from "./empezarADialogueData.js";
+import { DEJAR_DE_DIALOGUES, DEJAR_DE_INTRO, DEJAR_DE_REVIEW } from "./dejarDeDialogueData.js";
+import { VOLVER_A_DIALOGUES, VOLVER_A_INTRO, VOLVER_A_REVIEW } from "./volverADialogueData.js";
 import {
   CAPSULE_LINE,
   QUERER_CAPSULE_1,
@@ -1227,6 +1233,289 @@ function PoderIntentions({ onBack, onComplete }) {
   />;
 }
 
+// Капсула 6 · TENER QUE. Та же механика, что у PoderIntentions (Капсула 4,
+// PODER) — меняются только данные (tenerQueDialogueData.js) и la cierre/
+// enlace a Gramática. El motor no se copia.
+function TenerQueIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 6 · TENER QUE" title={TENER_QUE_INTRO.title} sub="Reconstruye una obligación completa. No traduzcas: sigue la escena." />
+    <Card>
+      {TENER_QUE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{TENER_QUE_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = TENER_QUE_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 6" total={TENER_QUE_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === TENER_QUE_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={TENER_QUE_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula6:tenerque", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("tener-que-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 6"
+    title="Informe de obligaciones"
+    closingLine={<>Ya sabemos <b>qué tenían que hacer</b> Tomás y Lucía.<br />Tener que hacer algo no siempre coincide con poder o querer.</>}
+    gramaticaTema="op-tenerque"
+    gramaticaLabel="Practicar TENER QUE en Gramática"
+  />;
+}
+
+// Капсула 8 · IR A. Та же механика, что у TenerQueIntentions (Капсула 6) —
+// меняются только данные (iraDialogueData.js) и la cierre/enlace a
+// Gramática. El motor no se copia.
+function IrAIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 8 · IR A" title={IR_A_INTRO.title} sub="Reconstruye un plan completo. No traduzcas: sigue la escena." />
+    <Card>
+      {IR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{IR_A_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = IR_A_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 8" total={IR_A_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === IR_A_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={IR_A_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula8:ira", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("ir-a-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 8"
+    title="Informe de planes"
+    closingLine={<>Ya sabemos <b>qué iban a hacer</b> Tomás y Lucía.<br />Ir a hacer algo es un plan, todavía no una obligación.</>}
+    gramaticaTema="op-ira"
+    gramaticaLabel="Practicar IR A en Gramática"
+  />;
+}
+
+// Капсула 10 · INTENTAR. Та же механика, что у IrAIntentions (Капсула 8) —
+// меняются только данные (intentarDialogueData.js) и la cierre/enlace a
+// Gramática. El motor no se copia.
+function IntentarIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 10 · INTENTAR" title={INTENTAR_INTRO.title} sub="Reconstruye un intento completo. No traduzcas: sigue la escena." />
+    <Card>
+      {INTENTAR_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{INTENTAR_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = INTENTAR_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 10" total={INTENTAR_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === INTENTAR_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={INTENTAR_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula10:intentar", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("intentar-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 10"
+    title="Informe de intentos"
+    closingLine={<>Ya sabemos <b>qué intentaban hacer</b> Tomás y Lucía.<br />Intentar algo no garantiza conseguirlo.</>}
+    gramaticaTema="op-intentar"
+    gramaticaLabel="Practicar INTENTAR en Gramática"
+  />;
+}
+
+// Капсула 12 · EMPEZAR A. Та же механика, что у IntentarIntentions
+// (Капсула 10) — меняются только данные (empezarADialogueData.js) и la
+// cierre/enlace a Gramática. El motor no se copia.
+function EmpezarAIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 12 · EMPEZAR A" title={EMPEZAR_A_INTRO.title} sub="Reconstruye un comienzo completo. No traduzcas: sigue la escena." />
+    <Card>
+      {EMPEZAR_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{EMPEZAR_A_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = EMPEZAR_A_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 12" total={EMPEZAR_A_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === EMPEZAR_A_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={EMPEZAR_A_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula12:empezara", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("empezar-a-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 12"
+    title="Informe de comienzos"
+    closingLine={<>Ya sabemos <b>qué empezaban a hacer</b> Tomás y Lucía.<br />Empezar algo no significa terminarlo.</>}
+    gramaticaTema="op-empezara"
+    gramaticaLabel="Practicar EMPEZAR A en Gramática"
+  />;
+}
+
+// Капсула 14 · DEJAR DE. Та же механика, что у EmpezarAIntentions
+// (Капсула 12) — меняются только данные (dejarDeDialogueData.js) и la
+// cierre/enlace a Gramática. El motor no se copia.
+function DejarDeIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 14 · DEJAR DE" title={DEJAR_DE_INTRO.title} sub="Reconstruye una pausa completa. No traduzcas: sigue la escena." />
+    <Card>
+      {DEJAR_DE_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{DEJAR_DE_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = DEJAR_DE_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 14" total={DEJAR_DE_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === DEJAR_DE_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={DEJAR_DE_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula14:dejarde", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("dejar-de-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 14"
+    title="Informe de pausas"
+    closingLine={<>Ya sabemos <b>qué dejaban de hacer</b> Tomás y Lucía.<br />Dejar de hacer algo es tan significativo como empezarlo.</>}
+    gramaticaTema="op-dejarde"
+    gramaticaLabel="Practicar DEJAR DE en Gramática"
+  />;
+}
+
+// Капсула 16 · VOLVER A. Última cápsula de la línea. Та же механика, que
+// DejarDeIntentions (Капсула 14) — меняются только данные
+// (volverADialogueData.js) и la cierre/enlace a Gramática. El motor no se
+// copia.
+function VolverAIntentions({ onBack, onComplete }) {
+  const [phase, setPhase] = useState("intro");
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+  const [result, setResult] = useState(null);
+
+  if (phase === "intro") return <div style={wrap}><div style={maxw}>
+    <Header small="Cápsula 16 · VOLVER A" title={VOLVER_A_INTRO.title} sub="Reconstruye una repetición completa. No traduzcas: sigue la escena." />
+    <Card>
+      {VOLVER_A_INTRO.paragraphs.map((paragraph, index) => <p key={index} style={{ margin: index ? "10px 0 0" : 0, fontSize: 15, lineHeight: 1.65 }}>{paragraph}</p>)}
+      <div style={{ marginTop: 16, borderLeft: `3px solid ${C.gold}`, padding: "10px 0 10px 13px", color: C.raspberry, fontWeight: 900, lineHeight: 1.55 }}>{VOLVER_A_INTRO.mission}</div>
+      <button onClick={() => setPhase("dialogues")} style={{ marginTop: 18, width: "100%", background: C.emerald, color: "#fff", border: 0, borderRadius: 12, padding: 13, fontFamily: SERIF, fontSize: 15, fontWeight: 800, cursor: "pointer" }}>Entrar en la Sala →</button>
+    </Card>
+    <Back onClick={onBack} label="← Volver a las cápsulas" />
+  </div></div>;
+
+  if (phase === "dialogues") {
+    const dialogue = VOLVER_A_DIALOGUES[dialogueIndex];
+    return <DialogueExercise key={dialogue.id} dialogue={dialogue} capsuleLabel="Cápsula 16" total={VOLVER_A_DIALOGUES.length} onSolved={() => {
+      if (dialogueIndex === VOLVER_A_DIALOGUES.length - 1) setPhase("review");
+      else setDialogueIndex(value => value + 1);
+    }} />;
+  }
+
+  if (phase === "review") return <MeaningReview pool={VOLVER_A_REVIEW} onFinish={(nextResult) => {
+    setResult(nextResult);
+    try {
+      window.localStorage.setItem("ciudad:capsula16:volvera", JSON.stringify({ ...nextResult, completedAt: new Date().toISOString() }));
+    } catch (_) { /* El resultado visual sigue disponible aunque el navegador bloquee storage. */ }
+    onComplete?.("volver-a-2");
+    setPhase("finish");
+  }} />;
+
+  return <IntentionsFinish
+    result={result || { correct: 0, total: 4, missed: [] }}
+    onAgain={() => { setDialogueIndex(0); setResult(null); setPhase("intro"); }}
+    onBack={onBack}
+    capsuleLabel="Cápsula 16"
+    title="Informe de repeticiones"
+    closingLine={<>Ya sabemos <b>qué volvían a hacer</b> Tomás y Lucía.<br />Volver a hacer algo significa repetir lo que ya se hizo antes.</>}
+    gramaticaTema="op-volvera"
+    gramaticaLabel="Practicar VOLVER A en Gramática"
+  />;
+}
+
 function Finish({ score, total, onAgain, onBack }) {
   return <div style={wrap}><div style={maxw}>
     <Header small="Капсулы действия A1" title="Маршрут пройден" sub={`${score} из ${total} ходов собраны точно.`} />
@@ -1430,11 +1719,17 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "poder-1") return <PoderOne initialStep={resumeStep || progress.stepByCapsule?.["poder-1"] || 0} onStep={(step) => saveStep("poder-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "poder-2") return <PoderIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
     if (mode === "tener-que-1") return <TenerQueOne initialStep={resumeStep || progress.stepByCapsule?.["tener-que-1"] || 0} onStep={(step) => saveStep("tener-que-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "tener-que-2") return <TenerQueIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "ir-a-1") return <IrAOne initialStep={resumeStep || progress.stepByCapsule?.["ir-a-1"] || 0} onStep={(step) => saveStep("ir-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "ir-a-2") return <IrAIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "intentar-1") return <IntentarOne initialStep={resumeStep || progress.stepByCapsule?.["intentar-1"] || 0} onStep={(step) => saveStep("intentar-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "intentar-2") return <IntentarIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "empezar-a-1") return <EmpezarAOne initialStep={resumeStep || progress.stepByCapsule?.["empezar-a-1"] || 0} onStep={(step) => saveStep("empezar-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "empezar-a-2") return <EmpezarAIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "dejar-de-1") return <DejarDeOne initialStep={resumeStep || progress.stepByCapsule?.["dejar-de-1"] || 0} onStep={(step) => saveStep("dejar-de-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "dejar-de-2") return <DejarDeIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
+  if (mode === "volver-a-2") return <VolverAIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
   if (mode === "build") return <Build onBack={() => setMode("start")} />;
   if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
