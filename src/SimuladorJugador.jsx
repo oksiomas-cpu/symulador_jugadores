@@ -1837,6 +1837,14 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         </div>
       )}
 
+      {isCapFour && (
+        <div style={{ background: C.emerald, borderRadius: 14, padding: "14px 16px", marginBottom: 14 }}>
+          <button onClick={onCapsules} style={{ width: "100%", background: "#fff", color: C.emeraldDeep, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Капсулы Дона Вербо →
+          </button>
+        </div>
+      )}
+
       {/* ИСТОРИЯ-МАЯК */}
       <Block stripe={C.gold}>
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
@@ -1885,16 +1893,11 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
 
       {/* УЧЕБНЫЕ МАРШРУТЫ ГЛАВЫ */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "📕 Два маршрута Главы 4" : "📊 Тренажёр спряжений"}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "🕵️ Тренировка ролей" : "📊 Тренажёр спряжений"}</div>
         {isCapFour ? (
-          <>
-            <button onClick={onCapsules} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-              Капсулы Дона Вербо →
-            </button>
-            <button onClick={onEnter} style={{ width: "100%", background: C.card, color: C.raspberry, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
-              Тренировать роли →
-            </button>
-          </>
+          <button onClick={onEnter} style={{ width: "100%", background: C.card, color: C.raspberry, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
+            Тренировать роли →
+          </button>
         ) : isCapOne ? (
           <button onClick={onDiario} style={{ width: "100%", background: C.emerald, color: "#fff", border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Открыть Mi Diario →
@@ -2193,6 +2196,23 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
       </div>
       </Gate>
 
+      {/* Rumbos con Don Verbo — Архитектура живой речи / Campo de acción, отдельно от нумерованных уровней */}
+      <Gate open={acc.cap4} title="Архитектура живой речи" onOpen={() => onPick(PACKS.cap4)}>
+      <div style={{
+        background: C.goldDeep, borderRadius: 20, padding: "28px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        boxShadow: "0 6px 22px rgba(166,124,46,0.30)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap4.emoji}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 4 }}>Архитектура живой речи</div>
+        <div style={{ fontSize: 13, fontStyle: "italic", letterSpacing: "0.5px", color: "rgba(255,255,255,0.75)", marginBottom: 8 }}>Campo de acción</div>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap4.desc}</div>
+        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.70)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap4.VERBS.length} улик · 21 вопрос · Detective · Canon · Fantasía</div>
+      </div>
+      </Gate>
+
+      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "4px 0 16px" }} />
+
       {/* Уровень 1 — золотой */}
       <Gate open={acc.cap1} title="Nivel 1" onOpen={() => onPick(PACKS.cap1)}>
       <div style={{
@@ -2235,21 +2255,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap3.titulo}</div>
         <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap3.desc}</div>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap3.VERBS.length} улик · Detective · Canon · Fantasía</div>
-      </div>
-      </Gate>
-
-      {/* Уровень 4 — глаголы-операторы, первый этаж 3×7 */}
-      <Gate open={acc.cap4} title="Nivel 4" onOpen={() => onPick(PACKS.cap4)}>
-      <div style={{
-        background: C.goldDeep, borderRadius: 20, padding: "28px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(166,124,46,0.30)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap4.emoji}</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 4 · {PACKS.cap4.grammar}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap4.titulo}</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap4.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.70)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap4.VERBS.length} улик · 21 вопрос · Detective · Canon · Fantasía</div>
       </div>
       </Gate>
 
