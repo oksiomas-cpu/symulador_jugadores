@@ -5,6 +5,7 @@ import {
   CAPSULE_STORIES,
   capsuleByIds,
   capsulePhrase,
+  capsuleTaskRu,
 } from "./actionCapsulesData.js";
 import { QUERER_DIALOGUES, QUERER_INTRO, QUERER_REVIEW } from "./quererDialogueData.js";
 import { PODER_DIALOGUES, PODER_INTRO, PODER_REVIEW } from "./poderDialogueData.js";
@@ -1562,9 +1563,9 @@ function Finish({ score, total, onAgain, onBack }) {
 }
 
 function Recognize({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({
-    action,
-    operator: CAPSULE_OPERATORS[i % CAPSULE_OPERATORS.length],
+  const tasks = useMemo(() => CAPSULE_OPERATORS.map((operator, i) => ({
+    action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length],
+    operator,
     person: i % 2 === 0 ? "el" : "ella",
   })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
@@ -1576,7 +1577,7 @@ function Recognize({ onBack }) {
     <Card>
       <div style={{ color: C.inkSoft, fontSize: 13, textAlign: "center" }}>{task.action.scene}</div>
       <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{capsulePhrase(task.operator.id, task.action.id, task.person)}</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 }}>
         {CAPSULE_OPERATORS.map(op => <Choice key={op.id} active={picked === op.id} disabled={!!picked} onClick={() => { setPicked(op.id); if (op.id === task.operator.id) setScore(s => s + 1); }}>{op.label}</Choice>)}
       </div>
       {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.person === "el" ? task.operator.el : task.operator.ella} = «${task.person === "el" ? task.operator.elRu : task.operator.ellaRu}».`}</div>}
@@ -1587,16 +1588,16 @@ function Recognize({ onBack }) {
 }
 
 function Build({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({ action, operator: CAPSULE_OPERATORS[(i + 1) % CAPSULE_OPERATORS.length] })), []);
+  const tasks = useMemo(() => CAPSULE_OPERATORS.map((operator, i) => ({ action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length], operator })), []);
   const [i, setI] = useState(0); const [op, setOp] = useState(null); const [act, setAct] = useState(null); const [checked, setChecked] = useState(false); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setOp(null); setAct(null); setChecked(false); setScore(0); }} onBack={onBack} />;
   const task = tasks[i];
   return <div style={wrap}><div style={maxw}>
-    <Header small="2 · Собрать" title="Собери речевой ход" sub={`Задание: «${task.operator.taskRu} ${task.action.taskRu}».`} />
+    <Header small="2 · Собрать" title="Собери речевой ход" sub={`Задание: «${capsuleTaskRu(task.operator.id, task.action.id)}».`} />
     <Progress index={i} total={tasks.length} />
     <Card>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, marginBottom: 7 }}>1. ОПЕРАТОР</div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 }}>{CAPSULE_OPERATORS.map(x => <Choice key={x.id} active={op === x.id} disabled={checked} onClick={() => setOp(x.id)}>{x.yo}</Choice>)}</div>
       <div style={{ fontSize: 12, fontWeight: 800, color: C.goldDeep, margin: "16px 0 7px" }}>2. ДЕЙСТВИЕ</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 7 }}>{CAPSULE_ACTIONS.map(x => <Choice key={x.id} active={act === x.id} disabled={checked} onClick={() => setAct(x.id)}>{x.infinitive}</Choice>)}</div>
       {op && act && <Capsule {...capsuleByIds(op, act)} compact />}
@@ -1609,7 +1610,11 @@ function Build({ onBack }) {
 }
 
 function Transform({ onBack }) {
-  const tasks = useMemo(() => CAPSULE_ACTIONS.map((action, i) => ({ action, from: CAPSULE_OPERATORS[i % 3], to: CAPSULE_OPERATORS[(i + 1) % 3] })), []);
+  const tasks = useMemo(() => CAPSULE_OPERATORS.map((from, i) => ({
+    action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length],
+    from,
+    to: CAPSULE_OPERATORS[(i + 1) % CAPSULE_OPERATORS.length],
+  })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setPicked(null); setScore(0); }} onBack={onBack} />;
   const task = tasks[i];
@@ -1647,6 +1652,35 @@ function Story({ onBack }) {
     </Card>
     <Back onClick={onBack} label="← К режимам" />
   </div></div>;
+}
+
+function ActionTrainerStart({ onMode, onBack }) {
+  const demo = capsuleByIds("querer", "abrir");
+  return <div style={wrap}><div style={maxw}>
+    <Header small="El verbo · A1" title="Капсулы действия" sub="Отдельный тренажёр: 8 операторов × 7 действий. Спрягается оператор; действие остаётся в infinitivo." />
+    <Card>
+      <Capsule {...demo} />
+      <div style={{ textAlign: "center", fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}><b style={{ color: C.ink }}>Yo quiero</b> сообщает намерение.<br /><b style={{ color: C.raspberry }}>Abrir</b> сохраняет действие.</div>
+    </Card>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+      {MODE_INFO.map(([id, title, sub], i) => <button key={id} onClick={() => onMode(id)} style={{ minHeight: 118, background: C.card, border: `1.5px solid ${C.gold}`, borderRadius: 15, padding: 13, textAlign: "left", fontFamily: SERIF, cursor: "pointer", boxShadow: "0 3px 12px rgba(201,162,75,.12)" }}>
+        <div style={{ color: C.goldDeep, fontSize: 11, fontWeight: 900 }}>{i + 1}</div>
+        <div style={{ color: C.raspberry, fontSize: 17, fontWeight: 900, margin: "4px 0" }}>{title}</div>
+        <div style={{ color: C.inkSoft, fontSize: 12.5, lineHeight: 1.4 }}>{sub}</div>
+      </button>)}
+    </div>
+    <div style={{ textAlign: "center", color: C.inkSoft, fontSize: 12, lineHeight: 1.55, marginTop: 16 }}>56 сочетаний · abrir · llevar · buscar · recoger · guardar · usar · dar</div>
+    <Back onClick={onBack} label="← В Архитектуру живой речи" />
+  </div></div>;
+}
+
+export function ActionCapsulesTrainer({ onBack }) {
+  const [mode, setMode] = useState("start");
+  if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
+  if (mode === "build") return <Build onBack={() => setMode("start")} />;
+  if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
+  if (mode === "story") return <Story onBack={() => setMode("start")} />;
+  return <ActionTrainerStart onMode={setMode} onBack={onBack} />;
 }
 
 function Start({ progress, onOpen, onBack }) {
@@ -1763,10 +1797,6 @@ export default function ActionCapsules({ onBack, onPracticeGrammar, initialCapsu
   if (mode === "dejar-de-2") return <DejarDeIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "volver-a-1") return <VolverAOne initialStep={resumeStep || progress.stepByCapsule?.["volver-a-1"] || 0} onStep={(step) => saveStep("volver-a-1", step)} onPracticeGrammar={onPracticeGrammar} onComplete={completeSynced} onBack={() => setMode("start")} />;
   if (mode === "volver-a-2") return <VolverAIntentions onComplete={completeSynced} onBack={() => setMode("start")} />;
-  if (mode === "recognize") return <Recognize onBack={() => setMode("start")} />;
-  if (mode === "build") return <Build onBack={() => setMode("start")} />;
-  if (mode === "transform") return <Transform onBack={() => setMode("start")} />;
-  if (mode === "story") return <Story onBack={() => setMode("start")} />;
   if (mode === "intentions") return <Intentions onComplete={completeSynced} onBack={() => setMode("start")} />;
   return <Start progress={progress} onOpen={setMode} onBack={onBack} />;
 }
