@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
-import ActionCapsules from "./ActionCapsules.jsx";
+import ActionCapsules, { ActionCapsulesTrainer } from "./ActionCapsules.jsx";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
@@ -1978,7 +1978,7 @@ function RumbosCarousel() {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onOperadores, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onActionTrainer, onOperadores, onBack }) {
   const isCapOne = pack.id === "cap1";
   const isCapThree = pack.id === "cap3";
   const isCapFour = pack.id === "cap4";
@@ -2005,6 +2005,9 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         <div style={{ background: C.emerald, borderRadius: 14, padding: "14px 16px", marginBottom: 14 }}>
           <button onClick={onCapsules} style={{ width: "100%", background: "#fff", color: C.emeraldDeep, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Капсулы Дона Вербо →
+          </button>
+          <button onClick={onActionTrainer} style={{ width: "100%", background: C.goldSoft, color: C.ink, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            Капсулы действия A1 · 8 × 7 →
           </button>
           <button onClick={onOperadores} style={{ width: "100%", background: "none", color: "#fff", border: "1.5px solid rgba(255,255,255,0.6)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
             Спряжение глаголов операторов →
@@ -2219,6 +2222,7 @@ export default function SimuladorJugador() {
   // Gramática — грамматический справочник, четвёртая самостоятельная активность
   const [showGramatica, setShowGramatica] = useState(false);
   const [showCapsules, setShowCapsules] = useState(false);
+  const [showActionTrainer, setShowActionTrainer] = useState(false);
   const [capsuleGrammar, setCapsuleGrammar] = useState(null);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
@@ -2287,6 +2291,7 @@ export default function SimuladorJugador() {
   if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
+  if (showActionTrainer) return <ActionCapsulesTrainer onBack={() => setShowActionTrainer(false)} />;
   if (!entered) return <LevelPicker
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
@@ -2308,6 +2313,7 @@ export default function SimuladorJugador() {
     onImperfecto={() => setDeepTema("imperfecto")}
     onPresenteErIr={() => setShowPresenteErIr(true)}
     onCapsules={() => setShowCapsules(true)}
+    onActionTrainer={() => setShowActionTrainer(true)}
     onOperadores={() => setDeepTema("operadores")}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
