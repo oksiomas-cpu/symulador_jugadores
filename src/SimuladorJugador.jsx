@@ -1813,6 +1813,168 @@ function LiveGame({ onHome }) {
 }
 
 // ============================================================
+// RUMBOS — вступительная карусель «Архитектура живой речи»
+// Первый блок экрана ChapterWelcome для cap4, показывается при
+// каждом входе в отдел. Текст утверждён Оксаной 30.08.2026 —
+// не менять смысл/формулировки без отдельного решения, только вёрстку.
+// ============================================================
+const RUMBOS_SLIDES = [
+  {
+    kicker: "С чего начинается разговорная речь",
+    body: (
+      <>
+        <p style={rumbosP}>Разговорная речь начинается не с первого произнесённого слова. Ещё до того, как фраза прозвучит, в голове появляется внутренний глагол:</p>
+        <div style={rumbosImpulseList}>
+          {["Я ХОЧУ.", "Я МОГУ.", "МНЕ НУЖНО.", "Я СОБИРАЮСЬ.", "Я ПЫТАЮСЬ."].map(t => (
+            <div key={t} style={rumbosImpulseItem}>{t}</div>
+          ))}
+        </div>
+        <p style={rumbosP}>Здесь ты проследишь весь путь от мысли к действию через глагол: как внутренний импульс находит конкретное действие, собирает вокруг него участников и превращается в развёрнутое высказывание.</p>
+      </>
+    ),
+  },
+  {
+    kicker: "Глаголы-операторы — глаголы намерения",
+    body: (
+      <>
+        <p style={rumbosP}>Они появляются перед главным действием и показывают, что ты хочешь, можешь, должен, собираешься или пытаешься сделать.</p>
+        <div style={rumbosOperatorGrid}>
+          {[
+            ["QUIERO", "я хочу"], ["PUEDO", "я могу"], ["TENGO QUE", "мне нужно"],
+            ["VOY A", "я собираюсь"], ["INTENTO", "я пытаюсь"], ["EMPIEZO A", "я начинаю"],
+            ["DEJO DE", "я перестаю"], ["VUELVO A", "я снова возвращаюсь к действию"],
+          ].map(([es, ru]) => (
+            <div key={es} style={rumbosOperatorChip}>
+              <div style={rumbosOperatorEs}>{es}</div>
+              <div style={rumbosOperatorRu}>{ru}</div>
+            </div>
+          ))}
+        </div>
+        <p style={rumbosP}>Оператор ещё не называет само действие. Он задаёт ему направление и открывает вопрос: <strong style={{ color: C.raspberry }}>что сделать?</strong></p>
+      </>
+    ),
+  },
+  {
+    kicker: "Одно действие — разные смыслы",
+    body: (
+      <>
+        <p style={rumbosP}>Возьмём одно действие: <strong>HABLAR</strong> — говорить. Теперь поставим перед ним разные операторы:</p>
+        <div style={rumbosExampleList}>
+          {[
+            ["QUIERO hablar", "я хочу поговорить."],
+            ["PUEDO hablar", "я могу поговорить."],
+            ["TENGO QUE hablar", "мне нужно поговорить."],
+            ["VOY A hablar", "я собираюсь поговорить."],
+          ].map(([es, ru]) => (
+            <div key={es} style={rumbosExampleRow}>
+              <span style={rumbosExampleEs}>{es}</span>
+              <span style={rumbosExampleRu}>{ru}</span>
+            </div>
+          ))}
+        </div>
+        <p style={rumbosP}>Действие осталось тем же. Но каждый оператор создаёт другое намерение и меняет дальнейший ход разговора.</p>
+      </>
+    ),
+  },
+  {
+    kicker: "Как работает капсула",
+    body: (
+      <>
+        <p style={rumbosP}>В каждой капсуле ты попадаешь в историю и понимаешь, что происходит с Томасом, Лусией, Доном Вербо или детективами.</p>
+        <p style={rumbosP}>Сначала ты улавливаешь внутренний импульс героя: что он хочет, может, должен или собирается сделать. Затем выбираешь и спрягаешь оператор, соединяешь его с действием, добавляешь участников и проводишь получившуюся конструкцию через диалог.</p>
+        <p style={rumbosP}>Это не теория перед игрой. Это разговорная практика внутри самой истории.</p>
+      </>
+    ),
+  },
+  {
+    kicker: "Что изменится в твоём расследовании",
+    body: (
+      <>
+        <p style={rumbosP}>Одно дело — назвать факт:</p>
+        <div style={rumbosQuoteBlock}>
+          <div style={rumbosQuoteEs}>Tomás habló con Lucía.</div>
+          <div style={rumbosQuoteRu}>Томас поговорил с Лусией.</div>
+        </div>
+        <p style={rumbosP}>И совсем другое — увидеть весь ход событий:</p>
+        <div style={{ ...rumbosQuoteBlock, borderColor: C.raspberry }}>
+          <div style={rumbosQuoteEs}>Tomás quería hablar con Lucía, pero no pudo. Después intentó volver a hablar.</div>
+          <div style={rumbosQuoteRu}>Томас хотел поговорить с Лусией, но не смог. Потом он попытался вернуться к разговору.</div>
+        </div>
+        <p style={rumbosP}>Теперь в показании есть не только действие. В нём появились намерение, препятствие и новая попытка.</p>
+        <p style={rumbosP}>Именно это нужно в расследовании: объяснять мотивы, сопоставлять решения, замечать противоречия и понимать, почему герой хотел сделать одно, а произошло другое. Так твоя речь становится не длиннее, а точнее и объёмнее.</p>
+      </>
+    ),
+  },
+  {
+    kicker: "Формула раздела",
+    body: (
+      <div style={rumbosFormulaWrap}>
+        {["ВНУТРЕННИЙ ИМПУЛЬС", "ГЛАГОЛ-ОПЕРАТОР", "ЧТО СДЕЛАТЬ?", "ДЕЙСТВИЕ", "УЧАСТНИКИ", "РЕЗУЛЬТАТ"].map((t, i, arr) => (
+          <span key={t} style={{ display: "contents" }}>
+            <span style={rumbosFormulaChip}>{t}</span>
+            {i < arr.length - 1 && <span style={rumbosFormulaArrow}>→</span>}
+          </span>
+        ))}
+      </div>
+    ),
+  },
+];
+
+const rumbosP = { fontSize: 14.5, color: C.ink, lineHeight: 1.65, margin: "0 0 12px" };
+const rumbosImpulseList = { margin: "0 0 12px" };
+const rumbosImpulseItem = { fontSize: 16, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, padding: "6px 0", borderBottom: `1px dashed ${C.line}` };
+const rumbosOperatorGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "4px 0 12px" };
+const rumbosOperatorChip = { background: C.creamDeep, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 10px" };
+const rumbosOperatorEs = { fontSize: 13.5, fontWeight: 800, color: C.goldDeep, letterSpacing: "0.3px" };
+const rumbosOperatorRu = { fontSize: 12, color: C.inkSoft, marginTop: 2 };
+const rumbosExampleList = { margin: "4px 0 12px" };
+const rumbosExampleRow = { display: "flex", flexDirection: "column", padding: "8px 0", borderBottom: `1px dashed ${C.line}` };
+const rumbosExampleEs = { fontSize: 15, fontWeight: 700, color: C.emeraldDeep, fontStyle: "italic" };
+const rumbosExampleRu = { fontSize: 13, color: C.inkSoft, marginTop: 2 };
+const rumbosQuoteBlock = { background: C.creamDeep, borderLeft: `3px solid ${C.gold}`, borderRadius: 8, padding: "10px 12px", margin: "0 0 12px" };
+const rumbosQuoteEs = { fontSize: 14, fontStyle: "italic", color: C.ink, lineHeight: 1.5 };
+const rumbosQuoteRu = { fontSize: 12.5, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 };
+const rumbosFormulaWrap = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6, padding: "6px 0 2px" };
+const rumbosFormulaChip = { background: C.emerald, color: "#fff", fontSize: 12, fontWeight: 700, letterSpacing: "0.3px", borderRadius: 8, padding: "8px 10px", lineHeight: 1.3 };
+const rumbosFormulaArrow = { color: C.goldDeep, fontSize: 15, fontWeight: 700 };
+
+function RumbosCarousel() {
+  const n = RUMBOS_SLIDES.length;
+  const [slide, setSlide] = useState(0);
+  const touchX = useRef(null);
+  const go = (i) => setSlide(Math.max(0, Math.min(n - 1, i)));
+  const onTouchStart = (e) => { touchX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touchX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (Math.abs(dx) < 40) return;
+    go(dx < 0 ? slide + 1 : slide - 1);
+  };
+  const s = RUMBOS_SLIDES[slide];
+  return (
+    <div
+      style={{ background: C.card, borderRadius: 20, border: `1.5px solid ${C.gold}`, boxShadow: "0 6px 22px rgba(166,124,46,0.18)", padding: "20px 20px 14px", marginBottom: 18, overflow: "hidden" }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 6 }}>Экран {slide + 1} · {n}</div>
+      <div style={{ fontSize: 19, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.25, marginBottom: 12 }}>{s.kicker}</div>
+      {s.body}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
+        <button onClick={() => go(slide - 1)} disabled={slide === 0} style={{ background: "none", border: "none", fontSize: 24, color: slide === 0 ? C.line : C.goldDeep, cursor: slide === 0 ? "default" : "pointer", padding: "4px 10px", fontFamily: SERIF }}>‹</button>
+        <div style={{ display: "flex", gap: 6 }}>
+          {RUMBOS_SLIDES.map((_, i) => (
+            <div key={i} onClick={() => go(i)} style={{ width: i === slide ? 18 : 7, height: 7, borderRadius: 4, background: i === slide ? C.raspberry : C.line, cursor: "pointer", transition: "width .15s" }} />
+          ))}
+        </div>
+        <button onClick={() => go(slide + 1)} disabled={slide === n - 1} style={{ background: "none", border: "none", fontSize: 24, color: slide === n - 1 ? C.line : C.goldDeep, cursor: slide === n - 1 ? "default" : "pointer", padding: "4px 10px", fontFamily: SERIF }}>›</button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
@@ -1836,6 +1998,8 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
           <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую главу</button>
         </div>
       )}
+
+      {isCapFour && <RumbosCarousel />}
 
       {isCapFour && (
         <div style={{ background: C.emerald, borderRadius: 14, padding: "14px 16px", marginBottom: 14 }}>
