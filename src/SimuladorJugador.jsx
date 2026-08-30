@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
 import ActionCapsules, { ActionCapsulesTrainer } from "./ActionCapsules.jsx";
+import "./rumbos.css";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
@@ -1813,7 +1814,7 @@ function LiveGame({ onHome }) {
 }
 
 // ============================================================
-// RUMBOS — вступительная карусель «Архитектура живой речи»
+// RUMBOS — интерактивная книга «Архитектура живой речи»
 // Первый блок экрана ChapterWelcome для cap4, показывается при
 // каждом входе в отдел. Текст утверждён Оксаной 30.08.2026 —
 // не менять смысл/формулировки без отдельного решения, только вёрстку.
@@ -1938,11 +1939,15 @@ const RUMBOS_SLIDES = [
   },
 ];
 
-function RumbosCarousel() {
+function RumbosBook() {
   const n = RUMBOS_SLIDES.length;
   const [slide, setSlide] = useState(0);
+  const [open, setOpen] = useState(false);
   const touchX = useRef(null);
-  const go = (i) => setSlide(Math.max(0, Math.min(n - 1, i)));
+  const go = (i) => {
+    setSlide(Math.max(0, Math.min(n - 1, i)));
+    setOpen(true);
+  };
   const onTouchStart = (e) => { touchX.current = e.touches[0].clientX; };
   const onTouchEnd = (e) => {
     if (touchX.current == null) return;
@@ -1952,25 +1957,57 @@ function RumbosCarousel() {
     go(dx < 0 ? slide + 1 : slide - 1);
   };
   const s = RUMBOS_SLIDES[slide];
+  if (!open) {
+    return (
+      <section className="rumbos-book-wrap" aria-label="Книга Архитектура живой речи">
+        <div className="rumbos-book-shadow" />
+        <button className="rumbos-book-cover" onClick={() => setOpen(true)}>
+          <span className="rumbos-book-spine" aria-hidden="true" />
+          <span className="rumbos-book-filigree rumbos-book-filigree-top" aria-hidden="true" />
+          <span className="rumbos-book-filigree rumbos-book-filigree-bottom" aria-hidden="true" />
+          <span className="rumbos-book-network" aria-hidden="true" />
+          <span className="rumbos-book-kicker">Авторский метод</span>
+          <span className="rumbos-book-title">Архитектура<br/>живой речи</span>
+          <span className="rumbos-book-subtitle">Campo de acción</span>
+          <span className="rumbos-book-rule" aria-hidden="true" />
+          <span className="rumbos-book-description">От внутреннего импульса — к действию, участникам и результату</span>
+          <span className="rumbos-book-motto">Un impulso. Ocho rumbos.</span>
+          <span className="rumbos-book-open">Открыть книгу</span>
+        </button>
+      </section>
+    );
+  }
   return (
-    <div
-      style={{ background: C.card, borderRadius: 20, border: `1.5px solid ${C.gold}`, boxShadow: "0 6px 22px rgba(166,124,46,0.18)", padding: "20px 20px 14px", marginBottom: 18, overflow: "hidden" }}
+    <section
+      className="rumbos-open-book"
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 6 }}>Экран {slide + 1} · {n}</div>
-      <div style={{ fontSize: 19, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.25, marginBottom: 12 }}>{s.kicker}</div>
-      {s.body}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-        <button onClick={() => go(slide - 1)} disabled={slide === 0} style={{ background: "none", border: "none", fontSize: 24, color: slide === 0 ? C.line : C.goldDeep, cursor: slide === 0 ? "default" : "pointer", padding: "4px 10px", fontFamily: SERIF }}>‹</button>
-        <div style={{ display: "flex", gap: 6 }}>
-          {RUMBOS_SLIDES.map((_, i) => (
-            <div key={i} onClick={() => go(i)} style={{ width: i === slide ? 18 : 7, height: 7, borderRadius: 4, background: i === slide ? C.raspberry : C.line, cursor: "pointer", transition: "width .15s" }} />
+      <div className="rumbos-book-gilt" aria-hidden="true" />
+      <header className="rumbos-book-head">
+        <button className="rumbos-book-close" onClick={() => setOpen(false)}>Закрыть книгу</button>
+        <div className="rumbos-book-page-count">Страница {slide + 1} из {n}</div>
+        <h2>{s.kicker}</h2>
+      </header>
+      <div className="rumbos-book-layout">
+        <nav className="rumbos-book-toc" aria-label="Оглавление">
+          <div className="rumbos-book-toc-title">Оглавление</div>
+          {RUMBOS_SLIDES.map((item, i) => (
+            <button key={item.kicker} className={i === slide ? "is-active" : ""} onClick={() => go(i)}>
+              <span>{String(i + 1).padStart(2, "0")}</span>{item.kicker}
+            </button>
           ))}
-        </div>
-        <button onClick={() => go(slide + 1)} disabled={slide === n - 1} style={{ background: "none", border: "none", fontSize: 24, color: slide === n - 1 ? C.line : C.goldDeep, cursor: slide === n - 1 ? "default" : "pointer", padding: "4px 10px", fontFamily: SERIF }}>›</button>
+        </nav>
+        <article className="rumbos-book-page">{s.body}</article>
       </div>
-    </div>
+      <footer className="rumbos-book-nav">
+        <button onClick={() => go(slide - 1)} disabled={slide === 0}>← Предыдущая</button>
+        <div className="rumbos-book-dots" aria-hidden="true">
+          {RUMBOS_SLIDES.map((_, i) => <span key={i} className={i === slide ? "is-active" : ""} />)}
+        </div>
+        <button onClick={() => go(slide + 1)} disabled={slide === n - 1}>Следующая →</button>
+      </footer>
+    </section>
   );
 }
 
@@ -1999,27 +2036,44 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         </div>
       )}
 
-      {isCapFour && <RumbosCarousel />}
+      {isCapFour && <RumbosBook />}
 
       {isCapFour && (
-        <div style={{ background: C.emerald, borderRadius: 14, padding: "14px 16px", marginBottom: 14 }}>
-          <button onClick={onCapsules} style={{ width: "100%", background: "#fff", color: C.emeraldDeep, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
-            Капсулы Дона Вербо →
+        <section className="rumbos-practice" aria-label="Практика архитектуры живой речи">
+          <div className="rumbos-section-kicker">Практика метода</div>
+          <h2>Собери речевое действие</h2>
+          <p>От отдельной конструкции — к свободному использованию операторов в истории.</p>
+          <button className="rumbos-practice-card is-primary" aria-label="Капсулы действия A1 · 8 × 7 →" onClick={onActionTrainer}>
+            <span className="rumbos-practice-number">01</span>
+            <span><strong>Капсулы действия A1</strong><small>8 операторов × 7 действий · основная практика</small></span>
+            <b>›</b>
           </button>
-          <button onClick={onActionTrainer} style={{ width: "100%", background: C.goldSoft, color: C.ink, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
-            Капсулы действия A1 · 8 × 7 →
+          <button className="rumbos-practice-card" aria-label="Капсулы Дона Вербо →" onClick={onCapsules}>
+            <span className="rumbos-practice-number">02</span>
+            <span><strong>Капсулы Дона Вербо</strong><small>Практика операторов внутри истории</small></span>
+            <b>›</b>
           </button>
-          <button onClick={onOperadores} style={{ width: "100%", background: "none", color: "#fff", border: "1.5px solid rgba(255,255,255,0.6)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
-            Спряжение глаголов операторов →
+          <button className="rumbos-practice-card is-supplement" onClick={onOperadores}>
+            <span className="rumbos-practice-number">+</span>
+            <span><strong>Спряжение глаголов-операторов</strong><small>Грамматическое дополнение</small></span>
+            <b>›</b>
           </button>
-        </div>
+        </section>
       )}
 
+      <div className={isCapFour ? "rumbos-game-volume" : ""}>
+      {isCapFour && (
+        <header className="rumbos-game-head">
+          <div className="rumbos-section-kicker">Игра · практика</div>
+          <h2>El Libro Mágico de Don Verbo</h2>
+          <p>Изучи историю и улики, затем подготовь свою роль к расследованию.</p>
+        </header>
+      )}
       {/* ИСТОРИЯ-МАЯК */}
       <Block stripe={C.gold}>
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
           <div>
-            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🗼 {pack.titulo}</div>
+            <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>{isCapFour ? "История игры" : `🗼 ${pack.titulo}`}</div>
             <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>{pack.term.fem ? `${pack.term.nom}: ${pack.VERBS.length} ${pack.term.objects} для расследования` : `История-маяк · все ${pack.VERBS.length} ${pack.term.objects} спрятаны здесь`}</div>
           </div>
           <span style={{ fontSize: 20, color: C.gold, transform: storyOpen ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
@@ -2063,7 +2117,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
 
       {/* УЧЕБНЫЕ МАРШРУТЫ ГЛАВЫ */}
       <div style={{ background: C.card, borderRadius: 14, border: `1.5px dashed ${C.emerald}`, padding: "14px 16px", marginBottom: 14 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "🕵️ Тренировка ролей" : "📊 Тренажёр спряжений"}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: C.emeraldDeep, marginBottom: 8 }}>{isCapFour ? "Тренировка ролей" : "📊 Тренажёр спряжений"}</div>
         {isCapFour ? (
           <button onClick={onEnter} style={{ width: "100%", background: C.card, color: C.raspberry, border: `1.5px solid ${C.raspberry}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Тренировать роли →
@@ -2087,6 +2141,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
             Presente · глаголы -ER / -IR →
           </button>
         )}
+      </div>
       </div>
 
       {/* ГЛАВНАЯ КНОПКА */}
@@ -2372,16 +2427,15 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
 
       {/* Rumbos con Don Verbo — Архитектура живой речи / Campo de acción, отдельно от нумерованных уровней */}
       <Gate open={acc.cap4} title="Архитектура живой речи" onOpen={() => onPick(PACKS.cap4)}>
-      <div style={{
-        background: C.goldDeep, borderRadius: 20, padding: "28px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(166,124,46,0.30)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap4.emoji}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 4 }}>Архитектура живой речи</div>
-        <div style={{ fontSize: 13, fontStyle: "italic", letterSpacing: "0.5px", color: "rgba(255,255,255,0.75)", marginBottom: 8 }}>Campo de acción</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap4.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.70)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap4.VERBS.length} улик · 21 вопрос · Detective · Canon · Fantasía</div>
+      <div className="rumbos-entry-cover">
+        <span className="rumbos-entry-spine" aria-hidden="true" />
+        <span className="rumbos-entry-network" aria-hidden="true" />
+        <div className="rumbos-entry-kicker">Авторский метод</div>
+        <div className="rumbos-entry-title">Архитектура живой речи</div>
+        <div className="rumbos-entry-subtitle">Campo de acción</div>
+        <div className="rumbos-entry-description">{PACKS.cap4.desc}</div>
+        <div className="rumbos-entry-motto">Un impulso. Ocho rumbos.</div>
+        <div className="rumbos-entry-open">Открыть раздел</div>
       </div>
       </Gate>
 
