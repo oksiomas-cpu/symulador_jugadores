@@ -30,17 +30,17 @@ export const CAPSULE_LINE = [
   { id: "poder-1", operator: "PODER", title: "Los papeles del suelo", ready: true },
   { id: "poder-2", operator: "PODER", title: "La Sala de las Posibilidades", ready: true },
     { id: "tener-que-1", operator: "TENER QUE", title: "El reloj detenido", ready: true },
-  { id: "tener-que-2", operator: "TENER QUE", title: "Cápsula 2", ready: false },
+  { id: "tener-que-2", operator: "TENER QUE", title: "La Sala de las Obligaciones", ready: true },
   { id: "ir-a-1", operator: "IR A", title: "El libro de recetas", ready: true },
-  { id: "ir-a-2", operator: "IR A", title: "Cápsula 2", ready: false },
+  { id: "ir-a-2", operator: "IR A", title: "La Sala de los Planes", ready: true },
   { id: "intentar-1", operator: "INTENTAR", title: "La puerta del despacho", ready: true },
-  { id: "intentar-2", operator: "INTENTAR", title: "Cápsula 2", ready: false },
+  { id: "intentar-2", operator: "INTENTAR", title: "La Sala de los Intentos", ready: true },
   { id: "empezar-a-1", operator: "EMPEZAR A", title: "El baúl de las pistas", ready: true },
-  { id: "empezar-a-2", operator: "EMPEZAR A", title: "Cápsula 2", ready: false },
+  { id: "empezar-a-2", operator: "EMPEZAR A", title: "La Sala de los Comienzos", ready: true },
   { id: "dejar-de-1", operator: "DEJAR DE", title: "Los cajones de la biblioteca", ready: true },
-  { id: "dejar-de-2", operator: "DEJAR DE", title: "Cápsula 2", ready: false },
+  { id: "dejar-de-2", operator: "DEJAR DE", title: "La Sala de las Pausas", ready: true },
   { id: "volver-a-1", operator: "VOLVER A", title: "La puerta, otra vez", ready: true },
-  { id: "volver-a-2", operator: "VOLVER A", title: "Cápsula 2", ready: false },
+  { id: "volver-a-2", operator: "VOLVER A", title: "La Sala de las Repeticiones", ready: true },
 ];
 
 export const QUERER_CAPSULE_1_STEPS = [
