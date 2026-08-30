@@ -1816,7 +1816,7 @@ function LiveGame({ onHome }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
-function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onBack }) {
+function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onOperadores, onBack }) {
   const isCapOne = pack.id === "cap1";
   const isCapThree = pack.id === "cap3";
   const isCapFour = pack.id === "cap4";
@@ -1841,6 +1841,9 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         <div style={{ background: C.emerald, borderRadius: 14, padding: "14px 16px", marginBottom: 14 }}>
           <button onClick={onCapsules} style={{ width: "100%", background: "#fff", color: C.emeraldDeep, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
             Капсулы Дона Вербо →
+          </button>
+          <button onClick={onOperadores} style={{ width: "100%", background: "none", color: "#fff", border: "1.5px solid rgba(255,255,255,0.6)", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer", marginTop: 8 }}>
+            Спряжение глаголов операторов →
           </button>
         </div>
       )}
@@ -2141,6 +2144,7 @@ export default function SimuladorJugador() {
     onImperfecto={() => setDeepTema("imperfecto")}
     onPresenteErIr={() => setShowPresenteErIr(true)}
     onCapsules={() => setShowCapsules(true)}
+    onOperadores={() => setDeepTema("operadores")}
     onBack={() => { setPack(null); setEntered(false); setChapterShown(false); }}
   />;
   if (!role) return <RolePicker pack={pack} onPick={setRole} session={sess} onBack={() => { setChapterShown(false); }} onDiario={grammarAction} />;
