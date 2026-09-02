@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import "./libro-vivo-pages.css";
 
 // ============================================================
 // LIBRO VIVO — живая книга «Королевство Карамели»
@@ -174,6 +175,22 @@ function Ilustracion({ label = "Ilustración" }) {
   );
 }
 
+// Входное окно первых двух листов: тот же перламутрово-мятный язык,
+// что у утверждённой читалки, но без повторения формы устройства.
+function VentanaHistoria({ label, variant = "reino" }) {
+  return (
+    <div className={`libro-vivo-window libro-vivo-window--${variant}`} aria-label={label}>
+      <span className="libro-vivo-window-thread libro-vivo-window-thread--top" aria-hidden="true" />
+      <span className="libro-vivo-window-thread libro-vivo-window-thread--bottom" aria-hidden="true" />
+      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--one" aria-hidden="true" />
+      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--two" aria-hidden="true" />
+      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--three" aria-hidden="true" />
+      <span className="libro-vivo-window-label">{label}</span>
+      <span className="libro-vivo-window-accent" aria-hidden="true" />
+    </div>
+  );
+}
+
 function Audio({ src, label }) {
   return (
     <div style={{ marginTop: 14 }}>
@@ -220,7 +237,7 @@ function HojaJefe() {
   return (
     <div style={cardS}>
       <Titulo emoji="📜" es="Hoja del Jefe" ru="Записка Шефа — первый лист книги" />
-      <Ilustracion label="El despacho del Jefe" />
+      <VentanaHistoria label="El despacho del Jefe" variant="jefe" />
       <Instruccion><b>Слушай записку Шефа</b> и следи глазами по тексту. Это его первый лист — он обращается лично к тебе.</Instruccion>
       <div style={{ fontStyle: "italic", fontSize: 15.5, lineHeight: 1.8 }}>
         {HOJA_ES.map((p, i) => <p key={i} style={{ margin: "0 0 8px" }}>{p}</p>)}
@@ -440,7 +457,7 @@ function CapituloRuso() {
   return (
     <div style={cardS}>
       <Titulo emoji="📖" es="Начало истории — на русском" ru="Сначала войди в мир — потом читай его на испанском" />
-      <Ilustracion label="El Reino del Caramelo" />
+      <VentanaHistoria label="El Reino del Caramelo" variant="reino" />
       <Instruccion>
         <b>Начни отсюда.</b> Слушай начало истории на русском — это самостоятельное литературное произведение, не перевод. Ты узнаешь, куда попал: Королевство Карамели, дворец, Шеф и его помощники.<br />
         Когда история станет твоей — переходи на следующий лист и читай её же на испанском. Ты уже будешь понимать всё.
