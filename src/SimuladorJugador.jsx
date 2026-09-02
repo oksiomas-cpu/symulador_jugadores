@@ -2456,7 +2456,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         <div className="rumbos-entry-subtitle">Campo de acción</div>
         <div className="rumbos-entry-description">{PACKS.cap4.desc}</div>
         <div className="rumbos-entry-motto">Un impulso. Ocho rumbos.</div>
-        <div className="rumbos-entry-open">Открыть раздел</div>
       </div>
       </Gate>
 
@@ -2497,7 +2496,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
           <span className="gramatica-entry-clasp gramatica-entry-clasp--top" aria-hidden="true" />
           <span className="gramatica-entry-clasp gramatica-entry-clasp--bottom" aria-hidden="true" />
           <div className="gramatica-entry-title">ГРАММАТИКА<br />ГЛАГОЛОВ</div>
-          <div className="gramatica-entry-open">ОТКРЫТЬ</div>
         </div>
       </Gate>
       <div className="ciudad-rules-link-wrap" style={{ textAlign: "center", marginTop: 18 }}>
