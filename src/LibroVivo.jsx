@@ -175,16 +175,13 @@ function Ilustracion({ label = "Ilustración" }) {
   );
 }
 
-// Входное окно первых двух листов: тот же перламутрово-мятный язык,
+// Входное окно первых трёх листов: тот же перламутрово-мятный язык,
 // что у утверждённой читалки, но без повторения формы устройства.
 function VentanaHistoria({ label, variant = "reino" }) {
   return (
     <div className={`libro-vivo-window libro-vivo-window--${variant}`} aria-label={label}>
-      <span className="libro-vivo-window-thread libro-vivo-window-thread--top" aria-hidden="true" />
-      <span className="libro-vivo-window-thread libro-vivo-window-thread--bottom" aria-hidden="true" />
-      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--one" aria-hidden="true" />
-      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--two" aria-hidden="true" />
-      <span className="libro-vivo-window-pearl libro-vivo-window-pearl--three" aria-hidden="true" />
+      <span className="libro-vivo-window-ornament libro-vivo-window-ornament--top" aria-hidden="true" />
+      <span className="libro-vivo-window-ornament libro-vivo-window-ornament--bottom" aria-hidden="true" />
       <span className="libro-vivo-window-label">{label}</span>
       <span className="libro-vivo-window-accent" aria-hidden="true" />
     </div>
@@ -251,7 +248,7 @@ function Historia() {
   return (
     <div style={cardS}>
       <Titulo emoji="📖" es="La historia · fragmento 1" ru="История — читай и слушай художественную озвучку" />
-      <Ilustracion label="La mañana del palacio" />
+      <VentanaHistoria label="La mañana del palacio" variant="palacio" />
       <Instruccion><b>Сначала слушай</b> — художественная озвучка носителя. <b>Потом читай</b> и слушай ещё раз, следя по тексту.</Instruccion>
       <div style={{ fontSize: 15.5, lineHeight: 1.85 }}>
         {HISTORIA_ES.map((p, i) => <p key={i} style={{ margin: "0 0 10px" }}>{p}</p>)}
