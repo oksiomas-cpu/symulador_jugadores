@@ -2411,7 +2411,7 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
   }
 
   return (
-    <div style={wrap}><div style={maxw}>
+    <div style={wrap} className="ciudad-home-shell"><div style={maxw} className="ciudad-home-content">
       <Header subtitle="Bienvenido · добро пожаловать" />
 
       <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
@@ -2460,55 +2460,46 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
       </div>
       </Gate>
 
-      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "4px 0 16px" }} />
+      <div className="ciudad-home-divider" />
+
+      {/* Пульт игрока — главный вход в живую Zoom-игру */}
+      <Gate open={acc.live} title="Пульт игрока" onOpen={onLive}>
+        <div className="player-control-entry" role="button" aria-label="Пульт игрока. Открыть живую игру.">
+          <span className="player-control-entry-kicker">ЖИВАЯ ИГРА</span>
+          <span className="player-control-entry-title">ПУЛЬТ ИГРОКА</span>
+        </div>
+      </Gate>
 
       {/* Игровые карты — утверждённая горизонтальная серия Ciudad */}
       {[
-        { pack: PACKS.cap1, art: "cata", label: "La Cata a Ciegas" },
-        { pack: PACKS.cap2, art: "perfecto", label: "Pretérito Perfecto Compuesto" },
-        { pack: PACKS.cap3, art: "huellas", label: "El Caso de las Tres Huellas" },
-      ].map(({ pack: gamePack, art, label }) => (
+        { pack: PACKS.cap1, art: "cata", label: "La Cata a Ciegas", level: "УРОВЕНЬ 1 · A1–A2", descriptor: "ГЛАГОЛЫ НА -AR" },
+        { pack: PACKS.cap2, art: "perfecto", label: "Pretérito Perfecto Compuesto", level: "УРОВЕНЬ 2 · A1–A2", descriptor: "" },
+        { pack: PACKS.cap3, art: "huellas", label: "El Caso de las Tres Huellas", level: "УРОВЕНЬ 3 · A1–A2", descriptor: "ТРИ ПРОШЕДШИХ ВРЕМЕНИ" },
+      ].map(({ pack: gamePack, art, label, level, descriptor }) => (
         <Gate key={gamePack.id} open={acc[gamePack.id]} title={`Nivel ${gamePack.num}`} onOpen={() => onPick(gamePack)}>
           <div
             className={`ciudad-game-card ciudad-game-card--${art}`}
-            role="img"
-            aria-label={`${label}. Открыть игру.`}
+            role="button"
+            aria-label={`${level}. ${label}. ${descriptor || ""} Открыть игру.`}
           >
-            <span className="ciudad-game-card-sr">{label}. Открыть игру.</span>
+            <span className="ciudad-game-card-sr">{level}. {label}. {descriptor}. Открыть игру.</span>
+            <span className="ciudad-game-card-level" aria-hidden="true">{level}</span>
+            {descriptor && <span className="ciudad-game-card-descriptor" aria-hidden="true">{descriptor}</span>}
+            <span className="ciudad-game-card-action" aria-hidden="true">ABRIR</span>
           </div>
         </Gate>
       ))}
 
-      {/* Gramática — справочник */}
-      <Gate open={acc.gramatica} title="Грамматика" onOpen={onGramatica}>
-      <div style={{
-        background: C.card, borderRadius: 20, padding: "24px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        border: `2px solid ${C.emerald}`,
-        boxShadow: "0 6px 22px rgba(22,121,91,0.18)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>📐</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.emeraldDeep, textTransform: "uppercase", marginBottom: 4 }}>Gramática · El Reino del Caramelo</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: C.emeraldDeep, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Грамматика</div>
-        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Справочник Королевства: правила по-русски, примеры из наших историй и тренировка после каждой темы</div>
-        <div style={{ fontSize: 12, color: C.emeraldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>El verbo · три спряжения · Presente</div>
-      </div>
+      {/* Gramática — плоская книга-справочник */}
+      <Gate open={acc.gramatica} title="Грамматика глаголов" onOpen={onGramatica}>
+        <div className="gramatica-entry-cover" role="button" aria-label="Грамматика глаголов. Открыть справочник.">
+          <span className="gramatica-entry-jewel" aria-hidden="true" />
+          <span className="gramatica-entry-clasp gramatica-entry-clasp--top" aria-hidden="true" />
+          <span className="gramatica-entry-clasp gramatica-entry-clasp--bottom" aria-hidden="true" />
+          <div className="gramatica-entry-title">ГРАММАТИКА<br />ГЛАГОЛОВ</div>
+          <div className="gramatica-entry-open">ОТКРЫТЬ</div>
+        </div>
       </Gate>
-
-      {/* Живая игра — малиновая, отдельно */}
-      <div style={{ borderTop: `1px dashed ${C.line}`, margin: "8px 0 16px" }} />
-      <Gate open={acc.live} title="Пульт живой игры" onOpen={onLive}>
-      <div style={{
-        background: C.raspberry, borderRadius: 20, padding: "22px 24px",
-        cursor: "pointer", textAlign: "center",
-        boxShadow: "0 4px 16px rgba(168,27,62,0.22)",
-      }}>
-        <div style={{ fontSize: 28, marginBottom: 6 }}>🎮</div>
-        <div style={{ fontSize: 19, fontWeight: 800, color: "#fff", fontFamily: SERIF }}>Пульт живой игры</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.80)", marginTop: 6 }}>Только во время Zoom-игры</div>
-      </div>
-      </Gate>
-
       <div style={{ textAlign: "center", marginTop: 18 }}>
         <button onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
           ❓ Правила игры — посмотреть снова
