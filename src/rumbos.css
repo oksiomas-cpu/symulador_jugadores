@@ -2,7 +2,8 @@
 .rumbos-book-cover,
 .rumbos-open-book,
 .rumbos-practice,
-.rumbos-game-volume {
+.rumbos-game-volume,
+.ciudad-game-card {
   --ivory: #fbf7ed;
   --pearl: #fffdf7;
   --mint-glass: #d9eee6;
@@ -13,6 +14,59 @@
   --gold-light: #ead8a7;
   --opal-pink: #ead9df;
   --ink-soft: #52655f;
+}
+
+.ciudad-game-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 97 / 37;
+  margin-bottom: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 22px;
+  background-color: var(--ivory);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: 0 10px 24px rgba(70, 58, 42, .16);
+  filter: saturate(.98);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.ciudad-game-card--cata {
+  background-image: url('/ui/game-card-cata.webp');
+}
+
+.ciudad-game-card--perfecto {
+  background-image: url('/ui/game-card-perfecto.webp');
+}
+
+.ciudad-game-card--huellas {
+  aspect-ratio: 97 / 36;
+  background-image: url('/ui/game-card-huellas.webp');
+}
+
+.ciudad-game-card:hover {
+  filter: saturate(1.02) brightness(1.015);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(70, 58, 42, .19);
+}
+
+.ciudad-game-card:active {
+  transform: translateY(1px) scale(.997);
+}
+
+.ciudad-game-card-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .rumbos-entry-cover {
