@@ -2462,50 +2462,22 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
 
       <div style={{ borderTop: `1px dashed ${C.line}`, margin: "4px 0 16px" }} />
 
-      {/* Уровень 1 — золотой */}
-      <Gate open={acc.cap1} title="Nivel 1" onOpen={() => onPick(PACKS.cap1)}>
-      <div style={{
-        background: C.gold, borderRadius: 20, padding: "28px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(201,162,75,0.30)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap1.emoji}</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 1 · {PACKS.cap1.grammar}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap1.titulo}</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap1.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap1.VERBS.length} глаголов · Detective · Canon · Fantasía</div>
-      </div>
-      </Gate>
-
-      {/* Уровень 2 — изумрудный */}
-      <Gate open={acc.cap2} title="Nivel 2" onOpen={() => onPick(PACKS.cap2)}>
-      <div style={{
-        background: C.emerald, borderRadius: 20, padding: "28px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(22,121,91,0.28)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap2.emoji}</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 2 · {PACKS.cap2.grammar}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap2.titulo}</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap2.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap2.VERBS.length} улик · Detective · Canon · Fantasía</div>
-      </div>
-      </Gate>
-
-      {/* Уровень 3 — светлый изумруд: три прошедших времени */}
-      <Gate open={acc.cap3} title="Nivel 3" onOpen={() => onPick(PACKS.cap3)}>
-      <div style={{
-        background: C.emeraldLight, borderRadius: 20, padding: "28px 24px",
-        marginBottom: 16, cursor: "pointer", textAlign: "center",
-        boxShadow: "0 6px 22px rgba(63,174,134,0.28)",
-      }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>{PACKS.cap3.emoji}</div>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", marginBottom: 4 }}>Nivel 3 · {PACKS.cap3.grammar}</div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>{PACKS.cap3.titulo}</div>
-        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.55 }}>{PACKS.cap3.desc}</div>
-        <div style={{ fontSize: 12, color: "rgba(255,255,255,0.65)", fontWeight: 600, marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>{PACKS.cap3.VERBS.length} улик · Detective · Canon · Fantasía</div>
-      </div>
-      </Gate>
+      {/* Игровые карты — утверждённая горизонтальная серия Ciudad */}
+      {[
+        { pack: PACKS.cap1, art: "cata", label: "La Cata a Ciegas" },
+        { pack: PACKS.cap2, art: "perfecto", label: "Pretérito Perfecto Compuesto" },
+        { pack: PACKS.cap3, art: "huellas", label: "El Caso de las Tres Huellas" },
+      ].map(({ pack: gamePack, art, label }) => (
+        <Gate key={gamePack.id} open={acc[gamePack.id]} title={`Nivel ${gamePack.num}`} onOpen={() => onPick(gamePack)}>
+          <div
+            className={`ciudad-game-card ciudad-game-card--${art}`}
+            role="img"
+            aria-label={`${label}. Открыть игру.`}
+          >
+            <span className="ciudad-game-card-sr">{label}. Открыть игру.</span>
+          </div>
+        </Gate>
+      ))}
 
       {/* Gramática — справочник */}
       <Gate open={acc.gramatica} title="Грамматика" onOpen={onGramatica}>
