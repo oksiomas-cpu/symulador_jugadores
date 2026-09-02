@@ -270,7 +270,7 @@
 
 
 /* ============================================================
-   LIBRO VIVO · EXACT APPROVED TABLET · 2026-09-02
+   LIBRO VIVO · APPROVED FRAME WITH LIVE CONTROLS · 2026-09-02
    ============================================================ */
 .libro-vivo-entry {
   width: min(100%, 600px);
@@ -285,7 +285,15 @@
 .libro-vivo-entry::after { display: none !important; }
 .libro-vivo-entry-screen {
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
+  z-index: 2;
+  inset: 14% 11%;
+  padding: 4.5% 7% 3.5%;
+  opacity: 1;
+  pointer-events: auto;
+  border: 0;
+  border-radius: 16px;
+  background: #f7f7f2 url("data:image/webp;base64,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") center / 150px 420px repeat !important;
+  box-shadow: inset 0 0 24px rgba(255,255,255,.5);
 }
+.libro-vivo-entry-screen::before,
+.libro-vivo-entry-screen::after { display: none !important; }
