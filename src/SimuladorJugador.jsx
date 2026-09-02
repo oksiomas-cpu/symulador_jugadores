@@ -3,7 +3,6 @@ import LibroVivo from "./LibroVivo.jsx";
 import Gramatica from "./Gramatica.jsx";
 import ActionCapsules, { ActionCapsulesTrainer } from "./ActionCapsules.jsx";
 import "./rumbos.css";
-import "./ciudad-dashboard.css";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
@@ -2411,7 +2410,7 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
   }
 
   return (
-    <div style={wrap} className="ciudad-dashboard-shell"><div style={maxw} className="ciudad-dashboard">
+    <div style={wrap}><div style={maxw}>
       <Header subtitle="Bienvenido · добро пожаловать" />
 
       <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
@@ -2420,22 +2419,17 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
 
       {/* Libro Vivo — живая книга */}
       <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
-      <div className="ciudad-live-book">
-        <span className="ciudad-live-book-spine" aria-hidden="true" />
-        <span className="ciudad-live-book-network ciudad-live-book-network-left" aria-hidden="true" />
-        <span className="ciudad-live-book-network ciudad-live-book-network-right" aria-hidden="true" />
-        <span className="ciudad-pearl ciudad-pearl-one" aria-hidden="true" />
-        <span className="ciudad-pearl ciudad-pearl-two" aria-hidden="true" />
-        <span className="ciudad-pearl ciudad-pearl-three" aria-hidden="true" />
-        <div className="ciudad-live-book-object" aria-hidden="true">
-          <span className="ciudad-live-book-page ciudad-live-book-page-left" />
-          <span className="ciudad-live-book-page ciudad-live-book-page-right" />
-          <span className="ciudad-live-book-gem" />
-        </div>
-        <div className="ciudad-live-book-kicker">Libro Vivo · El Reino del Caramelo</div>
-        <div className="ciudad-live-book-title">Живая книга</div>
-        <div className="ciudad-live-book-description">Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
-        <div className="ciudad-live-book-meta">Capítulo 1 · fragmento 1 · 10 листов</div>
+      <div style={{
+        background: C.card, borderRadius: 20, padding: "24px 24px",
+        marginBottom: 16, cursor: "pointer", textAlign: "center",
+        border: `2px solid ${C.gold}`,
+        boxShadow: "0 6px 22px rgba(201,162,75,0.22)",
+      }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>📖</div>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "1px", color: C.goldDeep, textTransform: "uppercase", marginBottom: 4 }}>Libro Vivo · El Reino del Caramelo</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: C.raspberry, fontFamily: SERIF, lineHeight: 1.2, marginBottom: 8 }}>Живая книга</div>
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55 }}>Читай, слушай и говори вслух: история Королевства Карамели по листам — с озвучкой и допросом Шефа</div>
+        <div style={{ fontSize: 12, color: C.goldDeep, fontWeight: 600, marginTop: 12, borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>Capítulo 1 · fragmento 1 · 10 листов</div>
       </div>
       </Gate>
 
