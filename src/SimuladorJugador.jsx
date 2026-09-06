@@ -715,6 +715,10 @@ function accessMap(status) {
       return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
       return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+    case "trialVerbo":
+      // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
+      // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
+      return { cap1: false, cap2: false, cap3: false, cap4: true, libro: false, gramatica: false, live: true, presente: false, perfecto: false };
     default: // none
       return { cap1: false, cap2: false, cap3: false, cap4: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
   }
