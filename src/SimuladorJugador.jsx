@@ -680,6 +680,7 @@ const ACCESS_API = "https://don-verbo.vercel.app/api/access";
 const CHANNEL_URL = "https://t.me/es_consabor";        // бесплатный канал — получить Пропуск
 const CLUB_URL = "https://t.me/oksanamaikova_spanish"; // посадочная клуба
 const BOT_URL = "https://t.me/DonVerbobot";
+const CAFE_DOMINO_URL = "https://cafe-domino-game.vercel.app/";
 
 const CTA_BTN = {
   display: "inline-block", background: C.raspberry, color: "#fff", border: "none",
@@ -710,17 +711,17 @@ async function fetchAccess(tgId) {
 function accessMap(status) {
   switch (status) {
     case "club":
-      return { cap1: true, cap2: true, cap3: true, cap4: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
+      return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
     case "trialVerbo":
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
-      return { cap1: false, cap2: false, cap3: false, cap4: true, libro: false, gramatica: false, live: true, presente: false, perfecto: false };
+      return { cap1: false, cap2: false, cap3: false, cap4: true, cafe: false, libro: false, gramatica: false, live: true, presente: false, perfecto: false };
     default: // none
-      return { cap1: false, cap2: false, cap3: false, cap4: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
+      return { cap1: false, cap2: false, cap3: false, cap4: false, cafe: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
   }
 }
 function temaAllowed(tema, acc) {
@@ -2291,6 +2292,7 @@ export default function SimuladorJugador() {
   const [showGramatica, setShowGramatica] = useState(false);
   const [showCapsules, setShowCapsules] = useState(false);
   const [showActionTrainer, setShowActionTrainer] = useState(false);
+  const [showCafeDomino, setShowCafeDomino] = useState(false);
   const [capsuleGrammar, setCapsuleGrammar] = useState(null);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
@@ -2360,12 +2362,14 @@ export default function SimuladorJugador() {
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
   if (showActionTrainer) return <ActionCapsulesTrainer onBack={() => setShowActionTrainer(false)} />;
+  if (showCafeDomino) return <CafeDominoMission onBack={() => setShowCafeDomino(false)} />;
   if (!entered) return <LevelPicker
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
     onLibro={() => setShowLibro(true)}
     onGramatica={() => setShowGramatica(true)}
+    onCafe={() => setShowCafeDomino(true)}
     onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
@@ -2393,7 +2397,24 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour }) {
+function CafeDominoMission({ onBack }) {
+  return (
+    <div className="cafe-domino-room">
+      <div className="cafe-domino-room-toolbar">
+        <button type="button" onClick={onBack}>← В Город</button>
+        <span>Домино живой речи · Миссия 01 · Кафе</span>
+      </div>
+      <iframe
+        className="cafe-domino-room-frame"
+        src={CAFE_DOMINO_URL}
+        title="Домино живой речи. Миссия Кафе"
+        allow="autoplay"
+      />
+    </div>
+  );
+}
+
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onCafe, onTour }) {
   const [locked, setLocked] = useState(null);
   const toClub = status === "trial1" || status === "trial2";
   const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
@@ -2461,6 +2482,28 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onTour
         <div className="rumbos-entry-description">{PACKS.cap4.desc}</div>
         <div className="rumbos-entry-motto">Un impulso. Ocho rumbos.</div>
       </div>
+      </Gate>
+
+      {/* Домино живой речи — первая самостоятельная миссия, доступна только клубу */}
+      <Gate open={acc.cafe} title="Домино живой речи · Кафе" onOpen={onCafe}>
+        <div className="cafe-domino-entry" role="button" aria-label="Домино живой речи. Миссия Кафе. Открыть игру.">
+          <span className="cafe-domino-entry-image" aria-hidden="true" />
+          <span className="cafe-domino-entry-copy">
+            <span className="cafe-domino-entry-kicker">МИССИЯ 01 · КАФЕ</span>
+            <span className="cafe-domino-entry-title">Домино живой речи</span>
+            <span className="cafe-domino-entry-subtitle">Собери заказ — и добейся, чтобы тебя поняли</span>
+          </span>
+          <button
+            type="button"
+            className="cafe-domino-entry-open"
+            onClick={(event) => {
+              event.stopPropagation();
+              onCafe();
+            }}
+          >
+            Войти в миссию
+          </button>
+        </div>
       </Gate>
 
       <div className="ciudad-home-divider" />
