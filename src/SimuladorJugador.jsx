@@ -720,6 +720,9 @@ function accessMap(status) {
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
       return { cap1: false, cap2: false, cap3: false, cap4: true, cafe: false, libro: false, gramatica: false, live: true, presente: false, perfecto: false };
+    case "trialCafe":
+      // Instagram-ветка: семь дней открыта только самостоятельная миссия «Кафе».
+      return { cap1: false, cap2: false, cap3: false, cap4: false, cafe: true, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
     default: // none
       return { cap1: false, cap2: false, cap3: false, cap4: false, cafe: false, libro: false, gramatica: false, live: false, presente: false, perfecto: false };
   }
@@ -767,7 +770,7 @@ function NoPassScreen() {
 }
 
 function LockedScreen({ status, onBack }) {
-  const toClub = status === "trial1" || status === "trial2";
+  const toClub = ["trial1", "trial2", "trialVerbo", "trialCafe"].includes(status);
   return (<div style={wrap}><div style={maxw}>
     <Header subtitle="Todavía no…" />
     <div style={{ background: C.card, border: `2px solid ${C.gold}`, borderRadius: 20, padding: "28px 24px", textAlign: "center", marginTop: 12 }}>
@@ -2309,7 +2312,7 @@ export default function SimuladorJugador() {
   // --- Витрина доступа (ТЗ «Пропуск в Город», шаг 2) ---
   if (access === undefined) return <AccessLoading />;
   if (access.status === "notg") return <OpenInBot />;
-  const acc = accessMap(access.status);
+  const acc = { ...accessMap(access.status), cafe: access.status === "club" || access.cafe === true };
   if (access.status === "none") return <NoPassScreen />;
 
   if (capsuleGrammar) {
@@ -2416,7 +2419,7 @@ function CafeDominoMission({ onBack }) {
 
 function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onCafe, onTour }) {
   const [locked, setLocked] = useState(null);
-  const toClub = status === "trial1" || status === "trial2";
+  const toClub = ["trial1", "trial2", "trialVerbo", "trialCafe"].includes(status);
   const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
   const ctaLabel = toClub ? "🏛 Войти в клуб" : "📡 Открытый канал";
 
