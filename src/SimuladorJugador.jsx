@@ -681,6 +681,28 @@ const CHANNEL_URL = "https://t.me/es_consabor";        // бесплатный �
 const CLUB_URL = "https://t.me/oksanamaikova_spanish"; // посадочная клуба
 const BOT_URL = "https://t.me/DonVerbobot";
 const CAFE_DOMINO_URL = "https://cafe-domino-game.vercel.app/";
+const MENU_DEL_DIA_URL = import.meta.env.VITE_MENU_DEL_DIA_URL || "https://menu-del-dia-game.vercel.app/";
+
+const DOMINO_MISSIONS = [
+  {
+    id: "desayunar",
+    number: "01",
+    label: "DESAYUNAR",
+    roomLabel: "Desayunar",
+    subtitle: "Собери завтрак — и добейся, чтобы тебя поняли",
+    art: "breakfast",
+    url: CAFE_DOMINO_URL,
+  },
+  {
+    id: "menu-del-dia",
+    number: "02",
+    label: "MENÚ DEL DÍA",
+    roomLabel: "Menú del día",
+    subtitle: "Собери обед — от первого блюда до оплаты",
+    art: "menu-del-dia",
+    url: MENU_DEL_DIA_URL,
+  },
+];
 
 const CTA_BTN = {
   display: "inline-block", background: C.raspberry, color: "#fff", border: "none",
@@ -2295,7 +2317,7 @@ export default function SimuladorJugador() {
   const [showGramatica, setShowGramatica] = useState(false);
   const [showCapsules, setShowCapsules] = useState(false);
   const [showActionTrainer, setShowActionTrainer] = useState(false);
-  const [showCafeDomino, setShowCafeDomino] = useState(false);
+  const [dominoMission, setDominoMission] = useState(null);
   const [capsuleGrammar, setCapsuleGrammar] = useState(null);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
@@ -2365,14 +2387,14 @@ export default function SimuladorJugador() {
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
   if (showActionTrainer) return <ActionCapsulesTrainer onBack={() => setShowActionTrainer(false)} />;
-  if (showCafeDomino) return <CafeDominoMission onBack={() => setShowCafeDomino(false)} />;
+  if (dominoMission) return <DominoMission mission={dominoMission} onBack={() => setDominoMission(null)} />;
   if (!entered) return <LevelPicker
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
     onLibro={() => setShowLibro(true)}
     onGramatica={() => setShowGramatica(true)}
-    onCafe={() => setShowCafeDomino(true)}
+    onDomino={setDominoMission}
     onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
@@ -2400,28 +2422,52 @@ export default function SimuladorJugador() {
 // ============================================================
 // ВЫБОР УРОВНЯ — первый экран после тура
 // ============================================================
-function CafeDominoMission({ onBack }) {
+function DominoMission({ mission, onBack }) {
   return (
     <div className="cafe-domino-room">
       <div className="cafe-domino-room-toolbar">
         <button type="button" onClick={onBack}>← В Город</button>
-        <span>Домино живой речи · Миссия 01 · Кафе</span>
+        <span>Домино живой речи · Миссия {mission.number} · {mission.roomLabel}</span>
       </div>
       <iframe
         className="cafe-domino-room-frame"
-        src={CAFE_DOMINO_URL}
-        title="Домино живой речи. Миссия Кафе"
+        src={mission.url}
+        title={`Домино живой речи. Миссия ${mission.roomLabel}`}
         allow="autoplay"
       />
     </div>
   );
 }
 
-function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onCafe, onTour }) {
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onDomino, onTour }) {
   const [locked, setLocked] = useState(null);
+  const [dominoSlide, setDominoSlide] = useState(0);
+  const dominoTouchStart = useRef(null);
   const toClub = ["trial1", "trial2", "trialVerbo", "trialCafe"].includes(status);
   const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
   const ctaLabel = toClub ? "🏛 Войти в клуб" : "📡 Открытый канал";
+
+  function showDominoSlide(index) {
+    const next = Math.max(0, Math.min(DOMINO_MISSIONS.length - 1, index));
+    setDominoSlide(next);
+  }
+
+  function finishDominoSwipe(event) {
+    if (dominoTouchStart.current === null) return;
+    const distance = event.changedTouches[0].clientX - dominoTouchStart.current;
+    dominoTouchStart.current = null;
+    if (Math.abs(distance) < 45) return;
+    showDominoSlide(dominoSlide + (distance < 0 ? 1 : -1));
+  }
+
+  function openDomino(mission) {
+    const isOpen = mission.id === "desayunar" ? acc.cafe : status === "club";
+    if (isOpen) onDomino(mission);
+    else setLocked(`Домино живой речи · ${mission.roomLabel}`);
+  }
+
+  const activeDominoMission = DOMINO_MISSIONS[dominoSlide];
+  const activeDominoOpen = activeDominoMission.id === "desayunar" ? acc.cafe : status === "club";
 
   // Обёртка карточки: открыта → свой onClick; закрыта → витрина замка.
   function Gate({ open, title, onOpen, children }) {
@@ -2487,26 +2533,57 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onCafe
       </div>
       </Gate>
 
-      {/* Домино живой речи — первая самостоятельная миссия, доступна только клубу */}
-      <Gate open={acc.cafe} title="Домино живой речи · Кафе" onOpen={onCafe}>
-        <div className="cafe-domino-entry" role="button" aria-label="Домино живой речи. Миссия Кафе. Открыть игру.">
-          <span className="cafe-domino-entry-image" aria-hidden="true" />
-          <span className="cafe-domino-entry-copy">
-            <span className="cafe-domino-entry-kicker">МИССИЯ 01 · КАФЕ</span>
-            <span className="cafe-domino-entry-title">Домино живой речи</span>
-            <span className="cafe-domino-entry-subtitle">Собери заказ — и добейся, чтобы тебя поняли</span>
-          </span>
-          <button
-            type="button"
-            className="cafe-domino-entry-open"
-            onClick={(event) => {
-              event.stopPropagation();
-              onCafe();
-            }}
+      {/* Домино живой речи — горизонтальная серия самостоятельных миссий */}
+      <Gate open={acc.cafe} title="Домино живой речи" onOpen={undefined}>
+        <section className="domino-carousel" aria-label="Домино живой речи. Выбор миссии.">
+          <div
+            className="domino-carousel-viewport"
+            onTouchStart={(event) => { dominoTouchStart.current = event.changedTouches[0].clientX; }}
+            onTouchEnd={finishDominoSwipe}
           >
-            Войти в миссию
-          </button>
-        </div>
+            <article
+              key={activeDominoMission.id}
+              className={`cafe-domino-entry domino-carousel-card${activeDominoOpen ? "" : " is-locked"}`}
+              role="button"
+              aria-label={`Домино живой речи. Миссия ${activeDominoMission.number}. ${activeDominoMission.roomLabel}. ${activeDominoOpen ? "Открыть игру." : "Открывается участникам клуба."}`}
+              onClick={() => openDomino(activeDominoMission)}
+            >
+              <span className={`cafe-domino-entry-image cafe-domino-entry-image--${activeDominoMission.art}`} aria-hidden="true" />
+              <span className="cafe-domino-entry-copy">
+                <span className="cafe-domino-entry-kicker">МИССИЯ {activeDominoMission.number} · {activeDominoMission.label}</span>
+                <span className="cafe-domino-entry-title">Домино живой речи</span>
+                <span className="cafe-domino-entry-subtitle">{activeDominoMission.subtitle}</span>
+              </span>
+              <button
+                type="button"
+                className="cafe-domino-entry-open"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openDomino(activeDominoMission);
+                }}
+              >
+                {activeDominoOpen ? "Войти в миссию" : "Только для клуба"}
+              </button>
+            </article>
+          </div>
+          <nav className="domino-carousel-nav" aria-label="Переключить миссию">
+            <button type="button" aria-label="Предыдущая миссия" onClick={() => showDominoSlide(dominoSlide - 1)} disabled={dominoSlide === 0}>‹</button>
+            <span className="domino-carousel-dots">
+              {DOMINO_MISSIONS.map((mission, index) => (
+                <button
+                  key={mission.id}
+                  type="button"
+                  className={index === dominoSlide ? "is-active" : ""}
+                  aria-label={`Показать миссию ${mission.number}: ${mission.roomLabel}`}
+                  aria-current={index === dominoSlide ? "true" : undefined}
+                  onClick={() => showDominoSlide(index)}
+                />
+              ))}
+            </span>
+            <span className="domino-carousel-hint">смахни</span>
+            <button type="button" aria-label="Следующая миссия" onClick={() => showDominoSlide(dominoSlide + 1)} disabled={dominoSlide === DOMINO_MISSIONS.length - 1}>›</button>
+          </nav>
+        </section>
       </Gate>
 
       <div className="ciudad-home-divider" />

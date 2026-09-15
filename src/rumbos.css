@@ -62,7 +62,7 @@
   display: grid;
   grid-template-columns: minmax(118px, 38%) 1fr;
   min-height: 250px;
-  margin: 0 0 20px;
+  margin: 0;
   overflow: hidden;
   cursor: pointer;
   color: #123f34;
@@ -78,6 +78,39 @@
   transition: transform .18s ease, box-shadow .18s ease;
 }
 
+.domino-carousel {
+  margin: 0 0 20px;
+}
+
+.domino-carousel-viewport {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.domino-carousel-card {
+  animation: domino-card-enter .24s ease-out;
+}
+
+@keyframes domino-card-enter {
+  from { opacity: .56; transform: translateX(12px) scale(.992); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.cafe-domino-entry.is-locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(174,132,55,.58);
+  border-radius: 50%;
+  background: rgba(255,253,247,.94);
+  box-shadow: 0 4px 12px rgba(62,84,76,.14);
+}
+
 .cafe-domino-entry:hover {
   transform: translateY(-2px);
   box-shadow: 0 18px 34px rgba(62,84,76,.21), inset 0 0 0 5px rgba(255,255,255,.62), inset 0 0 0 7px rgba(201,164,92,.3);
@@ -86,9 +119,18 @@
 .cafe-domino-entry-image {
   grid-row: 1 / span 2;
   min-height: 250px;
+}
+
+.cafe-domino-entry-image--breakfast {
   background:
     linear-gradient(90deg, transparent 72%, rgba(255,253,247,.92)),
     url('https://cafe-domino-game.vercel.app/assets/generated/special-breakfast-v1.jpg') center / cover no-repeat;
+}
+
+.cafe-domino-entry-image--menu-del-dia {
+  background:
+    linear-gradient(90deg, transparent 72%, rgba(255,253,247,.92)),
+    url('/ui/domino-menu-del-dia.jpg') center / cover no-repeat;
 }
 
 .cafe-domino-entry-copy {
@@ -147,6 +189,62 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .04em;
+}
+
+.domino-carousel-nav {
+  display: grid;
+  grid-template-columns: 34px auto 1fr 34px;
+  min-height: 42px;
+  padding: 8px 4px 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.domino-carousel-nav > button {
+  width: 34px;
+  height: 34px;
+  padding: 0 0 3px;
+  cursor: pointer;
+  color: #8a6a32;
+  border: 1px solid rgba(174,132,55,.58);
+  border-radius: 50%;
+  background: rgba(255,253,247,.94);
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.domino-carousel-nav > button:disabled {
+  cursor: default;
+  opacity: .32;
+}
+
+.domino-carousel-dots {
+  display: flex;
+  gap: 7px;
+}
+
+.domino-carousel-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid #a67c2e;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.domino-carousel-dots button.is-active {
+  background: #741f37;
+  border-color: #741f37;
+}
+
+.domino-carousel-hint {
+  justify-self: end;
+  color: #6d7c77;
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .cafe-domino-room {
