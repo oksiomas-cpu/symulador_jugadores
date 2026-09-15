@@ -270,6 +270,7 @@
 }
 
 .cafe-domino-room-toolbar button {
+  flex: 0 0 auto;
   padding: 8px 12px;
   cursor: pointer;
   color: #8a6a32;
@@ -278,9 +279,12 @@
   background: #fffdf7;
   font: inherit;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .cafe-domino-room-toolbar span {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   font-size: clamp(12px, 3.2vw, 16px);
   font-weight: 700;
