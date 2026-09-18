@@ -2526,16 +2526,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
       </div>
       </Gate>
 
-      {acc.libro && (
-        <button
-          type="button"
-          onClick={onDiccionario}
-          style={{ display: "block", margin: "10px auto 22px", background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}
-        >
-          📓 Мой словарь
-        </button>
-      )}
-
       {/* Rumbos con Don Verbo — Архитектура живой речи / Campo de acción, отдельно от нумерованных уровней */}
       <Gate open={acc.cap4} title="Архитектура живой речи" onOpen={() => onPick(PACKS.cap4)}>
       <div className="rumbos-entry-cover">
@@ -2639,6 +2629,23 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
           <span className="gramatica-entry-clasp gramatica-entry-clasp--top" aria-hidden="true" />
           <span className="gramatica-entry-clasp gramatica-entry-clasp--bottom" aria-hidden="true" />
           <div className="gramatica-entry-title">ГРАММАТИКА<br />ГЛАГОЛОВ</div>
+        </div>
+      </Gate>
+
+      {/* Мой словарь — общий личный словарь игрока (не привязан к Libro Vivo,
+          общий для всех будущих активностей), отдельный пункт меню, тот же
+          гейт acc.libro, что у Живой книги — сейчас единственный источник слов.
+          Свои CSS-классы (diccionario-entry-*, не gramatica-entry-*): на этом
+          экране .gramatica-entry-cover переопределён финальным QA-патчем на
+          статичную обложку с зашитым текстом «Грамматика глаголов», см.
+          rumbos.css. */}
+      <Gate open={acc.libro} title="Мой словарь" onOpen={onDiccionario}>
+        <div className="diccionario-entry-cover" role="button" aria-label="Мой словарь. Открыть личный список слов.">
+          <span className="diccionario-entry-jewel" aria-hidden="true" />
+          <span className="diccionario-entry-clasp diccionario-entry-clasp--top" aria-hidden="true" />
+          <span className="diccionario-entry-clasp diccionario-entry-clasp--bottom" aria-hidden="true" />
+          <div className="diccionario-entry-title">МОЙ<br />СЛОВАРЬ</div>
+          <div className="diccionario-entry-open">Открыть</div>
         </div>
       </Gate>
       <div className="ciudad-rules-link-wrap" style={{ textAlign: "center", marginTop: 18 }}>

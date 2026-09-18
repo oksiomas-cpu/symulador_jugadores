@@ -1393,3 +1393,130 @@
   box-shadow: none !important;
   filter: drop-shadow(0 16px 21px rgba(62,84,76,.16)) !important;
 }
+
+/* ============================================================
+   МОЙ СЛОВАРЬ — карточка входа в LevelPicker (ТЗ, блок 6.2).
+   Не переиспользует .gramatica-entry-cover: та карточка на этом экране
+   заменена финальными QA-патчами выше (см. «HOME · WARM GOLD FINAL QA»)
+   на статичную обложку с зашитым в артворк текстом «Грамматика глаголов»
+   и visibility:hidden у живого заголовка — при переиспользовании того же
+   класса карточка всегда показывала бы «Грамматика глаголов» независимо
+   от реального текста. Здесь — тот же декоративный паттерн книжной
+   обложки на градиентах (без запечённого текста), что был у
+   .gramatica-entry-cover до QA-патчей, в малиновой палитре словаря
+   (см. палитру C в MiDiccionario.jsx).
+   ============================================================ */
+.diccionario-entry-cover {
+  position: relative;
+  display: flex;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(82%, 430px);
+  min-height: 460px;
+  margin: 20px auto 18px;
+  padding: 54px 34px 32px;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #5c1226;
+  border: 1px solid rgba(166,124,46,.78);
+  border-radius: 16px 22px 22px 16px;
+  background:
+    radial-gradient(circle at 50% 7%, rgba(255,255,255,.98), transparent 22%),
+    radial-gradient(circle at 14% 86%, rgba(249,227,232,.78), transparent 32%),
+    repeating-linear-gradient(118deg, rgba(255,255,255,.2) 0 1px, rgba(211,171,180,.06) 1px 4px),
+    linear-gradient(145deg, #fffdfb, #f3e8d2);
+  box-shadow:
+    0 18px 34px rgba(94,32,50,.16),
+    inset 0 0 0 6px rgba(255,255,255,.62),
+    inset 0 0 0 9px rgba(201,164,92,.34);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.diccionario-entry-cover::before,
+.diccionario-entry-cover::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 22px;
+  border: 1px solid rgba(201,164,92,.58);
+  border-radius: 10px 16px 16px 10px;
+  pointer-events: none;
+}
+
+.diccionario-entry-cover::after {
+  inset: 29px;
+  border-color: rgba(168,27,62,.30);
+  box-shadow: inset 0 0 28px rgba(249,227,232,.5);
+}
+
+.diccionario-entry-cover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 40px rgba(94,32,50,.19),
+    inset 0 0 0 6px rgba(255,255,255,.64),
+    inset 0 0 0 9px rgba(201,164,92,.34);
+}
+
+.diccionario-entry-cover:active {
+  transform: translateY(1px) scale(.996);
+}
+
+.diccionario-entry-title {
+  color: #5c1226;
+  font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  font-size: clamp(31px, 8vw, 46px);
+  font-weight: 500;
+  line-height: 1.12;
+  text-align: center;
+  text-shadow: 0 1px 0 white;
+}
+
+.diccionario-entry-jewel {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  width: 13px;
+  height: 18px;
+  border: 2px solid #d8b66d;
+  border-radius: 50% 50% 48% 48%;
+  background: radial-gradient(circle at 38% 30%, #e0708c, #A81B3E 48%, #5c1226 100%);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.72), 0 0 0 6px rgba(201,164,92,.42);
+  transform: translateX(-50%);
+}
+
+.diccionario-entry-clasp {
+  position: absolute;
+  right: -2px;
+  width: 42px;
+  height: 18px;
+  border: 1px solid rgba(166,124,46,.82);
+  border-radius: 999px 0 0 999px;
+  background:
+    radial-gradient(circle at 34% 50%, #741f37 0 4px, #d8b66d 5px 7px, transparent 8px),
+    linear-gradient(180deg, #f9edc8, #c49a4c);
+  box-shadow: 0 3px 7px rgba(77,57,28,.16), inset 0 1px 0 white;
+}
+
+.diccionario-entry-clasp--top { top: 28%; }
+.diccionario-entry-clasp--bottom { bottom: 28%; }
+
+.diccionario-entry-open {
+  margin-top: 22px;
+  padding: 9px 22px;
+  color: #5c1226;
+  border: 1px solid rgba(168,27,62,.42);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(249,227,232,.78));
+  font-family: 'Iowan Old Style', Baskerville, 'Palatino Linotype', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 430px) {
+  .diccionario-entry-cover { width: min(88%, 390px); min-height: 420px; padding-inline: 26px; }
+  .diccionario-entry-open { margin-top: 54px; }
+}

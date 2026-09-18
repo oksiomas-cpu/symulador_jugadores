@@ -36,6 +36,20 @@ export default function MiDiccionario({ onBack, tgId = null }) {
     })();
   }, [tgId]);
 
+  async function removeWord(chapterId, verbId) {
+    setItems(prev => {
+      const next = prev.filter(it => !(it.chapterId === chapterId && it.verbId === verbId));
+      writeDictionaryLocal(next);
+      return next;
+    });
+    if (!tgId) return;
+    try {
+      const cloudItems = await dictionaryCloudCall({ action: "remove", tgId, chapterId, verbId });
+      writeDictionaryLocal(cloudItems);
+      setItems(cloudItems);
+    } catch (_) { /* локальный кэш уже обновлён, повторим синк на следующем открытии листа */ }
+  }
+
   const sorted = [...items].sort((a, b) => (b.addedAt || "").localeCompare(a.addedAt || ""));
 
   return (
@@ -47,6 +61,9 @@ export default function MiDiccionario({ onBack, tgId = null }) {
           <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 2 }}>
             {sorted.length ? `${sorted.length} ${sorted.length === 1 ? "конструкция" : "конструкций"}` : "пока пусто"}
           </div>
+          <button type="button" disabled style={{ display: "inline-block", marginTop: 12, background: C.creamDeep, border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 12, padding: "10px 16px", fontSize: 13.5, fontWeight: 700, fontFamily: SERIF, cursor: "not-allowed", opacity: 0.75 }}>
+            🎮 Тренировка слов (скоро)
+          </button>
         </div>
 
         {loading && (
@@ -62,10 +79,20 @@ export default function MiDiccionario({ onBack, tgId = null }) {
         {!loading && sorted.length > 0 && (
           <div style={{ display: "grid", gap: 10 }}>
             {sorted.map(it => (
-              <div key={`${it.chapterId}:${it.verbId}`} style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 16px", boxShadow: "0 2px 10px rgba(61,43,31,0.06)" }}>
-                <div style={{ fontSize: 16.5, fontWeight: 800, color: C.raspberry }}>{labelFor(it.chapterId, it.verbId)}</div>
-                <div style={{ fontSize: 14, color: C.ink, marginTop: 3 }}>{translationFor(it.chapterId, it.verbId) || "—"}</div>
-                <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6, textTransform: "uppercase", letterSpacing: ".3px" }}>{chapterTitle(it.chapterId)}</div>
+              <div key={`${it.chapterId}:${it.verbId}`} style={{ background: C.card, border: `1.5px solid ${C.line}`, borderRadius: 14, padding: "13px 16px", boxShadow: "0 2px 10px rgba(61,43,31,0.06)", display: "flex", justifyContent: "space-between", gap: 10 }}>
+                <div>
+                  <div style={{ fontSize: 16.5, fontWeight: 800, color: C.raspberry }}>{labelFor(it.chapterId, it.verbId)}</div>
+                  <div style={{ fontSize: 14, color: C.ink, marginTop: 3 }}>{translationFor(it.chapterId, it.verbId) || "—"}</div>
+                  <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6, textTransform: "uppercase", letterSpacing: ".3px" }}>{chapterTitle(it.chapterId)}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeWord(it.chapterId, it.verbId)}
+                  title="Выучил — убрать из словаря"
+                  style={{ flexShrink: 0, alignSelf: "flex-start", background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 10, padding: "5px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, whiteSpace: "nowrap" }}
+                >
+                  ✓ Выучено
+                </button>
               </div>
             ))}
           </div>

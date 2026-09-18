@@ -10,9 +10,10 @@
 // на каждом открытии листа.
 //
 // Действия:
-//   get   {tgId}                              → { ok:true, items:[...] }
-//   add   {tgId, chapterId, verbId}            → HSET одной записи, вернуть полный список
-//   sync  {tgId, items:[{chapterId,verbId}]}   → HSET всех локальных записей разом
+//   get    {tgId}                              → { ok:true, items:[...] }
+//   add    {tgId, chapterId, verbId}            → HSET одной записи, вернуть полный список
+//   sync   {tgId, items:[{chapterId,verbId}]}   → HSET всех локальных записей разом
+//   remove {tgId, chapterId, verbId}            → HDEL одной записи («выучил — выбросил»), вернуть полный список
 // ============================================================
 
 function env() {
@@ -80,6 +81,16 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: "Неверный chapterId/verbId" });
       }
       await cmd(["HSET", key, `${chapterId}:${verbId}`, new Date().toISOString()]);
+      return res.status(200).json({ ok: true, items: await readItems(tgId) });
+    }
+
+    if (action === "remove") {
+      const chapterId = String(body.chapterId || "");
+      const verbId = String(body.verbId || "");
+      if (!VALID_CHAPTER_ID.test(chapterId) || !VALID_VERB_ID.test(verbId)) {
+        return res.status(400).json({ error: "Неверный chapterId/verbId" });
+      }
+      await cmd(["HDEL", key, `${chapterId}:${verbId}`]);
       return res.status(200).json({ ok: true, items: await readItems(tgId) });
     }
 
