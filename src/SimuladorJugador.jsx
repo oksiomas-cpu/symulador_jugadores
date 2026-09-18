@@ -2387,7 +2387,7 @@ export default function SimuladorJugador() {
     return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   }
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
-  if (showLibro) return <LibroVivo tgId={tgId} onBack={() => setShowLibro(false)} />;
+  if (showLibro) return <LibroVivo tgId={tgId} onBack={() => setShowLibro(false)} onOpenDiccionario={() => { setShowLibro(false); setShowDiccionario(true); }} />;
   if (showDiccionario) return <MiDiccionario tgId={tgId} onBack={() => setShowDiccionario(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
