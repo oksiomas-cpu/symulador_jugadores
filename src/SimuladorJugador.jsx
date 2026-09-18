@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import LibroVivo from "./LibroVivo.jsx";
+import MiDiccionario from "./MiDiccionario.jsx";
 import Gramatica from "./Gramatica.jsx";
 import ActionCapsules, { ActionCapsulesTrainer } from "./ActionCapsules.jsx";
 import "./rumbos.css";
@@ -2220,6 +2221,7 @@ export default function SimuladorJugador() {
   // Облачный счёт: warmup — очки разминки Don Verbo, total — общий (тренажёр + разминка)
   const [cloud, setCloud] = useState(null);
   const tg = useRef(getTg());
+  const tgId = tg.current?.id || null;
 
   // Доступ по Пропуску (ТЗ шаг 2): undefined = грузим; затем { status, expiresAt }.
   const [access, setAccess] = useState(undefined);
@@ -2313,6 +2315,8 @@ export default function SimuladorJugador() {
   const [showPresenteErIr, setShowPresenteErIr] = useState(false);
   // Libro Vivo — живая книга «Королевство Карамели», третья самостоятельная активность
   const [showLibro, setShowLibro] = useState(false);
+  // Мой словарь — личные конструкции игрока, сохранённые в Libro Vivo
+  const [showDiccionario, setShowDiccionario] = useState(false);
   // Gramática — грамматический справочник, четвёртая самостоятельная активность
   const [showGramatica, setShowGramatica] = useState(false);
   const [showCapsules, setShowCapsules] = useState(false);
@@ -2383,7 +2387,8 @@ export default function SimuladorJugador() {
     return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   }
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
-  if (showLibro) return <LibroVivo onBack={() => setShowLibro(false)} />;
+  if (showLibro) return <LibroVivo tgId={tgId} onBack={() => setShowLibro(false)} />;
+  if (showDiccionario) return <MiDiccionario tgId={tgId} onBack={() => setShowDiccionario(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
   if (showActionTrainer) return <ActionCapsulesTrainer onBack={() => setShowActionTrainer(false)} />;
@@ -2393,6 +2398,7 @@ export default function SimuladorJugador() {
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
     onLibro={() => setShowLibro(true)}
+    onDiccionario={() => setShowDiccionario(true)}
     onGramatica={() => setShowGramatica(true)}
     onDomino={setDominoMission}
     onTour={() => setShowTour(true)}
@@ -2439,7 +2445,7 @@ function DominoMission({ mission, onBack }) {
   );
 }
 
-function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onDomino, onTour }) {
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGramatica, onDomino, onTour }) {
   const [locked, setLocked] = useState(null);
   const [dominoSlide, setDominoSlide] = useState(0);
   const dominoTouchStart = useRef(null);
@@ -2519,6 +2525,16 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onGramatica, onDomi
         </div>
       </div>
       </Gate>
+
+      {acc.libro && (
+        <button
+          type="button"
+          onClick={onDiccionario}
+          style={{ display: "block", margin: "10px auto 22px", background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}
+        >
+          📓 Мой словарь
+        </button>
+      )}
 
       {/* Rumbos con Don Verbo — Архитектура живой речи / Campo de acción, отдельно от нумерованных уровней */}
       <Gate open={acc.cap4} title="Архитектура живой речи" onOpen={() => onPick(PACKS.cap4)}>
