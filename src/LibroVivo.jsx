@@ -266,7 +266,7 @@ function VerbSpan({ text, onTap }) {
 
 // Попап перевода: показывается по тапу на VerbSpan, снизу экрана,
 // с кнопкой «+ добавить в словарь» (Мой словарь, вариант A из ТЗ).
-function TranslationPopup({ open, surface, translation, alreadySaved, onAdd, onClose }) {
+function TranslationPopup({ open, surface, translation, alreadySaved, onAdd, onClose, onOpenDiccionario }) {
   if (!open) return null;
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(61,43,31,0.35)", zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -279,6 +279,11 @@ function TranslationPopup({ open, surface, translation, alreadySaved, onAdd, onC
             {alreadySaved ? "✓ В словаре" : "+ Добавить в словарь"}
           </button>
         </div>
+        {alreadySaved && onOpenDiccionario && (
+          <button onClick={onOpenDiccionario} style={{ display: "block", margin: "12px auto 0", background: "none", border: "none", color: C.goldDeep, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
+            → Открыть Мой словарь
+          </button>
+        )}
       </div>
     </div>
   );
@@ -300,7 +305,7 @@ function HojaJefe() {
   );
 }
 
-function Historia({ tgId }) {
+function Historia({ tgId, onOpenDiccionario }) {
   const [openVerb, setOpenVerb] = useState(null); // токен v(id,text) открытого попапа, либо null
   const [savedIds, setSavedIds] = useState(() => new Set(
     readDictionaryLocal().filter(it => it.chapterId === CAP1_ID).map(it => it.verbId)
@@ -338,6 +343,15 @@ function Historia({ tgId }) {
       <Titulo emoji="📖" es="La historia · fragmento 1" ru="История — читай и слушай художественную озвучку" />
       <VentanaHistoria label="La mañana del palacio" variant="palacio" />
       <Instruccion><b>Сначала слушай</b> — художественная озвучка носителя. <b>Потом читай</b> и слушай ещё раз, следя по тексту. <b>Нажми на подчёркнутое слово</b> — увидишь перевод и сможешь добавить его в свой словарь.</Instruccion>
+      {onOpenDiccionario && (
+        <button
+          type="button"
+          onClick={onOpenDiccionario}
+          style={{ display: "block", margin: "0 0 14px", background: "none", border: "none", color: C.goldDeep, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}
+        >
+          📓 Мой словарь{savedIds.size ? ` (${savedIds.size})` : ""}
+        </button>
+      )}
       <div style={{ fontSize: 15.5, lineHeight: 1.85 }}>
         {HISTORIA_ES.map((parts, i) => (
           <p key={i} style={{ margin: "0 0 10px" }}>
@@ -357,6 +371,7 @@ function Historia({ tgId }) {
         alreadySaved={openVerb ? savedIds.has(openVerb.v) : false}
         onAdd={() => openVerb && addWord(openVerb.v)}
         onClose={() => setOpenVerb(null)}
+        onOpenDiccionario={onOpenDiccionario}
       />
     </div>
   );
@@ -571,7 +586,7 @@ function CapituloRuso() {
 
 // ---------- каркас с перелистыванием ----------
 
-export default function LibroVivo({ onBack, tgId = null }) {
+export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
   const [n, setN] = useState(0);
   const touch = useRef(null);
 
@@ -580,7 +595,7 @@ export default function LibroVivo({ onBack, tgId = null }) {
   const HOJAS = [
     { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
     { id: "hoja", label: "📜", node: <HojaJefe /> },
-    { id: "historia", label: "📖", node: <Historia tgId={tgId} /> },
+    { id: "historia", label: "📖", node: <Historia tgId={tgId} onOpenDiccionario={onOpenDiccionario} /> },
     { id: "pregunta", label: "🕵️", node: <JefePregunta /> },
     { id: "robadas", label: "⏳", node: <Robadas /> },
     { id: "habla", label: "🎭", node: <HablaPorOtro /> },
