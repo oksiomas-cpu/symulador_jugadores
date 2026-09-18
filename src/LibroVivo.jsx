@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import "./libro-vivo-pages.css";
+import { CAP1_ID, CAP1_DICT, readDictionaryLocal, writeDictionaryLocal, dictionaryCloudCall } from "./libroVivoDictionary.js";
 
 // ============================================================
 // LIBRO VIVO — живая книга «Королевство Карамели»
 // Пилот: Capítulo 1, fragmento 1. 10 листов, перелистывание ←/→.
 // Каждый лист автономен: текст → аудио под ним, ответы скрыты до нажатия.
 // Аудио лежат в public/audio (играют нативным <audio>).
+// В листе «Historia» подчёркнутые глагольные конструкции кликабельны:
+// тап показывает перевод и кнопку «+ добавить в словарь» (Мой словарь).
 // ============================================================
 
 const C = {
@@ -31,15 +34,35 @@ const HOJA_ES = [
   "Mira bien. Sobre todo, mira al más pequeño. — E.G.J.A.",
 ];
 
+// Токен глагольной конструкции: id ссылается на CAP1_DICT (libroVivoDictionary.js),
+// t — точная поверхностная форма в тексте (то, что видит и нажимает игрок).
+function v(id, t) { return { v: id, t }; }
+
+// Каждый параграф — массив кусочков: обычная строка ИЛИ токен v(id, text).
+// Разметка соответствует подчёркнутым глагольным конструкциям утверждённого
+// пилота (Notion, «Испанский пилот Главы 1»); id совпадает со строками
+// глоссария оттуда — переводы см. в libroVivoDictionary.js, ничего не
+// переведено заново.
 const HISTORIA_ES = [
-  "El palacio del Reino del Caramelo se despierta cada mañana igual. Primero llega la luz. El sol toca el tejado y entra por las grietas de los muros. Los muros son de caramelo de verdad: duro, dorado, con líneas finas como venas. Cuando el sol entra en esas líneas, los muros brillan. Parecen ríos de oro.",
-  "Pero la mañana no empieza con el sol. La mañana empieza con Tomás.",
-  "Tomás es el primer ayudante del Jefe. Se levanta antes que el sol. Se lava la cara con agua fría. Se pone el chaleco con botones dorados. Un botón siempre está flojo. Tomás siempre dice: «Hoy lo arreglo». Pero no lo arregla nunca.",
-  "Coge su farol y camina por el pasillo.",
-  "—Enciendo la luz —dice Tomás. Y la luz se enciende. Así, al momento.",
-  "En el Reino del Caramelo, las palabras funcionan así: lo que dices, pasa ya. Nadie promete la luz para mañana. Y nadie habla de la luz de ayer. De hecho, en este reino no existe la palabra «ayer». No existe, porque nadie la necesita.",
-  "Tomás enciende dieciocho faroles en el pasillo del este. Enciende doce en la escalera. Enciende veinticuatro en la Sala Grande. Cada farol despierta un poco más al palacio. El muro, cuando lo tocas, está tibio.",
-  "—El palacio respira —dice Tomás cada mañana—. Todo va bien.",
+  ["El palacio del Reino del Caramelo ", v("se-despierta", "se despierta"), " cada mañana igual. Primero ", v("llega", "llega"), " la luz. El sol ", v("toca", "toca"), " el tejado y ", v("entrar-por", "entra por"), " las grietas de los muros. Los muros ", v("ser-de", "son"), " de caramelo de verdad: duro, dorado, con líneas finas como venas. Cuando el sol ", v("entrar-en", "entra en"), " esas líneas, los muros ", v("brillar", "brillan"), ". ", v("parecer", "Parecen"), " ríos de oro."],
+  ["Pero la mañana no ", v("empezar-con", "empieza con"), " el sol. La mañana ", v("empezar-con", "empieza con"), " Tomás."],
+  ["Tomás ", v("ser", "es"), " el primer ayudante del Jefe. ", v("se-levanta", "Se levanta"), " antes que el sol. ", v("se-lava", "Se lava"), " la cara con agua fría. ", v("se-pone", "Se pone"), " el chaleco con botones dorados. Un botón siempre ", v("estar", "está"), " flojo. Tomás siempre ", v("decir", "dice"), ": «Hoy lo ", v("arreglar", "arreglo"), "». Pero no lo ", v("arreglar", "arregla"), " nunca."],
+  [v("coger", "Coge"), " su farol y ", v("caminar-por", "camina por"), " el pasillo."],
+  ["—", v("encender", "Enciendo"), " la luz —", v("decir", "dice"), " Tomás. Y la luz ", v("se-enciende", "se enciende"), ". Así, al momento."],
+  ["En el Reino del Caramelo, las palabras ", v("funcionar", "funcionan"), " así: lo que ", v("decir", "dices"), ", ", v("pasar", "pasa"), " ya. Nadie ", v("prometer", "promete"), " la luz para mañana. Y nadie ", v("hablar-de", "habla de"), " la luz de ayer. De hecho, en este reino no ", v("existir", "existe"), " la palabra «ayer». No ", v("existir", "existe"), ", porque nadie la ", v("necesitar", "necesita"), "."],
+  ["Tomás ", v("encender", "enciende"), " dieciocho faroles en el pasillo del este. ", v("encender", "Enciende"), " doce en la escalera. ", v("encender", "Enciende"), " veinticuatro en la Sala Grande. Cada farol ", v("despertar-a-alguien", "despierta"), " un poco más al palacio. El muro, cuando lo ", v("tocar-tu", "tocas"), ", ", v("estar", "está"), " tibio."],
+  ["—El palacio ", v("respirar", "respira"), " —", v("decir", "dice"), " Tomás cada mañana—. Todo ", v("ir-bien", "va"), " bien."],
+  ["Mientras tanto, en la cocina, Lucía ", v("preparar", "prepara"), " el desayuno. Sus manos ", v("se-mueven", "se mueven"), " solas, sin ", v("mirar", "mirar"), ". El caramelo caliente ", v("oler", "huele"), " dulce y ", v("brillar", "brilla"), " como hilos de oro."],
+  ["—", v("preparar", "Preparo"), " el desayuno —", v("decir", "dice"), " Lucía a las cazuelas."],
+  ["Las cazuelas no ", v("contestar", "contestan"), ". Nadie en el palacio ", v("se-queja", "se queja"), ". Todo ", v("funcionar", "funciona"), " bien, cada día igual: Tomás ", v("encender", "enciende"), " la luz, Lucía ", v("preparar", "prepara"), " el desayuno, Mateo ", v("ordenar", "ordena"), " los papeles, y Bruno, en la puerta, ", v("abrir", "abre"), " su lista: la lista de quién ", v("entrar", "entra"), " hoy."],
+  ["Nadie ", v("tener", "tiene"), " una lista de quién ", v("perfecto-compuesto", "ha entrado"), " antes. Nadie ", v("hacer", "hace"), " esa pregunta."],
+  ["Solo una persona, esta mañana, no ", v("hacer", "hace"), " lo de siempre."],
+  [v("llamarse", "Se llama"), " Nico. ", v("ser", "Es"), " el ayudante más joven. ", v("tener-que", "Tiene que llenar"), " las jarras de agua, pero su jarra ", v("seguir-adj", "sigue"), " vacía. Nico ", v("mirar-por", "mira por"), " la ventana, con la cara seria."],
+  [v("creer", "Cree"), " que ", v("perfecto-compuesto", "ha oído"), " un ruido esta noche. Pero, ¿cómo ", v("hablar-de", "se habla de"), " un ruido que ya no ", v("estar", "está"), "? Ahora ", v("hay", "hay"), " silencio."],
+  ["Nico no ", v("entender", "entiende"), ". Nadie en el palacio ", v("entender", "entiende"), " esto."],
+  ["Así que Nico ", v("callar", "calla"), ". Y ", v("pensar", "piensa"), ": «Algo raro me ", v("pasarle-a-alguien", "pasa"), " a mí»."],
+  ["Muy arriba, en la torre más alta, ", v("hay", "hay"), " una ventana con luz. ", v("estar-encendida", "Está encendida"), " desde antes de Tomás. ", v("estar-encendida", "Está encendida"), " siempre."],
+  ["Detrás de esa ventana ", v("vivir", "vive"), " alguien que lo ", v("saber", "sabe"), " todo sobre esta mañana. Y también ", v("saber", "sabe"), " un poco más."],
 ];
 
 // Вопросы Шефа (текстовая подсказка к аудио — дополнение, не основа)
@@ -228,6 +251,39 @@ function Instruccion({ children }) {
 
 const cardS = { background: C.card, borderRadius: 16, border: `1.5px solid ${C.line}`, boxShadow: "0 2px 12px rgba(61,43,31,0.08)", padding: "18px 16px" };
 
+// Подчёркнутая глагольная конструкция в тексте — тап открывает перевод.
+function VerbSpan({ text, onTap }) {
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={onTap}
+      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
+      style={{ fontWeight: 700, textDecoration: "underline", textDecorationColor: C.gold, textDecorationThickness: 2, textUnderlineOffset: 3, cursor: "pointer" }}
+    >{text}</span>
+  );
+}
+
+// Попап перевода: показывается по тапу на VerbSpan, снизу экрана,
+// с кнопкой «+ добавить в словарь» (Мой словарь, вариант A из ТЗ).
+function TranslationPopup({ open, surface, translation, alreadySaved, onAdd, onClose }) {
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(61,43,31,0.35)", zIndex: 60, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: "18px 18px 0 0", padding: "18px 20px 26px", width: "100%", maxWidth: 560, boxShadow: "0 -6px 24px rgba(61,43,31,0.22)" }}>
+        <div style={{ fontSize: 18, fontWeight: 800, color: C.raspberry, fontFamily: SERIF }}>{surface}</div>
+        <div style={{ fontSize: 15, color: C.ink, marginTop: 6, lineHeight: 1.5 }}>{translation}</div>
+        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "none", border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 12, padding: "12px 10px", fontSize: 14.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>Закрыть</button>
+          <button onClick={onAdd} disabled={alreadySaved} style={{ flex: 1.5, background: alreadySaved ? C.line : C.emerald, border: "none", color: alreadySaved ? C.inkSoft : "#fff", borderRadius: 12, padding: "12px 10px", fontSize: 14.5, fontWeight: 700, cursor: alreadySaved ? "default" : "pointer", fontFamily: SERIF }}>
+            {alreadySaved ? "✓ В словаре" : "+ Добавить в словарь"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ---------- листы ----------
 
 function HojaJefe() {
@@ -244,16 +300,64 @@ function HojaJefe() {
   );
 }
 
-function Historia() {
+function Historia({ tgId }) {
+  const [openVerb, setOpenVerb] = useState(null); // токен v(id,text) открытого попапа, либо null
+  const [savedIds, setSavedIds] = useState(() => new Set(
+    readDictionaryLocal().filter(it => it.chapterId === CAP1_ID).map(it => it.verbId)
+  ));
+
+  // Синк личного словаря с облаком при открытии листа — та же идемпотентная
+  // модель, что у капсул (capsulesCloudCall): сервер всегда возвращает
+  // полный список записей tgId, повторный синк безопасен.
+  useEffect(() => {
+    if (!tgId) return;
+    (async () => {
+      try {
+        const mine = readDictionaryLocal().filter(it => it.chapterId === CAP1_ID);
+        const items = await dictionaryCloudCall({ action: "sync", tgId, items: mine });
+        writeDictionaryLocal(items);
+        setSavedIds(new Set(items.filter(it => it.chapterId === CAP1_ID).map(it => it.verbId)));
+      } catch (_) { /* офлайн — остаёмся на локальном кэше */ }
+    })();
+  }, [tgId]);
+
+  async function addWord(verbId) {
+    setSavedIds(prev => new Set(prev).add(verbId)); // мгновенный отклик
+    const local = readDictionaryLocal();
+    const withoutDup = local.filter(it => !(it.chapterId === CAP1_ID && it.verbId === verbId));
+    writeDictionaryLocal([...withoutDup, { chapterId: CAP1_ID, verbId, addedAt: new Date().toISOString() }]);
+    if (!tgId) return;
+    try {
+      const items = await dictionaryCloudCall({ action: "add", tgId, chapterId: CAP1_ID, verbId });
+      writeDictionaryLocal(items);
+    } catch (_) { /* локальный кэш уже обновлён, повторим синк на следующем открытии листа */ }
+  }
+
   return (
     <div style={cardS}>
       <Titulo emoji="📖" es="La historia · fragmento 1" ru="История — читай и слушай художественную озвучку" />
       <VentanaHistoria label="La mañana del palacio" variant="palacio" />
-      <Instruccion><b>Сначала слушай</b> — художественная озвучка носителя. <b>Потом читай</b> и слушай ещё раз, следя по тексту.</Instruccion>
+      <Instruccion><b>Сначала слушай</b> — художественная озвучка носителя. <b>Потом читай</b> и слушай ещё раз, следя по тексту. <b>Нажми на подчёркнутое слово</b> — увидишь перевод и сможешь добавить его в свой словарь.</Instruccion>
       <div style={{ fontSize: 15.5, lineHeight: 1.85 }}>
-        {HISTORIA_ES.map((p, i) => <p key={i} style={{ margin: "0 0 10px" }}>{p}</p>)}
+        {HISTORIA_ES.map((parts, i) => (
+          <p key={i} style={{ margin: "0 0 10px" }}>
+            {parts.map((part, pi) => (
+              typeof part === "string"
+                ? <span key={pi}>{part}</span>
+                : <VerbSpan key={pi} text={part.t} onTap={() => setOpenVerb(part)} />
+            ))}
+          </p>
+        ))}
       </div>
       <Audio src="/audio/cap1-historia_es.mp3" label="Historia (español)" />
+      <TranslationPopup
+        open={!!openVerb}
+        surface={openVerb ? openVerb.t : ""}
+        translation={openVerb ? (CAP1_DICT[openVerb.v] || "") : ""}
+        alreadySaved={openVerb ? savedIds.has(openVerb.v) : false}
+        onAdd={() => openVerb && addWord(openVerb.v)}
+        onClose={() => setOpenVerb(null)}
+      />
     </div>
   );
 }
@@ -467,22 +571,24 @@ function CapituloRuso() {
 
 // ---------- каркас с перелистыванием ----------
 
-const HOJAS = [
-  { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
-  { id: "hoja", label: "📜", node: <HojaJefe /> },
-  { id: "historia", label: "📖", node: <Historia /> },
-  { id: "pregunta", label: "🕵️", node: <JefePregunta /> },
-  { id: "robadas", label: "⏳", node: <Robadas /> },
-  { id: "habla", label: "🎭", node: <HablaPorOtro /> },
-  { id: "pruebas", label: "🔎", node: <Pruebas /> },
-  { id: "dossier", label: "📁", node: <Dossier /> },
-  { id: "donde", label: "🗂", node: <DondeHaPasado /> },
-  { id: "ley", label: "⚖️", node: <LeyDelReino /> },
-];
-
-export default function LibroVivo({ onBack }) {
+export default function LibroVivo({ onBack, tgId = null }) {
   const [n, setN] = useState(0);
   const touch = useRef(null);
+
+  // Historia получает tgId для синка личного словаря — остальные листы
+  // не завязаны на игрока, поэтому массив строится внутри компонента.
+  const HOJAS = [
+    { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
+    { id: "hoja", label: "📜", node: <HojaJefe /> },
+    { id: "historia", label: "📖", node: <Historia tgId={tgId} /> },
+    { id: "pregunta", label: "🕵️", node: <JefePregunta /> },
+    { id: "robadas", label: "⏳", node: <Robadas /> },
+    { id: "habla", label: "🎭", node: <HablaPorOtro /> },
+    { id: "pruebas", label: "🔎", node: <Pruebas /> },
+    { id: "dossier", label: "📁", node: <Dossier /> },
+    { id: "donde", label: "🗂", node: <DondeHaPasado /> },
+    { id: "ley", label: "⚖️", node: <LeyDelReino /> },
+  ];
   const total = HOJAS.length;
 
   // при смене листа — вверх страницы (аудио умирает вместе с листом)
