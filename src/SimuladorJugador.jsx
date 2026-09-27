@@ -736,9 +736,9 @@ function accessMap(status) {
     case "club":
       return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
     case "trialVerbo":
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
@@ -2338,7 +2338,8 @@ export default function SimuladorJugador() {
   // --- Витрина доступа (ТЗ «Пропуск в Город», шаг 2) ---
   if (access === undefined) return <AccessLoading />;
   if (access.status === "notg") return <OpenInBot />;
-  const acc = { ...accessMap(access.status), cafe: access.status === "club" || access.cafe === true };
+  const baseAcc = accessMap(access.status);
+  const acc = { ...baseAcc, cafe: baseAcc.cafe || access.cafe === true };
   if (access.status === "none") return <NoPassScreen />;
 
   if (capsuleGrammar) {
