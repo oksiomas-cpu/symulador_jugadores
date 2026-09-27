@@ -681,8 +681,7 @@ const ACCESS_API = "https://don-verbo.vercel.app/api/access";
 const CHANNEL_URL = "https://t.me/es_consabor";        // бесплатный канал — получить Пропуск
 const CLUB_URL = "https://t.me/oksanamaikova_spanish"; // посадочная клуба
 const BOT_URL = "https://t.me/DonVerbobot";
-const CAFE_DOMINO_URL = "https://cafe-domino-game.vercel.app/";
-const MENU_DEL_DIA_URL = import.meta.env.VITE_MENU_DEL_DIA_URL || "https://menu-del-dia-game.vercel.app/";
+const MISSION_TICKET_API = "https://don-verbo.vercel.app/api/mission-ticket";
 
 const DOMINO_MISSIONS = [
   {
@@ -692,7 +691,6 @@ const DOMINO_MISSIONS = [
     roomLabel: "Desayunar",
     subtitle: "Собери завтрак — и добейся, чтобы тебя поняли",
     art: "breakfast",
-    url: CAFE_DOMINO_URL,
   },
   {
     id: "menu-del-dia",
@@ -701,7 +699,6 @@ const DOMINO_MISSIONS = [
     roomLabel: "Menú del día",
     subtitle: "Собери обед — от первого блюда до оплаты",
     art: "menu-del-dia",
-    url: MENU_DEL_DIA_URL,
   },
 ];
 
@@ -736,9 +733,9 @@ function accessMap(status) {
     case "club":
       return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: false, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
     case "trialVerbo":
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
@@ -2338,7 +2335,8 @@ export default function SimuladorJugador() {
   // --- Витрина доступа (ТЗ «Пропуск в Город», шаг 2) ---
   if (access === undefined) return <AccessLoading />;
   if (access.status === "notg") return <OpenInBot />;
-  const acc = { ...accessMap(access.status), cafe: access.status === "club" || access.cafe === true };
+  const baseAcc = accessMap(access.status);
+  const acc = { ...baseAcc, cafe: baseAcc.cafe || access.cafe === true };
   if (access.status === "none") return <NoPassScreen />;
 
   if (capsuleGrammar) {
@@ -2437,7 +2435,7 @@ function DominoMission({ mission, onBack }) {
       </div>
       <iframe
         className="cafe-domino-room-frame"
-        src={mission.url}
+        src={mission.ticketUrl}
         title={`Домино живой речи. Миссия ${mission.roomLabel}`}
         allow="autoplay"
       />
@@ -2448,6 +2446,7 @@ function DominoMission({ mission, onBack }) {
 function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGramatica, onDomino, onTour }) {
   const [locked, setLocked] = useState(null);
   const [dominoSlide, setDominoSlide] = useState(0);
+  const [dominoLoading, setDominoLoading] = useState(false);
   const dominoTouchStart = useRef(null);
   const toClub = ["trial1", "trial2", "trialVerbo", "trialCafe"].includes(status);
   const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
@@ -2466,10 +2465,27 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
     showDominoSlide(dominoSlide + (distance < 0 ? 1 : -1));
   }
 
-  function openDomino(mission) {
+  async function openDomino(mission) {
     const isOpen = mission.id === "desayunar" ? acc.cafe : status === "club";
-    if (isOpen) onDomino(mission);
-    else setLocked(`Домино живой речи · ${mission.roomLabel}`);
+    if (!isOpen) { setLocked(`Домино живой речи · ${mission.roomLabel}`); return; }
+    if (dominoLoading) return;
+    const initData = window.Telegram?.WebApp?.initData;
+    if (!initData) { setLocked("Открой Город через личный чат Дона Вербо, чтобы войти в миссию."); return; }
+    setDominoLoading(true);
+    try {
+      const response = await fetch(MISSION_TICKET_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData, mission: mission.id }),
+      });
+      const ticket = await response.json();
+      if (!response.ok || !ticket.ok || !ticket.url) throw new Error("mission ticket");
+      onDomino({ ...mission, ticketUrl: ticket.url });
+    } catch {
+      setLocked("Не удалось открыть миссию. Вернись к Дону Вербо и попробуй ещё раз.");
+    } finally {
+      setDominoLoading(false);
+    }
   }
 
   const activeDominoMission = DOMINO_MISSIONS[dominoSlide];
