@@ -2632,20 +2632,12 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
         </div>
       </Gate>
 
-      {/* Мой словарь — общий личный словарь игрока (не привязан к Libro Vivo,
-          общий для всех будущих активностей), отдельный пункт меню, тот же
-          гейт acc.libro, что у Живой книги — сейчас единственный источник слов.
-          Свои CSS-классы (diccionario-entry-*, не gramatica-entry-*): на этом
-          экране .gramatica-entry-cover переопределён финальным QA-патчем на
-          статичную обложку с зашитым текстом «Грамматика глаголов», см.
-          rumbos.css. */}
+      {/* Мой словарь — компактный вход в общий личный словарь игрока.
+          Гейт acc.libro и логика словаря остаются прежними. */}
       <Gate open={acc.libro} title="Мой словарь" onOpen={onDiccionario}>
-        <div className="diccionario-entry-cover" role="button" aria-label="Мой словарь. Открыть личный список слов.">
-          <span className="diccionario-entry-jewel" aria-hidden="true" />
-          <span className="diccionario-entry-clasp diccionario-entry-clasp--top" aria-hidden="true" />
-          <span className="diccionario-entry-clasp diccionario-entry-clasp--bottom" aria-hidden="true" />
-          <div className="diccionario-entry-title">МОЙ<br />СЛОВАРЬ</div>
-          <div className="diccionario-entry-open">Открыть</div>
+        <div className="diccionario-entry-plaque" role="button" aria-label="Мой словарь. Открыть личный список слов.">
+          <span className="diccionario-entry-plaque-title">Мой словарь</span>
+          <span className="diccionario-entry-plaque-arrow" aria-hidden="true">›</span>
         </div>
       </Gate>
       <div className="ciudad-rules-link-wrap" style={{ textAlign: "center", marginTop: 18 }}>
