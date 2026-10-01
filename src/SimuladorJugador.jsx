@@ -2046,7 +2046,7 @@ function RumbosBook() {
 // отдельными файлами рядом со страницей (не base64 внутри неё).
 // ============================================================
 const RUMBOS_LESSONS = [
-  { id: "quiero-hablar", number: "1", title: "Quiero hablar español", subtitle: "Первый вход · оператор querer · звонок с заказом на дом", src: "/lessons/quiero-hablar/index.html" },
+  { id: "quiero-hablar", number: "1", title: "Quiero hablar español", subtitle: "Оператор querer · звонок с заказом на дом", src: "/lessons/quiero-hablar/index.html" },
 ];
 
 function LessonFrame({ lesson, onClose }) {
@@ -2111,7 +2111,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       {isCapFour && (
         <section className="rumbos-practice" aria-label="Уроки архитектуры живой речи">
           <div className="rumbos-section-kicker">Уроки</div>
-          <h2>Первый вход</h2>
+          <h2>Первый урок</h2>
           <p>Слушай, повторяй и собирай речь шаг за шагом.</p>
           {RUMBOS_LESSONS.map((lesson) => (
             <button
