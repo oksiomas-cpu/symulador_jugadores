@@ -2041,6 +2041,44 @@ function RumbosBook() {
 }
 
 // ============================================================
+// УРОКИ «Архитектуры живой речи» — самодостаточные страницы в public/lessons/<slug>/
+// Открываются поверх раздела во встроенном окне; звук и картинки лежат
+// отдельными файлами рядом со страницей (не base64 внутри неё).
+// ============================================================
+const RUMBOS_LESSONS = [
+  { id: "quiero-hablar", number: "1", title: "Quiero hablar español", subtitle: "Первый вход · оператор querer · звонок с заказом на дом", src: "/lessons/quiero-hablar/index.html" },
+];
+
+function LessonFrame({ lesson, onClose }) {
+  return (
+    <div
+      role="dialog"
+      aria-label={`Урок ${lesson.number}. ${lesson.title}`}
+      style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", flexDirection: "column", background: "#f6efe0" }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}
+        >
+          ← К разделу
+        </button>
+        <div style={{ fontSize: 13.5, color: C.inkSoft, fontFamily: SERIF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          Урок {lesson.number} · {lesson.title}
+        </div>
+      </div>
+      <iframe
+        title={`Урок ${lesson.number}. ${lesson.title}`}
+        src={lesson.src}
+        allow="autoplay"
+        style={{ flex: 1, width: "100%", border: "none", background: "#f6efe0" }}
+      />
+    </div>
+  );
+}
+
+// ============================================================
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
@@ -2053,11 +2091,14 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
   const [storyKey, setStoryKey] = useState(null);
+  const [lessonId, setLessonId] = useState(null);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
+  const openLesson = RUMBOS_LESSONS.find((l) => l.id === lessonId) || null;
 
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle={`${pack.emoji} Capítulo ${pack.num} · ${pack.grammar}`} />
+      {openLesson && <LessonFrame lesson={openLesson} onClose={() => setLessonId(null)} />}
 
       {onBack && (
         <div style={{ textAlign: "center", marginBottom: 14 }}>
@@ -2066,6 +2107,26 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       )}
 
       {isCapFour && <RumbosBook />}
+
+      {isCapFour && (
+        <section className="rumbos-practice" aria-label="Уроки архитектуры живой речи">
+          <div className="rumbos-section-kicker">Уроки</div>
+          <h2>Первый вход</h2>
+          <p>Слушай, повторяй и собирай речь шаг за шагом.</p>
+          {RUMBOS_LESSONS.map((lesson) => (
+            <button
+              key={lesson.id}
+              className="rumbos-practice-card is-primary"
+              aria-label={`Урок ${lesson.number}. ${lesson.title}`}
+              onClick={() => setLessonId(lesson.id)}
+            >
+              <span className="rumbos-practice-number">{String(lesson.number).padStart(2, "0")}</span>
+              <span><strong>{lesson.title}</strong><small>{lesson.subtitle}</small></span>
+              <b>›</b>
+            </button>
+          ))}
+        </section>
+      )}
 
       {isCapFour && (
         <section className="rumbos-practice" aria-label="Практика архитектуры живой речи">
