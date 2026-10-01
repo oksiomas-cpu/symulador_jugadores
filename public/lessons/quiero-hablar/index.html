@@ -1,0 +1,2411 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
+<title>Quiero Hablar</title>
+<style>
+  :root{
+    --bg:#f6efe0;
+    --paper:#fbf6ea;
+    --paper-edge:#e9dfc4;
+    --ink:#20392f;
+    --ink-soft:#52685c;
+    --accent:#7c2434;
+    --accent-soft:#a6535f;
+    --gold:#b3862e;
+    --gold-soft:#e2cf9c;
+    --glass-a:#dcece2;
+    --glass-b:#f1f7f1;
+    --btn:#fcf7ea;
+    --font-display:'Playfair Display', 'Iowan Old Style', Georgia, serif;
+    --font-body:'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  }
+
+  * { box-sizing:border-box; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    padding-inline:16px;
+    padding-block:14px;
+  }
+
+  a{color:inherit;}
+
+  .wrap{
+    max-width:840px;
+    margin-inline:auto;
+  }
+
+  .crumbs{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+    font-family:var(--font-display);
+    color:var(--ink-soft);
+    font-size:1rem;
+    letter-spacing:0.02em;
+    margin-bottom:6px;
+  }
+  .crumbs .back{color:var(--accent); font-weight:600;}
+  .crumbs .sep{opacity:0.5;}
+
+  .eyebrow-top{
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:0.16em;
+    color:var(--accent);
+    font-size:0.78rem;
+    margin-bottom:4px;
+  }
+
+  h1.title{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(1.9rem, 4.6vw, 2.6rem);
+    color:var(--ink);
+    margin:0 0 18px 0;
+    text-wrap:balance;
+  }
+
+  /* stepper */
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:0;
+    margin-bottom:14px;
+    overflow-x:auto;
+    padding-bottom:6px;
+  }
+  .stepper .node{
+    flex:none;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1.5px solid var(--gold);
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-display);
+    font-size:0.95rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background .2s, color .2s, transform .15s;
+  }
+  .stepper .node:hover{ transform:translateY(-1px); }
+  .stepper .node.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--paper);
+  }
+  .stepper .line{
+    flex:1 1 12px;
+    min-width:8px;
+    height:1px;
+    background:var(--gold-soft);
+  }
+
+  .progress-label{
+    text-align:center;
+    font-family:var(--font-display);
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    letter-spacing:0.06em;
+    margin-bottom:10px;
+  }
+
+  /* cards */
+  .stage{
+    display:flex;
+    justify-content:center;
+  }
+
+  .card{
+    position:relative;
+    aspect-ratio:1/1;
+    width:var(--card-size, min(94vw, 720px));
+    height:var(--card-size, min(94vw, 720px));
+    margin-inline:auto;
+    border-radius:26px;
+    border:2px solid var(--gold);
+    box-shadow:0 0 0 7px var(--paper) inset, 0 14px 34px -18px rgba(32,57,47,0.55);
+    background:var(--paper);
+    padding:clamp(28px, 5vw, 48px);
+    display:flex;
+    flex-direction:column;
+    overflow:auto;
+  }
+  .card .eyebrow{
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:0.16em;
+    color:var(--accent);
+    font-size:clamp(0.82rem, 2vw, 1rem);
+    text-align:center;
+    margin-bottom:14px;
+  }
+
+  .card h2{
+    font-family:var(--font-display);
+    font-weight:600;
+    text-align:center;
+    color:var(--ink);
+    font-size:clamp(1.6rem, 4.6vw, 2.3rem);
+    margin:0 0 20px 0;
+    text-wrap:balance;
+  }
+
+  .card .body-copy{
+    font-family:var(--font-body);
+    font-size:clamp(1.5rem, 3.6vw, 1.95rem);
+    line-height:1.5;
+    color:var(--ink);
+    text-align:center;
+  }
+
+  .card .note{
+    font-family:var(--font-body);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:clamp(1.05rem, 2.4vw, 1.25rem);
+    text-align:center;
+    margin-top:auto;
+    padding-top:16px;
+  }
+
+  .scene-lines{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin:auto 0;
+  }
+  .scene-lines .es{ font-size:clamp(1.5rem, 3.8vw, 1.9rem); }
+  .scene-lines .highlight{
+    color:var(--accent);
+    font-weight:600;
+  }
+
+  .glass{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    border-radius:18px;
+    border:1.5px solid var(--gold-soft);
+    background:linear-gradient(160deg, var(--glass-a), var(--glass-b));
+    margin:auto 0;
+    padding:26px;
+    text-align:center;
+  }
+  .glass .icon{ font-size:3.2rem; }
+  .glass .qcode{
+    font-family:var(--font-display);
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    font-size:1.05rem;
+  }
+
+  .audio-player{
+    width:100%;
+    max-width:420px;
+    margin-top:6px;
+  }
+
+  .phrase-big{
+    font-family:var(--font-display);
+    text-align:center;
+    font-size:clamp(1.9rem, 5.6vw, 2.7rem);
+    line-height:1.35;
+    margin:auto 0;
+  }
+  .phrase-big .op{ color:var(--accent); }
+  .phrase-big .ac{ color:var(--gold); }
+
+  .historia{
+    font-family:var(--font-body);
+    font-size:clamp(1.15rem, 2.6vw, 1.5rem);
+    line-height:1.7;
+    text-align:left;
+    margin:auto 0;
+    overflow-y:auto;
+  }
+  .historia p{ margin:0 0 12px 0; }
+  .hl-op{ color:var(--accent); font-weight:600; }
+  .hl-prep{ color:#2f6f76; font-weight:600; }
+  .hl-domicilio{ color:var(--gold); font-weight:600; }
+  .hl-day{ color:#b35a2e; font-weight:600; }
+  .hl-time{ color:#3a6ea5; font-weight:600; }
+  .historia-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 16px;
+    font-family:var(--font-body);
+    font-style:italic;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin-top:14px;
+  }
+  .historia-legend span b{ font-style:normal; }
+  .arrow-row{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    margin-top:18px;
+    font-family:var(--font-body);
+    font-size:1.05rem;
+    color:var(--ink-soft);
+    letter-spacing:0.04em;
+  }
+  .arrow-row span{ display:flex; align-items:center; gap:6px; }
+
+  .btn{
+    font-family:var(--font-display);
+    font-size:1.12rem;
+    background:var(--btn);
+    border:1.6px solid var(--gold);
+    color:var(--ink);
+    border-radius:999px;
+    padding:13px 24px;
+    cursor:pointer;
+    transition:background .15s, color .15s, transform .1s;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn.done{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:var(--paper);
+  }
+  .btn.ghost{ border-color:var(--gold-soft); color:var(--ink-soft); }
+  .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .btn:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  .btn-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    justify-content:center;
+    margin:auto 0;
+  }
+
+  .swap-out{
+    text-align:center;
+    font-family:var(--font-display);
+    font-size:clamp(1.6rem, 4.6vw, 2.1rem);
+    color:var(--ink);
+    margin-bottom:20px;
+    min-height:1.5em;
+  }
+  .swap-out b{ color:var(--accent); }
+
+  .field{
+    width:100%;
+    font-family:var(--font-body);
+    font-size:1.3rem;
+    padding:13px 16px;
+    border-radius:12px;
+    border:1.6px solid var(--gold-soft);
+    background:#fffdf6;
+    color:var(--ink);
+  }
+  .field:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .stack-mid{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    margin:auto 0;
+    align-items:center;
+    width:100%;
+  }
+
+  .prompt-es{
+    font-family:var(--font-display);
+    font-style:italic;
+    font-size:clamp(1.3rem, 3.2vw, 1.6rem);
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  .table-ref{
+    width:100%;
+    border-collapse:collapse;
+    font-family:var(--font-body);
+    font-size:clamp(1.05rem, 2.4vw, 1.25rem);
+    margin-top:16px;
+  }
+  .table-ref td{
+    border-top:1px solid var(--gold-soft);
+    padding:8px 10px;
+    text-align:center;
+    color:var(--ink-soft);
+  }
+  .table-ref .lbl{
+    text-align:center;
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    font-size:0.75rem;
+    color:var(--accent);
+    padding-top:16px;
+    border-top:none;
+  }
+
+  .faces{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  .faces .btn.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--paper);
+  }
+
+  .face-panel{
+    text-align:center;
+    font-family:var(--font-display);
+    font-size:clamp(1.6rem, 4.4vw, 2.1rem);
+    color:var(--ink);
+    margin:auto 0;
+  }
+  .face-panel .ctx{
+    display:block;
+    font-family:var(--font-body);
+    font-style:italic;
+    font-size:clamp(1.05rem, 2.6vw, 1.25rem);
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+
+  .script{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:auto 0;
+    width:100%;
+  }
+  .line{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    padding:8px 12px;
+    border-radius:12px;
+    transition:background .2s, color .2s;
+  }
+  .line .who{
+    font-family:var(--font-display);
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    flex:none;
+    width:78px;
+  }
+  .line .txt{ font-family:var(--font-body); font-size:clamp(1.05rem, 2.4vw, 1.3rem); }
+  .line.you{ background:rgba(124,36,52,0.09); }
+  .line.you .who{ color:var(--accent); }
+  .line.clerk{ background:transparent; }
+  .swap-toggle{ text-align:center; margin-top:14px; }
+
+  textarea.field{ resize:vertical; min-height:78px; font-family:var(--font-body); }
+
+  .check-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    justify-content:center;
+    font-family:var(--font-body);
+    font-size:1.25rem;
+    margin:auto 0 14px;
+  }
+  .check-row input[type=checkbox]{
+    width:24px; height:24px; accent-color:var(--accent);
+  }
+
+  .qa-list{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin:auto 0;
+    overflow-y:auto;
+  }
+  .qa-item{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    border-top:1px solid var(--gold-soft);
+    padding-top:12px;
+  }
+  .qa-item:first-child{ border-top:none; padding-top:0; }
+  .qa-q{
+    font-family:var(--font-display);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:clamp(0.98rem, 2.2vw, 1.15rem);
+  }
+  .qa-a{
+    font-family:var(--font-body);
+    color:var(--accent);
+    font-size:clamp(1.02rem, 2.3vw, 1.2rem);
+  }
+  .btn.small{
+    font-size:0.85rem;
+    padding:7px 14px;
+    align-self:flex-start;
+  }
+
+  .self-check{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:auto 0;
+    overflow-y:auto;
+  }
+  .self-check label{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-family:var(--font-body);
+    font-size:clamp(0.98rem, 2vw, 1.14rem);
+    line-height:1.35;
+    text-align:left;
+    color:var(--ink);
+  }
+  .self-check input[type=checkbox]{
+    margin-top:3px;
+    width:20px; height:20px;
+    accent-color:var(--accent);
+    flex:none;
+  }
+  .self-check textarea.field{ margin-top:4px; }
+
+  .anchor-word{
+    font-family:var(--font-display);
+    font-size:clamp(2.2rem, 7vw, 3rem);
+    text-align:center;
+    color:var(--accent);
+    margin:auto 0 14px;
+  }
+
+  /* schema (operator) card */
+  .schema{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    margin:auto 0;
+    width:100%;
+  }
+  .schema .op-word{
+    font-family:var(--font-display);
+    font-size:clamp(2.1rem, 6vw, 2.9rem);
+    color:var(--accent);
+    background:var(--btn);
+    border:2px solid var(--accent);
+    border-radius:20px;
+    padding:10px 30px;
+  }
+  .schema .down-arrow{
+    font-size:1.6rem;
+    color:var(--gold);
+  }
+  .schema .inf-tag{
+    font-family:var(--font-body);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:1.1rem;
+  }
+  .schema .groups{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(100px, 1fr));
+    gap:12px;
+    width:100%;
+  }
+  .schema .grp{
+    min-width:0;
+    border:1.5px solid var(--gold-soft);
+    border-radius:14px;
+    background:linear-gradient(160deg, var(--glass-a), var(--glass-b));
+    padding:14px 8px;
+    text-align:center;
+  }
+  .schema .grp .tag{
+    font-family:var(--font-display);
+    color:var(--gold);
+    font-size:1.05rem;
+    letter-spacing:0.08em;
+    margin-bottom:8px;
+  }
+  .schema .grp .verbs{
+    font-family:var(--font-body);
+    font-size:1.15rem;
+    color:var(--ink);
+    line-height:1.5;
+  }
+
+  /* dialogue audio-by-role */
+  .role-audio{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    margin-bottom:14px;
+  }
+  .role-audio .row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .role-audio .role-label{
+    font-family:var(--font-display);
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    flex:none;
+    width:78px;
+  }
+  .role-audio audio{
+    flex:1;
+    height:32px;
+  }
+  .audio-hint{
+    font-family:var(--font-body);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    text-align:center;
+    margin-bottom:10px;
+  }
+
+  /* nav */
+  .nav{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+    margin-top:14px;
+  }
+  .nav .btn{ min-width:150px; text-align:center; }
+
+  footer.credit{
+    text-align:center;
+    font-family:var(--font-body);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    margin-top:26px;
+  }
+
+  /* glossary */
+  .glossary-fab{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:50;
+    font-family:var(--font-display);
+    font-size:1rem;
+    background:var(--accent);
+    color:var(--paper);
+    border:none;
+    border-radius:999px;
+    padding:13px 22px;
+    box-shadow:0 10px 24px -10px rgba(32,57,47,0.55);
+    cursor:pointer;
+    transition:transform .12s;
+  }
+  .glossary-fab:hover{ transform:translateY(-2px); }
+
+  .glossary-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:rgba(20,20,19,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .glossary-overlay[hidden]{ display:none; }
+
+  .glossary-panel{
+    width:100%;
+    max-width:560px;
+    max-height:82vh;
+    overflow-y:auto;
+    background:var(--paper);
+    border:2px solid var(--gold);
+    border-radius:22px;
+    padding:clamp(20px, 4vw, 34px);
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.5);
+  }
+  .glossary-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .glossary-head h2{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(1.4rem, 4vw, 1.8rem);
+    color:var(--ink);
+    margin:0;
+  }
+  .glossary-progress{
+    font-family:var(--font-body);
+    color:var(--accent);
+    font-size:0.92rem;
+    margin-top:6px;
+  }
+  .glossary-close{
+    font-family:var(--font-display);
+    font-size:0.95rem;
+    background:var(--btn);
+    border:1.6px solid var(--gold);
+    color:var(--ink);
+    border-radius:999px;
+    padding:8px 16px;
+    cursor:pointer;
+    flex:none;
+  }
+  .glossary-group{ margin-bottom:18px; }
+  .glossary-group:last-child{ margin-bottom:0; }
+  .glossary-group-title{
+    font-family:var(--font-display);
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    font-size:0.78rem;
+    color:var(--accent);
+    margin-bottom:8px;
+  }
+  .glossary-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:9px 0;
+    border-top:1px solid var(--gold-soft);
+    transition:opacity .15s;
+  }
+  .glossary-group .glossary-item:first-of-type{ border-top:none; padding-top:0; }
+  .glossary-check{
+    flex:none;
+    display:flex;
+    align-items:center;
+  }
+  .glossary-checkbox{
+    width:20px;
+    height:20px;
+    accent-color:var(--accent);
+    cursor:pointer;
+  }
+  .glossary-main{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .glossary-word{
+    font-family:var(--font-display);
+    font-size:1.12rem;
+    color:var(--ink);
+  }
+  .glossary-transcription{
+    font-family:var(--font-body);
+    font-style:italic;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+  }
+  .glossary-ru{
+    flex:none;
+    max-width:42%;
+    font-family:var(--font-body);
+    color:var(--ink-soft);
+    font-size:1rem;
+    text-align:right;
+  }
+  .glossary-item.is-own .glossary-word::after{ content:' · моё'; font-family:var(--font-body); font-style:italic; font-size:0.8rem; color:var(--accent); }
+  .glossary-del{ flex:none; background:none; border:none; color:var(--ink-soft); font-size:1.1rem; cursor:pointer; padding:4px 6px; }
+  .glossary-add-toggle{ margin-top:8px; font-family:var(--font-body); font-size:0.95rem; background:none; border:1.4px dashed var(--gold); color:var(--accent); border-radius:999px; padding:6px 14px; cursor:pointer; }
+  .glossary-add-form{ margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+  .glossary-add-form[hidden]{ display:none; }
+  .glossary-add-form input{ flex:1 1 140px; min-width:0; font-family:var(--font-body); font-size:16px; padding:9px 12px; border:1.4px solid var(--gold-soft); border-radius:12px; background:var(--paper); color:var(--ink); }
+  .glossary-add-form input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .glossary-add-save{ flex:none; font-family:var(--font-display); font-size:0.95rem; background:var(--accent); color:var(--paper); border:none; border-radius:999px; padding:9px 18px; cursor:pointer; }
+  .glossary-item.is-known{ opacity:0.48; }
+  .glossary-item.is-known .glossary-word{ text-decoration:line-through; }
+  /* grammar block 17+ */
+  .op-list{ display:flex; flex-direction:column; gap:7px; width:100%; }
+  .op-row{ display:grid; grid-template-columns:minmax(70px,auto) 1fr; gap:2px 14px; align-items:baseline; border:1.5px solid var(--gold-soft); border-radius:14px; background:linear-gradient(160deg, var(--glass-a), var(--glass-b)); padding:7px 14px; }
+  .op-name{ grid-row:span 2; font-family:var(--font-display); color:var(--accent); font-size:1.25rem; }
+  .op-es{ font-family:var(--font-body); font-size:clamp(1.1rem,2.6vw,1.35rem); color:var(--ink); }
+  .op-ru{ font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:1rem; }
+  .politeness{ margin-top:10px; border-top:1px dashed var(--gold); padding-top:12px; }
+  .pol-title{ font-family:var(--font-display); color:var(--ink-soft); font-size:0.95rem; text-align:center; margin-bottom:8px; }
+  .pol-line{ display:flex; justify-content:space-between; gap:12px; font-family:var(--font-body); font-size:1.1rem; padding:3px 6px; }
+  .pol-es b{ color:var(--accent); font-weight:600; }
+  .pol-ru{ font-style:italic; color:var(--ink-soft); }
+  .pol-foot{ font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:0.95rem; text-align:center; margin-top:6px; }
+  .illu-slot{ flex:none; min-height:110px; border:1.5px dashed var(--gold); border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:14px; text-align:center; margin-bottom:14px; background:rgba(255,253,246,0.6); }
+  .illu-label{ font-family:var(--font-display); font-size:0.85rem; color:var(--gold); letter-spacing:0.06em; }
+  .illu-text{ font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:1rem; }
+  .prep-list{ display:flex; flex-direction:column; gap:10px; width:100%; margin:auto 0; }
+  .prep-item{ border-top:1px solid var(--gold-soft); padding-top:10px; text-align:center; }
+  .prep-item:first-child{ border-top:none; padding-top:0; }
+  .prep-q{ font-family:var(--font-display); font-style:italic; color:var(--ink-soft); font-size:clamp(1rem,2.4vw,1.15rem); }
+  .prep-es{ font-family:var(--font-display); font-size:clamp(1.4rem,4vw,1.9rem); color:var(--ink); margin-top:2px; }
+  .timeline{ display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .tl-node{ display:flex; flex-direction:column; align-items:center; border:1.5px solid var(--gold-soft); border-radius:14px; padding:8px 12px; background:var(--btn); }
+  .tl-big{ font-family:var(--font-display); font-size:clamp(1.05rem,2.8vw,1.3rem); }
+  .tl-ru{ font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:0.9rem; }
+  .tl-arrow{ color:var(--gold); font-size:1.3rem; }
+  .tl-hour{ color:var(--accent); font-weight:600; }
+  .audio-slot{ flex:none; border:1.5px dashed var(--gold); border-radius:999px; padding:10px 16px; text-align:center; font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:1rem; max-width:340px; margin:0 auto 12px; }
+
+  /* v14: approved warm ivory page, airy photographs and readable opaque text. */
+  :root{
+    --bg:#f7f3e9; --paper:#fbf8f0; --paper-edge:#e5d9ba;
+    --ink:#20392f; --ink-soft:#52685c; --accent:#7c2434;
+    --gold:#b3862e; --gold-soft:#e2cf9c;
+    --glass-a:#f0f7f3; --glass-b:#fffefa; --btn:#fffefa;
+  }
+  body{background:var(--bg);}
+  .card{
+    border-radius:26px; border:2px solid var(--gold);
+    box-shadow:0 0 0 11px var(--paper) inset,0 0 0 12px #e5d9ba inset,0 16px 34px -20px rgba(32,57,47,.3);
+    background:var(--paper);
+    padding:clamp(25px,4.6vw,44px);
+    gap:0;
+    scrollbar-color:#d8c69d transparent;
+  }
+  .card .series-mark{
+    flex:none; font-family:var(--font-display); font-size:clamp(.68rem,1.6vw,.82rem);
+    font-weight:700; color:#98712a; letter-spacing:.10em; margin:0 0 8px;
+  }
+  .card .eyebrow{
+    flex:none; text-align:left; letter-spacing:.09em; font-weight:700;
+    font-size:clamp(.72rem,1.7vw,.9rem); margin:0 0 7px;
+  }
+  .card h2{
+    flex:none; text-align:left; font-weight:700; line-height:1.17;
+    font-size:clamp(1.55rem,4.5vw,2.5rem); margin:0 0 13px;
+  }
+  .tile-photo{
+    position:relative; flex:none; width:100%; height:clamp(112px,24vw,180px);
+    border:1.5px solid #d8c69d; border-radius:16px; overflow:hidden;
+    background:#f3f8f4; margin:0 0 15px;
+  }
+  .tile-photo img{position:absolute; max-width:none; display:block; user-select:none; pointer-events:none;}
+  .card[data-index="0"] .tile-photo{height:clamp(145px,34vw,265px);}
+  .card[data-index="1"] .tile-photo{height:clamp(110px,21vw,170px);}
+  .card[data-density="dense"] .tile-photo{height:clamp(76px,15vw,115px); margin-bottom:10px;}
+  .card[data-index="0"] .scene-lines{
+    flex:none; margin:0; gap:6px!important; width:100%;
+    background:#fffefa; border:1px solid #dfcc9f;
+    border-radius:15px; padding:clamp(13px,2.5vw,24px);
+  }
+  .scene-lines .es{line-height:1.28; font-family:var(--font-display); font-size:clamp(1.12rem,3.2vw,1.85rem);}
+  .card[data-index="0"] > .note{display:none;}
+  .card .note{line-height:1.25; padding-top:10px;}
+  .glass,.op-row,.schema .grp,.tl-node{background:#fffefa;}
+  .phrase-big,.face-panel,.prompt-es,.swap-out{background:#fffefa; border:1px solid #dfcc9f; border-radius:16px; padding:clamp(12px,2vw,22px);}
+  .prompt-es{font-style:normal;}
+  .schema{gap:0; margin:0 0 auto;}
+  .schema .op-word{
+    background:#fffefa; color:var(--ink); border:1.7px solid var(--gold);
+    min-width:45%; text-align:center; font-weight:700; padding:6px 22px;
+    font-size:clamp(1.65rem,4.7vw,2.7rem);
+  }
+  .schema .op-word small{display:block; font-size:.38em; color:var(--accent); letter-spacing:.10em; line-height:1.3;}
+  .schema .connection{display:block; width:100%; height:clamp(35px,8vw,58px); flex:none; overflow:visible;}
+  .schema .connection path{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+  .schema .connection polygon{fill:var(--gold);}
+  .schema .groups{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px;}
+  .schema .grp{padding:clamp(8px,2vw,15px) 4px; border-color:#dfcc9f;}
+  .schema .grp .tag{font-family:var(--font-display);font-weight:700;color:var(--accent);}
+  .schema .grp .verbs{font-family:var(--font-display);font-weight:600;font-size:clamp(.9rem,2.1vw,1.35rem);line-height:1.55;}
+  .schema .inf-tag{font-family:var(--font-display);font-style:normal;color:var(--ink);font-size:clamp(.9rem,1.9vw,1.1rem);margin-top:10px;text-align:center;}
+  .card[data-index="1"] > .note{font-style:normal;color:var(--accent);font-weight:600;}
+  .prep-visual-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:430px;margin:0 auto 11px;}
+  .prep-visual-pair .tile-photo{height:auto;aspect-ratio:1/1;margin:0;}
+  .prep-visual-pair .visual-label{font-family:var(--font-display);color:var(--ink);font-size:clamp(.8rem,1.8vw,1rem);text-align:center;margin-top:5px;}
+  .prep-visual-pair .visual-label b{color:var(--accent);}
+  .prep-direction{width:100%;padding:9px 12px;margin:0 0 11px;border:1px solid #dfcc9f;border-radius:14px;background:#fffefa;text-align:center;font-family:var(--font-display);color:var(--accent);font-size:clamp(1.05rem,2.7vw,1.4rem);}
+  .illu-slot{display:none;}
+  .prep-item{background:#fffefa;border:1px solid #e4d2ac!important;border-radius:14px;padding:9px 12px!important;}
+  .prep-list{gap:8px;}
+  .op-row{border-color:#dfcc9f;}
+  .politeness{background:#fffefa;border:1px solid #dfcc9f;border-radius:15px;padding:9px 13px;margin-top:12px;}
+  .line.clerk{background:#fffefa;border:1px solid #eadbb8;}
+  .line.you{background:#f6e9e9;border:1px solid #e9c7cc;}
+  .qa-item{background:#fffefa;border:1px solid #eadbb8!important;border-radius:12px;padding:9px 12px!important;}
+  .historia{background:#fffefa;border:1px solid #dfcc9f;border-radius:15px;padding:15px;}
+  .audio-slot{background:#fffefa;}
+  .card button,.nav button,.glossary-fab{touch-action:manipulation;}
+  @media (max-width:560px){
+    .card{padding:22px;}
+    .card .series-mark{font-size:.59rem;margin-bottom:5px;}
+    .card .eyebrow{font-size:.68rem;margin-bottom:5px;}
+    .card h2{font-size:clamp(1.28rem,5vw,1.65rem);margin-bottom:8px;}
+    .schema .groups{gap:5px;}
+    .schema .grp .verbs{font-size:.78rem;}
+    .prep-visual-pair{gap:7px;}
+    .prep-visual-pair .visual-label{font-size:.72rem;}
+  }
+  /* preguntas 24-26 */
+  .fx-list{ display:flex; flex-direction:column; gap:5px; width:100%; margin:auto 0; }
+  .fx-row{ display:grid; grid-template-columns:1fr 1.25fr; align-items:center; gap:2px 10px; border:1.5px solid var(--gold-soft); border-radius:12px; background:#fffefa; padding:4px 12px; }
+  .fx-q{ font-family:var(--font-display); font-style:italic; color:var(--ink-soft); font-size:clamp(0.95rem,2.4vw,1.1rem); }
+  .fx-q small{ display:block; font-style:normal; font-family:var(--font-body); font-size:0.78rem; color:var(--ink-soft); opacity:.8; }
+  .fx-a{ font-family:var(--font-display); font-size:clamp(1.15rem,3.2vw,1.45rem); color:var(--ink); text-align:right; }
+  .fx-row.is-time{ border-color:var(--gold); }
+  .fx-sentence{ text-align:center; font-family:var(--font-display); font-size:clamp(1.1rem,3.2vw,1.5rem); color:var(--ink); margin-top:6px; }
+  .fx-tag{ font-family:var(--font-body); font-style:italic; font-size:0.85rem; color:var(--accent); text-align:center; }
+  .cm-tabs{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; flex:none; }
+  .cm-tabs .btn.active{ background:var(--accent); color:var(--paper); }
+  .cm-lead{ text-align:center; font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:0.95rem; margin-bottom:6px; flex:none; }
+  .cd-chain{ display:flex; flex-direction:column; gap:6px; width:100%; overflow-y:auto; flex:1 1 auto; min-height:60px; }
+  .cd-q{ font-family:var(--font-display); font-style:italic; color:var(--ink-soft); font-size:1.02rem; }
+  .cd-a{ font-family:var(--font-body); color:var(--accent); font-size:1.08rem; padding-left:12px; border-left:2px solid var(--gold-soft); }
+  .cd-keys{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px; flex:none; }
+  .cd-input{ display:flex; gap:6px; margin-top:8px; flex:none; }
+  .cd-input input{ flex:1 1 auto; min-width:0; font-family:var(--font-body); font-size:16px; padding:9px 12px; border:1.4px solid var(--gold-soft); border-radius:12px; background:#fffefa; color:var(--ink); }
+  .cd-input input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .cd-count{ text-align:center; font-family:var(--font-body); font-size:0.88rem; color:var(--accent); margin-top:6px; flex:none; }
+  /* juegos de repaso */
+  .card.is-review{ background:linear-gradient(165deg,#fffefa,#f3efe0); }
+  .jg-lead{ text-align:center; font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:0.95rem; margin-bottom:8px; flex:none; }
+  .jg-pairs{ display:grid; grid-template-columns:1fr 1fr; gap:7px; width:100%; margin:auto 0; }
+  .jg-col{ display:flex; flex-direction:column; gap:7px; }
+  .jg-chip{ font-family:var(--font-display); font-size:clamp(1rem,2.8vw,1.2rem); background:#fffefa; border:1.5px solid var(--gold-soft); color:var(--ink); border-radius:12px; padding:8px 10px; cursor:pointer; text-align:center; transition:background .15s, border-color .15s, opacity .2s; touch-action:manipulation; }
+  .jg-chip.sel{ border-color:var(--accent); background:#f6e9ec; }
+  .jg-chip.ok{ border-color:#5d8a6a; background:#e6f0e7; color:#2f5a3b; cursor:default; }
+  .jg-chip.bad{ border-color:#b35a2e; background:#f8e3d8; }
+  .jg-chip.used{ opacity:.25; cursor:default; }
+  .jg-q{ text-align:center; font-family:var(--font-display); font-size:clamp(1.25rem,3.6vw,1.6rem); color:var(--ink); margin:6px 0 10px; }
+  .jg-q .gap{ display:inline-block; min-width:3.2em; border-bottom:2px solid var(--gold); color:var(--accent); }
+  .jg-opts{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+  .jg-built{ min-height:2.6em; border:1.5px dashed var(--gold); border-radius:14px; padding:8px 10px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center; align-items:center; margin-bottom:10px; font-family:var(--font-display); font-size:clamp(1.05rem,3vw,1.3rem); color:var(--accent); }
+  .jg-built.col{ flex-direction:column; align-items:stretch; font-size:1rem; }
+  .jg-built.col .ln{ font-family:var(--font-body); color:var(--ink); text-align:left; }
+  .jg-built.col .ln.q{ font-style:italic; color:var(--ink-soft); }
+  .jg-built.col .ln.a{ color:var(--accent); padding-left:10px; border-left:2px solid var(--gold-soft); }
+  .jg-pool{ display:flex; flex-wrap:wrap; gap:7px; justify-content:center; }
+  .jg-pool.col{ flex-direction:column; align-items:stretch; }
+  .jg-pool.col .jg-chip{ font-family:var(--font-body); font-size:0.98rem; text-align:left; }
+  .jg-status{ text-align:center; font-family:var(--font-body); color:var(--ink-soft); font-size:0.9rem; margin-top:8px; flex:none; }
+  .jg-win{ text-align:center; font-family:var(--font-display); color:#2f5a3b; font-size:clamp(1.2rem,3.4vw,1.5rem); margin-top:8px; flex:none; }
+  .jg-again{ display:block; margin:8px auto 0; }
+  @keyframes jgshake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+  .jg-chip.bad{ animation:jgshake .25s; }
+  @media (prefers-reduced-motion: reduce){ .jg-chip.bad{ animation:none; } }
+  .jg-badge{ position:fixed; left:18px; bottom:18px; z-index:50; font-family:var(--font-display); font-size:1rem; background:#fffefa; color:var(--ink); border:1.6px solid var(--gold); border-radius:999px; padding:11px 18px; box-shadow:0 10px 24px -12px rgba(32,57,47,0.45); }
+  .jg-pts{ text-align:center; font-family:var(--font-body); color:var(--accent); font-size:1rem; margin-top:2px; }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap">
+
+<div class="wrap">
+  <div class="crumbs">
+    <span class="back">&larr; Первый вход</span>
+    <span class="sep">·</span>
+    <span>Архитектура живой речи</span>
+    <span class="sep">·</span>
+    <span>Материал 1</span>
+  </div>
+  <div class="eyebrow-top">Оператор querer · черновой прогон на занятии</div>
+  <h1 class="title">Quiero hablar español</h1>
+
+  <div class="stepper" id="stepper"></div>
+  <div class="progress-label" id="progress-label"></div>
+
+  <div class="stage">
+    <div id="deck"></div>
+  </div>
+
+  <div class="nav">
+    <button class="btn" id="prevBtn">&larr; Назад</button>
+    <button class="btn" id="nextBtn">Далее &rarr;</button>
+  </div>
+
+  <footer class="credit">La Ciudad de los Sentidos · Домино живой речи · сценарий из 11 учебных шагов · 31 экран · 5 игр на повтор</footer>
+</div>
+
+<button class="glossary-fab" id="glossaryFab" type="button">📖 Словарь</button>
+<div class="glossary-overlay" id="glossaryOverlay" hidden>
+  <div class="glossary-panel">
+    <div class="glossary-head">
+      <div>
+        <h2>Словарь материала</h2>
+        <div class="glossary-progress" id="glossaryProgress">Знаю: 0 из 0</div>
+      </div>
+      <button class="glossary-close" id="glossaryClose" type="button">Закрыть ✕</button>
+    </div>
+    <div id="glossaryBody"></div>
+  </div>
+</div>
+
+<script>
+window.AUDIO = {
+  historia: "/lessons/quiero-hablar/audio/historia.mp3",
+  scene: "/lessons/quiero-hablar/audio/scene.mp3",
+  pedir: "/lessons/quiero-hablar/audio/pedir.mp3",
+  tu: "/lessons/quiero-hablar/audio/tu.mp3",
+  tienda: "/lessons/quiero-hablar/audio/tienda.mp3",
+  preguntas: "/lessons/quiero-hablar/audio/preguntas.mp3"
+};
+</script>
+<script>
+(function(){
+
+  const VISUAL_ASSETS = ['/lessons/quiero-hablar/img/visual-0.webp', '/lessons/quiero-hablar/img/visual-1.webp', '/lessons/quiero-hablar/img/visual-2.webp', '/lessons/quiero-hablar/img/visual-3.webp', '/lessons/quiero-hablar/img/visual-4.webp'];
+  const VISUALS = [
+    [0,0],[1,0],[2,1],[4,0],[4,7],[4,1],[4,2],[4,3],
+    [4,4],[4,5],[3,0],[4,6],[4,7],[4,8],[2,8],[3,8],
+    [2,3],null,[3,8],[2,5],[3,4],[3,5],[3,7]
+  ];
+  const DENSE = new Set([7,10,11,13,15,16,17,21,22,23,24,25]);
+  function makePhoto(asset, tile, square=false){
+    const frame = document.createElement('div'); frame.className = 'tile-photo';
+    frame.setAttribute('role','img');
+    frame.setAttribute('aria-label','Светлая фотография из истории о покупке продуктов');
+    const img = document.createElement('img'); img.alt = '';
+    img.src = VISUAL_ASSETS[asset];
+    img.dataset.asset = String(asset);
+    img.dataset.grid = asset >= 2 ? '3' : '1';
+    img.dataset.col = String(tile % 3); img.dataset.row = String(Math.floor(tile / 3));
+    frame.appendChild(img);
+    if(square) frame.classList.add('square-photo');
+    return frame;
+  }
+  function layoutPhotos(){
+    document.querySelectorAll('.tile-photo').forEach(frame=>{
+      const img=frame.querySelector('img'); if(!img) return;
+      const w=frame.clientWidth, h=frame.clientHeight;
+      if(!w || !h) return;
+      const grid=Number(img.dataset.grid);
+      if(grid===1){
+        // Cover the frame while keeping the original scene's center.
+            if(!img.naturalWidth || !img.naturalHeight) return;
+        const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight);
+        const iw=img.naturalWidth*scale, ih=img.naturalHeight*scale;
+        img.style.width=iw+'px'; img.style.height=ih+'px';
+        img.style.left=((w-iw)/2)+'px';
+        img.style.top=((h-ih)*(img.dataset.asset === '1' ? .27 : .67))+'px';
+      } else {
+        const cell=w;
+        img.style.width=(grid*cell)+'px'; img.style.height=(grid*cell)+'px';
+        img.style.left=(-Number(img.dataset.col)*cell)+'px';
+        img.style.top=(-Number(img.dataset.row)*cell-(cell-h)*.48)+'px';
+      }
+    });
+  }
+
+  const steps = [
+    {eyebrow:'Шаг 1 · Откуда всё начинается', title:'Necesito la compra', render: renderScene},
+    {eyebrow:'Схема · Как работает оператор', title:'Querer + infinitivo', render: renderSchema},
+    {eyebrow:'Ejemplos · En la pregunta está la respuesta', title:'¿Qué quieres?', render: renderQAExamples},
+    {eyebrow:'Шаг 3 · Главная фраза', title:'Наблюдение конструкции', render: renderConstruction},
+    {eyebrow:'Шаг 4 · Скажи вслух', title:'Повтори с разным ударением', render: renderSayAloud},
+    {eyebrow:'Шаг 5 · Собери фразу', title:'Замена элемента', render: renderSwap},
+    {eyebrow:'Шаг 6 · Твоя реплика', title:'¿Qué quieres pedir tú?', render: renderYourLine},
+    {eyebrow:'Juego 1 · Repaso', title:'Найди пару', render: renderJuego1, review:true},
+    {eyebrow:'Шаг 7 · Gramática en contexto', title:'Tres voces de querer', render: renderThreeVoices},
+    {eyebrow:'Голос querer · Quisiera', title:'¿Por qué quisiera?', render: renderQuisieraCard},
+    {eyebrow:'Голос querer · Quería', title:'¿Por qué quería?', render: renderQueriaCard},
+    {eyebrow:'Шаг 8 · La llamada (quisiera)', title:'Диалог со сменой ролей', render: renderDialogue},
+    {eyebrow:'Шаг 8 · La llamada (quería)', title:'Тот же звонок, другой голос', render: renderDialogueQueria},
+    {eyebrow:'Juego 2 · Repaso', title:'Вставь слово', render: renderJuego2, review:true},
+    {eyebrow:'Шаг 9 · Tu llamada real', title:'Действие', render: renderAction},
+    {eyebrow:'Шаг 10 · La prueba', title:'Что я уже могу?', render: renderSelfCheck},
+    {eyebrow:'Финал · Vuelve al principio', title:'Cierra el círculo', render: renderClosingLoop},
+    {eyebrow:'Mi historia · Todo junto', title:'Vivo en España', render: renderHistoria},
+    {eyebrow:'Juego 3 · Repaso', title:'Собери фразу', render: renderJuego3, review:true},
+    {eyebrow:'Gramática · Operadores', title:'Три оператора в этой истории', render: renderOperadores},
+    {eyebrow:'Gramática · Связь A', title:'ayudar a · llamar a', render: renderPrepA},
+    {eyebrow:'Gramática · Связь DE', title:'salir de casa', render: renderPrepDe},
+    {eyebrow:'Gramática · Связь EN', title:'vivir en España', render: renderPrepEn},
+    {eyebrow:'Gramática · a domicilio', title:'La compra llega a casa', render: renderADomicilio},
+    {eyebrow:'Gramática · Tiempo', title:'Día · parte del día · hora', render: renderTiempo},
+    {eyebrow:'Diálogo · Tiempo', title:'Три вопроса — три ответа', render: renderTresPreguntas},
+    {eyebrow:'Juego 4 · Repaso', title:'Связи и операторы', render: renderJuego4, review:true},
+    {eyebrow:'Preguntas · La fórmula', title:'Сначала — когда', render: renderFormula},
+    {eyebrow:'Preguntas · Tres caminos', title:'Вглубь · вперёд · вширь', render: renderCaminos},
+    {eyebrow:'Preguntas · Tu cadena', title:'Вопрос — ответ — вопрос', render: renderCadena},
+    {eyebrow:'Juego 5 · Repaso', title:'Собери разговор', render: renderJuego5, review:true},
+  ];
+
+  const deck = document.getElementById('deck');
+  const stepperEl = document.getElementById('stepper');
+  const progressLabel = document.getElementById('progress-label');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let current = 0;
+  const cards = [];
+  const nodes = [];
+
+  steps.forEach((s, i) => {
+    const card = document.createElement('section');
+    card.className = 'card';
+    card.hidden = i !== 0;
+    const eyebrow = document.createElement('div');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = s.eyebrow;
+    const h2 = document.createElement('h2');
+    h2.textContent = s.title;
+    card.appendChild(eyebrow);
+    card.appendChild(h2);
+    s.render(card);
+    deck.appendChild(card);
+    cards.push(card);
+
+    const node = document.createElement('div');
+    node.className = 'node' + (i === 0 ? ' active' : '');
+    node.textContent = i + 1;
+    node.addEventListener('click', () => showStep(i));
+    stepperEl.appendChild(node);
+    nodes.push(node);
+    if (i < steps.length - 1) {
+      const line = document.createElement('div');
+      line.className = 'line';
+      stepperEl.appendChild(line);
+    }
+  });
+
+  function showStep(idx){
+    idx = Math.max(0, Math.min(steps.length - 1, idx));
+    cards.forEach((c, i) => c.hidden = i !== idx);
+    nodes.forEach((n, i) => n.classList.toggle('active', i === idx));
+    current = idx;
+    progressLabel.textContent = 'Шаг ' + (idx + 1) + ' из ' + steps.length;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === steps.length - 1;
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    requestAnimationFrame(() => { if (typeof layoutPhotos === 'function') layoutPhotos(); });
+  }
+  prevBtn.addEventListener('click', () => showStep(current - 1));
+  nextBtn.addEventListener('click', () => showStep(current + 1));
+  showStep(0);
+
+  // size the square card to whatever room is left after the header/nav/footer,
+  // so the whole thing fits on one screen without scrolling to reach the buttons
+  const wrapEl = document.querySelector('.wrap');
+  const stageEl = document.querySelector('.stage');
+  function fitCard(){
+    const others = Array.from(wrapEl.children).filter(el => el !== stageEl);
+    let usedH = 0;
+    others.forEach(el => { usedH += el.getBoundingClientRect().height; });
+    const bodyStyle = getComputedStyle(document.body);
+    const vPad = parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom);
+    const availH = window.innerHeight - usedH - vPad - 24;
+    const availW = window.innerWidth - 32;
+    const size = Math.max(280, Math.min(availW, availH, 720));
+    document.documentElement.style.setProperty('--card-size', size + 'px');
+  }
+  window.addEventListener('resize', fitCard);
+  fitCard();
+
+  function renderScene(card){
+    card.style.overflowY = 'auto';
+    card.style.justifyContent = 'flex-start';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'scene-lines';
+    wrap.style.margin = '0';
+    wrap.style.gap = '6px';
+    wrap.innerHTML = `
+      <div class="es">Vivo en España.</div>
+      <div class="es">Estudio español.</div>
+      <div class="es">No puedo salir hoy.</div>
+      <div class="es highlight">Quiero pedir la compra a domicilio.</div>
+    `;
+    card.appendChild(wrap);
+
+    const audio = document.createElement('audio');
+    audio.className = 'audio-player';
+    audio.controls = true;
+    audio.src = window.AUDIO.scene;
+    audio.style.display = 'block';
+    audio.style.width = '100%';
+    audio.style.maxWidth = '340px';
+    audio.style.height = '32px';
+    audio.style.marginInline = 'auto';
+    audio.style.marginTop = '10px';
+    audio.style.flex = 'none';
+    audio.style.flex = 'none';
+    card.appendChild(audio);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.style.marginTop = '10px';
+    note.style.paddingTop = '0';
+    note.style.flex = 'none';
+    note.textContent = 'Импульс — не «хочу знать язык», а конкретная нужда сегодня.';
+    card.appendChild(note);
+  }
+
+  function renderAudio(card){
+    const glass = document.createElement('div');
+    glass.className = 'glass';
+    glass.innerHTML = `
+      <div class="icon">🎧</div>
+      <div class="qcode">No puedo salir hoy</div>
+    `;
+    const audio = document.createElement('audio');
+    audio.className = 'audio-player';
+    audio.controls = true;
+    audio.src = window.AUDIO.scene;
+    audio.style.flex = 'none';
+    audio.style.minHeight = '54px';
+    audio.style.width = '100%';
+    audio.style.maxWidth = '340px';
+    glass.appendChild(audio);
+    card.appendChild(glass);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Вся сцена целиком, естественным голосом — с этого начинается материал.';
+    card.appendChild(note);
+  }
+
+  function renderSchema(card){
+    const schema = document.createElement('div');
+    schema.className = 'schema';
+    schema.innerHTML = `
+      <div class="op-word"><small>ОПЕРАТОР</small>querer</div>
+      <svg class="connection" viewBox="0 0 600 66" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M300 0 V27 H100 V55 M300 27 V55 M300 27 H500 V55"/>
+        <polygon points="92,54 108,54 100,65"/><polygon points="292,54 308,54 300,65"/><polygon points="492,54 508,54 500,65"/>
+      </svg>
+      <div class="groups">
+        <div class="grp"><div class="tag">-AR</div><div class="verbs">hablar<br>estudiar</div></div>
+        <div class="grp"><div class="tag">-ER</div><div class="verbs">aprender<br>entender</div></div>
+        <div class="grp"><div class="tag">-IR</div><div class="verbs">vivir<br>conducir</div></div>
+      </div>
+      <div class="inf-tag">+ infinitivo</div>
+    `;
+    card.appendChild(schema);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Меняется форма querer. Действие остаётся в инфинитиве.';
+    card.appendChild(note);
+  }
+
+  function renderQAExamples(card){
+    const defs = [
+      {key:'hablar', label:'hablar', q:'¿Qué lengua quieres hablar?', verb:'hablar', rest:'español'},
+      {key:'vivir', label:'vivir', q:'¿Dónde quieres vivir?', verb:'vivir en', rest:'España'},
+      {key:'ayudar', label:'ayudar', q:'¿A quién quieres ayudar?', verb:'ayudar a', rest:'mi familia'},
+    ];
+    const faces = document.createElement('div');
+    faces.className = 'faces';
+    const buttons = {};
+    defs.forEach((d, i) => {
+      const b = document.createElement('button');
+      b.className = 'btn' + (i === 0 ? ' active' : '');
+      b.textContent = d.label;
+      buttons[d.key] = b;
+      faces.appendChild(b);
+    });
+    card.appendChild(faces);
+
+    const qEl = document.createElement('div');
+    qEl.className = 'prompt-es';
+    card.appendChild(qEl);
+
+    const aEl = document.createElement('div');
+    aEl.className = 'phrase-big';
+    aEl.style.marginTop = '18px';
+    card.appendChild(aEl);
+
+    function show(key){
+      const d = defs.find(x => x.key === key);
+      qEl.textContent = d.q;
+      aEl.innerHTML = `Quiero <span class="op">${d.verb}</span> <span class="ac">${d.rest}</span>.`;
+      Object.entries(buttons).forEach(([k, b]) => b.classList.toggle('active', k === key));
+    }
+    defs.forEach(d => buttons[d.key].addEventListener('click', () => show(d.key)));
+    show(defs[0].key);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'В самом вопросе уже звучит ответ — услышь связку раньше, чем составишь её сам.';
+    card.appendChild(note);
+  }
+
+  function renderConstruction(card){
+    const p = document.createElement('div');
+    p.className = 'phrase-big';
+    p.innerHTML = `Quiero <span class="op">pedir</span> la compra <span class="ac">a domicilio</span>.`;
+    card.appendChild(p);
+    const arrows = document.createElement('div');
+    arrows.className = 'arrow-row';
+    arrows.innerHTML = `<span>quiero → operador</span><span>&rarr;</span><span>pedir → acción</span>`;
+    card.appendChild(arrows);
+  }
+
+  function renderSayAloud(card){
+    const mid = document.createElement('div');
+    mid.className = 'stack-mid';
+    const p1 = document.createElement('div');
+    p1.className = 'prompt-es';
+    p1.innerHTML = `<b style="color:var(--accent)">Quiero</b> pedir la compra a domicilio.`;
+    const p2 = document.createElement('div');
+    p2.className = 'prompt-es';
+    p2.innerHTML = `Quiero <b style="color:var(--gold)">pedir</b> la compra a domicilio.`;
+    mid.appendChild(p1); mid.appendChild(p2);
+    card.appendChild(mid);
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+    ['С ударением на quiero','С ударением на pedir'].forEach(label=>{
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = '✓ Сказал(а): ' + label;
+      b.addEventListener('click', ()=> b.classList.toggle('done'));
+      row.appendChild(b);
+    });
+    card.appendChild(row);
+  }
+
+  function renderSwap(card){
+    const out = document.createElement('div');
+    out.className = 'swap-out';
+    const items = ['un pan','leche','unos huevos'];
+    function setOut(item){ out.innerHTML = `Quiero pedir <b>${item}</b>.`; }
+    setOut(items[0]);
+    card.appendChild(out);
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+    items.forEach((item, idx)=>{
+      const b = document.createElement('button');
+      b.className = 'btn' + (idx===0 ? ' done' : '');
+      b.textContent = item;
+      b.addEventListener('click', ()=>{
+        row.querySelectorAll('.btn').forEach(x=>x.classList.remove('done'));
+        b.classList.add('done');
+        setOut(item);
+      });
+      row.appendChild(b);
+    });
+    card.appendChild(row);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Меняется один элемент — конструкция остаётся.';
+    card.appendChild(note);
+  }
+
+  function renderYourLine(card){
+    const mid = document.createElement('div');
+    mid.className = 'stack-mid';
+    const audio = document.createElement('audio');
+    audio.className = 'audio-player';
+    audio.controls = true;
+    audio.src = window.AUDIO.pedir;
+    audio.style.flex = 'none';
+    audio.style.minHeight = '54px';
+    audio.style.width = '100%';
+    audio.style.maxWidth = '340px';
+    mid.appendChild(audio);
+    const prompt = document.createElement('div');
+    prompt.className = 'prompt-es';
+    prompt.textContent = '¿Qué quieres pedir tú?';
+    mid.appendChild(prompt);
+    const input = document.createElement('input');
+    input.className = 'field';
+    input.type = 'text';
+    input.id = 'your-line-input';
+    input.placeholder = 'agua, fruta, medicinas…';
+    mid.appendChild(input);
+    const out = document.createElement('div');
+    out.className = 'swap-out';
+    out.style.marginTop = '6px';
+    out.hidden = true;
+    mid.appendChild(out);
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Собрать фразу';
+    btn.addEventListener('click', ()=>{
+      const v = input.value.trim();
+      if (v) { out.innerHTML = `Quiero pedir <b>${v}</b>.`; out.hidden = false; } else { out.hidden = true; }
+    });
+    mid.appendChild(btn);
+    card.appendChild(mid);
+  }
+
+  function renderThreeVoices(card){
+    const faces = document.createElement('div');
+    faces.className = 'faces';
+    const defs = [
+      {key:'quiero', label:'quiero', html:'yo quiero <span class="ctx">решение себе, дома — прямо, сегодня</span>'},
+      {key:'quisiera', label:'quisiera', html:'(yo) quisiera <span class="ctx">вежливая просьба к незнакомому — subjuntivo de cortesía</span>'},
+      {key:'queria', label:'quería', html:'(yo) quería <span class="ctx">мягкая просьба, разговорно — не про прошлое, про смягчение сейчас</span>'},
+    ];
+    const buttons = {};
+    defs.forEach((d, i) => {
+      const b = document.createElement('button');
+      b.className = 'btn' + (i === 0 ? ' active' : '');
+      b.textContent = d.label;
+      buttons[d.key] = b;
+      faces.appendChild(b);
+    });
+    card.appendChild(faces);
+
+    const panel = document.createElement('div');
+    panel.className = 'face-panel';
+    function show(key){
+      const d = defs.find(x => x.key === key);
+      panel.innerHTML = d.html;
+      defs.forEach(x => buttons[x.key].classList.toggle('active', x.key === key));
+    }
+    show('quiero');
+    defs.forEach(d => d && buttons[d.key].addEventListener('click', () => show(d.key)));
+    card.appendChild(panel);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Три голоса — не три уровня сложности. Все про сегодня, разница только в мягкости.';
+    card.appendChild(note);
+  }
+
+  function renderQuisieraCard(card){
+    const p = document.createElement('div');
+    p.className = 'phrase-big';
+    p.innerHTML = `<span class="op">Quisiera</span> pedir la compra a domicilio.`;
+    card.appendChild(p);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Грамматически это imperfecto de subjuntivo — но здесь он работает не как время, а как вежливость (subjuntivo de cortesía). Настоящий кондициональ, querría, испанцы в быту почти не говорят — предпочитают именно quisiera. Звучит один раз, в открытии просьбы к незнакомому человеку.';
+    card.appendChild(note);
+  }
+
+  function renderQueriaCard(card){
+    const p = document.createElement('div');
+    p.className = 'phrase-big';
+    p.innerHTML = `<span class="op">Quería</span> pedir la compra a domicilio.`;
+    card.appendChild(p);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Грамматически это imperfecto de indicativo — прошедшее время. Но в этой роли это imperfecto de cortesía: речь не о прошлом, а о том же самом сейчас, сказанном ещё мягче и разговорнее, чем quisiera. Прошедшая форма — иллюзия для непривычного уха.';
+    card.appendChild(note);
+  }
+
+  function renderRoleAudio(card){
+    const wrap = document.createElement('div');
+    wrap.className = 'role-audio';
+    wrap.innerHTML = `
+      <div class="row">
+        <span class="role-label">Tienda</span>
+        <audio controls></audio>
+      </div>
+      <div class="row">
+        <span class="role-label">Tú</span>
+        <audio controls></audio>
+      </div>
+    `;
+    const auds = wrap.querySelectorAll('audio');
+    auds[0].src = window.AUDIO.tienda;
+    auds[1].src = window.AUDIO.tu;
+    auds.forEach(a => { a.style.flex = 'none'; a.style.minHeight = '32px'; });
+    card.appendChild(wrap);
+    const hint = document.createElement('div');
+    hint.className = 'audio-hint';
+    hint.textContent = 'Включай нужную роль — после каждой реплики стоп, чтобы вторую сказал ученик.';
+    card.appendChild(hint);
+  }
+
+  function renderDialogue(card){
+    renderRoleAudio(card);
+    const lines = [
+      {who:'Tienda', txt:'¿Diga?', role:'clerk'},
+      {who:'Tú', txt:'Buenos días. Quisiera pedir la compra a domicilio, por favor.', role:'you'},
+      {who:'Tienda', txt:'Sí, claro. ¿Qué necesita?', role:'clerk'},
+      {who:'Tú', txt:'Pan, leche y huevos.', role:'you'},
+      {who:'Tienda', txt:'Muy bien. ¿Para cuándo la quiere?', role:'clerk'},
+      {who:'Tú', txt:'Para mañana por la mañana, si es posible.', role:'you'},
+      {who:'Tienda', txt:'Perfecto, sin problema. ¿Algo más?', role:'clerk'},
+      {who:'Tú', txt:'No, eso es todo. Gracias.', role:'you'},
+    ];
+    const script = document.createElement('div');
+    script.className = 'script';
+    lines.forEach(l=>{
+      const row = document.createElement('div');
+      row.className = 'line ' + l.role;
+      row.innerHTML = `<span class="who">${l.who}</span><span class="txt">${l.txt}</span>`;
+      script.appendChild(row);
+    });
+    card.appendChild(script);
+
+    const toggleWrap = document.createElement('div');
+    toggleWrap.className = 'swap-toggle';
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Поменяться ролями';
+    btn.addEventListener('click', ()=>{
+      script.querySelectorAll('.line').forEach(row=>{
+        row.classList.toggle('you');
+        row.classList.toggle('clerk');
+      });
+    });
+    toggleWrap.appendChild(btn);
+    card.appendChild(toggleWrap);
+  }
+
+  function renderDialogueQueria(card){
+    const lines = [
+      {who:'Tienda', txt:'¿Diga?', role:'clerk'},
+      {who:'Tú', txt:'Buenos días. Quería pedir la compra a domicilio, por favor.', role:'you'},
+      {who:'Tienda', txt:'Sí, claro. ¿Qué necesita?', role:'clerk'},
+      {who:'Tú', txt:'Pan, leche y huevos.', role:'you'},
+      {who:'Tienda', txt:'Muy bien. ¿Para cuándo la quiere?', role:'clerk'},
+      {who:'Tú', txt:'Para mañana por la mañana, si es posible.', role:'you'},
+      {who:'Tienda', txt:'Perfecto, sin problema. ¿Algo más?', role:'clerk'},
+      {who:'Tú', txt:'No, eso es todo. Gracias.', role:'you'},
+    ];
+    const script = document.createElement('div');
+    script.className = 'script';
+    lines.forEach(l=>{
+      const row = document.createElement('div');
+      row.className = 'line ' + l.role;
+      row.innerHTML = `<span class="who">${l.who}</span><span class="txt">${l.txt}</span>`;
+      script.appendChild(row);
+    });
+    card.appendChild(script);
+
+    const toggleWrap = document.createElement('div');
+    toggleWrap.className = 'swap-toggle';
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Поменяться ролями';
+    btn.addEventListener('click', ()=>{
+      script.querySelectorAll('.line').forEach(row=>{
+        row.classList.toggle('you');
+        row.classList.toggle('clerk');
+      });
+    });
+    toggleWrap.appendChild(btn);
+    card.appendChild(toggleWrap);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Тот же звонок, только первая реплика мягче. Смысл и результат — те же. Аудио к этой версии пока не записано — используй запись из шага «quisiera» как опору по ритму.';
+    card.appendChild(note);
+  }
+
+  function renderAction(card){
+    const mid = document.createElement('div');
+    mid.className = 'stack-mid';
+    const p = document.createElement('div');
+    p.className = 'prompt-es';
+    p.textContent = 'Произнеси свой заказ вслух — как будто это настоящий звонок.';
+    mid.appendChild(p);
+    const ta = document.createElement('textarea');
+    ta.className = 'field';
+    ta.id = 'action-note';
+    ta.placeholder = 'Quiero pedir… / Quisiera pedir…';
+    mid.appendChild(ta);
+    card.appendChild(mid);
+
+    const revealText = document.createElement('div');
+    revealText.className = 'body-copy';
+    revealText.hidden = true;
+    revealText.style.marginTop = '14px';
+    revealText.textContent = 'Quisiera pedir la compra a domicilio: pan, huevos y leche, porque hoy no puedo salir de casa.';
+
+    const revealWrap = document.createElement('div');
+    revealWrap.className = 'swap-toggle';
+    const revealBtn = document.createElement('button');
+    revealBtn.className = 'btn';
+    revealBtn.textContent = 'Сверить — ver el monólogo completo';
+    revealBtn.addEventListener('click', ()=>{
+      revealText.hidden = !revealText.hidden;
+      revealBtn.textContent = revealText.hidden ? 'Сверить — ver el monólogo completo' : 'Ocultar';
+    });
+    revealWrap.appendChild(revealBtn);
+    card.appendChild(revealWrap);
+    card.appendChild(revealText);
+
+    const revealNote = document.createElement('div');
+    revealNote.className = 'note';
+    revealNote.textContent = 'Сначала скажи по-своему — свериться можно потом. Твой вариант тоже верный, если работает конструкция.';
+    card.appendChild(revealNote);
+  }
+
+  function renderSelfCheck(card){
+    const items = [
+      'Могу сам(а) произнести Quiero pedir la compra a domicilio.',
+      'Понимаю, почему после quiero стоит pedir, а не другая форма — querer тянет за собой infinitivo.',
+      'Понимаю, зачем нужен предлог a в a domicilio.',
+      'Понимаю, когда нужен артикль (un pan, unos huevos), а когда нет (leche).',
+      'Различаю quiero / quisiera / quería и знаю, какую форму выбрал(а) бы сам(а) с незнакомым человеком.',
+      'Могу сыграть обе роли в диалоге со звонком в магазин.',
+      'Смог(ла) произнести свой собственный заказ вслух — не чужой пример.',
+    ];
+    const list = document.createElement('div');
+    list.className = 'self-check';
+    items.forEach((text, i) => {
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'self-check-' + i;
+      const span = document.createElement('span');
+      span.textContent = text;
+      label.appendChild(cb);
+      label.appendChild(span);
+      list.appendChild(label);
+    });
+    const ta = document.createElement('textarea');
+    ta.className = 'field';
+    ta.placeholder = 'Что осталось непонятным?';
+    list.appendChild(ta);
+    card.appendChild(list);
+  }
+
+  function renderClosingLoop(card){
+    const pairs = [
+      {q:'¿Dónde vives?', a:'Vivo en España.'},
+      {q:'¿Qué estudias?', a:'Estudio español.'},
+      {q:'¿Hoy puedes salir de casa?', a:'No, hoy no puedo salir de casa.'},
+      {q:'¿Qué necesitas para preparar la cena o el desayuno?', a:'Necesito pan, leche y huevos.'},
+      {q:'Si no puedes salir, ¿qué puedes hacer?', a:'Puedo llamar a la tienda.'},
+      {q:'Por eso, ¿qué quieres hacer?', a:'Quiero pedir la compra a domicilio.'},
+    ];
+    const list = document.createElement('div');
+    list.className = 'qa-list';
+    pairs.forEach((p, i) => {
+      const item = document.createElement('div');
+      item.className = 'qa-item';
+      const q = document.createElement('div');
+      q.className = 'qa-q';
+      q.textContent = p.q;
+      const a = document.createElement('div');
+      a.className = 'qa-a';
+      a.textContent = p.a;
+      a.hidden = true;
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      btn.textContent = 'Mostrar respuesta';
+      btn.addEventListener('click', () => {
+        a.hidden = !a.hidden;
+        btn.textContent = a.hidden ? 'Mostrar respuesta' : 'Ocultar';
+      });
+      item.appendChild(q);
+      item.appendChild(btn);
+      item.appendChild(a);
+      list.appendChild(item);
+    });
+    card.appendChild(list);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Сначала ответь сам вслух — потом проверь. Круг замыкается там же, где начался.';
+    card.appendChild(note);
+
+    const replayWrap = document.createElement('div');
+    replayWrap.className = 'glass';
+    replayWrap.style.marginTop = '18px';
+    replayWrap.innerHTML = `
+      <div class="icon">🎧</div>
+      <div class="qcode">Necesito la compra</div>
+    `;
+    const replayAudio = document.createElement('audio');
+    replayAudio.className = 'audio-player';
+    replayAudio.controls = true;
+    replayAudio.src = window.AUDIO.scene;
+    replayAudio.style.flex = 'none';
+    replayAudio.style.minHeight = '54px';
+    replayAudio.style.width = '100%';
+    replayAudio.style.maxWidth = '340px';
+    replayWrap.appendChild(replayAudio);
+    card.appendChild(replayWrap);
+
+    const replayNote = document.createElement('div');
+    replayNote.className = 'note';
+    replayNote.textContent = 'Ahora escucha el monólogo entero una vez más — y cuéntalo tú, de memoria, sin pistas.';
+    card.appendChild(replayNote);
+  }
+
+  function renderHistoria(card){
+    const wrap = document.createElement('div');
+    wrap.className = 'historia';
+    wrap.innerHTML = `
+      <p><span class="hl-prep">Vivo en</span> España. Estudio español porque <span class="hl-op">quiero</span> hablar español.</p>
+      <p><span class="hl-op">Quiero</span> <span class="hl-prep">vivir en</span> España y <span class="hl-op">quiero</span> <span class="hl-prep">ayudar a</span> mi familia.</p>
+      <p>Hoy <span class="hl-op">no puedo</span> <span class="hl-prep">salir de</span> casa. Necesito la compra: pan, leche y huevos.</p>
+      <p><span class="hl-op">Voy a</span> <span class="hl-prep">llamar a</span> la tienda y <span class="hl-op">voy a</span> decir: <span class="hl-op">quisiera</span> pedir la compra <span class="hl-domicilio">a domicilio</span>, por favor.</p>
+      <p>La tienda me preguntará: ¿<span class="hl-day">Para cuándo</span> la <span class="hl-op">quiere</span>?</p>
+      <p>Y yo diré: <span class="hl-day">para mañana</span> <span class="hl-time">por la mañana</span>, si es posible.</p>
+      <p>Gracias.</p>
+    `;
+    card.appendChild(wrap);
+
+    const audio = document.createElement('audio');
+    audio.className = 'audio-player';
+    audio.controls = true;
+    audio.src = window.AUDIO.historia;
+    audio.style.display = 'block';
+    audio.style.width = '100%';
+    audio.style.maxWidth = '340px';
+    audio.style.marginInline = 'auto';
+    audio.style.marginTop = '10px';
+    audio.style.flex = 'none';
+    audio.style.minHeight = '54px';
+    card.appendChild(audio);
+  }
+
+  function renderOperadores(card){
+    const rows = [
+      {op:'querer', es:'Quiero pedir la compra.', ru:'Чего я хочу'},
+      {op:'poder', es:'No puedo salir.', ru:'Что я могу или не могу'},
+      {op:'ir a', es:'Voy a llamar a la tienda.', ru:'Что я собираюсь сделать'},
+    ];
+    const list = document.createElement('div');
+    list.className = 'op-list';
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'op-row';
+      row.innerHTML = `<div class="op-name">${r.op}</div><div class="op-es">${r.es}</div><div class="op-ru">${r.ru}</div>`;
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.style.marginTop = '14px';
+    note.style.paddingTop = '0';
+    note.textContent = 'Оператор показывает моё отношение к действию: хочу, могу или собираюсь. Само действие называю инфинитивом: pedir, salir, llamar.';
+    card.appendChild(note);
+
+    const pol = document.createElement('div');
+    pol.className = 'politeness';
+    pol.innerHTML = `
+      <div class="pol-title">Уже знакомо · тройная вежливость одной просьбы</div>
+      <div class="pol-line"><span class="pol-es"><b>Quiero</b> pedir…</span><span class="pol-ru">прямо</span></div>
+      <div class="pol-line"><span class="pol-es"><b>Quisiera</b> pedir…</span><span class="pol-ru">вежливо</span></div>
+      <div class="pol-line"><span class="pol-es"><b>Quería</b> pedir…</span><span class="pol-ru">мягко и разговорно</span></div>
+      <div class="pol-foot">Это три голоса одного оператора querer, а не новые операторы.</div>
+    `;
+    card.appendChild(pol);
+  }
+
+  function illustrationSlot(text){
+    const slot = document.createElement('div');
+    slot.className = 'illu-slot';
+    slot.innerHTML = `<span class="illu-label">Место для иллюстрации</span><span class="illu-text">${text}</span>`;
+    return slot;
+  }
+
+  function renderPrepCard(card, cfg){
+    if (cfg.kind === 'a') {
+      const pair = document.createElement('div');
+      pair.className = 'prep-visual-pair';
+      [[3,1,'<span class="hl-prep">ayudar a</span> mi familia'],[3,0,'<span class="hl-prep">llamar a</span> la tienda']].forEach(([asset,tile,label]) => {
+        const pane = document.createElement('div');
+        pane.appendChild(makePhoto(asset,tile,true));
+        const caption = document.createElement('div'); caption.className = 'visual-label';
+        caption.innerHTML = label; pane.appendChild(caption); pair.appendChild(pane);
+      });
+      card.appendChild(pair);
+    } else {
+      const direction = document.createElement('div');
+      direction.className = 'prep-direction';
+      direction.textContent = cfg.kind === 'de' ? '●  casa  ·  точка отсчёта' : '•  en España';
+      card.appendChild(direction);
+    }
+    const list = document.createElement('div');
+    list.className = 'prep-list';
+    cfg.items.forEach(it => {
+      const row = document.createElement('div');
+      row.className = 'prep-item';
+      row.innerHTML = `<div class="prep-q">${it.q}</div><div class="prep-es">${it.es}</div>`;
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'Запоминай действие вместе с его связью: vivir en España, ayudar a mi familia, salir de casa, llamar a la tienda.';
+    card.appendChild(note);
+  }
+
+  function renderPrepA(card){
+    renderPrepCard(card, {
+      kind:'a', illu:'Действие направлено к адресату: стрелка от человека к семье (помощь) и к магазину (звонок).',
+      items:[
+        {q:'Кому помогаю?', es:'<span class="hl-prep">ayudar a</span> mi familia'},
+        {q:'Куда звоню?', es:'<span class="hl-prep">llamar a</span> la tienda'},
+      ]
+    });
+  }
+
+  function renderPrepDe(card){
+    renderPrepCard(card, {
+      kind:'de', illu:'Человек выходит из дома: стрелка от дома наружу.',
+      items:[
+        {q:'Откуда выхожу?', es:'<span class="hl-prep">salir de</span> casa'},
+      ]
+    });
+  }
+
+  function renderPrepEn(card){
+    renderPrepCard(card, {
+      kind:'en', illu:'Человек находится в Испании: точка внутри страны, без движения.',
+      items:[
+        {q:'Где живу?', es:'<span class="hl-prep">vivir en</span> España'},
+      ]
+    });
+  }
+
+  function renderADomicilio(card){
+    const p = document.createElement('div');
+    p.className = 'phrase-big';
+    p.style.margin = '0 0 10px';
+    p.style.fontSize = 'clamp(1.5rem, 4.4vw, 2.1rem)';
+    p.innerHTML = `Quiero pedir la compra <span class="hl-domicilio">a domicilio</span>.`;
+    card.appendChild(p);
+    const ex = document.createElement('div');
+    ex.className = 'prompt-es';
+    ex.style.fontStyle = 'normal';
+    ex.textContent = 'A domicilio — с доставкой на дом.';
+    card.appendChild(ex);
+    const direction = document.createElement('div'); direction.className = 'prep-direction'; direction.textContent = 'tienda  ⟶  casa'; card.appendChild(direction);
+    const pair = document.createElement('div');
+    pair.className = 'prep-list';
+    pair.innerHTML = `<div class="prep-item"><div class="prep-q">¿Cómo quieres pedir la compra?</div><div class="prep-es"><span class="hl-domicilio">A domicilio.</span></div></div>`;
+    card.appendChild(pair);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.textContent = 'A domicilio — целое выражение. Запоминай его целиком.';
+    card.appendChild(note);
+  }
+
+  function renderTiempo(card){
+    const line = document.createElement('div');
+    line.className = 'timeline';
+    line.innerHTML = `
+      <div class="tl-node"><span class="tl-big hl-day">mañana</span><span class="tl-ru">день</span></div>
+      <div class="tl-arrow">&rarr;</div>
+      <div class="tl-node"><span class="tl-big hl-time">por la mañana</span><span class="tl-ru">часть дня</span></div>
+      <div class="tl-arrow">&rarr;</div>
+      <div class="tl-node"><span class="tl-big tl-hour">a las diez</span><span class="tl-ru">точный час</span></div>
+    `;
+    card.appendChild(line);
+    const rows = [
+      {q:'¿Para cuándo la quiere?', a:'Para mañana.', cls:'hl-day', ru:'день доставки'},
+      {q:'¿Por la mañana o por la tarde?', a:'Por la mañana.', cls:'hl-time', ru:'часть дня'},
+      {q:'¿A qué hora?', a:'A las diez.', cls:'tl-hour', ru:'точный час'},
+    ];
+    const list = document.createElement('div');
+    list.className = 'prep-list';
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'prep-item';
+      row.innerHTML = `<div class="prep-q">${r.q} <span class="tl-ru">· ${r.ru}</span></div><div class="prep-es"><span class="${r.cls}">${r.a}</span></div>`;
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.innerHTML = 'В большом звонке <i>Para mañana por la mañana, si es posible</i> — один ответ сразу называет и день, и часть дня.';
+    card.appendChild(note);
+  }
+
+  function renderTresPreguntas(card){
+    const src = window.AUDIO.preguntas || '';
+    if (src) {
+      const audio = document.createElement('audio');
+      audio.className = 'audio-player';
+      audio.controls = true;
+      audio.src = src;
+      audio.style.display = 'block';
+      audio.style.width = '100%';
+      audio.style.maxWidth = '340px';
+      audio.style.marginInline = 'auto';
+      audio.style.marginBottom = '10px';
+      audio.style.flex = 'none';
+      audio.style.minHeight = '54px';
+      card.appendChild(audio);
+    } else {
+      const slot = document.createElement('div');
+      slot.className = 'audio-slot';
+      slot.textContent = 'Место для записи Оксаны';
+      card.appendChild(slot);
+    }
+    const lines = [
+      {who:'Tienda', txt:'¿Para cuándo la quiere?', role:'clerk'},
+      {who:'Tú', txt:'Para mañana.', role:'you'},
+      {who:'Tienda', txt:'¿Por la mañana o por la tarde?', role:'clerk'},
+      {who:'Tú', txt:'Por la mañana.', role:'you'},
+      {who:'Tienda', txt:'¿A qué hora?', role:'clerk'},
+      {who:'Tú', txt:'A las diez, si es posible.', role:'you'},
+    ];
+    const script = document.createElement('div');
+    script.className = 'script';
+    lines.forEach(l=>{
+      const row = document.createElement('div');
+      row.className = 'line ' + l.role;
+      row.innerHTML = `<span class="who">${l.who}</span><span class="txt">${l.txt}</span>`;
+      script.appendChild(row);
+    });
+    card.appendChild(script);
+    const toggleWrap = document.createElement('div');
+    toggleWrap.className = 'swap-toggle';
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Поменяться ролями';
+    btn.addEventListener('click', ()=>{
+      script.querySelectorAll('.line').forEach(row=>{
+        row.classList.toggle('you');
+        row.classList.toggle('clerk');
+      });
+    });
+    toggleWrap.appendChild(btn);
+    card.appendChild(toggleWrap);
+  }
+
+  function renderFormula(card){
+    const examples = [
+      ['Hoy','(yo)','quiero pedir','la compra'],
+      ['Por la mañana','(yo)','voy a estudiar','español'],
+      ['Mañana','(yo)','no puedo salir','de casa'],
+      ['Hoy','(yo)','voy a ir','al gimnasio'],
+    ];
+    const slots = [
+      {q:'¿Cuándo?', ru:'время — всегда первым', time:true},
+      {q:'¿Quién?', ru:'кто (часто не звучит)'},
+      {q:'¿Qué quieres hacer?', ru:'оператор + действие'},
+      {q:'¿Qué? · ¿Adónde?', ru:'что / куда'},
+    ];
+    const list = document.createElement('div'); list.className = 'fx-list';
+    const cells = [];
+    slots.forEach(sl => {
+      const row = document.createElement('div'); row.className = 'fx-row' + (sl.time ? ' is-time' : '');
+      const q = document.createElement('div'); q.className = 'fx-q'; q.textContent = sl.q;
+      const sm = document.createElement('small'); sm.textContent = sl.ru; q.appendChild(sm);
+      const a = document.createElement('div'); a.className = 'fx-a';
+      if (sl.time) a.classList.add('hl-day');
+      row.append(q, a); list.appendChild(row); cells.push(a);
+    });
+    card.appendChild(list);
+    const sent = document.createElement('div'); sent.className = 'fx-sentence';
+    const tag = document.createElement('div'); tag.className = 'fx-tag';
+    card.append(sent, tag);
+    let k = 0;
+    function show(){
+      const ex = examples[k];
+      ex.forEach((w, i) => cells[i].textContent = w);
+      const words = [ex[0], ex[2], ex[3]].join(' ');
+      sent.textContent = words + '.';
+      tag.textContent = k === examples.length - 1 ? 'ir, el gimnasio — это уже свои слова: каркас тот же' : 'Каждое слово — ответ на свой вопрос';
+    }
+    show();
+    const row = document.createElement('div'); row.className = 'btn-row'; row.style.justifyContent = 'center'; row.style.marginTop = '8px';
+    const btn = document.createElement('button'); btn.className = 'btn small'; btn.style.alignSelf = 'center';
+    btn.textContent = 'Другой пример';
+    btn.addEventListener('click', () => { k = (k + 1) % examples.length; show(); });
+    row.appendChild(btn); card.appendChild(row);
+  }
+
+  function renderCaminos(card){
+    const ways = {
+      'Вглубь': {lead:'¿Por qué? → Porque… — ищем причину', pairs:[
+        {q:'¿Qué quieres hacer?', a:'Hoy quiero pedir la compra a domicilio.'},
+        {q:'¿Por qué?', a:'Porque hoy no puedo salir de casa.'},
+        {q:'¿Por qué no puedes salir?', a:'Porque por la mañana voy a estudiar español.'},
+      ]},
+      'Вперёд': {lead:'¿Para qué? → Para… — ищем цель и план', pairs:[
+        {q:'¿Para qué quieres estudiar español?', a:'Para ayudar a mi familia.'},
+        {q:'Y mañana, ¿qué vas a hacer?', a:'Mañana voy a llamar a la tienda.'},
+        {q:'¿Para qué?', a:'Para pedir la compra a domicilio.'},
+      ]},
+      'Вширь': {lead:'¿Cuándo? ¿A qué hora? ¿Y tú? — уточняем и передаём ход', pairs:[
+        {q:'¿Para cuándo quieres la compra?', a:'Para mañana por la mañana.'},
+        {q:'¿A qué hora?', a:'A las diez.'},
+        {q:'¿Y tú? ¿Qué quieres hacer?', a:'Hoy quiero hablar español.'},
+      ]},
+    };
+    const tabs = document.createElement('div'); tabs.className = 'cm-tabs';
+    const lead = document.createElement('div'); lead.className = 'cm-lead';
+    const list = document.createElement('div'); list.className = 'qa-list';
+    card.append(tabs, lead, list);
+    const btns = {};
+    function show(name){
+      Object.entries(btns).forEach(([n, b]) => b.classList.toggle('active', n === name));
+      lead.textContent = ways[name].lead;
+      list.innerHTML = '';
+      ways[name].pairs.forEach(p => {
+        const item = document.createElement('div'); item.className = 'qa-item';
+        const q = document.createElement('div'); q.className = 'qa-q'; q.textContent = p.q;
+        const a = document.createElement('div'); a.className = 'qa-a'; a.textContent = p.a; a.hidden = true;
+        const b = document.createElement('button'); b.className = 'btn small'; b.textContent = 'Mostrar respuesta';
+        b.addEventListener('click', () => { a.hidden = !a.hidden; b.textContent = a.hidden ? 'Mostrar respuesta' : 'Ocultar'; });
+        item.append(q, b, a); list.appendChild(item);
+      });
+    }
+    Object.keys(ways).forEach(n => {
+      const b = document.createElement('button'); b.className = 'btn small'; b.style.alignSelf = 'center'; b.textContent = n;
+      b.addEventListener('click', () => show(n)); tabs.appendChild(b); btns[n] = b;
+    });
+    show('Вглубь');
+    const note = document.createElement('div'); note.className = 'note';
+    note.textContent = 'Ответ на вопрос — снова целая фраза. Из неё рождается следующий вопрос.';
+    card.appendChild(note);
+  }
+
+  function renderCadena(card){
+    const keys = [
+      {q:'¿Por qué?', hint:'Porque…'},
+      {q:'¿Para qué?', hint:'Para…'},
+      {q:'¿A qué hora?', hint:'A las…'},
+      {q:'Y mañana, ¿qué vas a hacer?', hint:'Mañana voy a…'},
+      {q:'¿Y tú?', hint:'Yo…'},
+    ];
+    const lead = document.createElement('div'); lead.className = 'cm-lead';
+    lead.textContent = 'Ответь на вопрос своей фразой. Потом выбери следующий вопрос кнопкой — и снова ответь. Получится твой разговор.';
+    const chain = document.createElement('div'); chain.className = 'cd-chain';
+    const inputRow = document.createElement('div'); inputRow.className = 'cd-input';
+    const input = document.createElement('input'); input.placeholder = 'Hoy quiero…'; input.setAttribute('aria-label', 'Твой ответ');
+    const ok = document.createElement('button'); ok.className = 'btn small'; ok.textContent = 'Готово';
+    inputRow.append(input, ok);
+    const keysRow = document.createElement('div'); keysRow.className = 'cd-keys';
+    const count = document.createElement('div'); count.className = 'cd-count';
+    card.append(lead, chain, inputRow, keysRow, count);
+    function addQ(text){ const q = document.createElement('div'); q.className = 'cd-q'; q.textContent = text; chain.appendChild(q); }
+    addQ('¿Qué quieres hacer hoy?');
+    const keysLabel = document.createElement('div'); keysLabel.className = 'cm-lead'; keysLabel.style.flexBasis = '100%'; keysLabel.textContent = 'Выбери следующий вопрос:'; keysRow.appendChild(keysLabel);
+    let n = 0;
+    function updateCount(){ count.textContent = n ? 'Фраз в твоей цепочке: ' + n : ''; }
+    function addAnswer(){
+      const txt = input.value.trim() || '(сказал вслух)';
+      const a = document.createElement('div'); a.className = 'cd-a'; a.textContent = txt;
+      chain.appendChild(a); chain.scrollTop = chain.scrollHeight;
+      n++; updateCount(); input.value = ''; input.placeholder = 'выбери вопрос ниже';
+      inputRow.hidden = true; keysRow.hidden = false;
+    }
+    ok.addEventListener('click', addAnswer);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') addAnswer(); });
+    keys.forEach(k => {
+      const b = document.createElement('button'); b.className = 'btn small'; b.style.alignSelf = 'center'; b.textContent = k.q;
+      b.addEventListener('click', () => {
+        const q = document.createElement('div'); q.className = 'cd-q'; q.textContent = k.q;
+        chain.appendChild(q); chain.scrollTop = chain.scrollHeight;
+        input.placeholder = k.hint; inputRow.hidden = false; keysRow.hidden = true; input.focus();
+      });
+      keysRow.appendChild(b);
+    });
+    const reset = document.createElement('button'); reset.className = 'btn small ghost'; reset.style.alignSelf = 'center'; reset.textContent = 'Заново';
+    reset.addEventListener('click', () => { chain.innerHTML = ''; addQ('¿Qué quieres hacer hoy?'); n = 0; updateCount(); input.value = ''; input.placeholder = 'Hoy quiero…'; inputRow.hidden = false; keysRow.hidden = true; });
+    keysRow.hidden = true;
+    const resetRow = document.createElement('div'); resetRow.style.textAlign = 'center'; resetRow.style.marginTop = '6px'; resetRow.style.flex = 'none';
+    resetRow.appendChild(reset); card.appendChild(resetRow);
+  }
+
+  // ---------- игры на повтор ----------
+  const JG_MAX = {g1:6, g2:10, g3:9, g4:10, g5:5};
+  const JG_KEY = 'ciudad_juegos_puntos_es';
+  let jgBest = {};
+  try { jgBest = JSON.parse(localStorage.getItem(JG_KEY) || '{}') || {}; } catch(e) {}
+  const jgTotalMax = Object.values(JG_MAX).reduce((a,b)=>a+b,0);
+  const jgBadge = document.createElement('div'); jgBadge.className = 'jg-badge';
+  document.body.appendChild(jgBadge);
+  function jgUpdateBadge(){ const t = Object.values(jgBest).reduce((a,b)=>a+(b||0),0); jgBadge.textContent = '⭐ ' + t + ' из ' + jgTotalMax; }
+  jgUpdateBadge();
+  function jgResult(id, raw, errors){
+    const pts = Math.max(0, raw - errors);
+    const prev = jgBest[id] || 0;
+    if (pts > prev) { jgBest[id] = pts; try { localStorage.setItem(JG_KEY, JSON.stringify(jgBest)); } catch(e) {} jgUpdateBadge(); }
+    const best = Math.max(pts, prev);
+    return `+${pts} ${pts===1?'балл':(pts>=2&&pts<=4?'балла':'баллов')} из ${JG_MAX[id]}` + (prev && pts <= prev ? ` · лучший: ${best}` : '');
+  }
+  function jgLive(st, raw, errors){ return ' · ⭐ ' + Math.max(0, raw - errors); }
+  function jgShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+  function jgWin(errors, total, unit){
+    return errors===0 ? `¡Perfecto! ${total} из ${total} без ошибок` : `¡Bien! ${total} из ${total} · ошибок: ${errors}`;
+  }
+  function jgFrame(card, lead){
+    const l=document.createElement('div'); l.className='jg-lead'; l.textContent=lead; card.appendChild(l);
+    const box=document.createElement('div'); box.style.width='100%'; box.style.margin='auto 0'; card.appendChild(box);
+    const st=document.createElement('div'); st.className='jg-status'; card.appendChild(st);
+    return {box, st};
+  }
+  function jgAgain(card, fn){
+    const b=document.createElement('button'); b.className='btn small ghost jg-again'; b.textContent='Ещё раз';
+    b.addEventListener('click', fn); return b;
+  }
+
+  // Juego 1 — пары: глагол ↔ перевод
+  function renderJuego1(card){
+    const pairs=[['hablar','говорить'],['estudiar','изучать'],['aprender','учиться, узнавать'],['entender','понимать'],['vivir','жить'],['conducir','водить машину']];
+    const {box, st}=jgFrame(card,'Нажми испанский глагол, потом его перевод. Пара — 1 балл, ошибка — минус 1.');
+    function start(){
+      box.innerHTML=''; st.innerHTML='';
+      let sel=null, done=0, errors=0;
+      const grid=document.createElement('div'); grid.className='jg-pairs';
+      const L=document.createElement('div'); L.className='jg-col';
+      const R=document.createElement('div'); R.className='jg-col';
+      jgShuffle(pairs).forEach(p=>{ const c=document.createElement('button'); c.type='button'; c.className='jg-chip'; c.textContent=p[0]; c.dataset.k=p[0]; c.dataset.side='es'; L.appendChild(c); });
+      jgShuffle(pairs).forEach(p=>{ const c=document.createElement('button'); c.type='button'; c.className='jg-chip'; c.textContent=p[1]; c.dataset.k=p[0]; c.dataset.side='ru'; R.appendChild(c); });
+      grid.append(L,R); box.appendChild(grid);
+      st.textContent='Пар: 0 из '+pairs.length;
+      grid.addEventListener('click', e=>{
+        const c=e.target.closest('.jg-chip'); if(!c || c.classList.contains('ok')) return;
+        if(!sel || sel.dataset.side===c.dataset.side){ if(sel) sel.classList.remove('sel'); sel=c; c.classList.add('sel'); return; }
+        if(sel.dataset.k===c.dataset.k){
+          sel.classList.remove('sel'); sel.classList.add('ok'); c.classList.add('ok'); sel=null; done++;
+          st.textContent='Пар: '+done+' из '+pairs.length+jgLive(st,done,errors);
+          if(done===pairs.length){ st.innerHTML=''; const w=document.createElement('div'); w.className='jg-win'; w.textContent=jgWin(errors,pairs.length); const pt=document.createElement('div'); pt.className='jg-pts'; pt.textContent=jgResult('g1', pairs.length*1, errors); st.append(w,pt); st.appendChild(jgAgain(card,start)); }
+        } else {
+          errors++; c.classList.add('bad'); setTimeout(()=>c.classList.remove('bad'),400);
+        }
+      });
+    }
+    start();
+  }
+
+  // движок «вставь слово»
+  function jgFill(card, lead, items, id, per){
+    const {box, st}=jgFrame(card, lead);
+    function start(){
+      box.innerHTML=''; st.innerHTML='';
+      let k=0, errors=0; const order=jgShuffle(items);
+      const q=document.createElement('div'); q.className='jg-q';
+      const opts=document.createElement('div'); opts.className='jg-opts';
+      box.append(q,opts);
+      function show(){
+        const it=order[k]; const parts=it.s.split('___');
+        q.innerHTML=''; q.append(parts[0]); const g=document.createElement('span'); g.className='gap'; g.textContent='\u00a0'; q.append(g, parts[1]||'');
+        opts.innerHTML='';
+        jgShuffle(it.o).forEach(o=>{
+          const b=document.createElement('button'); b.type='button'; b.className='jg-chip'; b.textContent=o;
+          b.addEventListener('click',()=>{
+            if(o===it.o[0]){
+              g.textContent=o; b.classList.add('ok'); opts.querySelectorAll('.jg-chip').forEach(x=>x.disabled=true);
+              setTimeout(()=>{ k++; if(k<order.length){ st.textContent='Фраза '+(k+1)+' из '+order.length+jgLive(st,k*per,errors); show(); } else finish(); },700);
+            } else { errors++; b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),400); }
+          });
+          opts.appendChild(b);
+        });
+      }
+      function finish(){ opts.innerHTML=''; st.innerHTML=''; const w=document.createElement('div'); w.className='jg-win'; w.textContent=jgWin(errors,order.length); const pt=document.createElement('div'); pt.className='jg-pts'; pt.textContent=jgResult(id, order.length*per, errors); st.append(w,pt); st.appendChild(jgAgain(card,start)); }
+      st.textContent='Фраза 1 из '+order.length; show();
+    }
+    start();
+  }
+
+  // Juego 2 — слова звонка (первый вариант в o — правильный)
+  function renderJuego2(card){
+    jgFill(card,'Выбери слово, которое закрывает фразу.',[
+      {s:'Buenos ___.', o:['días','gracias','favor']},
+      {s:'Quisiera pedir la compra, por ___.', o:['favor','días','todo']},
+      {s:'Necesito pan, leche y ___.', o:['huevos','tienda','domicilio']},
+      {s:'¿Algo ___?', o:['más','todo','claro']},
+      {s:'No, eso es ___. Gracias.', o:['todo','más','algo']},
+    ], 'g2', 2);
+  }
+
+  // движок «собери по порядку»
+  function jgOrder(card, lead, tasks, vertical, id, per){
+    const {box, st}=jgFrame(card, lead);
+    function start(){
+      box.innerHTML=''; st.innerHTML='';
+      let t=0, errors=0; const list=vertical ? tasks : jgShuffle(tasks);
+      const built=document.createElement('div'); built.className='jg-built'+(vertical?' col':'');
+      const pool=document.createElement('div'); pool.className='jg-pool'+(vertical?' col':'');
+      box.append(built,pool);
+      function show(){
+        const parts=list[t]; let pos=0;
+        built.innerHTML=''; pool.innerHTML='';
+        jgShuffle(parts.map((p,i)=>[p,i])).forEach(([p,i])=>{
+          const b=document.createElement('button'); b.type='button'; b.className='jg-chip'; b.textContent=p;
+          b.addEventListener('click',()=>{
+            if(b.classList.contains('used')) return;
+            if(p===parts[pos]){
+              b.classList.add('used'); b.disabled=true;
+              const s=document.createElement('span'); s.textContent=p;
+              if(vertical){ s.className='ln '+(pos%2===0?'q':'a'); }
+              built.appendChild(s); pos++;
+              if(pos===parts.length){
+                setTimeout(()=>{ t++; if(t<list.length){ st.textContent=(vertical?'Разговор ':'Фраза ')+(t+1)+' из '+list.length+jgLive(st,t*per,errors); show(); } else finish(); }, vertical?1600:900);
+              }
+            } else { errors++; b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),400); }
+          });
+          pool.appendChild(b);
+        });
+      }
+      function finish(){ pool.innerHTML=''; st.innerHTML=''; const w=document.createElement('div'); w.className='jg-win'; w.textContent=vertical ? (errors===0 ? '¡Perfecto! Разговор собран без ошибок' : '¡Bien! Разговор собран · ошибок: '+errors) : jgWin(errors,list.length); const pt=document.createElement('div'); pt.className='jg-pts'; pt.textContent=jgResult(id, list.length*per, errors); st.append(w,pt); st.appendChild(jgAgain(card,start)); }
+      st.textContent=list.length>1 ? (vertical?'Разговор 1 из ':'Фраза 1 из ')+list.length : ''; show();
+    }
+    start();
+  }
+
+  // Juego 3 — фраза по формуле, время первым
+  function renderJuego3(card){
+    jgOrder(card,'Собери фразу по формуле: время — всегда первым.',[
+      ['Hoy','no puedo','salir de','casa.'],
+      ['Mañana','voy a','llamar a','la tienda.'],
+      ['Por la mañana','quiero','ayudar a','mi familia.'],
+    ], false, 'g3', 3);
+  }
+
+  // Juego 4 — связи и операторы
+  function renderJuego4(card){
+    jgFill(card,'Какое слово держит эту связь?',[
+      {s:'Vivo ___ España.', o:['en','a','de']},
+      {s:'Quiero ayudar ___ mi familia.', o:['a','en','de']},
+      {s:'Hoy no puedo salir ___ casa.', o:['de','en','a']},
+      {s:'Mañana ___ a llamar a la tienda.', o:['voy','quiero','puedo']},
+      {s:'¿A qué hora? — ___ las diez.', o:['A','En','De']},
+    ], 'g4', 2);
+  }
+
+  // Juego 5 — собери разговор из перепутанных реплик
+  function renderJuego5(card){
+    jgOrder(card,'Реплики перепутались. Нажимай по порядку: вопрос — ответ — вопрос.',[
+      ['¿Qué quieres hacer?','Hoy quiero pedir la compra a domicilio.','¿Por qué quieres pedir la compra?','Porque hoy no puedo salir de casa.','¿Por qué no puedes salir?','Porque por la mañana voy a estudiar español.'],
+    ], true, 'g5', 5);
+  }
+
+  let origCounter = -1;
+  steps.forEach((st,i)=>{
+    const card=cards[i];
+    if(st.review){ card.dataset.index='r'; card.dataset.density='dense'; card.classList.add('is-review'); }
+    else { origCounter++; }
+    const oi = st.review ? -1 : origCounter;
+    if(!st.review) card.dataset.index=String(oi);
+    if(DENSE.has(oi)) card.dataset.density='dense';
+    const mark=document.createElement('div'); mark.className='series-mark';
+    mark.textContent='LA CIUDAD DE LOS SENTIDOS';
+    card.insertBefore(mark,card.firstChild);
+    if(oi>=0 && VISUALS[oi]){
+      const [asset,tile]=VISUALS[oi];
+      card.querySelector('h2').insertAdjacentElement('afterend',makePhoto(asset,tile));
+    }
+  });
+  window.addEventListener('resize',layoutPhotos);
+  document.querySelectorAll('.tile-photo img').forEach(img=>img.addEventListener('load',layoutPhotos));
+  requestAnimationFrame(layoutPhotos);
+
+  // пустые аудиоисточники не показывают плеер (версия файла без аудио)
+  document.querySelectorAll('#deck audio').forEach(a => {
+    if (a.getAttribute('src')) return;
+    const row = a.closest('.role-audio .row');
+    const glass = a.closest('.glass');
+    if (row) row.hidden = true;
+    else if (glass) glass.hidden = true;
+    else a.hidden = true;
+  });
+  document.querySelectorAll('#deck .role-audio').forEach(w => {
+    if (w.querySelectorAll('.row:not([hidden])').length === 0) {
+      w.hidden = true;
+      const hint = w.nextElementSibling;
+      if (hint && hint.classList.contains('audio-hint')) hint.hidden = true;
+    }
+  });
+  fitCard();
+
+  // --- словарь материала: плавающая кнопка, доступна на любом шаге ---
+  const GLOSSARY = [
+    {
+      group: 'Операторы',
+      items: [
+        {w:'querer', tr:'керэ́р', ru:'хотеть (словарная форма)'},
+        {w:'quiero', tr:'кье́ро', ru:'я хочу'},
+        {w:'quisiera', tr:'кисье́ра', ru:'я хотел(а) бы — вежливо'},
+        {w:'quería', tr:'кери́а', ru:'я хотел(а) бы — мягче, разговорно'},
+        {w:'no puedo', tr:'но пуэ́до', ru:'я не могу'},
+        {w:'voy a', tr:'вой а', ru:'я собираюсь / иду'},
+        {w:'¿quiere?', tr:'кье́рэ', ru:'хотите — так спрашивают вежливо'},
+      ]
+    },
+    {
+      group: 'Глаголы в инфинитиве',
+      items: [
+        {w:'hablar', tr:'абла́р', ru:'говорить'},
+        {w:'estudiar', tr:'эстудья́р', ru:'учиться, изучать'},
+        {w:'aprender', tr:'апрендэ́р', ru:'учиться, узнавать'},
+        {w:'entender', tr:'энтендэ́р', ru:'понимать'},
+        {w:'vivir', tr:'виви́р', ru:'жить'},
+        {w:'conducir', tr:'кондуси́р', ru:'водить (машину)'},
+        {w:'ayudar', tr:'аюда́р', ru:'помогать'},
+        {w:'pedir', tr:'педи́р', ru:'заказывать, просить'},
+        {w:'recibir', tr:'ресиби́р', ru:'получать'},
+      ]
+    },
+    {
+      group: 'Глагол + предлог (пара фиксирована)',
+      items: [
+        {w:'vivir en', tr:'виви́р эн', ru:'жить в (стране)'},
+        {w:'ayudar a', tr:'аюда́р а', ru:'помогать (кому-то)'},
+        {w:'salir de', tr:'сали́р дэ', ru:'выходить из'},
+        {w:'llamar a', tr:'льяма́р а', ru:'звонить (кому-то)'},
+      ]
+    },
+    {
+      group: 'Слова материала',
+      items: [
+        {w:'la compra', tr:'ля ко́мпра', ru:'покупки, продукты'},
+        {w:'a domicilio', tr:'а домиси́лио', ru:'на дом, с доставкой'},
+        {w:'un pan', tr:'ун пан', ru:'хлеб'},
+        {w:'la leche', tr:'ля ле́чэ', ru:'молоко'},
+        {w:'unos huevos', tr:'у́нос уэ́вос', ru:'яйца'},
+        {w:'la tienda', tr:'ля тье́нда', ru:'магазин'},
+        {w:'mañana', tr:'манья́на', ru:'завтра / утро (два значения сразу)'},
+        {w:'por la mañana', tr:'пор ля манья́на', ru:'утром'},
+        {w:'por la tarde', tr:'пор ля та́рдэ', ru:'днём, после обеда'},
+        {w:'a las diez', tr:'а лас дьес', ru:'в десять часов'},
+        {w:'hoy', tr:'ой', ru:'сегодня'},
+      ]
+    },
+    {
+      group: 'Вежливые слова диалога',
+      items: [
+        {w:'buenos días', tr:'буэ́нос ди́ас', ru:'здравствуйте, добрый день'},
+        {w:'gracias', tr:'гра́сьяс', ru:'спасибо'},
+        {w:'por favor', tr:'пор фаво́р', ru:'пожалуйста'},
+        {w:'¿diga?', tr:'ди́га', ru:'алло (при ответе на звонок)'},
+        {w:'sí / no', tr:'си / но', ru:'да / нет'},
+        {w:'claro', tr:'кла́ро', ru:'конечно'},
+        {w:'sin problema', tr:'син пробле́ма', ru:'без проблем'},
+        {w:'algo más', tr:'а́льго мас', ru:'что-то ещё'},
+        {w:'eso es todo', tr:'э́со эс то́до', ru:'это всё'},
+      ]
+    },
+    {
+      group: 'Вопросы-ключи',
+      items: [
+        {w:'¿Cuándo?', tr:'куа́ндо', ru:'когда?'},
+        {w:'¿A qué hora?', tr:'а ке о́ра', ru:'во сколько?'},
+        {w:'¿Qué quieres hacer?', tr:'ке кье́рэс асэ́р', ru:'что ты хочешь сделать?'},
+        {w:'¿Qué?', tr:'ке', ru:'что?'},
+        {w:'¿Adónde?', tr:'адо́ндэ', ru:'куда?'},
+        {w:'¿Dónde?', tr:'до́ндэ', ru:'где?'},
+        {w:'¿Por qué? → porque', tr:'пор ке → по́ркэ', ru:'почему? → потому что'},
+        {w:'¿Para qué? → para', tr:'па́ра ке → па́ра', ru:'зачем? → чтобы'},
+        {w:'¿Cómo?', tr:'ко́мо', ru:'как?'},
+        {w:'¿Y tú?', tr:'и ту', ru:'а ты?'},
+      ]
+    },
+  ];
+
+  const GLOSSARY_STORAGE_KEY = 'ciudad_glossary_known_es';
+  let knownWords = {};
+  try {
+    const raw = localStorage.getItem(GLOSSARY_STORAGE_KEY);
+    if (raw) knownWords = JSON.parse(raw) || {};
+  } catch (e) {}
+
+  function saveKnownWords(){
+    try { localStorage.setItem(GLOSSARY_STORAGE_KEY, JSON.stringify(knownWords)); } catch (e) {}
+  }
+
+  const OWN_STORAGE_KEY = 'ciudad_glossary_own_es';
+  let ownWords = {};
+  try {
+    const raw = localStorage.getItem(OWN_STORAGE_KEY);
+    if (raw) ownWords = JSON.parse(raw) || {};
+  } catch (e) {}
+  function saveOwnWords(){
+    try { localStorage.setItem(OWN_STORAGE_KEY, JSON.stringify(ownWords)); } catch (e) {}
+  }
+
+  function updateGlossaryProgress(){
+    let total = GLOSSARY.reduce((sum, g) => sum + g.items.length, 0);
+    let known = GLOSSARY.reduce((sum, g, gi) => sum + g.items.filter((_, ii) => knownWords[gi + '-' + ii]).length, 0);
+    Object.values(ownWords).forEach(list => (list || []).forEach(o => { total++; if (o.k) known++; }));
+    const el = document.getElementById('glossaryProgress');
+    if (el) el.textContent = `Знаю: ${known} из ${total}`;
+  }
+
+  function makeItem(word, tr, ru, checked, opts){
+    const item = document.createElement('div');
+    item.className = 'glossary-item' + (checked ? ' is-known' : '') + (opts.own ? ' is-own' : '');
+    const lab = document.createElement('label'); lab.className = 'glossary-check';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'glossary-checkbox';
+    cb.checked = checked; cb.setAttribute('aria-label', 'Знаю это слово');
+    Object.entries(opts.data).forEach(([k, v]) => cb.dataset[k] = v);
+    lab.appendChild(cb);
+    const main = document.createElement('div'); main.className = 'glossary-main';
+    const w = document.createElement('div'); w.className = 'glossary-word'; w.textContent = word; main.appendChild(w);
+    if (tr) { const t = document.createElement('div'); t.className = 'glossary-transcription'; t.textContent = '[' + tr + ']'; main.appendChild(t); }
+    const r = document.createElement('div'); r.className = 'glossary-ru'; r.textContent = ru;
+    item.append(lab, main, r);
+    if (opts.own) {
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'glossary-del';
+      del.textContent = '✕'; del.setAttribute('aria-label', 'Удалить моё слово');
+      Object.entries(opts.data).forEach(([k, v]) => del.dataset[k] = v);
+      item.appendChild(del);
+    }
+    return item;
+  }
+
+  function buildGlossary(){
+    const body = document.getElementById('glossaryBody');
+    body.innerHTML = '';
+    GLOSSARY.forEach((g, gi) => {
+      const groupEl = document.createElement('div');
+      groupEl.className = 'glossary-group';
+      const title = document.createElement('div');
+      title.className = 'glossary-group-title';
+      title.textContent = g.group;
+      groupEl.appendChild(title);
+      g.items.forEach((it, ii) => {
+        const key = gi + '-' + ii;
+        groupEl.appendChild(makeItem(it.w, it.tr, it.ru, !!knownWords[key], {own:false, data:{key}}));
+      });
+      (ownWords[gi] || []).forEach((o, oi) => {
+        groupEl.appendChild(makeItem(o.w, '', o.ru, !!o.k, {own:true, data:{g:gi, o:oi}}));
+      });
+      const toggle = document.createElement('button');
+      toggle.type = 'button'; toggle.className = 'glossary-add-toggle';
+      toggle.textContent = '+ Моё слово';
+      const form = document.createElement('div');
+      form.className = 'glossary-add-form'; form.hidden = true;
+      const inW = document.createElement('input'); inW.placeholder = 'по-испански'; inW.setAttribute('aria-label', 'Слово по-испански');
+      const inR = document.createElement('input'); inR.placeholder = 'перевод'; inR.setAttribute('aria-label', 'Перевод');
+      const save = document.createElement('button'); save.type = 'button'; save.className = 'glossary-add-save'; save.textContent = 'Добавить';
+      form.append(inW, inR, save);
+      toggle.addEventListener('click', () => { form.hidden = !form.hidden; if (!form.hidden) inW.focus(); });
+      const add = () => {
+        const w = inW.value.trim(); if (!w) { inW.focus(); return; }
+        (ownWords[gi] = ownWords[gi] || []).push({w, ru: inR.value.trim(), k:false});
+        saveOwnWords(); buildGlossary();
+      };
+      save.addEventListener('click', add);
+      [inW, inR].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') add(); }));
+      groupEl.append(toggle, form);
+      body.appendChild(groupEl);
+    });
+    updateGlossaryProgress();
+  }
+  document.getElementById('glossaryBody').addEventListener('change', (e) => {
+    const cb = e.target.closest('.glossary-checkbox');
+    if (!cb) return;
+    if (cb.dataset.key !== undefined) { knownWords[cb.dataset.key] = cb.checked; saveKnownWords(); }
+    else { const o = (ownWords[cb.dataset.g] || [])[cb.dataset.o]; if (o) { o.k = cb.checked; saveOwnWords(); } }
+    cb.closest('.glossary-item').classList.toggle('is-known', cb.checked);
+    updateGlossaryProgress();
+  });
+  document.getElementById('glossaryBody').addEventListener('click', (e) => {
+    const del = e.target.closest('.glossary-del');
+    if (!del) return;
+    const list = ownWords[del.dataset.g] || [];
+    list.splice(+del.dataset.o, 1);
+    saveOwnWords(); buildGlossary();
+  });
+  buildGlossary();
+
+  const glossaryFab = document.getElementById('glossaryFab');
+  const glossaryOverlay = document.getElementById('glossaryOverlay');
+  const glossaryClose = document.getElementById('glossaryClose');
+  glossaryFab.addEventListener('click', () => { glossaryOverlay.hidden = false; });
+  glossaryClose.addEventListener('click', () => { glossaryOverlay.hidden = true; });
+  glossaryOverlay.addEventListener('click', (e) => { if (e.target === glossaryOverlay) glossaryOverlay.hidden = true; });
+})();
+</script>
+
+
+
+</body></html>
