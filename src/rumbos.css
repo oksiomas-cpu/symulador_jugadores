@@ -124,7 +124,7 @@
 .cafe-domino-entry-image--breakfast {
   background:
     linear-gradient(90deg, transparent 72%, rgba(255,253,247,.92)),
-    url('https://cafe-domino-game.vercel.app/assets/generated/special-breakfast-v1.jpg') center / cover no-repeat;
+    url('/ui/domino-breakfast.jpg') center / cover no-repeat;
 }
 
 .cafe-domino-entry-image--menu-del-dia {
