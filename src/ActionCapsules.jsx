@@ -1574,7 +1574,6 @@ function Recognize({ onBack }) {
   const tasks = useMemo(() => CAPSULE_OPERATORS.map((operator, i) => ({
     action: CAPSULE_ACTIONS[i % CAPSULE_ACTIONS.length],
     operator,
-    person: i % 2 === 0 ? "el" : "ella",
   })), []);
   const [i, setI] = useState(0); const [picked, setPicked] = useState(null); const [score, setScore] = useState(0);
   if (i >= tasks.length) return <Finish score={score} total={tasks.length} onAgain={() => { setI(0); setPicked(null); setScore(0); }} onBack={onBack} />;
@@ -1584,11 +1583,11 @@ function Recognize({ onBack }) {
     <Progress index={i} total={tasks.length} />
     <Card>
       <div style={{ color: C.inkSoft, fontSize: 13, textAlign: "center" }}>{task.action.scene}</div>
-      <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{capsulePhrase(task.operator.id, task.action.id, task.person)}</div>
+      <div style={{ textAlign: "center", fontSize: 21, fontWeight: 800, margin: "18px 0" }}>{capsulePhrase(task.operator.id, task.action.id)}</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 7 }}>
         {CAPSULE_OPERATORS.map(op => <Choice key={op.id} active={picked === op.id} disabled={!!picked} onClick={() => { setPicked(op.id); if (op.id === task.operator.id) setScore(s => s + 1); }}>{op.label}</Choice>)}
       </div>
-      {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.person === "el" ? task.operator.el : task.operator.ella} = «${task.person === "el" ? task.operator.elRu : task.operator.ellaRu}».`}</div>}
+      {picked && <div style={{ marginTop: 14, color: ok ? C.emeraldDeep : C.raspberry, textAlign: "center", fontWeight: 800 }}>{ok ? "Точно: статус действия распознан." : `Здесь ${task.operator.yo} = «${task.operator.taskRu}».`}</div>}
       {picked && <button onClick={() => { setI(i + 1); setPicked(null); }} style={{ marginTop: 14, width: "100%", background: C.gold, color: "#fff", border: 0, borderRadius: 12, padding: 12, fontFamily: SERIF, fontWeight: 800, cursor: "pointer" }}>Следующий ход →</button>}
     </Card>
     <Back onClick={onBack} label="← К режимам" />
