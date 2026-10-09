@@ -9,8 +9,9 @@ import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
 } from "./game3Data.js";
 import {
-  QUESTIONS4, CATS4, TARGETS4, verbByKey4, fullAnswer4, fullAnswerRu4, BANK_NOTES4,
+  QUESTIONS4, CATS4, TARGETS4, verbByKey4, fullAnswer4, fullAnswerRu4, BANK_NOTES4, GAME4_CASE_STORY,
 } from "./game4Data.js";
+import IntrusoTrainer from "./IntrusoTrainer.jsx";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -2086,12 +2087,13 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   const isCapOne = pack.id === "cap1";
   const isCapThree = pack.id === "cap3";
   const isCapFour = pack.id === "cap4";
-  const maya = isCapFour ? MAYA4 : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
+  const maya = isCapFour ? MAYA4_FULL : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
   const [glosOpen, setGlosOpen] = useState(false);
   const [storyKey, setStoryKey] = useState(null);
   const [lessonId, setLessonId] = useState(null);
+  const [intrusoOpen, setIntrusoOpen] = useState(false);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
   const openLesson = RUMBOS_LESSONS.find((l) => l.id === lessonId) || null;
 
@@ -2099,6 +2101,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
     <div style={wrap}><div style={maxw}>
       <Header subtitle={`${pack.emoji} Capítulo ${pack.num} · ${pack.grammar}`} />
       {openLesson && <LessonFrame lesson={openLesson} onClose={() => setLessonId(null)} />}
+      {isCapFour && intrusoOpen && <IntrusoTrainer onClose={() => setIntrusoOpen(false)} />}
 
       {onBack && (
         <div style={{ textAlign: "center", marginBottom: 14 }}>
@@ -2186,6 +2189,19 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
           </div>
         )}
       </Block>
+
+      {/* ТРЕНИРОВКА «ДУМАЙ КАК ПРЕСТУПНИК» — только игра №4 */}
+      {isCapFour && (
+        <Block stripe={C.emerald}>
+          <div onClick={() => setIntrusoOpen(true)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+            <div>
+              <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🕵️ Думай как преступник</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Piensa como el intruso · разложи 15 улик по quiere / puede / tiene que</div>
+            </div>
+            <span style={{ fontSize: 20, color: C.gold, flexShrink: 0, marginLeft: 8 }}>›</span>
+          </div>
+        </Block>
+      )}
 
       {/* ГЛОССАРИЙ ГЛАГОЛОВ */}
       <Block stripe={C.emerald}>
@@ -4858,6 +4874,13 @@ const MAYA4 = {
     "Что значит хотеть что-то сделать?",
     "Так начался настоящий поиск Волшебной книги.",
   ],
+  glos: [],
+};
+
+// История игры №4 целиком: пролог об операторах (27.08) + дело «план похищения» (09.10).
+const MAYA4_FULL = {
+  es: [...MAYA4.es, `**${GAME4_CASE_STORY.title}**`, ...GAME4_CASE_STORY.es],
+  ru: [...MAYA4.ru, "Ночь Волшебной книги", ...GAME4_CASE_STORY.ru],
   glos: [],
 };
 

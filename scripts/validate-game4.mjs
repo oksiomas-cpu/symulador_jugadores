@@ -1,6 +1,6 @@
 import {
   ACTIONS4, QUESTION_ORDER4, QUESTIONS4, CATS4, TARGETS4,
-  answerKey4, fullAnswer4,
+  answerKey4, fullAnswer4, intrusoKey4, GAME4_CASE_STORY,
 } from "../src/game4Data.js";
 import { readFileSync } from "node:fs";
 
@@ -42,17 +42,20 @@ const fantasyKeys = TARGETS4.map((item) => answerKey4(item, "fantasy"));
 check("15 Canon уникальны", new Set(canonKeys).size === 15);
 check("15 Fantasía уникальны", new Set(fantasyKeys).size === 15);
 check("ни одна Fantasía не совпадает с Canon", fantasyKeys.every((key) => !canonKeys.includes(key)));
-check("минимум Canon↔Canon = 2", minPairDistance(canonKeys) === 2, String(minPairDistance(canonKeys)));
+check("минимум Canon↔Canon = 3 (v2, было 2)", minPairDistance(canonKeys) === 3, String(minPairDistance(canonKeys)));
 check("минимум Fantasía↔Fantasía = 3", minPairDistance(fantasyKeys) === 3, String(minPairDistance(fantasyKeys)));
 const cross = fantasyKeys.flatMap((f) => canonKeys.map((c) => distance(f, c)));
 check("минимум Fantasía↔Canon = 2", Math.min(...cross) === 2, String(Math.min(...cross)));
 
 const ownDiffs = TARGETS4.map((item, i) => distance(canonKeys[i], fantasyKeys[i]));
-check("12 Fantasía отличаются на 5, три — на 6",
-  ownDiffs.filter((n) => n === 5).length === 12 && ownDiffs.filter((n) => n === 6).length === 3,
-  ownDiffs.join(","));
-check("карточки 05, 06 и 11 имеют шесть отличий",
-  [5, 6, 11].every((n) => ownDiffs[n - 1] === 6));
+check("каждая Fantasía отличается от своего Canon на 5–6 ответов",
+  ownDiffs.every((n) => n === 5 || n === 6), ownDiffs.join(","));
+const tKeys = TARGETS4.map((item) => intrusoKey4(item).tener_que.join(","));
+check("tener que уникален у всех 15 предметов (шаг плана)", new Set(tKeys).size === 15, tKeys.join(" | "));
+check("у каждого предмета есть ситуация ES/RU и три «почему»",
+  TARGETS4.every((item) => item.situationEs && item.situationRu &&
+    ["querer", "poder", "tener_que"].every((cat) => item.why && item.why[cat])));
+check("история дела v2 на месте", GAME4_CASE_STORY.es.length > 10 && GAME4_CASE_STORY.es.length === GAME4_CASE_STORY.ru.length);
 
 const yesCounts = QUESTION_ORDER4.map((id) => TARGETS4.filter((item) => item.answers[id] === "sí").length);
 check("баланс SÍ по вопросам = 2–13", Math.min(...yesCounts) >= 2 && Math.max(...yesCounts) <= 13,
@@ -69,7 +72,9 @@ check("cap4 подключён к PACKS и обеим витринам",
   shell.includes("[PACKS.cap1, PACKS.cap2, PACKS.cap3, PACKS.cap4]"));
 check("club открывает cap4, пробные доступы не открывают",
   shell.includes("cap4: true") && (shell.match(/cap4: false/g) || []).length >= 3);
-check("история-маяк MAYA4 подключена", shell.includes("const MAYA4") && shell.includes("isCapFour ? MAYA4"));
+check("история-маяк MAYA4 + дело v2 подключены", shell.includes("const MAYA4") && shell.includes("isCapFour ? MAYA4_FULL"));
+check("тренировка «Думай как преступник» подключена в cap4",
+  shell.includes('import IntrusoTrainer from "./IntrusoTrainer.jsx"') && shell.includes("<IntrusoTrainer"));
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
