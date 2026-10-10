@@ -77,7 +77,10 @@ check("club открывает cap4, пробные доступы не откр
   shell.includes("cap4: true") && (shell.match(/cap4: false/g) || []).length >= 3);
 check("история-маяк MAYA4 + дело v2 подключены", shell.includes("const MAYA4") && shell.includes("isCapFour ? MAYA4_FULL"));
 check("тренировка «Думай как преступник» подключена в cap4",
-  shell.includes('import IntrusoTrainer from "./IntrusoTrainer.jsx"') && shell.includes("<IntrusoTrainer"));
+  /import IntrusoTrainer(, \{ OpLine \})? from "\.\/IntrusoTrainer\.jsx"/.test(shell) && shell.includes("<IntrusoTrainer"));
+
+check("инструкция подготовки и история преступника в списке улик (10.10)",
+  shell.includes("isCapFour && <PrepGuide4 />") && (shell.match(/story\.historiaEs \? <StoryLines/g) || []).length === 3);
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);
