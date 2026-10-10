@@ -12,6 +12,7 @@ import {
   QUESTIONS4, CATS4, TARGETS4, verbByKey4, fullAnswer4, fullAnswerRu4, BANK_NOTES4, GAME4_CASE_STORY,
 } from "./game4Data.js";
 import IntrusoTrainer, { OpLine } from "./IntrusoTrainer.jsx";
+import { StoryPlayer, audio4 } from "./StoryAudio.jsx";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -2092,6 +2093,7 @@ function StoryLines({ story }) {
       <div style={{ textAlign: "right", marginBottom: 6 }}>
         <button onClick={() => setRu((v) => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "4px 12px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>{ru ? "ES ✓" : "RU перевод"}</button>
       </div>
+      {story.key && <StoryPlayer src={audio4.intruso(story.key)} label="Escuchar la historia" color={C.goldDeep} />}
       {story.historiaEs.map((line, i) => (
         <div key={i} style={{ marginBottom: 8 }}>
           <p style={{ fontSize: 15, lineHeight: 1.7, margin: 0 }}><OpLine text={line} /></p>
@@ -2246,6 +2248,12 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
                 {ru ? "ES ✓" : "RU перевод"}
               </button>
             </div>
+            {isCapFour && (
+              <div style={{ marginBottom: 10 }}>
+                <StoryPlayer src={audio4.prologo} label="Parte 1 · Los verbos-operadores" color={C.goldDeep} />
+                <StoryPlayer src={audio4.noche} label="Parte 2 · La noche del Libro Mágico" color={C.goldDeep} />
+              </div>
+            )}
             <div style={{ fontSize: 15.5, lineHeight: 1.85, color: C.ink }}>
               {maya.es.map((p, i) => (
                 <div key={i} style={{ marginBottom: 12 }}>
