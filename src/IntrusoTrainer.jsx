@@ -9,6 +9,7 @@
    источника истины нет.
    ============================================================ */
 import { useState, useRef } from "react";
+import { StoryPlayer, playStory, audio4 } from "./StoryAudio.jsx";
 import { ACTIONS4, TARGETS4, intrusoKey4 } from "./game4Data.js";
 
 const C = {
@@ -166,7 +167,6 @@ export default function IntrusoTrainer({ onClose }) {
 
   // ---------- Шаг 1: история преступника ----------
   if (step === "historia") {
-    const storyEs = item.historiaEs.join(" ");
     return (
       <div role="dialog" aria-label={`La historia del intruso · ${item.inf}`} ref={shellRef} style={shell}><div style={inner}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, gap: 8 }}>
@@ -181,6 +181,7 @@ export default function IntrusoTrainer({ onClose }) {
             <b style={{ color: OP_COLOR.querer }}>❤️ quiere</b> · <b style={{ color: OP_COLOR.poder }}>🔑 puede</b> · <b style={{ color: OP_COLOR.tener_que }}>⚖️ tiene que</b>
             <span style={{ color: C.inkSoft }}> — следи за этими линиями</span>
           </div>
+          <StoryPlayer src={audio4.intruso(item.key)} label="Escuchar la historia" color={C.goldDeep} />
           {item.historiaEs.map((line, i) => (
             <div key={i} style={{ marginBottom: 9 }}>
               <p style={{ margin: 0, fontSize: 16, lineHeight: 1.65 }}><OpLine text={line} /></p>
@@ -188,7 +189,6 @@ export default function IntrusoTrainer({ onClose }) {
             </div>
           ))}
           <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-            <button type="button" onClick={() => speak(storyEs)} style={{ ...topBtn, padding: "6px 12px" }}>🔊 Escuchar</button>
             <button type="button" onClick={() => setRu((v) => !v)} style={{ ...topBtn, padding: "6px 12px" }}>{ru ? "ES ✓" : "RU перевод"}</button>
           </div>
         </div>
@@ -224,7 +224,7 @@ export default function IntrusoTrainer({ onClose }) {
         {ru && <p style={{ margin: "0 0 8px", fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, fontStyle: "italic" }}>{item.situationRu}</p>}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" onClick={() => { setRu(false); setStep("historia"); }} style={{ ...topBtn, padding: "6px 12px" }}>📜 История</button>
-          <button type="button" onClick={() => speak(item.situationEs)} style={{ ...topBtn, padding: "6px 12px" }}>🔊 Escuchar</button>
+          <button type="button" onClick={() => { playStory(audio4.intruso(item.key)); setRu(false); setStep("historia"); toTop(); }} style={{ ...topBtn, padding: "6px 12px" }}>🔊 Escuchar</button>
           <button type="button" onClick={() => setRu((v) => !v)} style={{ ...topBtn, padding: "6px 12px" }}>{ru ? "ES ✓" : "RU перевод"}</button>
         </div>
       </div>
