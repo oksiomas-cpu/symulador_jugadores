@@ -18,6 +18,8 @@
    Матрицу в коде не чинить: изменение ключа требует возврата к источнику.
    ============================================================ */
 
+import { HISTORIAS4 } from "./game4Historias.js";
+
 export const GAME4_ID = "ciudad_game_04_libro_magico";
 export const GAME4_DISPLAY_NAME = "El Libro Mágico de Don Verbo";
 export const GAME4_SCHEMA_VERSION = "2.0.0";
@@ -159,9 +161,9 @@ const RAW_ITEMS4 = [
     key: "lapiz_rojo", emoji: "✏️", inf: "El lápiz rojo", ru: "красный карандаш",
     situationEs: "Debajo del armario del despacho hay un lápiz rojo. En uno de los documentos hay una pequeña marca roja.",
     situationRu: "Под шкафом в кабинете лежит красный карандаш. На одном из документов — маленькая красная метка.",
-    canon: "Esta noche el lápiz rojo se ha caído debajo del armario. El intruso quiere recogerlo y usarlo. Puede llevarlo, buscarlo, recogerlo, guardarlo, usarlo y dárselo a otra persona. No puede abrirlo. Tiene que buscarlo, recogerlo y usarlo para marcar la página de la receta.",
-    logicRu: "Карандаш упал; его находят, поднимают и метят им страницу рецепта.",
-    why: { querer: "Хочет поднять и поставить метку.", poder: "Обычный карандаш: всё, кроме «открыть».", tener_que: "Найти под шкафом, поднять и пометить страницу рецепта." },
+    canon: "Esta noche el lápiz rojo se ha caído debajo del armario. El intruso quiere recogerlo y usarlo. Puede llevarlo, buscarlo, recogerlo, guardarlo, usarlo y dárselo a otra persona. No puede abrirlo. Tiene que buscarlo, recogerlo y usarlo para marcar el documento con el número de la receta.",
+    logicRu: "Карандаш упал; его находят, поднимают и метят им документ с номером рецепта.",
+    why: { querer: "Хочет поднять и поставить метку.", poder: "Обычный карандаш: всё, кроме «открыть».", tener_que: "Найти под шкафом, поднять и пометить документ с номером рецепта." },
     canonYes: ["Q4", "Q6", "P2", "P3", "P4", "P5", "P6", "P7", "T3", "T4", "T6"],
     fantasy: "Fantasía ha visto una pieza roja en una cerradura y cree que el lápiz es una llave. Dice que el intruso quiere, puede y tiene que abrir algo con él, pero que no puede usarlo para escribir.",
     distortion: "Карандаш принят за ключ.",
@@ -229,11 +231,11 @@ const RAW_ITEMS4 = [
   },
   {
     key: "lupa", emoji: "🔍", inf: "La lupa", ru: "лупа",
-    situationEs: "La lupa de Don Verbo está sobre la mesa, a la vista de todos. Las letras del Libro son muy, muy pequeñas.",
-    situationRu: "Лупа Дона Вербо лежит на столе, у всех на виду. Буквы в Книге очень-очень мелкие.",
-    canon: "El intruso quiere recoger la lupa y usarla. Puede llevarla, recogerla, guardarla, usarla y dársela a otra persona. No puede buscarla: está a la vista. Tiene que llevarla al despacho y usarla: sin lupa no puede leer las letras pequeñas del Libro.",
-    logicRu: "Лупа на виду; её несут в кабинет, чтобы прочитать мелкие буквы.",
-    why: { querer: "Хочет взять и использовать.", poder: "Лупа на виду — искать нечего; открыть нельзя.", tener_que: "Отнести в кабинет и прочитать через неё мелкие буквы." },
+    situationEs: "La lupa de Don Verbo está sobre la mesa, a la vista de todos. Los números de los documentos son muy, muy pequeños.",
+    situationRu: "Лупа Дона Вербо лежит на столе, у всех на виду. Цифры на документах очень-очень мелкие.",
+    canon: "El intruso quiere recoger la lupa y usarla. Puede llevarla, recogerla, guardarla, usarla y dársela a otra persona. No puede buscarla: está a la vista. Tiene que llevarla al despacho y usarla: sin lupa no puede leer los números pequeños de los documentos.",
+    logicRu: "Лупа на виду; её несут в кабинет, чтобы прочитать мелкие цифры на документах.",
+    why: { querer: "Хочет взять и использовать.", poder: "Лупа на виду — искать нечего; открыть нельзя.", tener_que: "Отнести в кабинет и прочитать через неё мелкие цифры на документах." },
     canonYes: ["Q4", "Q6", "P2", "P4", "P5", "P6", "P7", "T2", "T6"],
     fantasy: "Fantasía cree que la lupa es un juguete roto de los niños. Dice que el intruso no puede usarla: solo quiere recogerla, y quiere y tiene que dársela a un niño.",
     distortion: "Лупа принята за сломанную детскую игрушку.",
@@ -278,6 +280,8 @@ export const ITEMS4 = RAW_ITEMS4.map((raw, index) => {
     storyEs: raw.canon,
     situationEs: raw.situationEs,
     situationRu: raw.situationRu,
+    historiaEs: HISTORIAS4[raw.key].es,
+    historiaRu: HISTORIAS4[raw.key].ru,
     why: raw.why,
     storyRu: raw.logicRu,
     canonVer: raw.canon,
@@ -337,7 +341,7 @@ export const GAME4_CASE_STORY = {
     "Los documentos numerados están en una caja cerrada. Uno tiene el número de la receta más importante del Libro.",
     "Debajo del armario hay un lápiz rojo. Y en uno de los documentos hay una pequeña marca roja.",
     "En el suelo hay papeles. Alguien ha recogido muchos, pero no todos.",
-    "La lupa de Don Verbo está sobre la mesa, a la vista de todos. Las letras del Libro son muy, muy pequeñas.",
+    "La lupa de Don Verbo está sobre la mesa, a la vista de todos. Los números de los documentos son muy, muy pequeños.",
     "En la cocina hay una bandeja grande con tapa. Esta mañana un ayudante la ha sacado del palacio. Ha dicho: «Hoy pesa mucho».",
     "El cuenco de cristal está en su sitio. Está limpio y vacío.",
     "Los ingredientes gramaticales tampoco están. Don Verbo los ha escondido en la cocina, pero ya no están en su escondite.",
@@ -358,7 +362,7 @@ export const GAME4_CASE_STORY = {
     "Пронумерованные документы лежат в закрытой коробке. На одном из них — номер самого важного рецепта Книги.",
     "Под шкафом лежит красный карандаш. А на одном из документов — маленькая красная метка.",
     "На полу бумаги. Кто-то собрал много, но не все.",
-    "Лупа Дона Вербо лежит на столе, у всех на виду. Буквы в Книге очень-очень мелкие.",
+    "Лупа Дона Вербо лежит на столе, у всех на виду. Цифры на документах очень-очень мелкие.",
     "На кухне — большой поднос с крышкой. Сегодня утром помощник вынес его из дворца. Сказал: «Сегодня он очень тяжёлый».",
     "Хрустальная чаша на своём месте. Чистая и пустая.",
     "Грамматических ингредиентов тоже нет. Дон Вербо спрятал их на кухне, но в тайнике их больше нет.",
