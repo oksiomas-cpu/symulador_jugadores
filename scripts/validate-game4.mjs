@@ -1,3 +1,5 @@
+import { PRESENTACIONES4, PRESENTA_CODES } from "../src/game4Presentaciones.js";
+import { HISTORIAS4 } from "../src/game4Historias.js";
 import {
   ACTIONS4, QUESTION_ORDER4, QUESTIONS4, CATS4, TARGETS4,
   answerKey4, fullAnswer4, intrusoKey4, GAME4_CASE_STORY,
@@ -81,6 +83,15 @@ check("тренировка «Думай как преступник» подк�
 
 check("инструкция подготовки и история преступника в списке улик (10.10)",
   shell.includes("isCapFour && <PrepGuide4 />") && (shell.match(/story\.historiaEs \? <StoryLines/g) || []).length === 3);
+
+// Истории «Как представить предмет» (10.10): по одной на каждый предмет, ES и RU построчно.
+{
+  const keys4 = Object.keys(HISTORIAS4);
+  check("истории представления есть у всех 15 предметов", keys4.length === 15 && keys4.every((k) => PRESENTACIONES4[k]));
+  check("истории представления: ES и RU совпадают по строкам",
+    keys4.every((k) => PRESENTACIONES4[k] && PRESENTACIONES4[k].es.length === PRESENTACIONES4[k].ru.length && PRESENTACIONES4[k].es.length > 0));
+  check("коды записей A17–A31 уникальны", new Set(Object.values(PRESENTA_CODES)).size === 15);
+}
 
 if (failed) {
   console.error(`\n🔴 Провалов: ${failed}\n`);

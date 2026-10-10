@@ -37,6 +37,7 @@ export const audio4 = {
   prologo: "/audio/cap4-historia-prologo.mp3",
   noche: "/audio/cap4-historia-noche.mp3",
   intruso: (key) => `/audio/cap4-intruso-${key}.mp3`,
+  presenta: (key) => `/audio/cap4-presenta-${key}.mp3`,
 };
 
 function fmt(s) {
