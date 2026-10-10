@@ -11,7 +11,7 @@ import {
 import {
   QUESTIONS4, CATS4, TARGETS4, verbByKey4, fullAnswer4, fullAnswerRu4, BANK_NOTES4, GAME4_CASE_STORY,
 } from "./game4Data.js";
-import IntrusoTrainer from "./IntrusoTrainer.jsx";
+import IntrusoTrainer, { OpLine } from "./IntrusoTrainer.jsx";
 // v2.9 — история допроса над вопросом (новые ответы сверху)
 // v2.37 — Этап 3 Шаг 2: мост playerId↔tgId — Live Game берёт tgId/имя из Telegram (getTg) и передаёт в join
 
@@ -2083,6 +2083,61 @@ function LessonFrame({ lesson, onClose }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
+// Игра №4: история преступника с подсветкой операторов — тот же текст,
+// что в «Думай как преступник» (10.10.2026), чтобы у участника не было двух версий.
+function StoryLines({ story }) {
+  const [ru, setRu] = useState(false);
+  return (
+    <div>
+      <div style={{ textAlign: "right", marginBottom: 6 }}>
+        <button onClick={() => setRu((v) => !v)} style={{ background: ru ? C.gold : C.goldSoft, border: `1.5px solid ${C.gold}`, color: ru ? "#fff" : C.goldDeep, borderRadius: 18, padding: "4px 12px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>{ru ? "ES ✓" : "RU перевод"}</button>
+      </div>
+      {story.historiaEs.map((line, i) => (
+        <div key={i} style={{ marginBottom: 8 }}>
+          <p style={{ fontSize: 15, lineHeight: 1.7, margin: 0 }}><OpLine text={line} /></p>
+          {ru && <p style={{ fontSize: 13, lineHeight: 1.55, margin: "2px 0 0", color: C.inkSoft, fontStyle: "italic" }}>{story.historiaRu[i]}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Инструкция «Как подготовиться к игре» — игра №4 (решение Оксаны 10.10.2026).
+const PREP4 = [
+  { t: "Шаг 1 · 📖 История игры", where: "Ниже в этом блоке", d: "Прочитай, что случилось этой ночью: что нашли детективы и где лежит каждая вещь. Если трудно, включи RU-перевод.", why: "Это общая картина. В игре все ссылаются на эту ночь." },
+  { t: "Шаг 2 · 🕵️ Думай как преступник ⭐ главный шаг", where: "Сразу под историей", d: "15 предметов. В каждом сначала 📜 история преступника: чего он хочет, что может и что обязан сделать с этой вещью. Операторы и действия выделены цветом, следи за этими линиями. Послушай 🔊, представь сцену как картинку и только потом нажми «Шаг 2» и разложи действия по трём полкам. ✅ Цель: все 15 предметов зелёные.", why: "В игре тебе не нужно угадывать. Ты будешь знать, что преступник делал с каждой вещью, и сможешь сослаться на конкретный факт: «Tiene que usarla: con la lupa lee el número»." },
+  { t: "Шаг 3 · 🎭 Тренировка ролей", where: "Внизу блока игры", d: "Попробуй все три роли, в игре они меняются каждый раунд. 🕵️ Detective: задаёшь вопросы двум свидетелям и угадываешь предмет. 🟢 Testigo Canon: знаешь правду и отвечаешь строго по истории. 🔴 Testigo Fantasía: врёшь красиво и уводишь детектива от правды. 📖 Забыл историю предмета — нажми на него в списке «Улики игры».", why: "Ты заранее произносишь вопросы и ответы, которые прозвучат в игре." },
+  { t: "🗣 Перед игрой", where: "", d: "Выбери 2–3 любимых предмета и скажи вслух: «El intruso quiere…, pero tiene que…». В игре у тебя будет пульт с готовыми фразами, но то, что ты уже произносил, выйдет легко.", why: "" },
+  { t: "➕ Если операторы пока путаются", where: "Раздел «Практика метода» выше", d: "«Капсулы действия A1» и «Спряжение глаголов-операторов» — по желанию.", why: "" },
+];
+function PrepGuide4() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Block stripe={C.raspberry}>
+      <div onClick={() => setOpen((v) => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+        <div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🎯 Как подготовиться к игре</div>
+          <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Три шага по порядку · что открыть и зачем</div>
+        </div>
+        <span style={{ fontSize: 20, color: C.gold, transform: open ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+      </div>
+      {open && (
+        <div style={{ marginTop: 12, fontSize: 14.5, lineHeight: 1.6, color: C.ink }}>
+          <p style={{ margin: "0 0 12px" }}>Ночью из дворца Дона Вербо пропала Волшебная книга. В игре вы — детективы и свидетели. Говорим тремя операторами: <b style={{ color: "#A81B3E" }}>❤️ quiere</b> (хочет), <b style={{ color: "#A67C2E" }}>🔑 puede</b> (может), <b style={{ color: "#0F5E47" }}>⚖️ tiene que</b> (должен). Иди по порядку 👇</p>
+          {PREP4.map((s, i) => (
+            <div key={i} style={{ marginBottom: 12, paddingBottom: 10, borderBottom: i < PREP4.length - 1 ? `1px solid ${C.line}` : "none" }}>
+              <div style={{ fontWeight: 700 }}>{s.t}</div>
+              {s.where && <div style={{ fontSize: 12.5, color: C.goldDeep, margin: "2px 0 4px" }}>📍 {s.where}</div>}
+              <div>{s.d}</div>
+              {s.why && <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 4 }}>💡 Зачем: {s.why}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+    </Block>
+  );
+}
+
 const WELCOME_SCROLL = {};
 function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onActionTrainer, onOperadores, onBack }) {
   const isCapOne = pack.id === "cap1";
@@ -2174,6 +2229,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
           <p>Изучи историю и улики, затем подготовь свою роль к расследованию.</p>
         </header>
       )}
+      {isCapFour && <PrepGuide4 />}
       {/* ИСТОРИЯ-МАЯК */}
       <Block stripe={C.gold}>
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
@@ -2278,7 +2334,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       <Footer />
 
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
+        {story && (story.historiaEs ? <StoryLines story={story} /> : <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>)}
       </Sheet>
     </div></div>
   );
@@ -2845,7 +2901,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана (как у детектива) */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
+        {story && (story.historiaEs ? <StoryLines story={story} /> : <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>)}
       </Sheet>
     </div></div>
   );
@@ -3049,7 +3105,7 @@ function DetectiveMode({ pack = DEFAULT_PACK, onHome, onScore, session, onDiario
 
       {/* ИСТОРИЯ ГЛАГОЛА — всплывает поверх экрана */}
       <Sheet open={!!story} onClose={() => setStoryKey(null)} title={story ? `${story.emoji} ${story.inf} — ${story.ru}` : ""}>
-        {story && <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>}
+        {story && (story.historiaEs ? <StoryLines story={story} /> : <p style={{ fontSize: 15, lineHeight: 1.75, margin: 0 }}>{renderClue(story.storyEs, pack)}</p>)}
       </Sheet>
 
       {/* УГАДЫВАНИЕ — всплывает поверх экрана */}
