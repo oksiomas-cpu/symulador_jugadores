@@ -128,7 +128,8 @@ export default function IntrusoTrainer({ onClose }) {
   }
 
   const shell = { position: "fixed", inset: 0, zIndex: 1000, background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, overflowY: "auto", fontFamily: SERIF, color: C.ink };
-  const inner = { maxWidth: 560, margin: "0 auto", padding: "14px 14px 60px", boxSizing: "border-box" };
+  // Верхний отступ 64px: шапка тренировки ниже плавающей кнопки «🧹 Сброс» (10.10.2026).
+  const inner = { maxWidth: 560, margin: "0 auto", padding: "64px 14px 60px", boxSizing: "border-box" };
   const topBtn = { background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF };
   const card = { background: C.card, border: `1px solid ${C.line}`, borderRadius: 14, padding: "14px 16px", marginBottom: 12, boxShadow: "0 2px 10px rgba(61,43,31,0.08)" };
 
