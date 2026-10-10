@@ -11,6 +11,7 @@
 import { useState, useRef } from "react";
 import { StoryPlayer, playStory, audio4 } from "./StoryAudio.jsx";
 import { ACTIONS4, TARGETS4, intrusoKey4 } from "./game4Data.js";
+import { PRESENTACIONES4, PRESENTA_GRABADAS } from "./game4Presentaciones.js";
 
 const C = {
   cream: "#FAF3E6", creamDeep: "#F3E8D2", card: "#FFFFFF",
@@ -276,10 +277,18 @@ export default function IntrusoTrainer({ onClose }) {
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 6 }}>✓ верно · ✕ лишнее · + пропущено</div>
             <div style={{ fontWeight: 700, fontSize: 15, marginTop: 8 }}>🗣 Tu historia</div>
             <div style={{ fontSize: 13, color: C.inkSoft, margin: "2px 0 8px" }}>
-              Скажи вслух, как думает нарушитель. Начни так: «El intruso quiere…, pero tiene que…». Вот версия по плану:
+              Так ты представишь этот предмет в игре. Выучи историю и расскажи её вслух: по ней ты спокойно ответишь на любой вопрос детективов.
             </div>
-            <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.7 }}>{sentenceEs(item, key)}</p>
-            <button type="button" onClick={() => speak(sentenceEs(item, key))} style={{ ...topBtn, padding: "6px 12px", marginTop: 8 }}>🔊 Escuchar</button>
+            {PRESENTA_GRABADAS.has(item.key)
+              ? <StoryPlayer src={audio4.presenta(item.key)} label="Escuchar" color={C.goldDeep} />
+              : <button type="button" onClick={() => speak(PRESENTACIONES4[item.key].es.join(" "))} style={{ ...topBtn, padding: "6px 12px", margin: "0 0 8px" }}>🔊 Escuchar</button>}
+            {PRESENTACIONES4[item.key].es.map((line, i) => (
+              <div key={i} style={{ marginBottom: 8 }}>
+                <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.65 }}><OpLine text={line} /></p>
+                {ru && <p style={{ margin: "2px 0 0", fontSize: 13.5, lineHeight: 1.55, color: C.inkSoft, fontStyle: "italic" }}>{PRESENTACIONES4[item.key].ru[i]}</p>}
+              </div>
+            ))}
+            <button type="button" onClick={() => setRu((v) => !v)} style={{ ...topBtn, padding: "6px 12px" }}>{ru ? "ES ✓" : "RU перевод"}</button>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button type="button" onClick={retry}
