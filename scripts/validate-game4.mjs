@@ -55,6 +55,9 @@ check("tener que уникален у всех 15 предметов (шаг пл
 check("у каждого предмета есть ситуация ES/RU и три «почему»",
   TARGETS4.every((item) => item.situationEs && item.situationRu &&
     ["querer", "poder", "tener_que"].every((cat) => item.why && item.why[cat])));
+check("у каждого предмета есть история преступника ES/RU (10.10)",
+  TARGETS4.every((item) => Array.isArray(item.historiaEs) && item.historiaEs.length >= 5 &&
+    Array.isArray(item.historiaRu) && item.historiaRu.length === item.historiaEs.length));
 check("история дела v2 на месте", GAME4_CASE_STORY.es.length > 10 && GAME4_CASE_STORY.es.length === GAME4_CASE_STORY.ru.length);
 
 const yesCounts = QUESTION_ORDER4.map((id) => TARGETS4.filter((item) => item.answers[id] === "sí").length);
