@@ -1,12 +1,14 @@
 /* ============================================================
    PIENSA COMO EL INTRUSO — тренировка к игре №4 (cap4)
    La Ciudad de los Sentidos · 09.10.2026
-   Участник читает ситуацию предмета и раскладывает 7 действий
-   по трём операторам: quiere / puede / tiene que. Проверка идёт по
+   10.10.2026: сначала участник читает и слушает историю преступника
+   (полная цепочка: чего хочет, что может, что обязан сделать и почему),
+   потом по ситуации раскладывает 7 действий по трём операторам:
+   quiere / puede / tiene que. Проверка идёт по
    канону той же матрицы, что и игра (game4Data.js), — второго
    источника истины нет.
    ============================================================ */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ACTIONS4, TARGETS4, intrusoKey4 } from "./game4Data.js";
 
 const C = {
@@ -54,6 +56,44 @@ export function sentenceEs(item, key) {
   }).join(" ");
 }
 
+// Подсветка оператора и связанных с ним инфинитивов (10.10.2026):
+// участник сразу видит линию «quiere / puede / tiene que + действие».
+const OP_COLOR = { querer: "#A81B3E", poder: "#A67C2E", tener_que: "#0F5E47" };
+const OP_RE = /(?:\b[Nn]o )?\b(?:[Qq]uiere|[Pp]uede|[Tt]iene que)\b/g;
+const INF_RE = /\b(?:abrir|llevar|buscar|recoger|guardar|usar|dar|d[aá]r)(?:l[oa]s?|se(?:l[oa]s?)?)?\b/gi;
+function opCat(word) {
+  const w = word.toLowerCase();
+  if (w.includes("quiere")) return "querer";
+  if (w.includes("puede")) return "poder";
+  return "tener_que";
+}
+export function OpLine({ text }) {
+  const out = [];
+  const ops = [...text.matchAll(OP_RE)];
+  let pos = 0;
+  ops.forEach((m, i) => {
+    const start = m.index;
+    if (start > pos) out.push(text.slice(pos, start));
+    const color = OP_COLOR[opCat(m[0])];
+    out.push(<b key={`o${i}`} style={{ color }}>{m[0]}</b>);
+    const after = start + m[0].length;
+    const nextOp = i + 1 < ops.length ? ops[i + 1].index : text.length;
+    const stop = text.slice(after).search(/[.:;]/);
+    const end = Math.min(nextOp, stop === -1 ? text.length : after + stop);
+    const seg = text.slice(after, end);
+    let p = 0;
+    for (const v of seg.matchAll(INF_RE)) {
+      if (v.index > p) out.push(seg.slice(p, v.index));
+      out.push(<b key={`o${i}v${v.index}`} style={{ color }}>{v[0]}</b>);
+      p = v.index + v[0].length;
+    }
+    if (p < seg.length) out.push(seg.slice(p));
+    pos = end;
+  });
+  if (pos < text.length) out.push(text.slice(pos));
+  return <>{out}</>;
+}
+
 function emptyMarks() { return { querer: new Set(), poder: new Set(), tener_que: new Set() }; }
 
 export default function IntrusoTrainer({ onClose }) {
@@ -61,12 +101,16 @@ export default function IntrusoTrainer({ onClose }) {
   const [marks, setMarks] = useState(emptyMarks);
   const [checked, setChecked] = useState(false);
   const [ru, setRu] = useState(false);
+  const [step, setStep] = useState("historia");
+  const shellRef = useRef(null);
+  function toTop() { try { shellRef.current?.scrollTo(0, 0); } catch { /* старые браузеры */ } }
   const [done, setDone] = useState(readDone);
 
   const item = idx === null ? null : TARGETS4[idx];
   const key = item ? intrusoKey4(item) : null;
 
-  function open(i) { setIdx(i); setMarks(emptyMarks()); setChecked(false); setRu(false); }
+  function open(i) { setIdx(i); setMarks(emptyMarks()); setChecked(false); setRu(false); setStep("historia"); toTop(); }
+  function retry() { setMarks(emptyMarks()); setChecked(false); setRu(false); setStep("juego"); }
   function toggle(cat, act) {
     if (checked) return;
     setMarks((m) => {
@@ -91,8 +135,8 @@ export default function IntrusoTrainer({ onClose }) {
   // ---------- Список предметов ----------
   if (!item) {
     return (
-      <div role="dialog" aria-label="Piensa como el intruso" style={shell}><div style={inner}>
-        <div style={{ marginBottom: 14 }}><button type="button" onClick={onClose} style={topBtn}>← К игре</button></div>
+      <div role="dialog" aria-label="Piensa como el intruso" ref={shellRef} style={shell}><div style={inner}>
+        <div style={{ marginBottom: 14 }}><button type="button" onClick={onClose} style={topBtn}>← К игре El Libro Mágico</button></div>
         <div style={{ textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontSize: 40 }}>🕵️</div>
           <h2 style={{ margin: "4px 0 2px", fontSize: 22 }}>Piensa como el intruso</h2>
@@ -100,9 +144,10 @@ export default function IntrusoTrainer({ onClose }) {
         </div>
         <div style={card}>
           <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: C.inkSoft }}>
-            Открой предмет и прочитай его ситуацию. Потом разложи семь действий по трём полкам:
-            чего нарушитель <b>хочет</b>, что он <b>может</b> и что ему <b>нужно сделать</b> по плану.
-            Ответ спрятан в сюжете: где лежит вещь, у кого она и зачем она нужна для похищения Книги.
+            Открой предмет. Сначала прочитай и послушай <b>историю преступника</b>: чего он хочет,
+            что может и что обязан сделать с этой вещью. Представь её как картинку.
+            Потом разложи семь действий по трём полкам: <b>хочет</b>, <b>может</b>, <b>нужно сделать</b>.
+            В игре ты сможешь сослаться на любой факт из истории.
           </p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -118,16 +163,57 @@ export default function IntrusoTrainer({ onClose }) {
     );
   }
 
-  // ---------- Экран предмета ----------
+  // ---------- Шаг 1: история преступника ----------
+  if (step === "historia") {
+    const storyEs = item.historiaEs.join(" ");
+    return (
+      <div role="dialog" aria-label={`La historia del intruso · ${item.inf}`} ref={shellRef} style={shell}><div style={inner}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, gap: 8 }}>
+          <button type="button" onClick={() => setIdx(null)} style={topBtn}>← Все предметы</button>
+          <button type="button" onClick={onClose} style={topBtn}>К игре ✕</button>
+        </div>
+        <div style={card}>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>{item.emoji} {item.inf}</div>
+          <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 4 }}>{item.ru}</div>
+          <div style={{ fontSize: 13, color: C.goldDeep, fontWeight: 700, marginBottom: 6 }}>📜 Шаг 1 · История преступника</div>
+          <div style={{ fontSize: 12.5, marginBottom: 10 }}>
+            <b style={{ color: OP_COLOR.querer }}>❤️ quiere</b> · <b style={{ color: OP_COLOR.poder }}>🔑 puede</b> · <b style={{ color: OP_COLOR.tener_que }}>⚖️ tiene que</b>
+            <span style={{ color: C.inkSoft }}> — следи за этими линиями</span>
+          </div>
+          {item.historiaEs.map((line, i) => (
+            <div key={i} style={{ marginBottom: 9 }}>
+              <p style={{ margin: 0, fontSize: 16, lineHeight: 1.65 }}><OpLine text={line} /></p>
+              {ru && <p style={{ margin: "2px 0 0", fontSize: 13.5, lineHeight: 1.55, color: C.inkSoft, fontStyle: "italic" }}>{item.historiaRu[i]}</p>}
+            </div>
+          ))}
+          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+            <button type="button" onClick={() => speak(storyEs)} style={{ ...topBtn, padding: "6px 12px" }}>🔊 Escuchar</button>
+            <button type="button" onClick={() => setRu((v) => !v)} style={{ ...topBtn, padding: "6px 12px" }}>{ru ? "ES ✓" : "RU перевод"}</button>
+          </div>
+        </div>
+        <div style={{ ...card, background: C.cream }}>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: C.inkSoft }}>
+            Представь эту сцену. Потом история закроется, и ты разложишь действия по памяти.
+          </p>
+        </div>
+        <button type="button" onClick={() => { setRu(false); setStep("juego"); toTop(); }}
+          style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 14, padding: "15px", fontSize: 17, fontWeight: 800, fontFamily: SERIF, cursor: "pointer" }}>
+          Lo veo · Шаг 2 →
+        </button>
+      </div></div>
+    );
+  }
+
+  // ---------- Шаг 2: упражнение ----------
   const total = ROWS.length * ACTIONS4.length;
   const right = checked ? ROWS.reduce((n, r) => n + ACTIONS4.filter((a) => marks[r.cat].has(a.id) === key[r.cat].includes(a.id)).length, 0) : 0;
   const nextIdx = (idx + 1) % TARGETS4.length;
 
   return (
-    <div role="dialog" aria-label={`Piensa como el intruso · ${item.inf}`} style={shell}><div style={inner}>
+    <div role="dialog" aria-label={`Piensa como el intruso · ${item.inf}`} ref={shellRef} style={shell}><div style={inner}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, gap: 8 }}>
         <button type="button" onClick={() => setIdx(null)} style={topBtn}>← Все предметы</button>
-        <button type="button" onClick={onClose} style={topBtn}>К игре</button>
+        <button type="button" onClick={onClose} style={topBtn}>К игре ✕</button>
       </div>
 
       <div style={card}>
@@ -135,7 +221,8 @@ export default function IntrusoTrainer({ onClose }) {
         <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 10 }}>{item.ru}</div>
         <p style={{ margin: "0 0 8px", fontSize: 16, lineHeight: 1.7 }}>{item.situationEs}</p>
         {ru && <p style={{ margin: "0 0 8px", fontSize: 13.5, lineHeight: 1.6, color: C.inkSoft, fontStyle: "italic" }}>{item.situationRu}</p>}
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button type="button" onClick={() => { setRu(false); setStep("historia"); }} style={{ ...topBtn, padding: "6px 12px" }}>📜 История</button>
           <button type="button" onClick={() => speak(item.situationEs)} style={{ ...topBtn, padding: "6px 12px" }}>🔊 Escuchar</button>
           <button type="button" onClick={() => setRu((v) => !v)} style={{ ...topBtn, padding: "6px 12px" }}>{ru ? "ES ✓" : "RU перевод"}</button>
         </div>
@@ -194,7 +281,7 @@ export default function IntrusoTrainer({ onClose }) {
             <button type="button" onClick={() => speak(sentenceEs(item, key))} style={{ ...topBtn, padding: "6px 12px", marginTop: 8 }}>🔊 Escuchar</button>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button type="button" onClick={() => open(idx)}
+            <button type="button" onClick={retry}
               style={{ flex: 1, background: C.card, color: C.goldDeep, border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 700, fontFamily: SERIF, cursor: "pointer" }}>
               Ещё раз
             </button>

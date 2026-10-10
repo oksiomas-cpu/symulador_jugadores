@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import LibroVivo from "./LibroVivo.jsx";
 import MiDiccionario from "./MiDiccionario.jsx";
 import Gramatica from "./Gramatica.jsx";
@@ -2083,6 +2083,7 @@ function LessonFrame({ lesson, onClose }) {
 // CHAPTER WELCOME — экран-преддверие между выбором главы и ролью
 // Показывает историю-маяк, глоссарий и кнопку тренажёра спряжений
 // ============================================================
+const WELCOME_SCROLL = {};
 function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onActionTrainer, onOperadores, onBack }) {
   const isCapOne = pack.id === "cap1";
   const isCapThree = pack.id === "cap3";
@@ -2094,6 +2095,17 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   const [storyKey, setStoryKey] = useState(null);
   const [lessonId, setLessonId] = useState(null);
   const [intrusoOpen, setIntrusoOpen] = useState(false);
+  // 10.10.2026: возврат на тот же экран главы — после тренировки ролей,
+  // капсул и грамматики участник оказывается там же, откуда ушёл, а не наверху.
+  useLayoutEffect(() => {
+    const id = pack.id;
+    const saved = WELCOME_SCROLL[id];
+    const timers = [];
+    if (saved) [0, 120, 400].forEach((ms) => timers.push(setTimeout(() => { try { window.scrollTo(0, saved); } catch { /* ignore */ } }, ms)));
+    const onScroll = () => { WELCOME_SCROLL[id] = window.scrollY || 0; };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { timers.forEach(clearTimeout); window.removeEventListener("scroll", onScroll); };
+  }, [pack.id]);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
   const openLesson = RUMBOS_LESSONS.find((l) => l.id === lessonId) || null;
 
@@ -2797,7 +2809,7 @@ function RolePicker({ pack = DEFAULT_PACK, onPick, session, onBack, onDiario }) 
   return (
     <div style={wrap}><div style={maxw}>
       <Header subtitle={`Cap. ${pack.num} · ${pack.grammar} · elige tu rol`} />
-      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую игру</button></div>}
+      {onBack && <div style={{ textAlign: "center", marginBottom: 12 }}><button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>{pack.id === "cap4" ? "← К истории и уликам игры" : "← Выбрать другую игру"}</button></div>}
       <ScoreBadge session={session} />
       <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Прокачай свою роль перед игрой. Выбери, кем тренируешься сегодня:</p>
       {cards.map((c) => (
