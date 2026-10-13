@@ -687,6 +687,23 @@
     color:var(--accent);
     margin-bottom:8px;
   }
+  /* glossary: уроки сверху, разделы сворачиваются */
+  .glossary-lessons{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; margin-bottom:6px; scrollbar-width:thin; }
+  .gl-chip{ flex:none; display:flex; flex-direction:column; align-items:flex-start; gap:1px; min-height:44px; font-family:var(--font-display); background:var(--paper); border:1.5px solid var(--gold-soft); color:var(--ink); border-radius:14px; padding:8px 14px; cursor:pointer; text-align:left; touch-action:manipulation; }
+  .gl-chip b{ font-size:.95rem; font-weight:600; }
+  .gl-chip small{ font-family:var(--font-body); font-style:italic; color:var(--ink-soft); font-size:.88rem; }
+  .gl-chip[aria-pressed="true"]{ background:var(--accent); border-color:var(--accent); color:var(--paper); }
+  .gl-chip[aria-pressed="true"] small{ color:var(--paper); opacity:.85; }
+  .gl-chip:focus-visible,details.glossary-group > summary:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  details.glossary-group{ margin-bottom:10px; border:1.5px solid var(--gold-soft); border-radius:14px; }
+  details.glossary-group > summary{ list-style:none; display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:46px; padding:10px 14px; cursor:pointer; }
+  details.glossary-group > summary::-webkit-details-marker{ display:none; }
+  .gg-title{ font-family:var(--font-display); text-transform:uppercase; letter-spacing:.1em; font-size:.78rem; color:var(--accent); min-width:0; }
+  .gg-count{ flex:none; color:var(--ink-soft); font-size:.92rem; white-space:nowrap; }
+  .gg-count::after{ content:' ▾'; }
+  details.glossary-group[open] .gg-count::after{ content:' ▴'; }
+  .gg-body{ padding:0 14px 12px; }
+  .gg-body > .glossary-item:first-child{ border-top:none; padding-top:2px; }
   .glossary-item{
     display:flex;
     align-items:center;
@@ -2218,195 +2235,147 @@ window.AUDIO = {
   fitCard();
 
   // --- словарь материала: плавающая кнопка, доступна на любом шаге ---
-  const GLOSSARY = [
-    {
-      group: 'Операторы',
-      items: [
-        {w:'querer', tr:'керэ́р', ru:'хотеть (словарная форма)'},
-        {w:'quiero', tr:'кье́ро', ru:'я хочу'},
-        {w:'quisiera', tr:'кисье́ра', ru:'я хотел(а) бы — вежливо'},
-        {w:'quería', tr:'кери́а', ru:'я хотел(а) бы — мягче, разговорно'},
-        {w:'no puedo', tr:'но пуэ́до', ru:'я не могу'},
-        {w:'voy a', tr:'вой а', ru:'я собираюсь / иду'},
-        {w:'¿quiere?', tr:'кье́рэ', ru:'хотите — так спрашивают вежливо'},
-      ]
-    },
-    {
-      group: 'Глаголы в инфинитиве',
-      items: [
-        {w:'hablar', tr:'абла́р', ru:'говорить'},
-        {w:'estudiar', tr:'эстудья́р', ru:'учиться, изучать'},
-        {w:'aprender', tr:'апрендэ́р', ru:'учиться, узнавать'},
-        {w:'entender', tr:'энтендэ́р', ru:'понимать'},
-        {w:'vivir', tr:'виви́р', ru:'жить'},
-        {w:'conducir', tr:'кондуси́р', ru:'водить (машину)'},
-        {w:'ayudar', tr:'аюда́р', ru:'помогать'},
-        {w:'pedir', tr:'педи́р', ru:'заказывать, просить'},
-        {w:'recibir', tr:'ресиби́р', ru:'получать'},
-      ]
-    },
-    {
-      group: 'Глагол + предлог (пара фиксирована)',
-      items: [
-        {w:'vivir en', tr:'виви́р эн', ru:'жить в (стране)'},
-        {w:'ayudar a', tr:'аюда́р а', ru:'помогать (кому-то)'},
-        {w:'salir de', tr:'сали́р дэ', ru:'выходить из'},
-        {w:'llamar a', tr:'льяма́р а', ru:'звонить (кому-то)'},
-      ]
-    },
-    {
-      group: 'Слова материала',
-      items: [
-        {w:'la compra', tr:'ля ко́мпра', ru:'покупки, продукты'},
-        {w:'a domicilio', tr:'а домиси́лио', ru:'на дом, с доставкой'},
-        {w:'un pan', tr:'ун пан', ru:'хлеб'},
-        {w:'la leche', tr:'ля ле́чэ', ru:'молоко'},
-        {w:'unos huevos', tr:'у́нос уэ́вос', ru:'яйца'},
-        {w:'la tienda', tr:'ля тье́нда', ru:'магазин'},
-        {w:'mañana', tr:'манья́на', ru:'завтра / утро (два значения сразу)'},
-        {w:'por la mañana', tr:'пор ля манья́на', ru:'утром'},
-        {w:'por la tarde', tr:'пор ля та́рдэ', ru:'днём, после обеда'},
-        {w:'a las diez', tr:'а лас дьес', ru:'в десять часов'},
-        {w:'hoy', tr:'ой', ru:'сегодня'},
-      ]
-    },
-    {
-      group: 'Вежливые слова диалога',
-      items: [
-        {w:'buenos días', tr:'буэ́нос ди́ас', ru:'здравствуйте, добрый день'},
-        {w:'gracias', tr:'гра́сьяс', ru:'спасибо'},
-        {w:'por favor', tr:'пор фаво́р', ru:'пожалуйста'},
-        {w:'¿diga?', tr:'ди́га', ru:'алло (при ответе на звонок)'},
-        {w:'sí / no', tr:'си / но', ru:'да / нет'},
-        {w:'claro', tr:'кла́ро', ru:'конечно'},
-        {w:'sin problema', tr:'син пробле́ма', ru:'без проблем'},
-        {w:'algo más', tr:'а́льго мас', ru:'что-то ещё'},
-        {w:'eso es todo', tr:'э́со эс то́до', ru:'это всё'},
-      ]
-    },
-    {
-      group: 'Вопросы-ключи',
-      items: [
-        {w:'¿Cuándo?', tr:'куа́ндо', ru:'когда?'},
-        {w:'¿A qué hora?', tr:'а ке о́ра', ru:'во сколько?'},
-        {w:'¿Qué quieres hacer?', tr:'ке кье́рэс асэ́р', ru:'что ты хочешь сделать?'},
-        {w:'¿Qué?', tr:'ке', ru:'что?'},
-        {w:'¿Adónde?', tr:'адо́ндэ', ru:'куда?'},
-        {w:'¿Dónde?', tr:'до́ндэ', ru:'где?'},
-        {w:'¿Por qué? → porque', tr:'пор ке → по́ркэ', ru:'почему? → потому что'},
-        {w:'¿Para qué? → para', tr:'па́ра ке → па́ра', ru:'зачем? → чтобы'},
-        {w:'¿Cómo?', tr:'ко́мо', ru:'как?'},
-        {w:'¿Y tú?', tr:'и ту', ru:'а ты?'},
-      ]
-    },
-  ];
-
+  /* Словарь: один, накопительный. Верхний уровень — урок, внутри — разделы.
+     Слово стоит в том уроке, где появилось впервые; каждый следующий урок добавляет только новое.
+     Отметки «знаю» общие для всех уроков: ключ — само слово. */
+  const GLOSSARY = [{"id": "1", "sub": "querer", "groups": [{"group": "Операторы", "items": [{"w": "querer", "tr": "керэ́р", "ru": "хотеть (словарная форма)"}, {"w": "quiero", "tr": "кье́ро", "ru": "я хочу"}, {"w": "quisiera", "tr": "кисье́ра", "ru": "я хотел(а) бы — вежливо"}, {"w": "quería", "tr": "кери́а", "ru": "я хотел(а) бы — мягче, разговорно"}, {"w": "no puedo", "tr": "но пуэ́до", "ru": "я не могу"}, {"w": "voy a", "tr": "вой а", "ru": "я собираюсь / иду"}, {"w": "¿quiere?", "tr": "кье́рэ", "ru": "хотите — так спрашивают вежливо"}]}, {"group": "Глаголы в инфинитиве", "items": [{"w": "hablar", "tr": "абла́р", "ru": "говорить"}, {"w": "estudiar", "tr": "эстудья́р", "ru": "учиться, изучать"}, {"w": "aprender", "tr": "апрендэ́р", "ru": "учиться, узнавать"}, {"w": "entender", "tr": "энтендэ́р", "ru": "понимать"}, {"w": "vivir", "tr": "виви́р", "ru": "жить"}, {"w": "conducir", "tr": "кондуси́р", "ru": "водить (машину)"}, {"w": "ayudar", "tr": "аюда́р", "ru": "помогать"}, {"w": "pedir", "tr": "педи́р", "ru": "заказывать, просить"}, {"w": "recibir", "tr": "ресиби́р", "ru": "получать"}]}, {"group": "Глагол + предлог (пара фиксирована)", "items": [{"w": "vivir en", "tr": "виви́р эн", "ru": "жить в (стране)"}, {"w": "ayudar a", "tr": "аюда́р а", "ru": "помогать (кому-то)"}, {"w": "salir de", "tr": "сали́р дэ", "ru": "выходить из"}, {"w": "llamar a", "tr": "льяма́р а", "ru": "звонить (кому-то)"}]}, {"group": "Слова материала", "items": [{"w": "la compra", "tr": "ля ко́мпра", "ru": "покупки, продукты"}, {"w": "a domicilio", "tr": "а домиси́лио", "ru": "на дом, с доставкой"}, {"w": "un pan", "tr": "ун пан", "ru": "хлеб"}, {"w": "la leche", "tr": "ля ле́чэ", "ru": "молоко"}, {"w": "unos huevos", "tr": "у́нос уэ́вос", "ru": "яйца"}, {"w": "la tienda", "tr": "ля тье́нда", "ru": "магазин"}, {"w": "mañana", "tr": "манья́на", "ru": "завтра / утро (два значения сразу)"}, {"w": "por la mañana", "tr": "пор ля манья́на", "ru": "утром"}, {"w": "por la tarde", "tr": "пор ля та́рдэ", "ru": "днём, после обеда"}, {"w": "a las diez", "tr": "а лас дьес", "ru": "в десять часов"}, {"w": "hoy", "tr": "ой", "ru": "сегодня"}]}, {"group": "Вежливые слова диалога", "items": [{"w": "buenos días", "tr": "буэ́нос ди́ас", "ru": "здравствуйте, добрый день"}, {"w": "gracias", "tr": "гра́сьяс", "ru": "спасибо"}, {"w": "por favor", "tr": "пор фаво́р", "ru": "пожалуйста"}, {"w": "¿diga?", "tr": "ди́га", "ru": "алло (при ответе на звонок)"}, {"w": "sí / no", "tr": "си / но", "ru": "да / нет"}, {"w": "claro", "tr": "кла́ро", "ru": "конечно"}, {"w": "sin problema", "tr": "син пробле́ма", "ru": "без проблем"}, {"w": "algo más", "tr": "а́льго мас", "ru": "что-то ещё"}, {"w": "eso es todo", "tr": "э́со эс то́до", "ru": "это всё"}]}, {"group": "Вопросы-ключи", "items": [{"w": "¿Cuándo?", "tr": "куа́ндо", "ru": "когда?"}, {"w": "¿A qué hora?", "tr": "а ке о́ра", "ru": "во сколько?"}, {"w": "¿Qué quieres hacer?", "tr": "ке кье́рэс асэ́р", "ru": "что ты хочешь сделать?"}, {"w": "¿Qué?", "tr": "ке", "ru": "что?"}, {"w": "¿Adónde?", "tr": "адо́ндэ", "ru": "куда?"}, {"w": "¿Dónde?", "tr": "до́ндэ", "ru": "где?"}, {"w": "¿Por qué? → porque", "tr": "пор ке → по́ркэ", "ru": "почему? → потому что"}, {"w": "¿Para qué? → para", "tr": "па́ра ке → па́ра", "ru": "зачем? → чтобы"}, {"w": "¿Cómo?", "tr": "ко́мо", "ru": "как?"}, {"w": "¿Y tú?", "tr": "и ту", "ru": "а ты?"}]}]}];
+  const CURRENT_LESSON = '1';
   const GLOSSARY_STORAGE_KEY = 'ciudad_glossary_known_es';
-  let knownWords = {};
-  try {
-    const raw = localStorage.getItem(GLOSSARY_STORAGE_KEY);
-    if (raw) knownWords = JSON.parse(raw) || {};
-  } catch (e) {}
-
-  function saveKnownWords(){
-    try { localStorage.setItem(GLOSSARY_STORAGE_KEY, JSON.stringify(knownWords)); } catch (e) {}
-  }
-
   const OWN_STORAGE_KEY = 'ciudad_glossary_own_es';
-  let ownWords = {};
-  try {
-    const raw = localStorage.getItem(OWN_STORAGE_KEY);
-    if (raw) ownWords = JSON.parse(raw) || {};
-  } catch (e) {}
-  function saveOwnWords(){
-    try { localStorage.setItem(OWN_STORAGE_KEY, JSON.stringify(ownWords)); } catch (e) {}
-  }
+  function gmk(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+  function gload(key){ try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; } }
+  function gsave(key, obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch (e) {} }
+  const knownWords = gload(GLOSSARY_STORAGE_KEY);
+  const ownWords = gload(OWN_STORAGE_KEY);
+  const wordKey = w => w.trim().toLowerCase().replace(/\s+/g, ' ');
+  const groupKey = (lesson, g) => lesson.id + '|' + g.group;
+  /* Перенос старых отметок урока 1: раньше ключом был номер раздела и слова («0-3»). */
+  (function migrateLegacy(){
+    const LEGACY = [{"g": "Операторы", "w": ["querer", "quiero", "quisiera", "quería", "no puedo", "voy a", "¿quiere?"]}, {"g": "Глаголы в инфинитиве", "w": ["hablar", "estudiar", "aprender", "entender", "vivir", "conducir", "ayudar", "pedir", "recibir"]}, {"g": "Глагол + предлог (пара фиксирована)", "w": ["vivir en", "ayudar a", "salir de", "llamar a"]}, {"g": "Слова материала", "w": ["la compra", "a domicilio", "un pan", "la leche", "unos huevos", "la tienda", "mañana", "por la mañana", "por la tarde", "a las diez", "hoy"]}, {"g": "Вежливые слова диалога", "w": ["buenos días", "gracias", "por favor", "¿diga?", "sí / no", "claro", "sin problema", "algo más", "eso es todo"]}, {"g": "Вопросы-ключи", "w": ["¿Cuándo?", "¿A qué hora?", "¿Qué quieres hacer?", "¿Qué?", "¿Adónde?", "¿Dónde?", "¿Por qué? → porque", "¿Para qué? → para", "¿Cómo?", "¿Y tú?"]}];
+    let changed = false;
+    Object.keys(knownWords).forEach(k => {
+      const m = /^(\d+)-(\d+)$/.exec(k); if (!m) return;
+      const grp = LEGACY[+m[1]], w = grp && grp.w[+m[2]];
+      if (w && knownWords[k]) knownWords[wordKey(w)] = true;
+      delete knownWords[k]; changed = true;
+    });
+    if (changed) gsave(GLOSSARY_STORAGE_KEY, knownWords);
+    let ownChanged = false;
+    Object.keys(ownWords).forEach(k => {
+      if (!/^\d+$/.test(k)) return;
+      const grp = LEGACY[+k];
+      if (grp) { const nk = '1|' + grp.g; ownWords[nk] = (ownWords[nk] || []).concat(ownWords[k] || []); }
+      delete ownWords[k]; ownChanged = true;
+    });
+    if (ownChanged) gsave(OWN_STORAGE_KEY, ownWords);
+  })();
+  const openState = {};
+  let activeLesson = CURRENT_LESSON;
+  let chipCountEls = {}, groupCountEls = {};
 
-  function updateGlossaryProgress(){
-    let total = GLOSSARY.reduce((sum, g) => sum + g.items.length, 0);
-    let known = GLOSSARY.reduce((sum, g, gi) => sum + g.items.filter((_, ii) => knownWords[gi + '-' + ii]).length, 0);
-    Object.values(ownWords).forEach(list => (list || []).forEach(o => { total++; if (o.k) known++; }));
+  function groupStats(lesson, g){
+    let total = g.items.length, known = g.items.filter(it => knownWords[wordKey(it.w)]).length;
+    (ownWords[groupKey(lesson, g)] || []).forEach(o => { total++; if (o.k) known++; });
+    return {total, known};
+  }
+  function lessonStats(lesson){
+    let total = 0, known = 0;
+    lesson.groups.forEach(g => { const s = groupStats(lesson, g); total += s.total; known += s.known; });
+    return {total, known};
+  }
+  function updateCounts(){
+    let total = 0, known = 0;
+    GLOSSARY.forEach(l => {
+      const s = lessonStats(l); total += s.total; known += s.known;
+      if (chipCountEls[l.id]) chipCountEls[l.id].textContent = s.known + ' из ' + s.total;
+      l.groups.forEach(g => { const el = groupCountEls[groupKey(l, g)]; if (el) { const gs = groupStats(l, g); el.textContent = gs.known + ' из ' + gs.total; } });
+    });
     const el = document.getElementById('glossaryProgress');
-    if (el) el.textContent = `Знаю: ${known} из ${total}`;
+    if (el) el.textContent = 'Знаю: ' + known + ' из ' + total;
   }
-
   function makeItem(word, tr, ru, checked, opts){
-    const item = document.createElement('div');
-    item.className = 'glossary-item' + (checked ? ' is-known' : '') + (opts.own ? ' is-own' : '');
-    const lab = document.createElement('label'); lab.className = 'glossary-check';
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'glossary-checkbox';
-    cb.checked = checked; cb.setAttribute('aria-label', 'Знаю это слово');
+    const item = gmk('div', 'glossary-item' + (checked ? ' is-known' : '') + (opts.own ? ' is-own' : ''));
+    const lab = gmk('label', 'glossary-check');
+    const cb = gmk('input', 'glossary-checkbox'); cb.type = 'checkbox'; cb.checked = checked; cb.setAttribute('aria-label', 'Знаю это слово');
     Object.entries(opts.data).forEach(([k, v]) => cb.dataset[k] = v);
     lab.appendChild(cb);
-    const main = document.createElement('div'); main.className = 'glossary-main';
-    const w = document.createElement('div'); w.className = 'glossary-word'; w.textContent = word; main.appendChild(w);
-    if (tr) { const t = document.createElement('div'); t.className = 'glossary-transcription'; t.textContent = '[' + tr + ']'; main.appendChild(t); }
-    const r = document.createElement('div'); r.className = 'glossary-ru'; r.textContent = ru;
+    const main = gmk('div', 'glossary-main');
+    const w = gmk('div', 'glossary-word'); w.textContent = word; main.appendChild(w);
+    if (tr) { const t = gmk('div', 'glossary-transcription'); t.textContent = '[' + tr + ']'; main.appendChild(t); }
+    const r = gmk('div', 'glossary-ru'); r.textContent = ru;
     item.append(lab, main, r);
     if (opts.own) {
-      const del = document.createElement('button'); del.type = 'button'; del.className = 'glossary-del';
-      del.textContent = '✕'; del.setAttribute('aria-label', 'Удалить моё слово');
+      const del = gmk('button', 'glossary-del'); del.type = 'button'; del.textContent = '✕'; del.setAttribute('aria-label', 'Удалить моё слово');
       Object.entries(opts.data).forEach(([k, v]) => del.dataset[k] = v);
       item.appendChild(del);
     }
     return item;
   }
-
-  function buildGlossary(){
+  function centerChip(){
+    const row = document.querySelector('.glossary-lessons'); const act = row && row.querySelector('[aria-pressed="true"]');
+    if (act) row.scrollLeft = Math.max(0, act.offsetLeft - row.offsetLeft - 8);
+  }
+  function buildGlossary(keepScroll){
     const body = document.getElementById('glossaryBody');
-    body.innerHTML = '';
-    GLOSSARY.forEach((g, gi) => {
-      const groupEl = document.createElement('div');
-      groupEl.className = 'glossary-group';
-      const title = document.createElement('div');
-      title.className = 'glossary-group-title';
-      title.textContent = g.group;
-      groupEl.appendChild(title);
-      g.items.forEach((it, ii) => {
-        const key = gi + '-' + ii;
-        groupEl.appendChild(makeItem(it.w, it.tr, it.ru, !!knownWords[key], {own:false, data:{key}}));
+    const panel = body.parentElement; const top = keepScroll ? panel.scrollTop : 0;
+    body.innerHTML = ''; chipCountEls = {}; groupCountEls = {};
+    if (GLOSSARY.length > 1) {
+      const row = gmk('div', 'glossary-lessons'); row.setAttribute('role', 'group'); row.setAttribute('aria-label', 'Уроки');
+      GLOSSARY.forEach(l => {
+        const chip = gmk('button', 'gl-chip'); chip.type = 'button'; chip.setAttribute('aria-pressed', l.id === activeLesson ? 'true' : 'false');
+        const t = gmk('b'); t.textContent = 'Урок ' + l.id;
+        const sub = gmk('small'); sub.append(l.sub + ' · ');
+        const cnt = gmk('span'); sub.appendChild(cnt); chipCountEls[l.id] = cnt;
+        chip.append(t, sub);
+        chip.addEventListener('click', () => { activeLesson = l.id; buildGlossary(); });
+        row.appendChild(chip);
       });
-      (ownWords[gi] || []).forEach((o, oi) => {
-        groupEl.appendChild(makeItem(o.w, '', o.ru, !!o.k, {own:true, data:{g:gi, o:oi}}));
-      });
-      const toggle = document.createElement('button');
-      toggle.type = 'button'; toggle.className = 'glossary-add-toggle';
-      toggle.textContent = '+ Моё слово';
-      const form = document.createElement('div');
-      form.className = 'glossary-add-form'; form.hidden = true;
+      body.appendChild(row);
+    }
+    const lesson = GLOSSARY.find(l => l.id === activeLesson) || GLOSSARY[0];
+    lesson.groups.forEach((g, gi) => {
+      const gk = groupKey(lesson, g);
+      const det = gmk('details', 'glossary-group'); det.open = openState[gk] !== undefined ? openState[gk] : gi === 0;
+      det.addEventListener('toggle', () => { openState[gk] = det.open; });
+      const sum = gmk('summary'); const title = gmk('span', 'gg-title'); title.textContent = g.group;
+      const count = gmk('span', 'gg-count'); groupCountEls[gk] = count; sum.append(title, count); det.appendChild(sum);
+      const inner = gmk('div', 'gg-body');
+      g.items.forEach(it => inner.appendChild(makeItem(it.w, it.tr, it.ru, !!knownWords[wordKey(it.w)], {own:false, data:{key:wordKey(it.w)}})));
+      (ownWords[gk] || []).forEach((o, oi) => inner.appendChild(makeItem(o.w, '', o.ru, !!o.k, {own:true, data:{g:gk, o:oi}})));
+      const toggle = gmk('button', 'glossary-add-toggle'); toggle.type = 'button'; toggle.textContent = '+ Моё слово';
+      const form = gmk('div', 'glossary-add-form'); form.hidden = true;
       const inW = document.createElement('input'); inW.placeholder = 'по-испански'; inW.setAttribute('aria-label', 'Слово по-испански');
       const inR = document.createElement('input'); inR.placeholder = 'перевод'; inR.setAttribute('aria-label', 'Перевод');
-      const save = document.createElement('button'); save.type = 'button'; save.className = 'glossary-add-save'; save.textContent = 'Добавить';
+      const save = gmk('button', 'glossary-add-save'); save.type = 'button'; save.textContent = 'Добавить';
       form.append(inW, inR, save);
       toggle.addEventListener('click', () => { form.hidden = !form.hidden; if (!form.hidden) inW.focus(); });
       const add = () => {
         const w = inW.value.trim(); if (!w) { inW.focus(); return; }
-        (ownWords[gi] = ownWords[gi] || []).push({w, ru: inR.value.trim(), k:false});
-        saveOwnWords(); buildGlossary();
+        (ownWords[gk] = ownWords[gk] || []).push({w, ru:inR.value.trim(), k:false});
+        gsave(OWN_STORAGE_KEY, ownWords); openState[gk] = true; buildGlossary(true);
       };
       save.addEventListener('click', add);
       [inW, inR].forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') add(); }));
-      groupEl.append(toggle, form);
-      body.appendChild(groupEl);
+      inner.append(toggle, form); det.appendChild(inner); body.appendChild(det);
     });
-    updateGlossaryProgress();
+    updateCounts();
+    panel.scrollTop = top;
+    centerChip();
   }
-  document.getElementById('glossaryBody').addEventListener('change', (e) => {
-    const cb = e.target.closest('.glossary-checkbox');
-    if (!cb) return;
-    if (cb.dataset.key !== undefined) { knownWords[cb.dataset.key] = cb.checked; saveKnownWords(); }
-    else { const o = (ownWords[cb.dataset.g] || [])[cb.dataset.o]; if (o) { o.k = cb.checked; saveOwnWords(); } }
+  document.getElementById('glossaryBody').addEventListener('change', e => {
+    const cb = e.target.closest('.glossary-checkbox'); if (!cb) return;
+    if (cb.dataset.key !== undefined) { knownWords[cb.dataset.key] = cb.checked; gsave(GLOSSARY_STORAGE_KEY, knownWords); }
+    else { const o = (ownWords[cb.dataset.g] || [])[cb.dataset.o]; if (o) { o.k = cb.checked; gsave(OWN_STORAGE_KEY, ownWords); } }
     cb.closest('.glossary-item').classList.toggle('is-known', cb.checked);
-    updateGlossaryProgress();
+    updateCounts();
   });
-  document.getElementById('glossaryBody').addEventListener('click', (e) => {
-    const del = e.target.closest('.glossary-del');
-    if (!del) return;
-    const list = ownWords[del.dataset.g] || [];
-    list.splice(+del.dataset.o, 1);
-    saveOwnWords(); buildGlossary();
+  document.getElementById('glossaryBody').addEventListener('click', e => {
+    const del = e.target.closest('.glossary-del'); if (!del) return;
+    (ownWords[del.dataset.g] || []).splice(+del.dataset.o, 1);
+    gsave(OWN_STORAGE_KEY, ownWords); buildGlossary(true);
   });
   buildGlossary();
+  document.getElementById('glossaryFab').addEventListener('click', () => setTimeout(centerChip, 0));
 
   const glossaryFab = document.getElementById('glossaryFab');
   const glossaryOverlay = document.getElementById('glossaryOverlay');

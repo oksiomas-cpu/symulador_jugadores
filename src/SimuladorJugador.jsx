@@ -2048,14 +2048,66 @@ function RumbosBook() {
 // отдельными файлами рядом со страницей (не base64 внутри неё).
 // ============================================================
 const RUMBOS_LESSONS = [
-  { id: "quiero-hablar", number: "1", title: "Quiero hablar español", subtitle: "Оператор querer · звонок с заказом на дом", src: "/lessons/quiero-hablar/index.html" },
+  { id: "quiero-hablar", number: "1", ordinal: "Первый урок", title: "Quiero hablar español", subtitle: "Оператор querer · звонок с заказом на дом", src: "/lessons/quiero-hablar/index.html", homeworkSrc: "/lessons/quiero-hablar/homework/index.html" },
+  { id: "puedo-hablar", number: "2", ordinal: "Второй урок", title: "Puedo hablar", subtitle: "Оператор poder · могу и не могу", src: "/lessons/puedo-hablar/index.html", homeworkSrc: "/lessons/puedo-hablar/homework/index.html" },
 ];
+// Каждый урок и каждая домашняя работа открываются в одной и той же рамке.
+const RUMBOS_FRAMES = RUMBOS_LESSONS.flatMap((l) => [
+  { key: l.id, number: l.number, title: l.title, src: l.src, label: `Урок ${l.number} · ${l.title}` },
+  { key: `${l.id}-hw`, number: l.number, title: l.title, src: l.homeworkSrc, label: `Урок ${l.number} · Домашняя работа` },
+]);
+
+function LessonsCarousel({ onOpen }) {
+  const trackRef = useRef(null);
+  const [active, setActive] = useState(0);
+  const go = (i) => {
+    const el = trackRef.current; if (!el) return;
+    const n = Math.max(0, Math.min(RUMBOS_LESSONS.length - 1, i));
+    el.scrollTo({ left: n * el.clientWidth, behavior: "smooth" });
+  };
+  const onScroll = () => {
+    const el = trackRef.current; if (!el || !el.clientWidth) return;
+    setActive(Math.round(el.scrollLeft / el.clientWidth));
+  };
+  return (
+    <section className="rumbos-practice rumbos-lessons" aria-label="Уроки архитектуры живой речи" aria-roledescription="карусель">
+      <div className="rumbos-section-kicker">Уроки</div>
+      <div className="rumbos-lessons-track" ref={trackRef} onScroll={onScroll}>
+        {RUMBOS_LESSONS.map((lesson, i) => (
+          <div key={lesson.id} className="rumbos-lessons-slide" role="group" aria-roledescription="слайд" aria-label={`${lesson.ordinal}, ${i + 1} из ${RUMBOS_LESSONS.length}`}>
+            <h2>{lesson.ordinal}</h2>
+            <p>Слушай, повторяй и собирай речь шаг за шагом.</p>
+            <button className="rumbos-practice-card is-primary" aria-label={`Урок ${lesson.number}. ${lesson.title}`} onClick={() => onOpen(lesson.id)}>
+              <span className="rumbos-practice-number">{String(lesson.number).padStart(2, "0")}</span>
+              <span><strong>{lesson.title}</strong><small>{lesson.subtitle}</small></span>
+              <b>›</b>
+            </button>
+            <button className="rumbos-practice-card" aria-label={`Домашняя работа к уроку ${lesson.number}`} onClick={() => onOpen(`${lesson.id}-hw`)}>
+              <span className="rumbos-practice-number">ДЗ</span>
+              <span><strong>Домашняя работа</strong><small>Монолог для повторения вслух</small></span>
+              <b>›</b>
+            </button>
+          </div>
+        ))}
+      </div>
+      {RUMBOS_LESSONS.length > 1 && (
+        <div className="rumbos-lessons-nav">
+          <button type="button" aria-label="Предыдущий урок" disabled={active === 0} onClick={() => go(active - 1)}>‹</button>
+          <div className="rumbos-lessons-dots" aria-hidden="true">
+            {RUMBOS_LESSONS.map((l, i) => <span key={l.id} className={i === active ? "is-active" : ""} />)}
+          </div>
+          <button type="button" aria-label="Следующий урок" disabled={active === RUMBOS_LESSONS.length - 1} onClick={() => go(active + 1)}>›</button>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function LessonFrame({ lesson, onClose }) {
   return (
     <div
       role="dialog"
-      aria-label={`Урок ${lesson.number}. ${lesson.title}`}
+      aria-label={lesson.label}
       style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", flexDirection: "column", background: "#f6efe0" }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
@@ -2067,11 +2119,11 @@ function LessonFrame({ lesson, onClose }) {
           ← К разделу
         </button>
         <div style={{ fontSize: 13.5, color: C.inkSoft, fontFamily: SERIF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          Урок {lesson.number} · {lesson.title}
+          {lesson.label}
         </div>
       </div>
       <iframe
-        title={`Урок ${lesson.number}. ${lesson.title}`}
+        title={lesson.label}
         src={lesson.src}
         allow="autoplay"
         style={{ flex: 1, width: "100%", border: "none", background: "#f6efe0" }}
@@ -2164,7 +2216,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
     return () => { timers.forEach(clearTimeout); window.removeEventListener("scroll", onScroll); };
   }, [pack.id]);
   const story = storyKey ? pack.verbByKey(storyKey) : null;
-  const openLesson = RUMBOS_LESSONS.find((l) => l.id === lessonId) || null;
+  const openLesson = RUMBOS_FRAMES.find((l) => l.key === lessonId) || null;
 
   return (
     <div style={wrap}><div style={maxw}>
@@ -2180,25 +2232,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
 
       {isCapFour && <RumbosBook />}
 
-      {isCapFour && (
-        <section className="rumbos-practice" aria-label="Уроки архитектуры живой речи">
-          <div className="rumbos-section-kicker">Уроки</div>
-          <h2>Первый урок</h2>
-          <p>Слушай, повторяй и собирай речь шаг за шагом.</p>
-          {RUMBOS_LESSONS.map((lesson) => (
-            <button
-              key={lesson.id}
-              className="rumbos-practice-card is-primary"
-              aria-label={`Урок ${lesson.number}. ${lesson.title}`}
-              onClick={() => setLessonId(lesson.id)}
-            >
-              <span className="rumbos-practice-number">{String(lesson.number).padStart(2, "0")}</span>
-              <span><strong>{lesson.title}</strong><small>{lesson.subtitle}</small></span>
-              <b>›</b>
-            </button>
-          ))}
-        </section>
-      )}
+      {isCapFour && <LessonsCarousel onOpen={setLessonId} />}
 
       {isCapFour && (
         <section className="rumbos-practice" aria-label="Практика архитектуры живой речи">
