@@ -1475,3 +1475,14 @@
   }
   .diccionario-entry-plaque-arrow { right: 20px; font-size: 28px; }
 }
+
+/* Карусель уроков: один урок на экране, остальные — свайпом */
+.rumbos-lessons-track { position: relative; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; }
+.rumbos-lessons-track::-webkit-scrollbar { display: none; }
+.rumbos-lessons-slide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.rumbos-lessons-nav { position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; }
+.rumbos-lessons-nav button { width: 44px; height: 44px; color: var(--burgundy); border: 1px solid rgba(116,31,55,.28); border-radius: 50%; background: rgba(255,255,255,.7); font-size: 22px; line-height: 1; cursor: pointer; }
+.rumbos-lessons-nav button:disabled { opacity: .35; cursor: default; }
+.rumbos-lessons-dots { display: flex; gap: 8px; }
+.rumbos-lessons-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(116,31,55,.22); }
+.rumbos-lessons-dots span.is-active { background: var(--burgundy); }
