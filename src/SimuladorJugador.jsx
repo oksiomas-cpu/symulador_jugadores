@@ -1357,11 +1357,16 @@ function WitIcon({ yes, size }) {
   );
 }
 
+// Новая шпаргалка свидетелей (сетка SÍ/NO) — игры 1 и 4. Остальные игры пока на старом экране.
+const NEW_SHEET_PACKS = new Set(["cap1", "cap4"]);
+
 function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen }) {
   const lie = !isCanon;
+  const byQuestion = pack.id !== "cap4";                       // игра 1: ячейка = вопрос; игра 4: ячейка = глагол действия
+  const adviceMap = byQuestion ? liveFantAns(v) : v.fantAns;   // совет лжецу: своя выдумка глагола или ответы маски
   const wasAsked = (qid) => !!(asked && asked.has && asked.has(qid));
   function tap(qid) {
-    const adv = v.fantAns[qid];
+    const adv = adviceMap[qid];
     const cur = marks[qid];
     const next = { ...marks };
     if (!cur) next[qid] = adv;
@@ -1389,14 +1394,14 @@ function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen 
         <div>
           <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: lie ? C.raspberryDeep : C.emeraldDeep }}>{lie ? "ТЫ — СВИДЕТЕЛЬ ЛЖИ" : "ТЫ — СВИДЕТЕЛЬ ПРАВДЫ"}</div>
           <div style={{ fontSize: 14, lineHeight: 1.3, color: C.ink, marginTop: 2 }}>
-            {lie ? "Под каждым глаголом совет, как ответить. Можно по-своему: запутывай следствие, как считаешь нужным." : "Зелёное — SÍ. Красное — NO."}
+            {lie ? `Под каждым ${byQuestion ? "вопросом" : "глаголом"} совет, как ответить. Можно по-своему: запутывай следствие, как считаешь нужным.` : "Зелёное — SÍ. Красное — NO."}
           </div>
         </div>
       </div>
 
       {lie && (
         <>
-          <div style={{ fontSize: 15, lineHeight: 1.35, color: C.ink, marginBottom: 10 }}><b>Твоя выдумка:</b> {v.distortion}</div>
+          <div style={{ fontSize: 15, lineHeight: 1.35, color: C.ink, marginBottom: 10 }}><b>Твоя выдумка:</b> {byQuestion ? renderClue(liveFantVer(v), pack) : v.distortion}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
             <div style={{ flex: 1, minWidth: 0, fontSize: 14, lineHeight: 1.3, color: C.inkSoft }}>Зелёное и красное — советы. Ответил — нажми: кнопка станет сплошной. 2-й раз: наоборот, 3-й: сброс.</div>
             <button type="button" onClick={() => setMarks({})} style={{ flex: "none", height: 44, padding: "0 14px", border: `1.5px solid ${C.raspberry}`, borderRadius: 12, background: "transparent", color: C.raspberry, fontFamily: SERIF, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Очистить</button>
@@ -1406,20 +1411,32 @@ function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen 
 
       {/* ===== три оператора ===== */}
       {pack.CATS.map((cat) => {
-        const op = WIT_OPS[cat.id] || { es: cat.es, ru: "" };
+        const op = byQuestion ? { es: cat.es, ru: cat.ru } : (WIT_OPS[cat.id] || { es: cat.es, ru: "" });
         let qs = pack.QUESTIONS.filter((q) => q.cat === cat.id);
         if (!lie) qs = [...qs.filter((q) => v.answers[q.id] === "sí"), ...qs.filter((q) => v.answers[q.id] !== "sí")];
         return (
           <div key={cat.id} style={{ boxSizing: "border-box", padding: 14, border: `1.5px solid ${C.gold}`, borderRadius: 16, background: C.card, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: C.ink }}>{op.es}</span>
+              <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: C.ink }}>{byQuestion ? cat.icon + " " : ""}{op.es}</span>
               <span style={{ fontSize: 14, color: C.inkSoft }}>{op.ru}</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: byQuestion ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))", gap: 8 }}>
               {qs.map((q) => {
                 const asked1 = wasAsked(q.id);
                 if (!lie) {
                   const yes = v.answers[q.id] === "sí";
+                  if (byQuestion) {
+                    return (
+                      <div key={q.id} style={{ ...cellBase, minHeight: 50, border: `1.5px solid ${yes ? C.emerald : "rgba(168,27,62,0.45)"}`, background: yes ? C.emerald : "rgba(168,27,62,0.10)", color: yes ? "#fff" : C.raspberryDeep }}>
+                        <WitIcon yes={yes} size={yes ? 20 : 16} />
+                        <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: 15, fontWeight: yes ? 800 : 600, lineHeight: 1.25 }}>{q.q}</span>
+                          <span style={{ fontSize: 12.5, opacity: 0.9 }}>{q.ru}{asked1 ? " · спросили" : ""}</span>
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".08em" }}>{word(yes ? "sí" : "no")}</span>
+                      </div>
+                    );
+                  }
                   return (
                     <div key={q.id} style={{ ...cellBase, minHeight: 46, border: `1.5px solid ${yes ? C.emerald : "rgba(168,27,62,0.45)"}`, background: yes ? C.emerald : "rgba(168,27,62,0.10)", color: yes ? "#fff" : C.raspberryDeep }}>
                       <WitIcon yes={yes} size={yes ? 20 : 16} />
@@ -1431,13 +1448,29 @@ function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen 
                     </div>
                   );
                 }
-                const adv = v.fantAns[q.id];
+                const adv = adviceMap[q.id];
                 const mk = marks[q.id] || null;
                 const shown = mk || adv;
                 const yes = shown === "sí";
                 const solid = !!mk;
                 const cap = (mk ? (mk === adv ? "по совету" : "своё") : "совет: " + word(adv)) + (asked1 ? " · спросили" : "");
                 const color = yes ? C.emerald : C.raspberry;
+                if (byQuestion) {
+                  const capQ = (mk ? (mk === adv ? "по совету" : "своё") : "совет") + (asked1 ? " · спросили" : "");
+                  return (
+                    <button key={q.id} type="button" onClick={() => tap(q.id)} style={{ ...cellBase, cursor: "pointer", minHeight: 56, border: `2px solid ${color}`, background: solid ? color : (yes ? "rgba(22,121,91,0.12)" : "rgba(168,27,62,0.10)"), color: solid ? "#fff" : (yes ? C.emeraldDeep : C.raspberryDeep) }}>
+                      <WitIcon yes={yes} size={yes ? 20 : 17} />
+                      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, lineHeight: 1.25 }}>{q.q}</span>
+                        <span style={{ fontSize: 12.5 }}>{q.ru}</span>
+                      </span>
+                      <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flex: "none" }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, letterSpacing: ".08em" }}>{word(shown)}</span>
+                        <span style={{ fontSize: 11.5 }}>{capQ}</span>
+                      </span>
+                    </button>
+                  );
+                }
                 return (
                   <button key={q.id} type="button" onClick={() => tap(q.id)} style={{ ...cellBase, cursor: "pointer", border: `2px solid ${color}`, background: solid ? color : (yes ? "rgba(22,121,91,0.12)" : "rgba(168,27,62,0.10)"), color: solid ? "#fff" : (yes ? C.emeraldDeep : C.raspberryDeep) }}>
                     <WitIcon yes={yes} size={yes ? 20 : 17} />
@@ -1463,9 +1496,11 @@ function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen 
         {open && (
           <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.55, display: "flex", flexDirection: "column", gap: 10 }}>
             {v.dossier.map((d, i) => (
-              <div key={i}><b>{d[0]}.</b> {renderClue(d[1], pack)}</div>
+              <div key={i}><b>{/[?.!]$/.test(d[0]) ? d[0] : d[0] + "."}</b> {renderClue(d[1], pack)}</div>
             ))}
-            {lie && <div><b>Tu versión.</b> {renderClue(liveFantVer(v), pack)}</div>}
+            {byQuestion
+              ? <div><b>La verdad.</b> {renderClue(v.storyEs, pack)}</div>
+              : (lie && <div><b>Tu versión.</b> {renderClue(liveFantVer(v), pack)}</div>)}
           </div>
         )}
       </div>
@@ -1550,7 +1585,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
         )}
 
         {/* ===== ШАПКА ГЛАГОЛА (cap4 рисует своё слово внутри WitnessSheet) ===== */}
-        {pack.id !== "cap4" && <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
+        {!NEW_SHEET_PACKS.has(pack.id) && <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
           <span style={{ fontSize: 34 }}>{v.emoji}</span>
           <div>
             <div style={{ fontSize: 24, fontWeight: 800, color: accent }}>{v.inf}</div>
@@ -1558,7 +1593,7 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
           </div>
         </div>}
 
-        {pack.id === "cap4" ? (
+        {NEW_SHEET_PACKS.has(pack.id) ? (
           <WitnessSheet pack={pack} v={v} isCanon={isCanon} marks={marks} setMarks={setMarks} asked={liveAsked} open={moreOpen} setOpen={setMoreOpen} />
         ) : isCanon ? (
           <>
