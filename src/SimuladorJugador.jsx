@@ -1374,11 +1374,20 @@ function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen 
 
   return (
     <>
+      {/* ===== слово раунда — крупно, самым верхом ===== */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
+        <span style={{ fontSize: 38 }}>{v.emoji}</span>
+        <div>
+          <div style={{ fontSize: 32, lineHeight: 1.1, fontWeight: 800, color: lie ? C.raspberry : C.emerald }}>{v.inf}</div>
+          <div style={{ fontSize: 16, color: C.inkSoft }}>{v.ru}</div>
+        </div>
+      </div>
+
       {/* ===== плашка роли ===== */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", border: `2px solid ${lie ? C.raspberry : C.emerald}`, borderRadius: 16, background: lie ? "rgba(168,27,62,0.10)" : "rgba(22,121,91,0.10)", marginBottom: 12 }}>
         <div style={{ color: lie ? C.raspberry : C.emerald }}><WitIcon yes={!lie} size={34} /></div>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: lie ? C.raspberryDeep : C.emeraldDeep }}>{lie ? "ТЫ ВРЁШЬ" : "ТЫ ГОВОРИШЬ ПРАВДУ"}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: lie ? C.raspberryDeep : C.emeraldDeep }}>{lie ? "ТЫ — СВИДЕТЕЛЬ ЛЖИ" : "ТЫ — СВИДЕТЕЛЬ ПРАВДЫ"}</div>
           <div style={{ fontSize: 14, lineHeight: 1.3, color: C.ink, marginTop: 2 }}>
             {lie ? "Под каждым глаголом совет, как ответить. Можно по-своему: запутывай следствие, как считаешь нужным." : "Зелёное — SÍ. Красное — NO."}
           </div>
@@ -1540,14 +1549,14 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
           </div>
         )}
 
-        {/* ===== ШАПКА ГЛАГОЛА ===== */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
+        {/* ===== ШАПКА ГЛАГОЛА (cap4 рисует своё слово внутри WitnessSheet) ===== */}
+        {pack.id !== "cap4" && <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
           <span style={{ fontSize: 34 }}>{v.emoji}</span>
           <div>
             <div style={{ fontSize: 24, fontWeight: 800, color: accent }}>{v.inf}</div>
             <div style={{ fontSize: 13.5, color: C.inkSoft }}>{v.ru}</div>
           </div>
-        </div>
+        </div>}
 
         {pack.id === "cap4" ? (
           <WitnessSheet pack={pack} v={v} isCanon={isCanon} marks={marks} setMarks={setMarks} asked={liveAsked} open={moreOpen} setOpen={setMoreOpen} />
