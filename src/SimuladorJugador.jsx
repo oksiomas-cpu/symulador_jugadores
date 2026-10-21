@@ -1339,6 +1339,140 @@ function LiveDetective({ onBack, onLeave, roundN, turn, live, pack = PACKS.cap1 
   );
 }
 
+// ===== ШПАРГАЛКА СВИДЕТЕЛЯ · игра 4 (cap4): сетка SÍ/NO по 21 вопросу =====
+// Канон: зелёное = SÍ, красное = NO. Фантазия: советы из fantAns горят тем же цветом,
+// нажатие отмечает «я так ответил(а)»: 1-й раз по совету, 2-й наоборот, 3-й сброс.
+// Данные игры не меняются: ответы берутся из v.answers / v.fantAns.
+const WIT_OPS = {
+  querer: { es: "QUIERE", ru: "хочет" },
+  poder: { es: "PUEDE", ru: "может" },
+  tener_que: { es: "TIENE QUE", ru: "должен" },
+};
+
+function WitIcon({ yes, size }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: "none" }}>
+      {yes ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M6 6l12 12M18 6L6 18" />}
+    </svg>
+  );
+}
+
+function WitnessSheet({ pack, v, isCanon, marks, setMarks, asked, open, setOpen }) {
+  const lie = !isCanon;
+  const wasAsked = (qid) => !!(asked && asked.has && asked.has(qid));
+  function tap(qid) {
+    const adv = v.fantAns[qid];
+    const cur = marks[qid];
+    const next = { ...marks };
+    if (!cur) next[qid] = adv;
+    else if (cur === adv) next[qid] = adv === "sí" ? "no" : "sí";
+    else delete next[qid];
+    setMarks(next);
+  }
+  const cellBase = { display: "flex", alignItems: "center", gap: 8, minHeight: 54, boxSizing: "border-box", padding: "6px 10px", borderRadius: 12, fontFamily: SERIF, textAlign: "left", width: "100%" };
+  const word = (s) => (s === "sí" ? "SÍ" : "NO");
+
+  return (
+    <>
+      {/* ===== слово раунда — крупно, самым верхом ===== */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
+        <span style={{ fontSize: 38 }}>{v.emoji}</span>
+        <div>
+          <div style={{ fontSize: 32, lineHeight: 1.1, fontWeight: 800, color: lie ? C.raspberry : C.emerald }}>{v.inf}</div>
+          <div style={{ fontSize: 16, color: C.inkSoft }}>{v.ru}</div>
+        </div>
+      </div>
+
+      {/* ===== плашка роли ===== */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", border: `2px solid ${lie ? C.raspberry : C.emerald}`, borderRadius: 16, background: lie ? "rgba(168,27,62,0.10)" : "rgba(22,121,91,0.10)", marginBottom: 12 }}>
+        <div style={{ color: lie ? C.raspberry : C.emerald }}><WitIcon yes={!lie} size={34} /></div>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: lie ? C.raspberryDeep : C.emeraldDeep }}>{lie ? "ТЫ — СВИДЕТЕЛЬ ЛЖИ" : "ТЫ — СВИДЕТЕЛЬ ПРАВДЫ"}</div>
+          <div style={{ fontSize: 14, lineHeight: 1.3, color: C.ink, marginTop: 2 }}>
+            {lie ? "Под каждым глаголом совет, как ответить. Можно по-своему: запутывай следствие, как считаешь нужным." : "Зелёное — SÍ. Красное — NO."}
+          </div>
+        </div>
+      </div>
+
+      {lie && (
+        <>
+          <div style={{ fontSize: 15, lineHeight: 1.35, color: C.ink, marginBottom: 10 }}><b>Твоя выдумка:</b> {v.distortion}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 14, lineHeight: 1.3, color: C.inkSoft }}>Зелёное и красное — советы. Ответил — нажми: кнопка станет сплошной. 2-й раз: наоборот, 3-й: сброс.</div>
+            <button type="button" onClick={() => setMarks({})} style={{ flex: "none", height: 44, padding: "0 14px", border: `1.5px solid ${C.raspberry}`, borderRadius: 12, background: "transparent", color: C.raspberry, fontFamily: SERIF, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Очистить</button>
+          </div>
+        </>
+      )}
+
+      {/* ===== три оператора ===== */}
+      {pack.CATS.map((cat) => {
+        const op = WIT_OPS[cat.id] || { es: cat.es, ru: "" };
+        let qs = pack.QUESTIONS.filter((q) => q.cat === cat.id);
+        if (!lie) qs = [...qs.filter((q) => v.answers[q.id] === "sí"), ...qs.filter((q) => v.answers[q.id] !== "sí")];
+        return (
+          <div key={cat.id} style={{ boxSizing: "border-box", padding: 14, border: `1.5px solid ${C.gold}`, borderRadius: 16, background: C.card, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: ".04em", color: C.ink }}>{op.es}</span>
+              <span style={{ fontSize: 14, color: C.inkSoft }}>{op.ru}</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+              {qs.map((q) => {
+                const asked1 = wasAsked(q.id);
+                if (!lie) {
+                  const yes = v.answers[q.id] === "sí";
+                  return (
+                    <div key={q.id} style={{ ...cellBase, minHeight: 46, border: `1.5px solid ${yes ? C.emerald : "rgba(168,27,62,0.45)"}`, background: yes ? C.emerald : "rgba(168,27,62,0.10)", color: yes ? "#fff" : C.raspberryDeep }}>
+                      <WitIcon yes={yes} size={yes ? 20 : 16} />
+                      <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontSize: yes ? 18 : 17, fontWeight: yes ? 800 : 600 }}>{q.action}</span>
+                        {asked1 && <span style={{ fontSize: 11.5 }}>спросили</span>}
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: ".08em" }}>{word(yes ? "sí" : "no")}</span>
+                    </div>
+                  );
+                }
+                const adv = v.fantAns[q.id];
+                const mk = marks[q.id] || null;
+                const shown = mk || adv;
+                const yes = shown === "sí";
+                const solid = !!mk;
+                const cap = (mk ? (mk === adv ? "по совету" : "своё") : "совет: " + word(adv)) + (asked1 ? " · спросили" : "");
+                const color = yes ? C.emerald : C.raspberry;
+                return (
+                  <button key={q.id} type="button" onClick={() => tap(q.id)} style={{ ...cellBase, cursor: "pointer", border: `2px solid ${color}`, background: solid ? color : (yes ? "rgba(22,121,91,0.12)" : "rgba(168,27,62,0.10)"), color: solid ? "#fff" : (yes ? C.emeraldDeep : C.raspberryDeep) }}>
+                    <WitIcon yes={yes} size={yes ? 20 : 17} />
+                    <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+                      <span style={{ fontSize: 17, fontWeight: 800 }}>{q.action}</span>
+                      <span style={{ fontSize: 12 }}>{cap}</span>
+                    </span>
+                    <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: ".08em" }}>{word(shown)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* ===== для понимания (свёрнуто) ===== */}
+      <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.07)", marginBottom: 14, overflow: "hidden" }}>
+        <div onClick={() => setOpen((o) => !o)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: 48, padding: "0 16px", cursor: "pointer", background: open ? C.goldSoft : "#fff" }}>
+          <span style={{ fontSize: 14.5, fontWeight: 800, color: C.ink }}>{lie ? "Что на самом деле · от чего уводишь" : "Что на самом деле · для понимания"}</span>
+          <span style={{ fontSize: 18, color: C.gold, transform: open ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+        </div>
+        {open && (
+          <div style={{ padding: "12px 16px", fontSize: 14.5, color: C.ink, lineHeight: 1.55, display: "flex", flexDirection: "column", gap: 10 }}>
+            {v.dossier.map((d, i) => (
+              <div key={i}><b>{d[0]}.</b> {renderClue(d[1], pack)}</div>
+            ))}
+            {lie && <div><b>Tu versión.</b> {renderClue(liveFantVer(v), pack)}</div>}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ===== ПУЛЬТ СВИДЕТЕЛЯ (Канон / Фантазия) =====
 function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked, myLetter, liveExtra, pack = PACKS.cap1 }) {
   const VERBS = pack.VERBS, verbByKey = pack.verbByKey;
@@ -1347,10 +1481,12 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
   const [storyOpen, setStoryOpen] = useState(false);      // Канон: мини-история
   const [lieOpen, setLieOpen] = useState(false);          // Фантазия: 🔴 Tu versión (независимая)
   const [truthOpen, setTruthOpen] = useState(false);      // Фантазия: 🟢 La verdad (независимая)
+  const [marks, setMarks] = useState({});                 // cap4, Фантазия: { qid: "sí"|"no" } — что игрок ответил
+  const [moreOpen, setMoreOpen] = useState(false);        // cap4: свёрнутый блок «Что на самом деле»
   const isCanon = mode === "canon";
   const accent = isCanon ? C.emerald : C.raspberry;
   const v = vk ? verbByKey(vk) : null;
-  function pickVerb(k) { setVk(k); setStoryOpen(false); setLieOpen(false); setTruthOpen(false); }
+  function pickVerb(k) { setVk(k); setStoryOpen(false); setLieOpen(false); setTruthOpen(false); setMarks({}); setMoreOpen(false); }
 
   if (!v) {
     return (
@@ -1413,16 +1549,18 @@ function LiveWitness({ mode, onBack, onLeave, initialVerbKey, roundN, liveAsked,
           </div>
         )}
 
-        {/* ===== ШАПКА ГЛАГОЛА ===== */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
+        {/* ===== ШАПКА ГЛАГОЛА (cap4 рисует своё слово внутри WitnessSheet) ===== */}
+        {pack.id !== "cap4" && <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12, padding: "0 4px" }}>
           <span style={{ fontSize: 34 }}>{v.emoji}</span>
           <div>
             <div style={{ fontSize: 24, fontWeight: 800, color: accent }}>{v.inf}</div>
             <div style={{ fontSize: 13.5, color: C.inkSoft }}>{v.ru}</div>
           </div>
-        </div>
+        </div>}
 
-        {isCanon ? (
+        {pack.id === "cap4" ? (
+          <WitnessSheet pack={pack} v={v} isCanon={isCanon} marks={marks} setMarks={setMarks} asked={liveAsked} open={moreOpen} setOpen={setMoreOpen} />
+        ) : isCanon ? (
           <>
             {/* ===== КАНОН: зелёная рамка с досье (правда) ===== */}
             <div style={{ background: C.card, border: `2.5px solid ${C.emerald}`, borderRadius: 16, padding: "16px 18px", marginBottom: 14, boxShadow: "0 2px 14px rgba(45,122,90,0.10)" }}>
