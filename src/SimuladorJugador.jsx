@@ -2365,6 +2365,43 @@ function PrepGuide4() {
   );
 }
 
+// Инструкция «Как подготовиться к игре» — игра №1 «La Cata a Ciegas», глаголы на -AR
+// (содержание одобрено Оксаной 25.10.2026). Дату игры в постоянный блок не вшиваем.
+const PREP1 = [
+  { t: "Шаг 1 · 📖 Прочитай историю", where: "Сразу под этим блоком", d: "Открой «El día en el Palacio de Caramelo». В этой истории спрятаны все 15 глаголов игры. Посмотри, что делает Шеф, где и с кем. Если нужна помощь, нажми «RU перевод».", why: "Вопросы на игре будут об этой истории, поэтому важно познакомиться не только со словами, но и с тем, что происходит." },
+  { t: "Шаг 2 · 🔍 Познакомься с 15 глаголами", where: "Ниже, блок «15 глаголов»", d: "Нажимай на каждое слово: появится его история. Прочитай её и проговори вслух, что делает герой.", why: "" },
+  { t: "Шаг 3 · 📊 Попробуй Mi Diario", where: "Ниже, блок «Тренажёр спряжений»", d: "Нажми «Открыть Mi Diario». Вставляй глаголы в нужной форме и проверяй себя. Если пока путаешь окончания, сюда можно возвращаться во время подготовки.", why: "" },
+  { t: "Шаг 4 · 🎭 Потренируй роли", where: "Внизу страницы, кнопка «Тренировать роли»", d: "По очереди попробуй все три роли. 🕵️ Detective: задаёшь вопросы двум свидетелям, сравниваешь ответы и отгадываешь глагол. 🟢 Testigo Canon: отвечаешь правдиво, опираясь на историю. 🔴 Testigo Fantasía: отвечаешь по подсказкам своей роли и путаешь следы.", why: "Проговаривай вопросы и ответы вслух: именно так ты будешь разговаривать на встрече. Роли меняются каждый раунд, поэтому пригодится каждая тренировка." },
+  { t: "🎥 На самой игре", where: "", d: "Подключись к Zoom по ссылке из приглашения. Ведущая подскажет, когда открыть «Пульт игрока» в приложении. Там будут твоя роль, вопросы и подсказки для ответов.", why: "" },
+];
+function PrepGuide1() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Block stripe={C.raspberry}>
+      <div onClick={() => setOpen((v) => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+        <div>
+          <div style={{ fontWeight: 700, color: C.ink, fontSize: 16 }}>🎯 Как подготовиться к игре</div>
+          <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 2 }}>Четыре шага по порядку · что открыть и зачем</div>
+        </div>
+        <span style={{ fontSize: 20, color: C.gold, transform: open ? "rotate(90deg)" : "none", transition: "transform .15s", flexShrink: 0, marginLeft: 8 }}>›</span>
+      </div>
+      {open && (
+        <div style={{ marginTop: 12, fontSize: 14.5, lineHeight: 1.6, color: C.ink }}>
+          <p style={{ margin: "0 0 12px" }}>В этой игре ты будешь отгадывать глагол на -AR, спрятанный в истории. В одном раунде ты детектив и задаёшь вопросы двум свидетелям. В другом сам становишься свидетелем. Поэтому заранее попробуй все три роли. Подготовку можно проходить частями 👇</p>
+          {PREP1.map((s, i) => (
+            <div key={i} style={{ marginBottom: 12, paddingBottom: 10, borderBottom: i < PREP1.length - 1 ? `1px solid ${C.line}` : "none" }}>
+              <div style={{ fontWeight: 700 }}>{s.t}</div>
+              {s.where && <div style={{ fontSize: 12.5, color: C.goldDeep, margin: "2px 0 4px" }}>📍 {s.where}</div>}
+              <div>{s.d}</div>
+              {s.why && <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 4 }}>💡 Зачем: {s.why}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+    </Block>
+  );
+}
+
 const WELCOME_SCROLL = {};
 function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onPresenteErIr, onCapsules, onActionTrainer, onOperadores, onBack }) {
   const isCapOne = pack.id === "cap1";
@@ -2439,6 +2476,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
         </header>
       )}
       {isCapFour && <PrepGuide4 />}
+      {isCapOne && <PrepGuide1 />}
       {/* ИСТОРИЯ-МАЯК */}
       <Block stripe={C.gold}>
         <div onClick={() => setStoryOpen(v => !v)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
