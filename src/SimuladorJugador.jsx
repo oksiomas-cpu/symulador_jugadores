@@ -729,15 +729,18 @@ async function fetchAccess(tgId) {
 //   cap4 — Nivel 4 (глаголы-операторы, первый этаж 3×7);
 //   libro — Живая книга;
 //   gramatica — раздел «Грамматика» (меню); live — Пульт живой игры;
-//   presente/perfecto — дрилл темы по deep-link из капсул Дона.
+//   presente/perfecto — дрилл темы по deep-link из капсул Дона;
+//   verbos1 — модуль 1 курса глаголов (клуб и Пропуск, решение Оксаны 23.11.2026);
+//   verbosAll — все модули курса глаголов (только клуб: курс продаётся подпиской клуба).
+//   Пропуск «глагол» и «Кафе» курс пока не открывают (видно с замком).
 function accessMap(status) {
   switch (status) {
     case "club":
-      return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true };
+      return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true, verbos1: true, verbosAll: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false, verbos1: true, verbosAll: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false, verbos1: true, verbosAll: false };
     case "trialVerbo":
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
@@ -2276,6 +2279,139 @@ function LessonsCarousel({ onOpen }) {
   );
 }
 
+// ============================================================
+// КУРС ГЛАГОЛОВ — модули живут самодостаточными страницами в public/kurs/<id>/
+// и открываются во встроенной рамке (как уроки «Архитектуры живой речи»).
+// Доступ (решение Оксаны 23.11.2026): модуль 1 — клуб и Пропуск (trial1, trial2);
+// следующие модули — только клуб. Прогресс и словарь модуля — за телеграм-аккаунтом
+// (api/course.js); localStorage рамки — кэш на устройстве. Домой ничего не задаётся.
+// ============================================================
+const KURS_TILE = {
+  background: `linear-gradient(135deg, #FFFDF8 0%, ${C.cream} 60%, ${C.goldSoft} 100%)`,
+  border: `2px solid ${C.gold}`, borderRadius: 18, padding: "18px 18px 16px", marginBottom: 18,
+  boxShadow: "0 6px 20px rgba(61,43,31,0.10)", cursor: "pointer", fontFamily: SERIF,
+};
+const KURS_MODULES = [
+  { id: "m1", number: "1", title: "Ser, estar, hay", subtitle: "Кто я, где я и что вокруг · глава «Карамельная кухня»", src: "/kurs/m1/index.html", storageKey: "kv_r1_ser_estar_v1", gate: "verbos1" },
+  { id: "m2", number: "2", title: "Mis verbos: -ar, -er, -ir", subtitle: "Что я делаю: форма «я» у любого глагола", gate: "verbosAll", soon: true },
+];
+const COURSE_API = "/api/course";
+// Вне Telegram (проверка Оксаны в браузере) личность берётся из ?tgId=…, как у Пропуска.
+function kursPreviewId() {
+  try { const q = new URLSearchParams(window.location.search).get("tgId"); return q && /^\d+$/.test(q) ? Number(q) : null; } catch { return null; }
+}
+
+// Сколько пройдено в состоянии модуля: ответы + отмеченные шаги. Нужно, чтобы
+// при входе с другого устройства взять более полный из двух прогрессов.
+function kursProgress(st) {
+  if (!st || typeof st !== "object" || !st.res) return -1;
+  let n = 0;
+  Object.values(st.res).forEach((r) => { n += r && Array.isArray(r.done) ? r.done.length : 1; });
+  return n + (Array.isArray(st.dict) ? st.dict.length : 0) * 0.01;
+}
+async function courseCall(payload) {
+  const r = await fetch(COURSE_API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  return r.json();
+}
+
+function KursModuleFrame({ mod, tgId, onClose }) {
+  const [ready, setReady] = useState(false);
+  const pending = useRef(null);
+  const timer = useRef(null);
+
+  // Перед открытием: сверить облако и устройство, более полный прогресс положить в рамку.
+  useEffect(() => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; setReady(true); } };
+    const guard = setTimeout(finish, 4000);
+    (async () => {
+      if (!tgId) return finish();
+      try {
+        const d = await courseCall({ action: "get", tgId, moduleId: mod.id });
+        let local = null;
+        try { local = JSON.parse(localStorage.getItem(mod.storageKey) || "null"); } catch { local = null; }
+        const cloud = d && d.ok ? d.state : null;
+        if (cloud && kursProgress(cloud) > kursProgress(local)) {
+          try { localStorage.setItem(mod.storageKey, JSON.stringify(cloud)); } catch { /* приватный режим */ }
+        } else if (local && kursProgress(local) > kursProgress(cloud)) {
+          courseCall({ action: "set", tgId, moduleId: mod.id, state: local }).catch(() => {});
+        }
+      } catch (e) { /* без сети — работаем с устройства */ }
+      finish();
+    })();
+    return () => { clearTimeout(guard); };
+  }, [mod.id, tgId]);
+
+  // Каждое сохранение в модуле → в облако (с задержкой, чтобы не слать на каждый клик).
+  useEffect(() => {
+    if (!tgId) return undefined;
+    const flush = () => {
+      if (!pending.current) return;
+      const state = pending.current; pending.current = null;
+      courseCall({ action: "set", tgId, moduleId: mod.id, state }).catch(() => {});
+    };
+    const onMsg = (e) => {
+      if (e.origin !== window.location.origin) return;
+      const m = e.data;
+      if (!m || m.kurs !== mod.id || !m.state) return;
+      pending.current = m.state;
+      clearTimeout(timer.current);
+      timer.current = setTimeout(flush, 1200);
+    };
+    window.addEventListener("message", onMsg);
+    return () => { window.removeEventListener("message", onMsg); clearTimeout(timer.current); flush(); };
+  }, [mod.id, tgId]);
+
+  return (
+    <div role="dialog" aria-label={`Курс глаголов · Модуль ${mod.number}`} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", flexDirection: "column", background: "#fbf8f1" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
+        <button type="button" onClick={onClose} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>
+          ← К модулям
+        </button>
+        <div style={{ fontSize: 13.5, color: C.inkSoft, fontFamily: SERIF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          Модуль {mod.number} · {mod.title}
+        </div>
+      </div>
+      {ready
+        ? <iframe title={`Модуль ${mod.number} · ${mod.title}`} src={mod.src} allow="autoplay" style={{ flex: 1, width: "100%", border: "none", background: "#fbf8f1" }} />
+        : <p style={{ ...pHint, textAlign: "center", marginTop: 40 }}>Открываю твой блокнот…</p>}
+    </div>
+  );
+}
+
+function CursoVerbos({ acc, status, tgId, onBack }) {
+  const [open, setOpen] = useState(null);
+  const [locked, setLocked] = useState(false);
+  if (locked) return <LockedScreen status={status} onBack={() => setLocked(false)} />;
+  if (open) return <KursModuleFrame mod={open} tgId={tgId} onClose={() => setOpen(null)} />;
+  return (<div style={wrap}><div style={maxw}>
+    <Header subtitle="Curso de verbos · курс глаголов" />
+    <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Этаж «Я» · Комната 1 · настоящее время. Каждый модуль — глава истории с Доном Вербо.</p>
+    {KURS_MODULES.map((m) => {
+      const isOpen = !!acc[m.gate];
+      const onClick = () => { if (!isOpen) setLocked(true); else if (!m.soon) setOpen(m); };
+      return (
+        <div key={m.id} role="button" onClick={onClick} aria-label={`Модуль ${m.number}. ${m.title}.`}
+          style={{ position: "relative", background: C.card, border: `2px solid ${isOpen && !m.soon ? C.gold : C.line}`, borderRadius: 16, padding: "16px 16px 14px", marginBottom: 12, cursor: m.soon && isOpen ? "default" : "pointer", fontFamily: SERIF }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, filter: isOpen ? "none" : "grayscale(0.9)", opacity: isOpen ? 1 : 0.55 }}>
+            <div style={{ flex: "none", width: 44, height: 44, borderRadius: "50%", background: C.goldSoft, color: C.goldDeep, fontSize: 20, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{m.number}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.ink }}>{m.title}</div>
+              <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.45 }}>{m.subtitle}</div>
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: isOpen ? C.raspberry : C.inkSoft, whiteSpace: "nowrap" }}>{!isOpen ? "🔒" : m.soon ? "Скоро" : "›"}</div>
+          </div>
+          {!isOpen && <div style={{ marginTop: 10, fontSize: 13, fontWeight: 800, color: C.goldDeep, textAlign: "center" }}>🔒 Открывается жителям Города</div>}
+        </div>
+      );
+    })}
+    <div style={{ textAlign: "center", marginTop: 14 }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад в Город</button>
+    </div>
+    <Footer />
+  </div></div>);
+}
+
 function LessonFrame({ lesson, onClose }) {
   return (
     <div
@@ -2704,6 +2840,10 @@ export default function SimuladorJugador() {
   const [deepCapsule, setDeepCapsule] = useState(() => {
     try { return new URLSearchParams(window.location.search).get("capsula") || null; } catch { return null; }
   });
+  // Курс глаголов: ?kurs=1 из бота открывает раздел сразу, минуя лицевой экран.
+  const [showKurs, setShowKurs] = useState(() => {
+    try { return !!new URLSearchParams(window.location.search).get("kurs"); } catch { return false; }
+  });
   // Показывать тренажёр Perfecto (Уровень 2)
   const [showPerfecto, setShowPerfecto] = useState(false);
   const [showDiario2, setShowDiario2] = useState(false);
@@ -2785,6 +2925,7 @@ export default function SimuladorJugador() {
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
   if (showLibro) return <LibroVivo tgId={tgId} onBack={() => setShowLibro(false)} onOpenDiccionario={() => { setShowLibro(false); setShowDiccionario(true); }} />;
   if (showDiccionario) return <MiDiccionario tgId={tgId} onBack={() => setShowDiccionario(false)} />;
+  if (showKurs) return <CursoVerbos acc={acc} status={access.status} tgId={tgId || kursPreviewId()} onBack={() => setShowKurs(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
   if (showActionTrainer) return <ActionCapsulesTrainer onBack={() => setShowActionTrainer(false)} />;
@@ -2796,6 +2937,7 @@ export default function SimuladorJugador() {
     onLibro={() => setShowLibro(true)}
     onDiccionario={() => setShowDiccionario(true)}
     onGramatica={() => setShowGramatica(true)}
+    onKurs={() => setShowKurs(true)}
     onDomino={setDominoMission}
     onTour={() => setShowTour(true)}
   />;
@@ -2841,7 +2983,7 @@ function DominoMission({ mission, onBack }) {
   );
 }
 
-function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGramatica, onDomino, onTour }) {
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGramatica, onKurs, onDomino, onTour }) {
   const [locked, setLocked] = useState(null);
   const [dominoSlide, setDominoSlide] = useState(0);
   const [dominoLoading, setDominoLoading] = useState(false);
@@ -2911,6 +3053,16 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
       <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
         Выбери уровень, который тренируешь, или подключайся к живой игре:
       </p>
+
+      {/* Курс глаголов — вход с эфира TikTok: Пропуск → модуль 1; остальные модули — клубу */}
+      <Gate open={acc.verbos1 || acc.verbosAll} title="Курс глаголов" onOpen={onKurs}>
+        <div role="button" aria-label="Курс глаголов. Открыть модули." style={KURS_TILE}>
+          <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Курс глаголов · Дон Вербо</div>
+          <div style={{ fontSize: 23, fontWeight: 800, color: C.ink, margin: "6px 0 4px", lineHeight: 1.2 }}>Глагольная вселенная</div>
+          <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5 }}>Модуль 1 · Ser, estar, hay — кто я, где я и что вокруг</div>
+          <div style={{ marginTop: 12, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Открыть ›</div>
+        </div>
+      </Gate>
 
       {/* Libro Vivo — живая книга */}
       <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
