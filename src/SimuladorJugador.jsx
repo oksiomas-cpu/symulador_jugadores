@@ -624,7 +624,7 @@ function SiNo({ v }) {
   const yes = v === "sí";
   return <span style={{ background: yes ? C.emerald : C.raspberry, color: "#fff", borderRadius: 7, padding: "2px 12px", fontWeight: 700, fontSize: 14, letterSpacing: ".5px" }}>{yes ? "SÍ" : "NO"}</span>;
 }
-function Header({ subtitle }) {
+function Header({ subtitle, title }) {
   function fullReset() {
     if (!window.confirm("Полный сброс: выйдешь из текущей игры и роли, начнёшь с чистого экрана. Очки копилки сохранятся. Продолжить?")) return;
     try { localStorage.removeItem("ciudad_live_v1"); } catch (e) {}
@@ -634,7 +634,7 @@ function Header({ subtitle }) {
     <div className="ciudad-header" style={{ textAlign: "center", marginBottom: 18 }}>
       <button className="ciudad-reset-button" onClick={fullReset} title="Полный сброс сессии" style={{ position: "fixed", top: 8, right: 8, zIndex: 9999, background: "rgba(255,255,255,0.94)", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 12, fontWeight: 700, borderRadius: 10, padding: "6px 10px", cursor: "pointer", fontFamily: SERIF, boxShadow: "0 2px 8px rgba(61,43,31,0.14)" }}>🧹 Сброс</button>
       <div className="ciudad-header-brand" style={{ fontSize: 12, letterSpacing: "2px", color: C.goldDeep, fontWeight: 600 }}>LA CIUDAD DE LOS SENTIDOS</div>
-      <div className="ciudad-header-title" style={{ fontSize: 24, fontWeight: 700, color: C.ink, fontFamily: SERIF }}>La Cata a Ciegas · Entrenamiento</div>
+      <div className="ciudad-header-title" style={{ fontSize: 24, fontWeight: 700, color: C.ink, fontFamily: SERIF }}>{title || "La Cata a Ciegas · Entrenamiento"}</div>
       {subtitle && <div className="ciudad-header-subtitle" style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 3 }}>{subtitle}</div>}
     </div>
   );
@@ -2292,7 +2292,7 @@ const KURS_TILE = {
   boxShadow: "0 6px 20px rgba(61,43,31,0.10)", cursor: "pointer", fontFamily: SERIF,
 };
 const KURS_MODULES = [
-  { id: "m1", number: "1", title: "Ser, estar, hay", subtitle: "Кто я, где я и что вокруг · глава «Карамельная кухня»", src: "/kurs/m1/index.html", storageKey: "kv_r1_ser_estar_v1", gate: "verbos1" },
+  { id: "m1", number: "1", title: "Ser, estar, hay", subtitle: "Кто я, где я и что вокруг", src: "/kurs/m1/index.html", storageKey: "kv_r1_ser_estar_v1", gate: "verbos1" },
   { id: "m2", number: "2", title: "Mis verbos: -ar, -er, -ir", subtitle: "Что я делаю: форма «я» у любого глагола", gate: "verbosAll", soon: true },
 ];
 const COURSE_API = "/api/course";
@@ -2385,8 +2385,7 @@ function CursoVerbos({ acc, status, tgId, onBack }) {
   if (locked) return <LockedScreen status={status} onBack={() => setLocked(false)} />;
   if (open) return <KursModuleFrame mod={open} tgId={tgId} onClose={() => setOpen(null)} />;
   return (<div style={wrap}><div style={maxw}>
-    <Header subtitle="Curso de verbos · курс глаголов" />
-    <p style={{ ...pHint, textAlign: "center", marginBottom: 18 }}>Этаж «Я» · Комната 1 · настоящее время. Каждый модуль — глава истории с Доном Вербо.</p>
+    <Header title="Curso de verbos" />
     {KURS_MODULES.map((m) => {
       const isOpen = !!acc[m.gate];
       const onClick = () => { if (!isOpen) setLocked(true); else if (!m.soon) setOpen(m); };
