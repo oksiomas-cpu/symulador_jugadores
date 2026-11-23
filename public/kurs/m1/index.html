@@ -198,7 +198,7 @@ tr.yo td{background:var(--theory-soft);font-weight:800}
 const BOXES = [
  {id:"ser", name:"SER · quién soy", distract:["estoy","eres"],
   theory:{dv:"— ¿Quién eres? — pregunta Don Verbo.",
-    ru:"<b class=\"v\">Soy</b> — «я есть»: кто я, какой я по характеру, откуда я.",
+    ru:"<b class=\"v\">Soy</b> — «я есть»: кто я и какой я.",
     ex:["Soy estudiante.","Soy nuev{a|o}.","Soy tímid{a|o}."],
     es:"Con «soy» digo quién soy.",
     tip:"Дон Вербо спрашивает: <i>¿Eres…?</i> («ты…?»). Ты отвечаешь: <i>Soy…</i> («я…»). Если ответ «нет», в испанском два «no»: <i>No, no soy…</i>"},
@@ -211,11 +211,11 @@ const BOXES = [
     ["¿Eres valiente?",["Sí, soy valiente.","No, no soy valiente."]],
     ["¿Eres curios{a|o}?",["Sí, soy curios{a|o}.","No, no soy curios{a|o}."]],
     ["¿Eres alumn{a|o} de Don Verbo?",["Sí, soy alumn{a|o} de Don Verbo.","No, no soy alumn{a|o} de Don Verbo."]],
-    ["¿Eres español{a|}?",["Sí, soy español{a|}.","No, no soy español{a|}."]]]},
+    ["¿Eres trabajador{a|}?",["Sí, soy trabajador{a|}.","No, no soy trabajador{a|}."]]]},
    {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", note:"Дон Вербо ошибся. Скажи «нет» и поправь его: правильное слово — в подсказке ✔.", items:[
     ["Eres profesor{a|}, ¿verdad?","No, no soy profesor{a|}. Soy estudiante.","✔ estudiante"],
     ["Eres muy valiente, ¿verdad?","No, no soy valiente. Soy tímid{a|o}.","✔ tímid{a|o}"],
-    ["Eres de aquí, ¿verdad?","No, no soy de aquí. Soy de otra ciudad.","✔ de otra ciudad"],
+    ["Eres perezos{a|o}, ¿verdad?","No, no soy perezos{a|o}. Soy trabajador{a|}.","✔ trabajador{a|}"],
     ["Eres expert{a|o} en español, ¿verdad?","No, no soy expert{a|o}. Soy principiante.","✔ principiante"],
     ["Eres mud{a|o}, ¿verdad?","No, no soy mud{a|o}. Soy callad{a|o}.","✔ callad{a|o}"],
     ["Eres aburrid{a|o}, ¿verdad?","No, no soy aburrid{a|o}. Soy curios{a|o}.","✔ curios{a|o}"],
@@ -251,7 +251,7 @@ const BOXES = [
  {id:"serestar", name:"✖ SER + ESTAR", distract:["es","está"],
   theory:{dv:"— Soy y estoy: dos verbos, dos preguntas — dice Don Verbo.",
     ru:"<b class=\"v\">Soy</b> — кто я и какой я. <b class=\"v\">Estoy</b> — где я сейчас и как я себя сейчас чувствую.",
-    ex:["Soy tranquil{a|o}, pero ahora estoy nervios{a|o}.","Soy de otra ciudad, pero estoy en el Reino del Caramelo."],
+    ex:["Soy tranquil{a|o}, pero ahora estoy nervios{a|o}.","Soy estudiante, pero ahora estoy en el Reino del Caramelo."],
     es:"¿Quién soy? → soy. ¿Dónde estoy? ¿Cómo estoy ahora? → estoy.",
     tip:"Проверь себя вопросом. «Это про то, кто я?» → soy. «Где я или как я себя чувствую сейчас?» → estoy. Подробно — в Chuleta."},
   practice:[
@@ -259,7 +259,7 @@ const BOXES = [
     ["___ en la cocina de Don Verbo.","estoy"],
     ["___ estudiante de español.","soy"],
     ["Ahora ___ nervios{a|o}.","estoy"],
-    ["___ de otra ciudad.","soy"],
+    ["___ trabajador{a|}.","soy"],
     ["___ sol{a|o} en casa.","estoy"],
     ["___ una persona tranquila.","soy"],
     ["___ cansad{a|o}: es de noche.","estoy"],
@@ -271,7 +271,7 @@ const BOXES = [
    {title:"Soy así, pero ahora…", type:"tiles", note:"Две подсказки: первая — какой я (soy), вторая — как я сейчас (estoy). Собери одну фразу.", who:"Don Verbo: ¿Cómo eres? ¿Y cómo estás ahora?", items:[
     [["tranquil{a|o}","nervios{a|o}"],"Soy tranquil{a|o}, pero ahora estoy nervios{a|o}."],
     [["alegre","asustad{a|o}"],"Soy alegre, pero ahora estoy asustad{a|o}."],
-    [["de otra ciudad","en el Reino del Caramelo"],"Soy de otra ciudad, pero ahora estoy en el Reino del Caramelo."],
+    [["seri{a|o}","en el Reino del Caramelo"],"Soy seri{a|o}, pero ahora estoy en el Reino del Caramelo."],
     [["trabajador{a|}","cansad{a|o}"],"Soy trabajador{a|}, pero ahora estoy cansad{a|o}."],
     [["curios{a|o}","un poco perdid{a|o}"],"Soy curios{a|o}, pero ahora estoy un poco perdid{a|o}."],
     [["estudiante","en una cocina mágica"],"Soy estudiante, pero ahora estoy en una cocina mágica."],
@@ -285,7 +285,7 @@ const BOXES = [
     ["Soy en la cocina.","estoy","Estoy en la cocina."],
     ["Estoy estudiante de español.","soy","Soy estudiante de español."],
     ["Estoy sol{a|o} en casa.",null,"Estoy sol{a|o} en casa."],
-    ["Estoy de otra ciudad.","soy","Soy de otra ciudad."],
+    ["Estoy trabajador{a|}.","soy","Soy trabajador{a|}."],
     ["Soy alumn{a|o} de Don Verbo.",null,"Soy alumn{a|o} de Don Verbo."],
     ["Soy delante de la mesa.","estoy","Estoy delante de la mesa."],
     ["Estoy una persona tranquila.","soy","Soy una persona tranquila."],
@@ -370,7 +370,7 @@ const BOXES = [
     ["En la cocina ___ una mesa grande.","hay"],
     ["Ahora yo ___ un poco nervios{a|o}.","estoy"],
     ["El cuaderno ___ en la mesa.","está"],
-    ["Yo ___ de otra ciudad.","soy"],
+    ["Yo ___ trabajador{a|}.","soy"],
     ["No ___ ordenador.","hay"],
     ["Don Verbo ___ delante de mí.","está"],
     ["Todo ___ de caramelo.","es"],
@@ -389,7 +389,7 @@ const BOXES = [
     ["Ahora soy nervios{a|o}.","Ahora estoy nervios{a|o}.","Ahora hay nervios{a|o}."],
     ["El cuaderno está en la mesa.",null,""],
     ["Hay mi ordenador en casa.","Mi ordenador está en casa.","Mi ordenador es en casa."],
-    ["Soy de otra ciudad.",null,""],
+    ["Soy trabajador{a|}.",null,""],
     ["Don Verbo es detrás de mí.","Don Verbo está detrás de mí.","Don Verbo hay detrás de mí."],
     ["No hay ordenador en la mesa.",null,""],
     ["Estoy alumn{a|o} de Don Verbo.","Soy alumn{a|o} de Don Verbo.","Hay alumn{a|o} de Don Verbo."],
@@ -565,7 +565,7 @@ function stats(){
 }
 /* ===== Отрисовка ===== */
 function render(){
-  const app=document.getElementById("app");
+  const app=document.getElementById("app"); const _y=window.scrollY;
   let h='<header><div class="eyebrow">Curso de verbos · Módulo 1</div><h1>Ser, estar, hay</h1>'+
     '<p class="sub">Capítulo 1: la cocina de caramelo</p></header>';
   h+='<div class="row between"><div class="seg" role="group" aria-label="Soy"><button data-g="f" aria-pressed="'+(S.g==="f")+'">Soy ella</button><button data-g="m" aria-pressed="'+(S.g==="m")+'">Soy él</button></div>'+
@@ -576,7 +576,7 @@ function render(){
   const st=STEPS[S.step];
   h+= st.type==="i"?introHtml(): st.type==="r"?resultsHtml(): st.type==="x"?chapterHtml(): st.type==="h"?talkHtml(st): st.type==="t"?theoryHtml(st): practiceHtml(st);
   h+=navHtml();
-  app.innerHTML=h;
+  app.innerHTML=h; window.scrollTo(0,_y);
   try{const nav=app.querySelector(".stepper"),a=nav&&nav.querySelector(".node.active");
     if(a) nav.scrollLeft=Math.max(0,a.offsetLeft-nav.clientWidth/2+a.clientWidth/2);}catch(e){}
 }
@@ -810,11 +810,9 @@ function openLayer(kind){
     h+='<p class="meta">Оба глагола неправильные: формы надо знать наизусть. По-русски оба часто переводятся «быть», поэтому их и путают.</p>';
     h+='<h3 class="title">SER — кто я и что это</h3><table><tbody>'+
       [["Кто я: роль, профессия, занятие","Soy estudiante. Soy alumna de Don Verbo."],
-       ["Откуда я, национальность","Soy de otra ciudad. No soy española."],
        ["Какой я по характеру, мои черты","Soy tímida. Soy curiosa. Soy una persona tranquila."],
        ["Что это за предмет","Es un cuaderno. Es una tarjeta."],
-       ["Из чего сделано","Todo es de caramelo."],
-       ["Время: час, день, ночь","Es de noche. Son las nueve."]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
+       ["Из чего сделано","Todo es de caramelo."]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
     h+='<h3 class="title">ESTAR — где я и как я сейчас</h3><table><tbody>'+
       [["Где я, где находится знакомый предмет","Estoy en la cocina. El cuaderno está en la mesa."],
        ["Как я себя чувствую сейчас, моё состояние","Estoy nerviosa. Estoy cansada. Estoy sorprendida."],
@@ -822,12 +820,10 @@ function openLayer(kind){
        ["Положение тела","Estoy de pie. Estoy sentada."],
        ["С кем я сейчас","Estoy sola. Estoy con Don Verbo."]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
     h+='<h3 class="title">Как выбрать</h3><table><tbody>'+
-      [["¿Quién eres? — кто ты?","Soy…"],["¿Cómo eres? — какой ты (характер)?","Soy…"],["¿De dónde eres? — откуда ты?","Soy de…"],["¿Dónde estás? — где ты?","Estoy en…"],["¿Cómo estás? — как ты (сейчас)?","Estoy…"]].map(r=>'<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>').join("")+'</tbody></table>';
+      [["¿Quién eres? — кто ты?","Soy…"],["¿Cómo eres? — какой ты (характер)?","Soy…"],["¿Dónde estás? — где ты?","Estoy en…"],["¿Cómo estás? — как ты (сейчас)?","Estoy…"]].map(r=>'<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>').join("")+'</tbody></table>';
     h+='<p>Одно предложение — два глагола: <i>Soy tranquila, pero ahora estoy nerviosa.</i> Характер — soy, состояние сейчас — estoy.</p>';
     h+='<h3 class="title">Частые ошибки</h3><table><tbody>'+
-      [["✗ Soy en la cocina.","✓ Estoy en la cocina. (место)"],["✗ Estoy estudiante.","✓ Soy estudiante. (кто я)"],["✗ Estoy de otra ciudad.","✓ Soy de otra ciudad. (откуда)"],["✗ Soy perdida.","✓ Estoy perdida. (состояние)"]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
-    h+='<h3 class="title">Одно слово — разный смысл</h3><p class="meta">Это следующий уровень, но полезно знать уже сейчас.</p><table><tbody>'+
-      [["soy aburrida — я скучная","estoy aburrida — мне скучно"],["soy lista — я умная","estoy lista — я готова"],["soy nerviosa — я нервный человек","estoy nerviosa — я нервничаю сейчас"],["soy mala — я плохая","estoy mala — я болею"]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
+      [["✗ Soy en la cocina.","✓ Estoy en la cocina. (место)"],["✗ Estoy estudiante.","✓ Soy estudiante. (кто я)"],["✗ Soy perdida.","✓ Estoy perdida. (состояние)"]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
     h+='<h3 class="title">HAY — что есть (предмет новый)</h3><p>Одна форма для всего: <i>hay un cuaderno, hay dos sillas, hay agua</i>. Называем предмет впервые — его ещё никто не знает.</p><table><tbody>'+
       [["hay + un / una","En la mesa hay un cuaderno."],["hay + число","Hay dos sillas."],["hay + mucho / poco","Hay mucho azúcar. No hay mucha luz."],["hay + слово без артикля","Hay agua. Hay gente."],["Отрицание — без артикля","No hay ordenador."],["Вопрос","¿Hay agua en la cocina? ¿Qué hay en la mesa?"]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
     h+='<h3 class="title">HAY или ESTÁ</h3><table><thead><tr><th>hay — что есть</th><th>está — где это</th></tr></thead><tbody>'+
