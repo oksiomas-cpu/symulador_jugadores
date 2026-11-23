@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habitación 1 · Ser, estar, hay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Дорогая тетрадь: молочная лощёная бумага, мелкая клетка, поле красной линией. Шаги: объяснение золотом, практика сиренью, разговор зелёным. */
+  --paper:#fbf8f1;
+  --sheet:#fffdf8;
+  --grid:rgba(120,140,170,.16);
+  --margin:rgba(205,92,92,.45);
+  --ink:#2b2836;
+  --muted:#6f6a7c;
+  --lilac:#8a7bb8;
+  --lilac-soft:#ece8f6;
+  --theory:#c4952f;
+  --theory-soft:#f7eed9;
+  --talk:#4f9a6b;
+  --gold:#a8761c;
+  --caramel:#b0622a;
+  --line:#e4ded2;
+  --ok:#3f8a5a;
+  --bad:#c0504d;
+  --display:"Young Serif", Georgia, serif;
+  --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55}
+body{background-color:var(--paper);
+  background-image:
+    linear-gradient(90deg, transparent 0, transparent calc(50% - 392px), var(--margin) calc(50% - 392px), var(--margin) calc(50% - 390px), transparent calc(50% - 390px)),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:100% 100%, 14px 14px, 14px 14px;background-attachment:fixed}
+@media (max-width:820px){body{background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:14px 14px,14px 14px}}
+.wrap{max-width:720px;margin:0 auto;padding:24px 16px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--lilac);font-weight:700}
+h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.15;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+.seg{display:inline-flex;background:var(--sheet);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 14px var(--body);padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--lilac);color:#fff}
+.card{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,var(--sheet) 45%,#f7f2e8 100%);
+  border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 1px 0 #fff inset, 0 10px 28px rgba(60,50,30,.08), 0 2px 6px rgba(60,50,30,.05)}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 32%, rgba(255,255,255,0) 68%, rgba(255,255,255,.45) 100%)}
+.card > *{position:relative}
+.card.theory{border-top:4px solid var(--theory)}
+.card.practice{border-top:4px solid var(--lilac)}
+.meta{font-size:13px;color:var(--muted);letter-spacing:.04em}
+.title{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
+.v{color:var(--gold);font-weight:800}
+.g{color:var(--ok);font-weight:800}
+.vo{color:var(--caramel);font-style:italic}
+details{background:var(--lilac-soft);border-radius:12px;padding:10px 14px}
+summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600}
+.prompt{color:var(--muted);font-size:15px;margin:0}
+.chapter p{margin:0 0 14px;font-size:18px;line-height:1.7}
+.btn{border:0;background:var(--lilac);color:#fff;font:700 16px var(--body);padding:12px 18px;border-radius:12px;cursor:pointer;box-shadow:0 4px 12px rgba(138,123,184,.3)}
+.btn.gold{background:var(--theory);box-shadow:0 4px 12px rgba(196,149,47,.3)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.btn.small{font-size:14px;padding:8px 12px}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn:focus-visible,.seg button:focus-visible,.pill:focus-visible,.tile:focus-visible,.w:focus-visible{outline:2px solid var(--lilac);outline-offset:2px}
+
+
+.where{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.fact{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column}
+.fact b{font:400 26px var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+.fact span{font-size:13px;color:var(--muted)}
+.plan{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.hook{background:linear-gradient(135deg,#fff7df,#f7eed9);border:1px solid var(--theory);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+
+/* витрина: презентация и итоги — в стиле шагов-объяснений */
+.showcase{gap:16px}
+.showcase .kicker{font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.showcase h2.cover{font:400 28px/1.2 var(--display);margin:0;color:var(--ink);text-wrap:balance}
+.showcase .lede{font:400 17px/1.55 var(--body);color:var(--muted);margin:0;max-width:60ch}
+.showcase .rule{height:1px;background:var(--line);border:0;margin:2px 0}
+.showcase h3{font:400 21px/1.25 var(--display);margin:4px 0 0;color:var(--ink)}
+.showcase p,.showcase li{font:400 17px/1.6 var(--body);color:var(--ink)}
+.showcase .where{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0 0 10px;font:500 13px var(--body);color:var(--muted)}
+.showcase .where b{font-weight:700;color:var(--ink)}
+.numbers{display:flex;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.numbers div{flex:1 1 100px;padding:12px 10px;display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line)}
+.numbers div:last-child{border-right:0}
+.numbers b{font:400 28px/1 var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+.numbers span{font:400 13px var(--body);color:var(--muted)}
+.steps-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps-list li{display:grid;grid-template-columns:28px 1fr;gap:10px;counter-increment:s}
+.steps-list li::before{content:counter(s);font:400 22px/1.2 var(--display);color:var(--theory)}
+.steps-list b{font-weight:700}
+.showcase .quote{border-left:3px solid var(--theory);padding:4px 0 4px 14px;font:400 18px/1.55 var(--body);color:var(--ink);margin:0}
+.showcase .note{font:400 15px/1.6 var(--body);color:var(--ink);background:var(--theory-soft);border-radius:12px;padding:10px 14px;margin:0}
+.showcase table td,.showcase table th{font-size:15px;border-bottom:1px solid var(--line)}
+.showcase .btn{align-self:flex-start}
+@media (max-width:480px){.showcase h2.cover{font-size:24px}}
+/* награды */
+.stats{display:flex;flex-wrap:wrap;gap:8px}
+.stat{background:var(--sheet);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font:700 14px var(--body);display:inline-flex;gap:6px;align-items:center}
+.stat b{font-variant-numeric:tabular-nums}
+.seals{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.seal{border:2px dashed var(--line);border-radius:14px;padding:12px;text-align:center;font-size:13px;color:var(--muted);min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.seal.on{border-style:solid;border-color:var(--theory);background:radial-gradient(circle at 30% 30%,#fff7df,#f3e2b5);color:var(--ink)}
+.seal .stamp{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:400 20px var(--display);background:var(--line);color:#fff}
+.seal.on .stamp{background:linear-gradient(135deg,#d8a845,#a8761c);box-shadow:0 2px 6px rgba(168,118,28,.4)}
+.titlebadge{background:linear-gradient(135deg,#fff7df,#f1dca6);border:2px solid var(--theory);border-radius:14px;padding:14px;text-align:center;font:400 22px var(--display)}
+/* лента шагов как в «Архитектуре речи» */
+.stepper{position:relative;display:flex;align-items:center;overflow-x:auto;padding:4px 2px 8px;scroll-behavior:auto}
+.stepper .node{flex:none;width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:var(--sheet);color:var(--ink);font:700 15px var(--display);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;text-decoration:none}
+.stepper .node.t{border-color:var(--theory);background:var(--theory-soft)}
+.stepper .node.p{border-color:var(--lilac);background:var(--lilac-soft)}
+.stepper .node.h{border-color:var(--talk);background:#e4f2e8}
+.stepper .node.soon{border-style:dashed;color:var(--muted);background:transparent;cursor:default;font-size:12px}
+.stepper .node.done::after{content:"✓";position:absolute;right:-4px;top:-6px;font:800 12px var(--body);color:#fff;background:var(--ok);border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center}
+.stepper .node.active.t{background:var(--theory);color:#fff}
+.stepper .node.active.p{background:var(--lilac);color:#fff}
+.stepper .node.active.h{background:var(--talk);color:#fff}
+.card.talk{border-top:4px solid var(--talk)}
+.btn.green{background:var(--talk);box-shadow:0 4px 12px rgba(79,154,107,.3)}
+.answer{border-left:3px solid var(--talk);padding:6px 0 6px 14px;font-size:20px;line-height:1.5}
+.answer .t{color:var(--talk);font-style:italic}
+.stepper .line{flex:1 1 10px;min-width:8px;height:2px;background:var(--line)}
+.progress-label{text-align:center;font:400 15px var(--display);color:var(--muted);letter-spacing:.04em}
+.nav{display:flex;justify-content:space-between;gap:10px}
+/* тропинка шагов */
+.path{display:flex;flex-direction:column;gap:12px}
+.box{display:flex;flex-direction:column;gap:6px}
+.box-name{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:2px solid var(--line);background:var(--sheet);color:var(--ink);font:700 13px var(--body);padding:6px 10px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pill.t{border-color:var(--theory);background:var(--theory-soft)}
+.pill.p{border-color:var(--lilac);background:var(--lilac-soft)}
+.pill.h{border-color:var(--talk);background:#e4f2e8;text-decoration:none;color:var(--ink)}
+.pill.soon{border-style:dashed;color:var(--muted);cursor:default;background:transparent}
+.pill[aria-current="true"]{box-shadow:0 0 0 3px rgba(138,123,184,.35)}
+.pill.t[aria-current="true"]{box-shadow:0 0 0 3px rgba(196,149,47,.35)}
+.pill .ck{color:var(--ok)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+.sw{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+/* объяснение */
+.dv{font-family:var(--display);font-size:21px;margin:0}
+.ru{margin:0;font-size:17px}
+.examples{display:flex;flex-direction:column;gap:4px;font-size:20px;padding-left:14px;border-left:3px solid var(--theory)}
+.es{margin:0;color:var(--muted);font-style:italic}
+.tip{background:var(--theory-soft);border-radius:12px;padding:10px 14px;font-size:15px}
+
+/* практика */
+.q{font-family:var(--display);font-size:25px;line-height:1.3;margin:0;text-wrap:balance}
+.who{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.built{min-height:56px;border:2px dashed var(--line);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:rgba(255,255,255,.6)}
+.built.empty::after{content:"Toca las palabras en orden";color:var(--muted);font-size:14px;padding:0 6px}
+.tiles{display:flex;flex-wrap:wrap;gap:8px}
+.tile{border:1px solid var(--line);background:#fff;color:var(--ink);font:600 18px var(--body);padding:8px 13px;border-radius:10px;cursor:pointer;box-shadow:0 2px 0 var(--line)}
+.tile.used{visibility:hidden}
+.built .tile{background:var(--lilac-soft);border-color:var(--lilac)}
+.verdict{border-radius:12px;padding:12px 14px;font-size:18px}
+.verdict.ok{background:#e4f2e8;border-left:4px solid var(--ok)}
+.verdict.bad{background:#f8e6e4;border-left:4px solid var(--bad)}
+.verdict .lab{font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:2px}
+.verdict.ok .lab{color:var(--ok)} .verdict.bad .lab{color:var(--bad)}
+.bar{height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lilac)}
+
+/* слова и словарь */
+.w{cursor:pointer;border-bottom:1px dotted rgba(111,106,124,.5)}
+.w:hover{background:var(--lilac-soft)}
+.pop{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);width:min(420px,calc(100% - 32px));background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 14px 40px rgba(40,30,20,.18);z-index:20;display:flex;flex-direction:column;gap:8px}
+.pop .word{font-family:var(--display);font-size:22px}
+.overlay{position:fixed;inset:0;background:rgba(43,40,54,.35);z-index:30;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto}
+.sheet{background:var(--sheet);border-radius:16px;max-width:620px;width:100%;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+table{border-collapse:collapse;width:100%;font-size:16px}
+td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+tr.yo td{background:var(--theory-soft);font-weight:800}
+.dict-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding:8px 0}
+.dict-item small{color:var(--muted);display:block}
+@media (max-width:420px){h1{font-size:25px}.q{font-size:22px}.examples{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="layer"></div>
+<script>
+/* ===== Данные ===== */
+const BOXES = [
+ {id:"ser", name:"SER · quién soy", distract:["estoy","eres"],
+  theory:{dv:"— ¿Quién eres? — pregunta Don Verbo.",
+    ru:"<b class=\"v\">Soy</b> — это кто я: моя роль, мой характер, откуда я.",
+    ex:["Soy estudiante.","Soy nuev{a|o}.","Soy tímid{a|o}."],
+    es:"Con «soy» digo quién soy por dentro.",
+    tip:"Дон Вербо спрашивает «¿Eres…?» — это «ты». Ты отвечаешь «Soy…» — это «я»."},
+  practice:[
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
+    ["¿Eres estudiante de español?","Sí, soy estudiante de español."],
+    ["¿Eres profesor{a|}?","No, no soy profesor{a|}."],
+    ["¿Eres nuev{a|o} aquí?","Sí, soy nuev{a|o} aquí."],
+    ["¿Eres tímid{a|o}?","Sí, soy un poco tímid{a|o}."],
+    ["¿Eres valiente?","No, no soy muy valiente."],
+    ["¿Eres curios{a|o}?","Sí, soy curios{a|o}."],
+    ["¿Eres alumn{a|o} de Don Verbo?","Sí, soy alumn{a|o} de Don Verbo."],
+    ["¿Eres español{a|}?","No, no soy español{a|}."]]},
+   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", items:[
+    ["Eres profesor{a|}, ¿verdad?","No, no soy profesor{a|}. Soy estudiante."],
+    ["Eres muy valiente, ¿verdad?","No, no soy valiente. Soy tímid{a|o}."],
+    ["Eres de aquí, ¿verdad?","No, no soy de aquí. Soy de otra ciudad."],
+    ["Eres expert{a|o} en español, ¿verdad?","No, no soy expert{a|o}. Soy principiante."],
+    ["Eres mud{a|o}, ¿verdad?","No, no soy mud{a|o}. Soy callad{a|o}."],
+    ["Eres aburrid{a|o}, ¿verdad?","No, no soy aburrid{a|o}. Soy curios{a|o}."],
+    ["Eres {la dueña|el dueño} de la cocina, ¿verdad?","No, no soy {la dueña|el dueño}. Soy invitad{a|o}."],
+    ["Eres un verbo, ¿verdad?","No, no soy un verbo. Soy una persona."]]}
+  ]},
+ {id:"estar", name:"ESTAR · dónde y cómo estoy", distract:["soy","estás"],
+  theory:{dv:"— ¿Dónde estás? ¿Cómo estás? — pregunta Don Verbo.",
+    ru:"<b class=\"v\">Estoy</b> — где я и как я сейчас: место и состояние.",
+    ex:["Estoy en la cocina.","Estoy sol{a|o}.","Estoy nervios{a|o}."],
+    es:"Con «estoy» digo dónde estoy y cómo me siento ahora.",
+    tip:"Дон Вербо спрашивает «¿Estás…?» — это «ты». Ты отвечаешь «Estoy…» — это «я»."},
+  practice:[
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
+    ["¿Estás en el salón?","No, no estoy en el salón."],
+    ["¿Estás en la cocina?","Sí, estoy en la cocina."],
+    ["¿Estás sol{a|o} en casa?","Sí, estoy sol{a|o} en casa."],
+    ["¿Estás nervios{a|o}?","Sí, estoy un poco nervios{a|o}."],
+    ["¿Estás cansad{a|o}?","Sí, estoy cansad{a|o}."],
+    ["¿Estás en el Reino del Caramelo?","Sí, estoy en el Reino del Caramelo."],
+    ["¿Estás perdid{a|o}?","Sí, estoy un poco perdid{a|o}."],
+    ["¿Estás list{a|o} para hablar?","Sí, estoy list{a|o}."]]},
+   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", items:[
+    ["Estás en el baño, ¿verdad?","No, no estoy en el baño. Estoy en la cocina."],
+    ["Estás aburrid{a|o}, ¿verdad?","No, no estoy aburrid{a|o}. Estoy sorprendid{a|o}."],
+    ["Estás muy tranquil{a|o}, ¿verdad?","No, no estoy tranquil{a|o}. Estoy nervios{a|o}."],
+    ["Estás dormid{a|o}, ¿verdad?","No, no estoy dormid{a|o}. Estoy despiert{a|o}."],
+    ["Estás enfadad{a|o}, ¿verdad?","No, no estoy enfadad{a|o}. Estoy asustad{a|o}."],
+    ["Estás lejos de la mesa, ¿verdad?","No, no estoy lejos. Estoy cerca de la mesa."],
+    ["Estás sentad{a|o}, ¿verdad?","No, no estoy sentad{a|o}. Estoy de pie."],
+    ["Estás triste, ¿verdad?","No, no estoy triste. Estoy emocionad{a|o}."]]}
+  ]},
+ {id:"serestar", name:"✖ SER + ESTAR", distract:["es","está"],
+  theory:{dv:"— Soy y estoy: dos verbos, dos preguntas — dice Don Verbo.",
+    ru:"<b class=\"v\">Soy</b> — кто я: роль, характер, откуда я. <b class=\"v\">Estoy</b> — где я и как я сейчас.",
+    ex:["Soy tranquil{a|o}, pero ahora estoy nervios{a|o}.","Soy de otra ciudad, pero estoy en el Reino del Caramelo."],
+    es:"¿Quién soy? → soy. ¿Dónde estoy? ¿Cómo estoy ahora? → estoy.",
+    tip:"Проверь себя вопросом. «Это про то, кто я?» → soy. «Где я или как я себя чувствую сейчас?» → estoy. Подробно — в Chuleta."},
+  practice:[
+   {title:"¿Soy o estoy?", type:"choice", who:"Elige", items:[
+    ["___ en la cocina de Don Verbo.","estoy"],
+    ["___ estudiante de español.","soy"],
+    ["Ahora ___ nervios{a|o}.","estoy"],
+    ["___ de otra ciudad.","soy"],
+    ["___ sol{a|o} en casa.","estoy"],
+    ["___ una persona tranquila.","soy"],
+    ["___ cansad{a|o}: es de noche.","estoy"],
+    ["___ alumn{a|o} de Don Verbo.","soy"],
+    ["___ delante de la mesa.","estoy"],
+    ["___ curios{a|o}.","soy"],
+    ["___ un poco perdid{a|o}.","estoy"],
+    ["___ principiante.","soy"]]},
+   {title:"Soy así, pero ahora…", type:"tiles", who:"Don Verbo: ¿Cómo eres? ¿Y cómo estás ahora?", items:[
+    [["tranquil{a|o}","nervios{a|o}"],"Soy tranquil{a|o}, pero ahora estoy nervios{a|o}."],
+    [["alegre","asustad{a|o}"],"Soy alegre, pero ahora estoy asustad{a|o}."],
+    [["de otra ciudad","en el Reino del Caramelo"],"Soy de otra ciudad, pero ahora estoy en el Reino del Caramelo."],
+    [["trabajador{a|}","cansad{a|o}"],"Soy trabajador{a|}, pero ahora estoy cansad{a|o}."],
+    [["curios{a|o}","un poco perdid{a|o}"],"Soy curios{a|o}, pero ahora estoy un poco perdid{a|o}."],
+    [["estudiante","en una cocina mágica"],"Soy estudiante, pero ahora estoy en una cocina mágica."],
+    [["una persona seria","sorprendid{a|o}"],"Soy una persona seria, pero ahora estoy sorprendid{a|o}."],
+    [["tímid{a|o}","con Don Verbo"],"Soy tímid{a|o}, pero ahora estoy con Don Verbo."],
+    [["principiante","list{a|o} para hablar"],"Soy principiante, pero ahora estoy list{a|o} para hablar."],
+    [["alumn{a|o}","delante del cuaderno dorado"],"Soy alumn{a|o}, pero ahora estoy delante del cuaderno dorado."],
+    [["callad{a|o}","emocionad{a|o}"],"Soy callad{a|o}, pero ahora estoy emocionad{a|o}."],
+    [["normal","en un mundo de caramelo"],"Soy normal, pero ahora estoy en un mundo de caramelo."]]},
+   {title:"Detective: mi cuaderno", type:"detect", who:"¿Está bien esta frase de tu cuaderno?", items:[
+    ["Soy en la cocina.","estoy","Estoy en la cocina."],
+    ["Estoy estudiante de español.","soy","Soy estudiante de español."],
+    ["Estoy sol{a|o} en casa.",null,"Estoy sol{a|o} en casa."],
+    ["Estoy de otra ciudad.","soy","Soy de otra ciudad."],
+    ["Soy alumn{a|o} de Don Verbo.",null,"Soy alumn{a|o} de Don Verbo."],
+    ["Soy delante de la mesa.","estoy","Estoy delante de la mesa."],
+    ["Estoy una persona tranquila.","soy","Soy una persona tranquila."],
+    ["Estoy en el Reino del Caramelo.",null,"Estoy en el Reino del Caramelo."],
+    ["Soy con Don Verbo.","estoy","Estoy con Don Verbo."],
+    ["Estoy principiante.","soy","Soy principiante."],
+    ["Soy curios{a|o}.",null,"Soy curios{a|o}."],
+    ["Soy perdid{a|o} en la cocina.","estoy","Estoy perdid{a|o} en la cocina."]]}
+  ]},
+ {id:"hay", name:"HAY · qué hay", distract:["está","es"],
+  theory:{dv:"— ¿Qué hay en tu cocina? — pregunta Don Verbo.",
+    ru:"<b class=\"v\">Hay</b> — «есть, имеется». Говорим, когда называем предмет впервые: его ещё никто не знает. Одна форма на всё: <i>hay un cuaderno, hay dos sillas</i>.",
+    ex:["En la mesa hay un cuaderno dorado.","Hay dos sillas.","No hay ordenador."],
+    es:"Después de «hay»: un, una, dos, mucho… — pero no el, la, mi.",
+    tip:"Отрицание без артикля: <i>no hay ordenador</i>. Вопрос: <i>¿Hay agua?</i>"},
+  practice:[
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
+    ["¿Qué hay en la mesa?","En la mesa hay un cuaderno dorado."],
+    ["¿Hay sillas en la cocina?","Sí, hay dos sillas."],
+    ["¿Hay un ordenador en la mesa?","No, no hay ordenador."],
+    ["¿Qué hay en la pared?","En la pared hay un reloj de caramelo."],
+    ["¿Qué hay al lado del cuaderno?","Al lado del cuaderno hay una tarjeta."],
+    ["¿Hay mucha luz?","No, no hay mucha luz: es de noche."],
+    ["¿Hay gente en la cocina?","No, no hay gente."],
+    ["¿Hay un problema?","Sí, hay un problema: tengo miedo."]]},
+   {title:"Mi texto: mi cocina de caramelo", type:"tiles", story:true, who:"Escribe tu texto, frase a frase", items:[
+    ["","En mi cocina hay una mesa grande."],
+    ["","En la mesa hay un cuaderno dorado."],
+    ["","Al lado del cuaderno hay una tarjeta."],
+    ["","Hay dos sillas de caramelo."],
+    ["","No hay ordenador."],
+    ["","Hay mucho azúcar en el suelo."],
+    ["","Hay un olor dulce."],
+    ["","Y hay una voz detrás de mí."]]}
+  ]},
+ {id:"estarhay", name:"✖ ESTAR + HAY", distract:[],
+  theory:{dv:"— ¿Qué hay? ¿Dónde está? — pregunta Don Verbo.",
+    ru:"<b class=\"v\">Hay</b> — <i>что</i> есть: предмет новый, неизвестный (un, una, dos, mucho). <b class=\"v\">Está</b> — <i>где</i> он: предмет знакомый (el, la, mi, tu, Don Verbo). А сам я — <b class=\"v\">estoy</b>.",
+    ex:["En la mesa hay un cuaderno.","El cuaderno está en la mesa.","Estoy delante de la mesa."],
+    es:"¿Qué hay? → hay. ¿Dónde está? → está. ¿Dónde estoy yo? → estoy.",
+    tip:"Подсказка по словам рядом: un, una, dos, mucho → hay. El, la, mi, tu, имя → está."},
+  practice:[
+   {title:"¿Hay, está o estoy?", type:"choice", opts:["hay","está","estoy"], who:"Elige", items:[
+    ["En la mesa ___ un cuaderno.","hay"],
+    ["El cuaderno ___ en la mesa.","está"],
+    ["___ en la cocina de Don Verbo.","estoy"],
+    ["¿Dónde ___ mi ordenador?","está"],
+    ["En la cocina ___ dos sillas.","hay"],
+    ["La tarjeta ___ al lado del cuaderno.","está"],
+    ["No ___ ordenador en la mesa.","hay"],
+    ["___ delante de la ventana.","estoy"],
+    ["Mi ordenador no ___ aquí.","está"],
+    ["¿___ agua en la cocina?","hay"],
+    ["Don Verbo ___ detrás de mí.","está"],
+    ["En la pared ___ un reloj.","hay"]]},
+   {title:"Texto: busco mi ordenador", type:"gaptext", opts:["hay","está","estoy"], who:"Completa el texto",
+    text:"___ en la cocina. Busco mi ordenador, pero no ___ en la mesa. En la mesa ___ un cuaderno dorado y una tarjeta. La tarjeta ___ al lado del cuaderno. ¿Y mi ordenador? ¿Dónde ___? En la cocina ___ dos sillas. Miro debajo de las sillas: no ___ nada. En la pared ___ un reloj. ___ un poco nervios{a|o}. Detrás de mí ___ Don Verbo. —Tu ordenador ___ en tu mundo —dice—. Aquí ___ otras cosas.",
+    items:[["","estoy"],["","está"],["","hay"],["","está"],["","está"],["","hay"],["","hay"],["","hay"],["","estoy"],["","está"],["","está"],["","hay"]]},
+   {title:"Detective: la descripción", type:"detect2", who:"¿Está bien esta frase?", items:[
+    ["En la mesa está un cuaderno.","En la mesa hay un cuaderno.","En la mesa es un cuaderno."],
+    ["El cuaderno hay en la mesa.","El cuaderno está en la mesa.","Hay el cuaderno en la mesa."],
+    ["En la cocina hay dos sillas.",null,""],
+    ["No hay mi ordenador.","Mi ordenador no está.","No hay el ordenador."],
+    ["La tarjeta está al lado del cuaderno.",null,""],
+    ["¿Dónde hay mi ordenador?","¿Dónde está mi ordenador?","¿Dónde es mi ordenador?"],
+    ["Hay en la cocina.","Estoy en la cocina.","Soy en la cocina."],
+    ["En la pared hay un reloj.",null,""],
+    ["Hay Don Verbo detrás de mí.","Don Verbo está detrás de mí.","Don Verbo hay detrás de mí."],
+    ["Estoy delante de la mesa.",null,""],
+    ["Hay mi cuaderno en la mesa.","Mi cuaderno está en la mesa.","Mi cuaderno es en la mesa."],
+    ["¿Hay agua en la cocina?",null,""]]}
+  ]},
+ {id:"todo", name:"✖ SER + ESTAR + HAY", distract:[],
+  theory:{dv:"— Ahora, todo junto — dice Don Verbo.",
+    ru:"<b class=\"v\">Soy / es</b> — кто и какой (я, предмет). <b class=\"v\">Estoy / está</b> — где и как сейчас. <b class=\"v\">Hay</b> — что есть, называем впервые.",
+    ex:["Soy estudiante. Estoy en la cocina.","En la cocina hay una mesa. La mesa es de caramelo.","El cuaderno está en la mesa."],
+    es:"¿Quién? ¿Cómo es? → ser. ¿Dónde? ¿Cómo está ahora? → estar. ¿Qué hay? → hay.",
+    tip:"«Es» и «está» — это про предметы и про Дона Вербо, «soy» и «estoy» — про меня. Вся схема — в Chuleta."},
+  practice:[
+   {title:"¿Soy, estoy, es, está o hay?", type:"choice", opts:["soy","estoy","es","está","hay"], who:"Elige", items:[
+    ["___ estudiante de español.","soy"],
+    ["En la cocina ___ una mesa grande.","hay"],
+    ["Ahora ___ un poco nervios{a|o}.","estoy"],
+    ["El cuaderno ___ en la mesa.","está"],
+    ["___ de otra ciudad.","soy"],
+    ["No ___ ordenador.","hay"],
+    ["Don Verbo ___ delante de mí.","está"],
+    ["Todo ___ de caramelo.","es"],
+    ["___ una persona curiosa.","soy"],
+    ["¿Qué ___ en la tarjeta?","hay"],
+    ["___ delante de la ventana.","estoy"],
+    ["La mesa ___ grande.","es"]]},
+   {title:"Texto: mi diario, la primera noche", type:"gaptext", opts:["soy","estoy","es","está","hay"], who:"Completa el texto",
+    text:"Esta noche ___ en el Reino del Caramelo. ___ estudiante de español y aquí ___ nuev{a|o}. En mi cocina ___ una mesa grande. La mesa ___ de caramelo. Mi cuaderno dorado ___ en la mesa, pero mi ordenador no ___. No ___ ordenador, pero ___ una tarjeta con un verbo. ___ un poco nervios{a|o}, pero no ___ sol{a|o}: Don Verbo ___ conmigo.",
+    items:[["","estoy"],["","soy"],["","soy"],["","hay"],["","es"],["","está"],["","está"],["","hay"],["","hay"],["","estoy"],["","estoy"],["","está"]]},
+   {title:"Detective: mi diario", type:"detect2", who:"¿Está bien esta frase?", items:[
+    ["Hay estudiante de español.","Soy estudiante de español.","Estoy estudiante de español."],
+    ["Estoy en la cocina de Don Verbo.",null,""],
+    ["La mesa está de caramelo.","La mesa es de caramelo.","La mesa hay de caramelo."],
+    ["En la cocina es una mesa grande.","En la cocina hay una mesa grande.","En la cocina está una mesa grande."],
+    ["Ahora soy nervios{a|o}.","Ahora estoy nervios{a|o}.","Ahora hay nervios{a|o}."],
+    ["El cuaderno está en la mesa.",null,""],
+    ["Hay mi ordenador en casa.","Mi ordenador está en casa.","Mi ordenador es en casa."],
+    ["Soy de otra ciudad.",null,""],
+    ["Don Verbo es detrás de mí.","Don Verbo está detrás de mí.","Don Verbo hay detrás de mí."],
+    ["No hay ordenador en la mesa.",null,""],
+    ["Estoy alumn{a|o} de Don Verbo.","Soy alumn{a|o} de Don Verbo.","Hay alumn{a|o} de Don Verbo."],
+    ["Todo es de caramelo.",null,""]]}
+  ]}
+];
+const SOON = ["La Poda","-AR + шкафчик","-ER + шкафчик","-IR + шкафчик","✖ Todo mezclado","Punto de vista"];
+
+const CHAPTER = [
+ "Hoy he empezado a estudiar español. Es de noche. Estoy en casa, en mi cocina. Estoy sol{a|o}. Abro el ordenador y pulso el botón «Empezar».",
+ "¡CRACK! Mi cocina cambia. Ahora todo es de caramelo: la mesa, las sillas, la ventana. Miro a mi alrededor. Busco mi ordenador. No está. En la mesa hay un cuaderno dorado. Oigo una voz detrás de mí.",
+ "— Hola. Soy Don Verbo. ¿Y tú? ¿Quién eres?\n— Soy nuev{a|o} aquí. Soy estudiante de español.\n— ¿Dónde estás?\n— No sé. Estoy en mi cocina… pero no es mi cocina.\n— Estás en el Reino del Caramelo. ¿Cómo estás?\n— Estoy nervios{a|o}. Tengo miedo.\n— ¿Miedo de qué?\n— Tengo miedo de hablar. Entiendo muchas palabras. Pienso una frase en español… y cierro la boca. Siempre igual.",
+ "Don Verbo sonríe. En la mesa hay una tarjeta: «hablar». ¡CRACK! Don Verbo corta el final con su batidor de oro.\n— Mira: habl-. Ahora tú pones el final.\n— Habl… hablo. ¡Hablo!\n— Muy bien. Ahora abre tu cuaderno.",
+ "Abro el cuaderno dorado. Leo la primera página: «Este cuaderno es tuyo». Escribo mi nombre. Escribo una frase:\n«Soy estudiante de español. Estoy en la cocina de Don Verbo. Aquí hay un cuaderno. Tengo miedo, pero quiero hablar. Y puedo. Empiezo hoy.»"
+];
+const YO = new Set(["he","empezado","estoy","abro","pulso","miro","busco","oigo","soy","sé","tengo","entiendo","pienso","cierro","hablo","leo","escribo","quiero","puedo","empiezo","hay"]);
+const OTHER = new Set(["es","cambia","está","eres","estás","sonríe","corta","mira","pones","abre"]);
+const TALK = [
+ {title:"En mi cocina",
+  p:"Hoy he empezado a estudiar español. Es de noche. Estoy en casa, en mi cocina. Estoy sol{a|o}.\nAbro el ordenador y pulso el botón «Empezar».",
+  qs:[
+   ["¿Cuándo has empezado a estudiar español?","Hoy he empezado a estudiar español…","esta noche, en mi cocina."],
+   ["¿Dónde estás esta noche?","Estoy en casa, en mi cocina…","sol{a|o}, con mi ordenador."],
+   ["¿Qué haces con el ordenador?","Abro el ordenador y pulso el botón «Empezar»…","y de repente, ¡CRACK!"]
+  ]},
+ {title:"¡CRACK!",
+  p:"¡CRACK!\nMi cocina cambia. Ahora todo es de caramelo: la mesa, las sillas, la ventana.\nMiro a mi alrededor. Busco mi ordenador. No está.\nEn la mesa hay un cuaderno dorado.\nOigo una voz detrás de mí.",
+  qs:[
+   ["¿Qué ves ahora?","Veo mi cocina…","pero todo cambia: ahora todo es de caramelo."],
+   ["¿Qué haces en tu cocina de caramelo?","Miro a mi alrededor…","y busco mi ordenador."],
+   ["¿Dónde está tu ordenador?","No está. No sé dónde está…","pero en la mesa hay un cuaderno dorado."],
+   ["¿Qué hay en la mesa?","En la mesa hay un cuaderno dorado…","y detrás de mí oigo una voz."],
+   ["¿Qué oyes?","Oigo una voz detrás de mí…","es Don Verbo."]
+  ]},
+ {title:"Don Verbo",
+  p:"— Hola. Soy Don Verbo. ¿Y tú? ¿Quién eres?\n— Soy nuev{a|o} aquí. Soy estudiante de español.\n— ¿Dónde estás?\n— No sé. Estoy en mi cocina… pero no es mi cocina.\n— Estás en el Reino del Caramelo. ¿Cómo estás?\n— Estoy nervios{a|o}. Tengo miedo.",
+  qs:[
+   ["¿Quién eres?","Soy nuev{a|o} aquí…","y soy estudiante de español."],
+   ["¿Eres profesor{a|}?","No, no soy profesor{a|}. Soy estudiante de español…","pero no sé dónde estoy."],
+   ["¿Dónde estás?","Estoy en mi cocina… pero no es mi cocina.","Estoy en el Reino del Caramelo."],
+   ["¿Cómo estás en el Reino del Caramelo?","Estoy nervios{a|o}…","y tengo miedo."]
+  ]},
+ {title:"Mi miedo",
+  p:"— ¿Miedo de qué?\n— Tengo miedo de hablar. Entiendo muchas palabras. Pienso una frase en español… y cierro la boca. Siempre igual.",
+  qs:[
+   ["¿De qué tienes miedo?","Tengo miedo de hablar…","pero entiendo muchas palabras."],
+   ["¿Qué entiendes?","Entiendo muchas palabras…","y pienso una frase en español."],
+   ["¿En qué lengua piensas la frase?","Pienso una frase en español…","y cierro la boca."],
+   ["¿Y qué haces con la boca?","Cierro la boca. Siempre igual…","pero Don Verbo sonríe."]
+  ]},
+ {title:"El primer final",
+  p:"Don Verbo sonríe. En la mesa hay una tarjeta: «hablar».\n¡CRACK! Don Verbo corta el final con su batidor de oro.\n— Mira: habl-. Ahora tú pones el final.\n— Habl… hablo. ¡Hablo!\n— Muy bien. Ahora abre tu cuaderno.",
+  qs:[
+   ["¿Qué hay en la mesa ahora?","En la mesa hay una tarjeta…","con un verbo: «hablar»."],
+   ["¿Qué lees en la tarjeta?","Leo «hablar»…","y Don Verbo corta el final: ¡CRACK! Habl-."],
+   ["¿Qué final pones tú?","Pongo -o…","habl-o: ¡hablo!"],
+   ["¿Qué dices ahora?","¡Hablo! ¡Hablo español!","Y Don Verbo dice: «Muy bien. Ahora abre tu cuaderno»."]
+  ]},
+ {title:"El cuaderno dorado",
+  p:"Abro el cuaderno dorado. Leo la primera página: «Este cuaderno es tuyo».\nEscribo mi nombre. Escribo una frase:\n«Soy estudiante de español. Estoy en la cocina de Don Verbo. Aquí hay un cuaderno. Tengo miedo, pero quiero hablar. Y puedo. Empiezo hoy.»",
+  qs:[
+   ["¿Qué abres?","Abro el cuaderno dorado…","y leo la primera página."],
+   ["¿Qué lees en la primera página?","Leo: «Este cuaderno es tuyo»…","y escribo mi nombre."],
+   ["¿Qué escribes?","Escribo mi nombre…","y una frase: tengo miedo, pero quiero hablar."],
+   ["¿Y qué quieres?","Quiero hablar…","y puedo."],
+   ["¿Puedes?","Sí, puedo…","Empiezo hoy."],
+   ["¿Cuándo empiezas?","Empiezo hoy.",""]
+  ]}
+];
+const TALK_FINAL = {q:"Ahora, tu frase en el cuaderno.",
+  a:"Soy estudiante de español. Estoy en la cocina de Don Verbo. Aquí hay un cuaderno. Tengo miedo, pero quiero hablar. Y puedo. Empiezo hoy."};
+
+const TALK_URL = "https://claude.ai/artifact/67kdAVjyHTM9yH8iZ8ZTei";
+
+/* Словарь главы: слово → [перевод, словарная форма] */
+const DICT = {
+ "sí":["да",""],"no":["нет; не",""],"soy":["я есть (кто я)","ser"],"eres":["ты есть (кто ты)","ser"],"estoy":["я нахожусь; я (в состоянии)","estar"],"estás":["ты находишься; ты (в состоянии)","estar"],
+ "estudiante":["студент, студентка",""],"de":["из; о; (связка «чего»)",""],"del":["(de + el)",""],"español":["испанский язык; испанец",""],"española":["испанка",""],
+ "profesora":["преподавательница","profesor"],"profesor":["преподаватель",""],"nueva":["новая","nuevo"],"nuevo":["новый",""],"aquí":["здесь",""],
+ "reino":["королевство",""],"caramelo":["карамель",""],"tímida":["робкая","tímido"],"tímido":["робкий",""],"un":["один; (неопр. артикль)",""],"una":["одна; (неопр. артикль)",""],
+ "poco":["мало; un poco — немного",""],"valiente":["смелый, смелая",""],"muy":["очень",""],"curiosa":["любопытная","curioso"],"curioso":["любопытный",""],
+ "alumna":["ученица","alumno"],"alumno":["ученик",""],"don":["дон (уважительно)",""],"verbo":["глагол",""],"persona":["человек",""],"tranquila":["спокойная","tranquilo"],"tranquilo":["спокойный",""],
+ "seria":["серьёзная","serio"],"serio":["серьёзный",""],"bastante":["довольно",""],"alegre":["весёлый, весёлая",""],"verdad":["правда; ¿verdad? — правда?",""],
+ "experta":["эксперт (о женщине)","experto"],"experto":["эксперт",""],"en":["в; на",""],"principiante":["начинающий, новичок",""],
+ "muda":["немая","mudo"],"mudo":["немой",""],"callada":["молчаливая","callado"],"callado":["молчаливый",""],"aburrida":["скучная; скучающая","aburrido"],"aburrido":["скучный; скучающий",""],
+ "perezosa":["ленивая","perezoso"],"perezoso":["ленивый",""],"trabajadora":["трудолюбивая","trabajador"],"trabajador":["трудолюбивый",""],
+ "la":["(опр. артикль ж. р.)",""],"el":["(опр. артикль м. р.)",""],"dueña":["хозяйка","dueño"],"dueño":["хозяин",""],"cocina":["кухня",""],"invitada":["гостья","invitado"],"invitado":["гость",""],
+ "rápida":["быстрая","rápido"],"rápido":["быстрый",""],"con":["с",""],"lenta":["медленная","lento"],"lento":["медленный",""],"perfecta":["идеальная","perfecto"],"perfecto":["идеальный",""],"normal":["обычный, обычная",""],
+ "reina":["королева",""],"rey":["король",""],"otra":["другая","otro"],"ciudad":["город",""],
+ "salón":["гостиная",""],"sola":["одна (без никого)","solo"],"solo":["один (без никого)",""],"casa":["дом",""],"nerviosa":["нервничающая","nervioso"],"nervioso":["нервничающий",""],
+ "cansada":["уставшая","cansado"],"cansado":["уставший",""],"perdida":["потерянная, растерянная","perdido"],"perdido":["потерянный, растерянный",""],"mal":["плохо",""],
+ "delante":["впереди; delante de — перед",""],"mesa":["стол",""],"lista":["готовая","listo"],"listo":["готовый",""],"para":["для; чтобы",""],"hablar":["говорить",""],
+ "baño":["ванная",""],"sorprendida":["удивлённая","sorprendido"],"sorprendido":["удивлённый",""],"jardín":["сад",""],"trabajo":["работа",""],
+ "dormida":["спящая","dormido"],"dormido":["спящий",""],"despierta":["не спящая, бодрствующая","despierto"],"despierto":["не спящий, бодрствующий",""],
+ "enfadada":["сердитая","enfadado"],"enfadado":["сердитый",""],"asustada":["испуганная","asustado"],"asustado":["испуганный",""],"lejos":["далеко",""],"cerca":["близко; cerca de — рядом с",""],
+ "sentada":["сидящая","sentado"],"sentado":["сидящий",""],"pie":["нога (стопа); de pie — стоя",""],"enferma":["больная","enfermo"],"enfermo":["больной",""],
+ "ordenador":["компьютер",""],"cuaderno":["тетрадь, блокнот",""],"triste":["грустный, грустная",""],"emocionada":["взволнованная (радостно)","emocionado"],"emocionado":["взволнованный (радостно)",""],
+ "quién":["кто",""],"pregunta":["спрашивает","preguntar"],"dónde":["где",""],"cómo":["как",""],"con":["с",""],"digo":["я говорю","decir"],"por":["по; dentro — внутри",""],"dentro":["внутри",""],
+ "ahora":["сейчас",""],"me":["себя (me siento — я себя чувствую)",""],"siento":["(я) чувствую","sentir"],"y":["и",""],"qué":["что",""],"cuándo":["когда",""],"has":["(ты) — вспомогательный: has empezado — ты начал(а)","haber"],"haces":["ты делаешь","hacer"],"repente":["de repente — вдруг",""],"ves":["ты видишь","ver"],"veo":["я вижу","ver"],"oyes":["ты слышишь","oír"],"tienes":["у тебя есть; tienes miedo — тебе страшно","tener"],"entiendes":["ты понимаешь","entender"],"lengua":["язык",""],"piensas":["ты думаешь; придумываешь","pensar"],"lees":["ты читаешь","leer"],"pongo":["я ставлю","poner"],"-o":["окончание «я» в настоящем",""],"habl-o":["основа + окончание = hablo",""],"dices":["ты говоришь","decir"],"abres":["ты открываешь","abrir"],"escribes":["ты пишешь","escribir"],"quieres":["ты хочешь","querer"],"puedes":["ты можешь","poder"],"empiezas":["ты начинаешь","empezar"],"hoy":["сегодня",""],"he":["(я) — вспомогательный глагол: he empezado — я начал(а)","haber"],"empezado":["начатый: he empezado — я начал(а)","empezar"],"a":["к; в; (связка: empezar a — начать)",""],"estudiar":["учить, изучать",""],"abro":["я открываю","abrir"],"pulso":["я нажимаю","pulsar"],"botón":["кнопка",""],"empezar":["начинать",""],"crack":["хруст (звук Ла Поды)",""],"cambia":["меняется","cambiar"],"alrededor":["вокруг; a mi alrededor — вокруг себя",""],"oigo":["я слышу","oír"],"hola":["привет",""],"tú":["ты",""],"sé":["я знаю","saber"],"entiendo":["я понимаю","entender"],"palabras":["слова","palabra"],"pienso":["я думаю; придумываю","pensar"],"frase":["фраза",""],"cierro":["я закрываю","cerrar"],"boca":["рот",""],"siempre":["всегда",""],"igual":["одинаково; siempre igual — всегда так",""],"sonríe":["улыбается","sonreír"],"corta":["отрезает","cortar"],"final":["окончание; конец",""],"su":["его, её, свой",""],"batidor":["венчик",""],"oro":["золото; de oro — золотой",""],"mira":["смотри","mirar"],"habl-":["основа глагола hablar",""],"habl":["основа глагола hablar",""],"pones":["ты ставишь","poner"],"hablo":["я говорю","hablar"],"bien":["хорошо",""],"abre":["открой","abrir"],"leo":["я читаю","leer"],"primera":["первая","primero"],"página":["страница",""],"este":["этот",""],"tuyo":["твой",""],"escribo":["я пишу","escribir"],"nombre":["имя",""],"quiero":["я хочу","querer"],"puedo":["я могу","poder"],"empiezo":["я начинаю","empezar"],"todo":["всё",""],"ser":["быть (кто, какой)",""],"estar":["быть, находиться (где, как сейчас)",""],"junto":["вместе",""],"conmigo":["со мной",""],"esta":["эта; esta noche — сегодня вечером",""],"nueva":["новая","nuevo"],"después":["после",""],"yo":["я",""],"hay":["есть, имеется","haber"],"reloj":["часы",""],"pared":["стена",""],"al":["(a + el)",""],"lado":["сторона; al lado de — рядом с",""],"mucha":["много (ж. р.)","mucho"],"mucho":["много",""],"luz":["свет",""],"gente":["люди",""],"problema":["проблема",""],"tengo":["у меня есть; tengo miedo — мне страшно","tener"],"miedo":["страх",""],"grande":["большой, большая",""],"sillas":["стулья","silla"],"azúcar":["сахар",""],"suelo":["пол",""],"olor":["запах",""],"dulce":["сладкий",""],"voz":["голос",""],"detrás":["сзади; detrás de — за, позади",""],"mí":["меня; detrás de mí — позади меня",""],"busco":["я ищу","buscar"],"debajo":["под; debajo de — под",""],"las":["(опр. артикль ж. р. мн. ч.)",""],"nada":["ничего",""],"miro":["я смотрю","mirar"],"otras":["другие","otro"],"cosas":["вещи","cosa"],"agua":["вода",""],"ventana":["окно",""],"mi":["мой, моя",""],"tu":["твой, твоя",""],"tarjeta":["карточка",""],"muchas":["много (ж. р. мн. ч.)","mucho"],"páginas":["страницы","página"],"pero":["но",""],"es":["(он/она/это) есть","ser"],"está":["находится; (он/она) в состоянии","estar"],"noche":["ночь; es de noche — сейчас ночь",""],"mágica":["волшебная","mágico"],"mundo":["мир",""],"dorado":["золотой",""],"dice":["говорит","decir"],"dos":["два",""],"verbos":["глаголы","verbo"],"preguntas":["вопросы","pregunta"],"soy":["я есть (кто я)","ser"],"estoy":["я нахожусь; я (в состоянии)","estar"]
+};
+
+/* ===== Состояние ===== */
+const KEY="kv_r1_ser_estar_v1";
+let S={g:"f", step:0, res:{}, err:{}, dict:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) S=Object.assign(S,s);}catch(e){}
+/* В приложении Города модуль открыт во встроенной рамке: каждое сохранение
+   уходит родителю, а тот кладёт прогресс и словарь за телеграм-аккаунтом. */
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  try{if(window.parent&&window.parent!==window)window.parent.postMessage({kurs:"m1",state:S},location.origin);}catch(e){}}
+let C=null; // текущее задание: {key,i,tiles,built,checked}
+
+/* Шаги: для каждого ящика объяснение, две практики, ошибки */
+const STEPS=[{type:"i",box:-3,label:"El módulo"},{type:"x",box:-1,label:"Capítulo 1"}];
+BOXES.forEach((b,bi)=>{
+  STEPS.push({type:"t",box:bi,label:"Explicación"});
+  b.practice.forEach((p,pi)=>STEPS.push({type:"p",box:bi,pi,label:"Práctica "+(pi+1),key:b.id+"-"+pi}));
+  STEPS.push({type:"e",box:bi,label:"Mis errores",key:b.id+"-err"});
+});
+
+TALK.forEach((t,ti)=>STEPS.push({type:"h",box:-2,hb:ti,label:"Hablamos "+(ti+1)}));
+STEPS.push({type:"h",box:-2,hb:"f",label:"Mi frase"});
+STEPS.push({type:"r",box:-4,label:"Mis resultados"});
+/* ===== Помощники ===== */
+function boxName(st){return st.box===-3?'Presentación':st.box===-1?'El texto':st.box===-2?'Hablamos con Don Verbo':st.box===-4?'Final':BOXES[st.box].name;}
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function G(s){return s.replace(/\{([^|}]*)\|([^}]*)\}/g,(m,f,ma)=>S.g==="f"?f:ma);}
+function gmark(s){return s.replace(/\{([^|}]*)\|([^}]*)\}/g,(m,f,ma)=>{const x=S.g==="f"?f:ma;return x?x.split(" ").map(w=>"\u0001"+w+"\u0002").join(" "):"";});}
+const strip=w=>w.replace(/[.,:;!¡¿?«»—…]/g,"");
+function tokens(a){return G(a).split(/\s+/).map(strip).filter(Boolean);}
+/* текст с нажимаемыми словами; род выделен, soy/estoy выделены */
+function tap(s,verbs){
+  const ctx=encodeURIComponent(G(s));
+  return gmark(s).split(/(\s+)/).map(part=>{
+    if(/^\s+$/.test(part)||!part) return part.includes("\n")?"<br>":part;
+    const m=part.match(/^([¡¿«—]*)(.*?)([.,:;!?»…]*)$/);
+    let [,pre,core,post]=m;
+    const isG=core.includes("\u0001");
+    const plainCore=core.replace(/[\u0001\u0002]/g,"");
+    const key=plainCore.toLowerCase();
+    let inner=esc(core).replace(/\u0001/g,'<span class="g">').replace(/\u0002/g,"</span>");
+    if(verbs){ if(YO.has(key)) inner='<span class="v">'+inner+'</span>'; else if(OTHER.has(key)) inner='<span class="vo">'+inner+'</span>'; }
+    else if(/^(soy|estoy)$/.test(key)) inner='<span class="v">'+inner+'</span>';
+    const w=DICT[key]?'<span class="w" tabindex="0" data-w="'+esc(key)+'" data-ctx="'+ctx+'">'+inner+'</span>':inner;
+    return esc(pre)+w+esc(post);
+  }).join("");
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function boxOf(st){return BOXES[st.box];}
+function resOf(key){return S.res[key]||(S.res[key]={done:[],ok:[]});}
+function stepDone(i){const st=STEPS[i];
+  if(st.type==="i") return !!S.res["intro"];
+  if(st.type==="r") return !!S.res["results"];
+  if(st.type==="x") return !!S.res["chapter"];
+  if(st.type==="h") return !!S.res["talk-"+st.hb];
+  if(st.type==="t") return !!S.res["t-"+st.box];
+  if(st.type==="p"){const r=S.res[st.key];return r&&r.done.length>=boxOf(st).practice[st.pi].items.length;}
+  const b=boxOf(st);const all=b.practice.every((p,pi)=>stepDone(STEPS.findIndex(x=>x.key===b.id+"-"+pi)));
+  return all && !(S.err[b.id]||[]).length;}
+
+/* ===== Награды ===== */
+const TITLE={f:"Habitante de la cocina",m:"Habitante de la cocina"};
+function errIndex(bi){return STEPS.findIndex(s=>s.type==="e"&&s.box===bi);}
+function stats(){
+  let pts=0;Object.keys(S.res).forEach(k=>{const r=S.res[k];if(r&&r.ok)pts+=r.ok.length;});
+  const stars=STEPS.filter((s,i)=>(s.type==="p"||s.type==="e"||s.type==="h")&&stepDone(i)).length;
+  const seals=BOXES.filter((b,bi)=>stepDone(errIndex(bi))).length;
+  return {pts,stars,seals};
+}
+/* ===== Отрисовка ===== */
+function render(){
+  const app=document.getElementById("app");
+  let h='<header><div class="eyebrow">Planta «Yo» · Habitación 1 · Presente</div><h1>Ser, estar, hay</h1>'+
+    '<p class="sub">Capítulo 1: la cocina de caramelo</p></header>';
+  h+='<div class="row between"><div class="seg" role="group" aria-label="Soy"><button data-g="f" aria-pressed="'+(S.g==="f")+'">Soy ella</button><button data-g="m" aria-pressed="'+(S.g==="m")+'">Soy él</button></div>'+
+     '<div class="row"><button class="btn ghost small" data-open="chuleta">Chuleta</button><button class="btn ghost small" data-open="dict">Mi diccionario ('+S.dict.length+')</button></div></div>';
+  const X=stats();
+  h+='<div class="stats"><span class="stat" title="Puntos: respuestas correctas a la primera">✦ <b>'+X.pts+'</b> puntos</span><span class="stat" title="Pasos de práctica terminados">★ <b>'+X.stars+'</b> estrellas</span><button class="stat" data-open="cuaderno" style="cursor:pointer" title="Sellos de Don Verbo">◉ <b>'+X.seals+'</b> de '+BOXES.length+' sellos · Mi cuaderno dorado</button></div>';
+  h+=pathHtml();
+  const st=STEPS[S.step];
+  h+= st.type==="i"?introHtml(): st.type==="r"?resultsHtml(): st.type==="x"?chapterHtml(): st.type==="h"?talkHtml(st): st.type==="t"?theoryHtml(st): practiceHtml(st);
+  h+=navHtml();
+  app.innerHTML=h;
+  try{const nav=app.querySelector(".stepper"),a=nav&&nav.querySelector(".node.active");
+    if(a) nav.scrollLeft=Math.max(0,a.offsetLeft-nav.clientWidth/2+a.clientWidth/2);}catch(e){}
+}
+function pathHtml(){
+  let h='<div class="legend"><span><i class="sw" style="background:var(--theory)"></i>explicación</span><span><i class="sw" style="background:var(--lilac)"></i>práctica</span><span><i class="sw" style="background:var(--talk)"></i>hablamos</span></div>';
+  h+='<nav class="stepper" aria-label="Pasos">';
+  const parts=[];
+  STEPS.forEach((st,i)=>parts.push('<button class="node '+(st.type==="t"||st.type==="x"||st.type==="i"?"t":st.type==="h"||st.type==="r"?"h":"p")+(S.step===i?" active":"")+(stepDone(i)?" done":"")+'" data-step="'+i+'" title="'+esc(boxName(st)+" · "+st.label)+'" aria-current="'+(S.step===i)+'">'+(i+1)+'</button>'));
+  h+=parts.join('<span class="line"></span>')+'</nav>';
+  const st=STEPS[S.step];
+  h+='<div class="progress-label">Paso '+(S.step+1)+' de '+STEPS.length+' · '+boxName(st)+' · '+st.label+'</div>';
+  return h;
+}
+function navHtml(){
+  return '<div class="nav"><button class="btn ghost" data-act="prev"'+(S.step===0?' disabled':'')+'>← Atrás</button><button class="btn ghost" data-act="nextstep"'+(S.step===STEPS.length-1?' disabled':'')+'>Siguiente →</button></div>';
+}
+function counts(){
+  let ex=0,pr=0;BOXES.forEach(b=>b.practice.forEach(p=>{pr++;ex+=p.items.length;}));
+  const tq=TALK.reduce((n,b)=>n+b.qs.length,0);
+  return {boxes:BOXES.length,pr,ex,tq,steps:STEPS.length};
+}
+function whereHtml(done){
+  return '<div class="where"><span>Planta «Yo»</span><span>›</span><span>Habitación 1 · Presente</span><span>›</span><b>Módulo 1 de 2 · Ser, estar, hay'+(done?' ✓':'')+'</b><span>›</span><span class="meta">Módulo 2 · Mis verbos: -ar, -er, -ir</span></div>';
+}
+function introHtml(){
+  const K=counts();
+  let h='<section class="card theory showcase">';
+  h+=whereHtml(false);
+  h+='<span class="kicker">Curso de verbos · Módulo 1</span>';
+  h+='<h2 class="cover">Ser, estar, hay</h2>';
+  h+='<p class="lede">Кто я, где я и что вокруг. Первые фразы о себе — внутри истории, а не в учебнике.</p>';
+  h+='<hr class="rule">';
+  h+='<p>Ночью, на своей кухне, ты начинаешь учить испанский — и кухня становится карамельной. Дон Вербо, хранитель глаголов, задаёт тебе вопросы. Ты отвечаешь о себе — сначала робко, потом свободно.</p>';
+  h+='<div class="numbers">'+[[K.steps,'шагов'],[K.pr,'тренажёров'],[K.ex,'заданий'],[K.tq,'вопросов в разговоре']].map(f=>'<div><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('')+'</div>';
+  h+='<h3>Как устроен модуль</h3><ol class="steps-list">'+
+    ['<b>Глава истории.</b> Читаешь, нажимаешь на незнакомые слова и собираешь свой словарь.',
+     '<b>Отработка.</b> Soy — кто я. Estoy — где я и как я. Hay — что есть вокруг. Потом всё вместе: в фразах, в цельных текстах и в поиске ошибок.',
+     '<b>Разговор с Доном Вербо.</b> Та же история, абзац за абзацем: он спрашивает, ты отвечаешь вслух.',
+     '<b>Итоги.</b> Твои результаты и подсказка, что стоит повторить.'].map(x=>'<li><span>'+x+'</span></li>').join('')+'</ol>';
+  h+='<h3>После модуля</h3><p class="quote">Ты говоришь, кто ты и какой ты, где ты и как себя чувствуешь, что вокруг — и больше не путаешь soy, estoy и hay.</p>';
+  h+='<p class="note">Объяснения на русском, история и задания на испанском. Вверху выбери «Soy ella» или «Soy él» — окончания подстроятся под тебя. Шпаргалка и словарь открываются с любого шага. За ответы — баллы, звёзды и печати Дона Вербо в твоём золотом блокноте.</p>';
+  h+='<button class="btn gold" data-act="introdone">Empezamos →</button></section>';
+  return h;
+}
+function resultsHtml(){
+  const X=stats();
+  let h='<section class="card theory showcase"><span class="kicker">Módulo 1 · Mis resultados</span><h2 class="cover">Tus resultados</h2>';
+  h+='<div class="numbers"><div><b>'+X.pts+'</b><span>баллов</span></div><div><b>'+X.stars+'</b><span>звёзд</span></div><div><b>'+X.seals+' / '+BOXES.length+'</b><span>печатей</span></div></div>';
+  h+='<table><thead><tr><th>Коробка</th><th>С первой попытки</th><th></th></tr></thead><tbody>';
+  const toRepeat=[];
+  BOXES.forEach((b,bi)=>{
+    let ok=0,done=0,total=0;b.practice.forEach((p,pi)=>{const r=S.res[b.id+"-"+pi]||{done:[],ok:[]};ok+=r.ok.length;done+=r.done.length;total+=p.items.length;});
+    const pend=(S.err[b.id]||[]).length;const pct=done?Math.round(ok/done*100):0;
+    const first=STEPS.findIndex(s=>s.box===bi&&s.type==="p");
+    let st= done<total?'не пройдено до конца':pend?'есть ошибки в «Mis errores»':pct<80?'стоит повторить':'отлично';
+    const need=done<total||pend||pct<80; if(need) toRepeat.push([bi,first,st]);
+    h+='<tr><td>'+esc(b.name)+'</td><td>'+(done?ok+' из '+done+' · '+pct+'%':'—')+'</td><td>'+(need?'<button class="btn ghost small" data-step="'+first+'">Повторить</button>':'<span style="color:var(--ok);font-weight:800">✓</span>')+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  const talkDone=TALK.filter((t,ti)=>S.res["talk-"+ti]).length;
+  h+='<p class="ru">Разговор с Доном Вербо: '+talkDone+' из '+TALK.length+' абзацев'+(S.res["talk-f"]?' и финальная фраза.':'.')+'</p>';
+  h+= toRepeat.length ? '<div class="tip">Совет: повтори сначала <b>'+esc(BOXES[toRepeat[0][0]].name)+'</b> — '+toRepeat[0][2]+'. Потом снова пройди разговор: он должен звучать легко.</div>'
+                      : '<div class="titlebadge">¡Eres «'+TITLE[S.g]+'»!<br><span class="meta">Модуль пройден без долгов.</span></div>';
+  h+='<hr class="rule"><span class="kicker">Lo que viene</span>';
+  h+='<p class="quote">— Muy bien. Ya sabes quién eres, dónde estás y qué hay a tu alrededor. Ahora vamos a hablar de lo que haces.</p>';
+  h+='<h3>Модуль 2 · «Мои глаголы»</h3><p>История продолжается на той же кухне. Ты научишься говорить, что делаешь: как из любого глагола сделать форму «я» — <i>hablo, leo, abro</i>, — какие глаголы при этом меняются — <i>pienso, tengo, oigo</i>, — и как рассказать о себе по-разному. В конце — снова разговор с Доном Вербо.</p>';
+  h+=whereHtml(true);
+  h+='<button class="btn green" data-act="resultsdone">Guardar mis resultados ✓</button></section>';
+  return h;
+}
+function talkHtml(st){
+  const key="talk-"+st.hb;
+  if(!C||C.key!==key) C={key,phase:"read",qi:0,shown:false};
+  let h='<section class="card talk">';
+  if(st.hb==="f"){
+    h+='<span class="meta">Hablamos con Don Verbo · Final</span><p class="q">'+TALK_FINAL.q+'</p>';
+    h+='<p class="prompt">Di en voz alta quién eres, dónde estás, qué hay aquí, qué quieres. <b>Con verbos.</b></p><div class="tip">Скажи вслух всю свою фразу из блокнота, потом сравни.</div>';
+    if(!C.shown) h+='<button class="btn green" data-act="tshow">La he dicho</button>';
+    else h+='<div class="answer">'+tap(TALK_FINAL.a,true)+'</div><p class="end" style="font:400 22px var(--display);color:var(--ok);margin:0">¡Hablas!</p><button class="btn green" data-act="nextstep">Mis resultados →</button>';
+    return h+'</section>';
+  }
+  const B=TALK[st.hb];
+  h+='<div class="row between"><span class="meta">Hablamos con Don Verbo · Párrafo '+(st.hb+1)+' de '+TALK.length+'</span><button class="btn ghost small" disabled title="Озвучка появится позже">Audio pronto</button></div>';
+  if(C.phase==="read"){
+    h+='<h2 class="title">'+esc(B.title)+'</h2><div class="chapter"><p>'+tap(B.p,true)+'</p></div>';
+    h+='<div class="tip">Прочитай абзац. Потом Дон Вербо задаст вопросы — отвечай вслух, в ответе всегда глагол.</div>';
+    h+='<button class="btn green" data-act="tq">Lo he leído · Preguntas</button>';
+    return h+'</section>';
+  }
+  const [q,a,t]=B.qs[C.qi];
+  h+='<span class="meta">Pregunta '+(C.qi+1)+' de '+B.qs.length+'</span>';
+  h+='<details><summary>Ver el párrafo</summary><div class="chapter"><p>'+tap(B.p,true)+'</p></div></details>';
+  h+='<p class="q">'+tap(q)+'</p>';
+  if(!C.shown){ h+='<p class="prompt">Responde en voz alta. <b>Con un verbo.</b></p><button class="btn green" data-act="tshow">He respondido</button>'; }
+  else {
+    h+='<div class="answer">'+tap(a,true)+(t?' <span class="t">'+tap(t)+'</span>':'')+'</div>';
+    h+= C.qi<B.qs.length-1 ? '<button class="btn green" data-act="tnext">Siguiente pregunta →</button>' : '<button class="btn green" data-act="nextstep">'+(st.hb<TALK.length-1?'Siguiente párrafo →':'Mi frase final →')+'</button>';
+  }
+  h+='<button class="btn ghost" data-act="tread">Volver a leer el párrafo</button>';
+  return h+'</section>';
+}
+function chapterHtml(){
+  let h='<section class="card theory"><div class="row between"><span class="meta">Capítulo 1 · La cocina de caramelo</span><button class="btn ghost small" disabled title="Озвучка появится позже">Audio pronto</button></div>';
+  h+='<div class="legend"><span><b class="v">soy, estoy, abro</b> — мои формы (yo)</span><span><b class="vo">es, está, eres</b> — другие лица</span><span><b class="g">-a / -o</b> — мой род</span></div>';
+  h+='<div class="chapter">'+CHAPTER.map(p=>'<p>'+tap(p,true)+'</p>').join("")+'</div>';
+  h+='<p class="meta">Нажми на незнакомое слово: увидишь перевод и сможешь добавить его в «Mi diccionario».</p>';
+  h+='<button class="btn gold" data-act="chapterdone">Leído · Empezamos →</button></section>';
+  return h;
+}
+function theoryHtml(st){
+  const b=boxOf(st),t=b.theory;
+  let h='<section class="card theory"><span class="meta">Caja '+(st.box+1)+' · Explicación</span>';
+  h+='<p class="dv">'+tap(t.dv)+'</p><p class="ru">'+t.ru+'</p>';
+  h+='<div class="examples">'+t.ex.map(e=>'<div>'+tap(e)+'</div>').join("")+'</div>';
+  h+='<p class="es">'+tap(t.es)+'</p><div class="tip">'+t.tip+'</div>';
+  h+='<button class="btn gold" data-act="theorydone">Entendido · A practicar →</button></section>';
+  return h;
+}
+function queue(st){
+  const b=boxOf(st);
+  if(st.type==="p") return b.practice[st.pi].items.map((it,i)=>({pi:st.pi,i}));
+  return (S.err[b.id]||[]).map(x=>({pi:x[0],i:x[1]}));
+}
+function practiceHtml(st){
+  const b=boxOf(st);const q=queue(st);
+  let h='<section class="card practice">';
+  if(st.type==="p"){
+    const r=resOf(st.key),items=b.practice[st.pi].items;
+    const idx=items.findIndex((_,i)=>!r.done.includes(i));
+    h+='<div class="row between"><span class="meta">Caja '+(st.box+1)+' · '+b.practice[st.pi].title+'</span><span class="meta">'+r.ok.length+' ✓ · '+r.done.length+' de '+items.length+'</span></div>';
+    h+='<div class="bar"><i style="width:'+Math.round(r.done.length/items.length*100)+'%"></i></div>';
+    if(idx<0 && !(C&&C.key===st.key&&C.checked)){
+      h+='<p class="title">¡Hecho! '+r.ok.length+' de '+items.length+' a la primera.</p>';
+      if(b.practice[st.pi].story) h+='<div class="story" style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:18px"><span class="meta">Tu texto</span><br>'+items.map(x=>tap(x[1])).join(" ")+'</div>';
+      if(b.practice[st.pi].type==="gaptext") h+='<div class="story" style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;font-size:18px"><span class="meta">El texto completo</span><br>'+fillGap(b.practice[st.pi])+'</div>';
+      h+='<div class="row"><button class="btn" data-act="nextstep">Siguiente paso →</button><button class="btn ghost" data-act="redo">Repetir este paso</button></div></section>';
+      return h;
+    }
+    if(!C||C.key!==st.key) newItem(st.key,st.pi,idx,b);
+  } else {
+    h+='<div class="row between"><span class="meta">Caja '+(st.box+1)+' · Mis errores</span><span class="meta">quedan '+q.length+'</span></div>';
+    if(!q.length && !(C&&C.key===st.key&&C.checked)){
+      const pend=b.practice.some((p,pi)=>!stepDone(STEPS.findIndex(x=>x.key===b.id+"-"+pi)));
+      h+='<p class="title">'+(pend?'Aquí aparecen tus errores de esta caja.':'¡Sin errores! Caja terminada.')+'</p>';
+      if(!pend) h+='<div class="seals"><div class="seal on"><span class="stamp">'+(st.box+1)+'</span>Don Verbo pone su sello en tu cuaderno: <b>'+esc(b.name)+'</b></div></div>'+(stats().seals===BOXES.length?'<div class="titlebadge">¡Eres «'+TITLE[S.g]+'»!<br><span class="meta">Todas las cajas de «Ser, estar, hay» tienen sello.</span></div>':'');
+      h+='<p class="meta">Всё, в чём ошибся в практике этой коробки, возвращается сюда, пока не ответишь верно.</p>';
+      h+='<button class="btn" data-act="nextstep">Siguiente paso →</button></section>';return h;
+    }
+    if(!C||C.key!==st.key) newItem(st.key,q[0].pi,q[0].i,b);
+  }
+  const P=b.practice[C.pi], item=P.items[C.i], type=P.type||"tiles";
+  h+='<span class="who">'+esc(P.who)+'</span>';
+  if(type==="choice"){
+    const parts=item[0].split("___");
+    h+='<p class="q">'+tap(parts[0])+'<span class="v">'+(C.checked?(/^¿?___/.test(item[0])?cap(item[1]):item[1]):"_____")+'</span>'+tap(parts[1]||"")+'</p>';
+    if(!C.checked){ h+='<div class="tiles">'+C.opts.map(o=>'<button class="tile" data-pick="'+o+'">'+o+'</button>').join("")+'</div>'; }
+    else { h+=verdict(C.ok,/^¿?___/.test(item[0])?item[0].replace("___",cap(item[1])):item[0].replace("___",item[1])); }
+  } else if(type==="gaptext"){
+    const segs=G(P.text).split("___");
+    let t="";segs.forEach((sg,k)=>{t+=tap(sg);if(k<segs.length-1){
+      let val, cls="v";
+      const startSent = k===0 || /[.?!]\s*$/.test(segs[k]);
+      if(k===C.i) val = C.checked ? (startSent?cap(P.items[k][1]):P.items[k][1]) : "＿＿＿";
+      else if(k<C.i || S.step!==STEPS.findIndex(x=>x.key===b.id+"-"+C.pi)) val = startSent?cap(P.items[k][1]):P.items[k][1];
+      else {val="＿＿＿";cls="meta";}
+      t+='<span class="'+cls+'"'+(k===C.i?' style="background:var(--lilac-soft);border-radius:6px;padding:0 4px"':'')+'>'+val+'</span>';}});
+    h+='<p class="story" style="font-size:19px;line-height:1.8;margin:0">'+t+'</p>';
+    if(!C.checked){ h+='<p class="prompt">Hueco '+(C.i+1)+' de '+P.items.length+'</p><div class="tiles">'+C.opts.map(o=>'<button class="tile" data-pick="'+o+'">'+o+'</button>').join("")+'</div>'; }
+    else { h+='<div class="verdict '+(C.ok?'ok':'bad')+'"><span class="lab">'+(C.ok?'¡Muy bien!':'Aquí va')+'</span><b>'+P.items[C.i][1]+'</b></div>'; }
+  } else if(type==="detect2"){
+    h+='<p class="q">«'+tap(item[0])+'»</p>';
+    if(!C.checked && C.stage===0){ h+='<div class="tiles"><button class="tile" data-det="ok">Está bien</button><button class="tile" data-det="bad">Hay un error</button></div>'; }
+    else if(!C.checked && C.stage===1){ h+='<p class="prompt">¿Cuál es la frase correcta?</p><div class="tiles" style="flex-direction:column;align-items:flex-start">'+C.opts.map((o,k)=>'<button class="tile" data-fix2="'+k+'">'+esc(G(o))+'</button>').join("")+'</div>'; }
+    else { h+=verdict(C.ok,item[1]||item[0],item[1]?null:"La frase está bien."); }
+  } else if(type==="detect"){
+    h+='<p class="q">«'+tap(item[0])+'»</p>';
+    if(!C.checked && C.stage===0){ h+='<div class="tiles"><button class="tile" data-det="ok">Está bien</button><button class="tile" data-det="bad">Hay un error</button></div>'; }
+    else if(!C.checked && C.stage===1){ h+='<p class="prompt">¿Qué verbo es el correcto aquí?</p><div class="tiles">'+C.opts.map(o=>'<button class="tile" data-fix="'+o+'">'+o+'</button>').join("")+'</div>'; }
+    else { h+=verdict(C.ok,item[2],item[1]?null:"La frase está bien."); }
+  } else {
+    if(P.story){ const prev=P.items.slice(0,C.i).map(x=>tap(x[1])).join(" ");
+      h+='<div class="story" style="background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:17px">'+(prev||'<span class="meta">Aquí crece tu texto.</span>')+'</div><p class="prompt">Frase '+(C.i+1)+' de '+P.items.length+'</p>'; }
+    else if(Array.isArray(item[0])) h+='<p class="q">'+C.chips.map(c=>'<span class="tile" style="cursor:default">'+tap(c)+'</span>').join(" · ")+'</p>';
+    else if(item[0]) h+='<p class="q">'+tap(item[0])+'</p>';
+    h+='<div class="built'+(C.built.length?'':' empty')+'" aria-label="Tu respuesta">'+C.built.map((ti,k)=>'<button class="tile" data-un="'+k+'">'+esc(C.tiles[ti])+'</button>').join("")+'</div>';
+    if(!C.checked){
+      h+='<div class="tiles">'+C.tiles.map((w,ti)=>'<button class="tile'+(C.built.includes(ti)?' used':'')+'" data-tile="'+ti+'">'+esc(w)+'</button>').join("")+'</div>';
+      h+='<div class="row"><button class="btn" data-act="check"'+(C.built.length?'':' disabled')+'>Comprobar</button><button class="btn ghost" data-act="clear">Borrar</button></div>';
+    } else { h+=verdict(C.ok,item[1]); }
+  }
+  if(C.checked) h+='<button class="btn" data-act="next">Siguiente →</button>';
+  return h+'</section>';
+}
+function verdict(ok,sentence,extra){
+  return '<div class="verdict '+(ok?'ok':'bad')+'"><span class="lab">'+(ok?'¡Muy bien!':'Así se dice')+'</span>'+(extra?esc(extra)+' ':'')+tap(sentence.charAt(0)==="_"?sentence:sentence)+'</div>';
+}
+function fillGap(P){const segs=G(P.text).split("___");let t="";segs.forEach((sg,k)=>{t+=tap(sg);if(k<segs.length-1){const v=P.items[k][1];const st=k===0||/[.?!]\s*$/.test(sg);t+='<span class="v">'+(st?cap(v):v)+'</span>';}});return t;}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function newItem(key,pi,i,b){
+  const P=b.practice[pi],type=P.type||"tiles",item=P.items[i];
+  C={key,pi,i,built:[],checked:false,ok:false,stage:0};
+  if(type==="choice"||type==="gaptext"){C.opts=P.opts?P.opts.slice():shuffle(["soy","estoy"]);return;}
+  if(type==="detect2"){C.opts=item[1]?shuffle([item[1],item[2]]):[];return;}
+  if(type==="detect"){C.opts=shuffle(["soy","estoy"]);return;}
+  const ans=tokens(item[1]);
+  const lower=ans.map((w,k)=>(k===0&&w!=="Don")?w.toLowerCase():w);
+  const extra=b.distract.filter(d=>!lower.map(x=>x.toLowerCase()).includes(d));
+  C.ans=lower;C.tiles=shuffle(lower.concat(extra));
+  if(Array.isArray(item[0])) C.chips=shuffle(item[0].slice());
+}
+function record(st,b){
+  const errs=S.err[b.id]||(S.err[b.id]=[]);
+  const at=errs.findIndex(x=>x[0]===C.pi&&x[1]===C.i);
+  if(st.type==="p"){const r=resOf(st.key);if(!r.done.includes(C.i)){r.done.push(C.i);if(C.ok)r.ok.push(C.i);}
+    if(!C.ok&&at<0)errs.push([C.pi,C.i]);}
+  else { if(C.ok&&at>=0)errs.splice(at,1); else if(!C.ok&&at>=0){errs.push(errs.splice(at,1)[0]);} }
+}
+
+/* ===== Окна ===== */
+function openLayer(kind){
+  const L=document.getElementById("layer");
+  let h='<div class="overlay" data-close="1"><div class="sheet" role="dialog" aria-modal="true">';
+  if(kind==="chuleta"){
+    h+='<div class="row between"><h2 class="title">Chuleta · ser, estar, hay</h2><button class="btn ghost small" data-close="1">Cerrar</button></div>';
+    h+='<p class="meta">Настоящее время. Вся таблица — для понимания. Отрабатываем пока только «yo» (выделено).</p>';
+    const T=[["yo","soy","estoy"],["tú","eres","estás"],["él / ella / usted","es","está"],["nosotros, nosotras","somos","estamos"],["vosotros, vosotras","sois","estáis"],["ellos / ellas / ustedes","son","están"]];
+    h+='<table><thead><tr><th></th><th>ser</th><th>estar</th></tr></thead><tbody>'+T.map((r,i)=>'<tr class="'+(i===0?'yo':'')+'"><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join("")+'</tbody></table>';
+    h+='<p class="meta">Оба глагола неправильные: формы надо знать наизусть. По-русски оба часто переводятся «быть», поэтому их и путают.</p>';
+    h+='<h3 class="title">SER — кто я и что это</h3><table><tbody>'+
+      [["Кто я: роль, профессия, занятие","Soy estudiante. Soy alumna de Don Verbo."],
+       ["Откуда я, национальность","Soy de otra ciudad. No soy española."],
+       ["Какой я по характеру, мои черты","Soy tímida. Soy curiosa. Soy una persona tranquila."],
+       ["Что это за предмет","Es un cuaderno. Es una tarjeta."],
+       ["Из чего сделано","Todo es de caramelo."],
+       ["Время: час, день, ночь","Es de noche. Son las nueve."]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">ESTAR — где я и как я сейчас</h3><table><tbody>'+
+      [["Где я, где находится знакомый предмет","Estoy en la cocina. El cuaderno está en la mesa."],
+       ["Как я себя чувствую сейчас, моё состояние","Estoy nerviosa. Estoy cansada. Estoy sorprendida."],
+       ["С bien и mal","Estoy bien. No estoy mal."],
+       ["Положение тела","Estoy de pie. Estoy sentada."],
+       ["С кем я сейчас","Estoy sola. Estoy con Don Verbo."]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">Как выбрать</h3><table><tbody>'+
+      [["¿Quién eres? — кто ты?","Soy…"],["¿Cómo eres? — какой ты (характер)?","Soy…"],["¿De dónde eres? — откуда ты?","Soy de…"],["¿Dónde estás? — где ты?","Estoy en…"],["¿Cómo estás? — как ты (сейчас)?","Estoy…"]].map(r=>'<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td></tr>').join("")+'</tbody></table>';
+    h+='<p>Одно предложение — два глагола: <i>Soy tranquila, pero ahora estoy nerviosa.</i> Характер — soy, состояние сейчас — estoy.</p>';
+    h+='<h3 class="title">Частые ошибки</h3><table><tbody>'+
+      [["✗ Soy en la cocina.","✓ Estoy en la cocina. (место)"],["✗ Estoy estudiante.","✓ Soy estudiante. (кто я)"],["✗ Estoy de otra ciudad.","✓ Soy de otra ciudad. (откуда)"],["✗ Soy perdida.","✓ Estoy perdida. (состояние)"]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">Одно слово — разный смысл</h3><p class="meta">Это следующий уровень, но полезно знать уже сейчас.</p><table><tbody>'+
+      [["soy aburrida — я скучная","estoy aburrida — мне скучно"],["soy lista — я умная","estoy lista — я готова"],["soy nerviosa — я нервный человек","estoy nerviosa — я нервничаю сейчас"],["soy mala — я плохая","estoy mala — я болею"]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">HAY — что есть (предмет новый)</h3><p>Одна форма для всего: <i>hay un cuaderno, hay dos sillas, hay agua</i>. Называем предмет впервые — его ещё никто не знает.</p><table><tbody>'+
+      [["hay + un / una","En la mesa hay un cuaderno."],["hay + число","Hay dos sillas."],["hay + mucho / poco","Hay mucho azúcar. No hay mucha luz."],["hay + слово без артикля","Hay agua. Hay gente."],["Отрицание — без артикля","No hay ordenador."],["Вопрос","¿Hay agua en la cocina? ¿Qué hay en la mesa?"]].map(r=>'<tr><td>'+r[0]+'</td><td><i>'+r[1]+'</i></td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">HAY или ESTÁ</h3><table><thead><tr><th>hay — что есть</th><th>está — где это</th></tr></thead><tbody>'+
+      [["предмет новый, неизвестный","предмет знакомый, конкретный"],["un, una, dos, mucho, без артикля","el, la, mi, tu, имя"],["En la mesa hay un cuaderno.","El cuaderno está en la mesa."],["¿Qué hay en la cocina?","¿Dónde está mi ordenador?"],["No hay ordenador.","Mi ordenador no está."]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
+    h+='<p>А сам я — всегда <b>estoy</b>: <i>Estoy delante de la mesa.</i> «Hay» про человека-себя не говорят.</p>';
+    h+='<h3 class="title">Частые ошибки с hay</h3><table><tbody>'+
+      [["✗ Hay el cuaderno en la mesa.","✓ El cuaderno está en la mesa."],["✗ En la mesa está un cuaderno.","✓ En la mesa hay un cuaderno."],["✗ ¿Dónde hay mi ordenador?","✓ ¿Dónde está mi ordenador?"],["✗ No hay mi ordenador.","✓ Mi ordenador no está."],["✗ Hay en la cocina. (о себе)","✓ Estoy en la cocina."]].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</tbody></table>';
+    h+='<h3 class="title">Всё вместе</h3><table><tbody>'+
+      [["soy / es","кто и какой: я, предмет, Дон Вербо","Soy estudiante. La mesa es de caramelo."],["estoy / está","где и как сейчас","Estoy en la cocina. El cuaderno está en la mesa."],["hay","что есть, называем впервые","En la cocina hay una mesa."]].map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td><i>'+r[2]+'</i></td></tr>').join("")+'</tbody></table>';
+    h+='<p class="meta">Род: я выбираю «ella» или «él», и окончание меняется: sola / solo, nerviosa / nervioso.</p>';
+  } else if(kind==="cuaderno"){
+    const X=stats();
+    h+='<div class="row between"><h2 class="title">Mi cuaderno dorado</h2><button class="btn ghost small" data-close="1">Cerrar</button></div>';
+    h+='<p class="meta">Балл — за каждый ответ с первой попытки. Звезда — за пройденный шаг практики. Печать Дона Вербо — за коробку, когда в «Mis errores» пусто.</p>';
+    h+='<div class="stats"><span class="stat">✦ <b>'+X.pts+'</b> puntos</span><span class="stat">★ <b>'+X.stars+'</b> estrellas</span></div>';
+    h+='<div class="seals">'+BOXES.map((b,bi)=>{const on=stepDone(errIndex(bi));return '<div class="seal'+(on?' on':'')+'"><span class="stamp">'+(bi+1)+'</span>'+esc(b.name)+'</div>';}).join("")+'</div>';
+    h+= X.seals===BOXES.length ? '<div class="titlebadge">«'+TITLE[S.g]+'»<br><span class="meta">Título de Don Verbo</span></div>' : '<p class="meta">Собери все '+BOXES.length+' печатей — и Дон Вербо даст тебе звание.</p>';
+  } else {
+    h+='<div class="row between"><h2 class="title">Mi diccionario</h2><button class="btn ghost small" data-close="1">Cerrar</button></div>';
+    if(!S.dict.length) h+='<p class="meta">Пусто. Нажми на любое слово в тренажёре и добавь его сюда.</p>';
+    h+=S.dict.map((d,i)=>'<div class="dict-item"><div><b>'+esc(d.w)+'</b>'+(d.lemma?' ('+esc(d.lemma)+')':'')+' — '+esc(d.ru)+'<small>'+esc(d.ctx)+'</small></div><button class="btn ghost small" data-learned="'+i+'">✓ Aprendida</button></div>').join("");
+  }
+  L.innerHTML=h+'</div></div>';
+}
+function showPop(w,ctx){
+  const d=DICT[w];const L=document.getElementById("layer");
+  const has=S.dict.some(x=>x.w===w);
+  L.innerHTML='<div class="pop" role="dialog"><div class="row between"><span class="word">'+esc(w)+'</span><button class="btn ghost small" data-close="1">✕</button></div>'+
+   '<div>'+esc(d[0])+(d[1]?' <span class="meta">· '+esc(d[1])+'</span>':'')+'</div><div class="meta">'+esc(ctx)+'</div>'+
+   (has?'<span class="meta">Ya está en tu diccionario.</span>':'<button class="btn small" data-add="'+esc(w)+'" data-ctx="'+encodeURIComponent(ctx)+'">+ Mi diccionario</button>')+'</div>';
+}
+
+/* ===== События ===== */
+document.addEventListener("click",e=>{
+  const w=e.target.closest(".w");
+  if(w){showPop(w.dataset.w,decodeURIComponent(w.dataset.ctx));return;}
+  const el=e.target.closest("button,a,.overlay");
+  if(!el) return;
+  if(el.dataset.close){ if(el.classList.contains("overlay")&&e.target!==el) return; document.getElementById("layer").innerHTML="";return;}
+  if(el.dataset.open){openLayer(el.dataset.open);return;}
+  if(el.dataset.add){const d=DICT[el.dataset.add];S.dict.push({w:el.dataset.add,ru:d[0],lemma:d[1],ctx:decodeURIComponent(el.dataset.ctx)});save();document.getElementById("layer").innerHTML="";render();return;}
+  if(el.dataset.learned!==undefined){S.dict.splice(+el.dataset.learned,1);save();openLayer("dict");render();return;}
+  if(el.tagName==="A") return;
+  const st=STEPS[S.step];
+  if(el.dataset.g){S.g=el.dataset.g;C=null;}
+  else if(el.dataset.step!==undefined){S.step=+el.dataset.step;C=null;window.scrollTo({top:0});}
+  else if(el.dataset.tile!==undefined){const t=+el.dataset.tile;if(!C.built.includes(t))C.built.push(t);}
+  else if(el.dataset.un!==undefined){if(!C.checked)C.built.splice(+el.dataset.un,1);}
+  else if(el.dataset.pick){const b=boxOf(st);C.ok=el.dataset.pick===b.practice[C.pi].items[C.i][1];C.checked=true;record(st,b);}
+  else if(el.dataset.det){const b=boxOf(st),it=b.practice[C.pi].items[C.i];
+    if(el.dataset.det==="ok"){C.ok=it[1]===null;C.checked=true;record(st,b);}
+    else{ if(it[1]===null){C.ok=false;C.checked=true;record(st,b);} else C.stage=1; } }
+
+  else if(el.dataset.fix2!==undefined){const b=boxOf(st),it=b.practice[C.pi].items[C.i];C.ok=C.opts[+el.dataset.fix2]===it[1];C.checked=true;record(st,b);}
+  else if(el.dataset.fix){const b=boxOf(st),it=b.practice[C.pi].items[C.i];C.ok=el.dataset.fix===it[1];C.checked=true;record(st,b);}
+  else{
+    const a=el.dataset.act;const b=boxOf(st);
+    if(a==="introdone"){S.res["intro"]=1;S.step=1;C=null;}
+    else if(a==="resultsdone"){S.res["results"]=1;}
+    else if(a==="tq"){C.phase="q";C.qi=0;C.shown=false;}
+    else if(a==="tshow"){C.shown=true; if(st.hb==="f"||C.qi===TALK[st.hb].qs.length-1) S.res["talk-"+st.hb]=1;}
+    else if(a==="tnext"){if(C.qi<TALK[st.hb].qs.length-1)C.qi++;C.shown=false;}
+    else if(a==="tread"){C.phase="read";C.shown=false;}
+    else if(a==="chapterdone"){S.res["chapter"]=1;S.step=2;C=null;}
+    else if(a==="theorydone"){S.res["t-"+st.box]=1;S.step=Math.min(S.step+1,STEPS.length-1);C=null;}
+    else if(a==="clear"){C.built=[];}
+    else if(a==="check"){
+      const got=C.built.map(t=>C.tiles[t].toLowerCase()).join(" ");
+      C.ok=got===C.ans.map(x=>x.toLowerCase()).join(" ");C.checked=true;record(st,b);
+    }
+    else if(a==="next"){C=null;}
+    else if(a==="redo"){S.res[st.key]={done:[],ok:[]};C=null;}
+    else if(a==="prev"){S.step=Math.max(S.step-1,0);C=null;window.scrollTo({top:0});}
+    else if(a==="nextstep"){S.step=Math.min(S.step+1,STEPS.length-1);C=null;window.scrollTo({top:0});}
+  }
+  save();render();
+});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("w")){e.preventDefault();e.target.click();}});
+render();
+</script>
+</body>
+</html>
