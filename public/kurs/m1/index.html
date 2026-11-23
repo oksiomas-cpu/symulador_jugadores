@@ -188,6 +188,12 @@ tr.yo td{background:var(--theory-soft);font-weight:800}
 .dict-item small{color:var(--muted);display:block}
 @media (max-width:420px){h1{font-size:25px}.q{font-size:22px}.examples{font-size:18px}}
 .hint{font-size:17px;background:#fff7df;border:1px dashed var(--theory);border-radius:10px;padding:6px 12px;align-self:flex-start}
+.pl{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 8px 4px 4px}
+.pl-btn{border:0;background:var(--talk);color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:13px;line-height:1}
+.pl-bar{width:90px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;cursor:pointer;display:inline-block}
+.pl-bar i{display:block;height:100%;width:0;background:var(--talk)}
+.pl-r{border:0;background:transparent;color:var(--muted);font:700 12px var(--body);padding:4px 6px;border-radius:999px;cursor:pointer}
+.pl-r[aria-pressed="true"]{background:var(--lilac-soft);color:var(--ink)}
 </style>
 </head>
 <body>
@@ -462,11 +468,15 @@ const TALK = [
 const TALK_FINAL = {q:"Ahora, tu frase en el cuaderno.",
   a:"Soy estudiante de español. Estoy en la cocina de Don Verbo. Aquí hay un cuaderno. Tengo miedo, pero quiero hablar. Y puedo. Empiezo hoy."};
 
-/* Озвучка Оксаны: кусочки в /kurs/m1/audio/ (full, p1–p6, q1_1/a1_1…, fq/fa) */
-const AUD="/kurs/m1/audio/";let PL=null;
-function stopA(){try{if(PL){PL.pause();PL=null;}}catch(e){}}
-function playA(k){try{stopA();PL=new Audio(AUD+k+".mp3");PL.play().catch(function(){});}catch(e){}}
-function abtn(k){return '<button class="btn ghost small" data-play="'+k+'">▶ Escuchar</button>';}
+/* Озвучка Оксаны: кусочки в /kurs/m1/audio/ (full, p1–p6, q1_1/a1_1…, fq/fa). Плеер: пауза, полоса, скорость. */
+const AUD="/kurs/m1/audio/";let PL=null,PLK=null,RATE=1;
+try{RATE=+localStorage.getItem("kv_rate")||1;}catch(e){}
+function syncPl(){document.querySelectorAll(".pl").forEach(function(el){var k=el.dataset.k,on=PL&&PLK===k,playing=on&&!PL.paused&&!PL.ended;el.querySelector(".pl-btn").textContent=playing?"⏸":"▶";var d=on&&PL.duration?PL.duration:0;el.querySelector(".pl-bar i").style.width=(d?Math.min(100,PL.currentTime/d*100):0)+"%";el.querySelectorAll("[data-rate]").forEach(function(x){x.setAttribute("aria-pressed",String(+x.dataset.rate===RATE));});});}
+function stopA(){try{if(PL)PL.pause();}catch(e){}PL=null;PLK=null;syncPl();}
+function playA(k){try{if(PL)PL.pause();PL=new Audio(AUD+k+".mp3");PLK=k;PL.playbackRate=RATE;["timeupdate","ended","pause","play","loadedmetadata"].forEach(function(ev){PL.addEventListener(ev,syncPl);});PL.play().catch(function(){});}catch(e){}syncPl();}
+function toggleA(k){if(PL&&PLK===k){if(PL.paused||PL.ended)PL.play().catch(function(){});else PL.pause();syncPl();}else playA(k);}
+function setRate(r){RATE=r;try{localStorage.setItem("kv_rate",r);}catch(e){}if(PL)PL.playbackRate=r;syncPl();}
+function abtn(k){return '<span class="pl" data-k="'+k+'"><button class="pl-btn" data-tog="'+k+'" aria-label="Escuchar / pausa">▶</button><span class="pl-bar" data-seek="'+k+'" title="Перемотать"><i></i></span>'+[0.75,1,1.25].map(function(r){return '<button class="pl-r" data-rate="'+r+'">'+r+'×</button>';}).join("")+'</span>';}
 const TALK_URL = "https://claude.ai/artifact/67kdAVjyHTM9yH8iZ8ZTei";
 
 /* Словарь главы: слово → [перевод, словарная форма] */
@@ -576,7 +586,7 @@ function render(){
   const st=STEPS[S.step];
   h+= st.type==="i"?introHtml(): st.type==="r"?resultsHtml(): st.type==="x"?chapterHtml(): st.type==="h"?talkHtml(st): st.type==="t"?theoryHtml(st): practiceHtml(st);
   h+=navHtml();
-  app.innerHTML=h; window.scrollTo(0,_y);
+  app.innerHTML=h; window.scrollTo(0,_y); syncPl();
   try{const nav=app.querySelector(".stepper"),a=nav&&nav.querySelector(".node.active");
     if(a) nav.scrollLeft=Math.max(0,a.offsetLeft-nav.clientWidth/2+a.clientWidth/2);}catch(e){}
 }
@@ -858,6 +868,7 @@ function showPop(w,ctx){
 
 /* ===== События ===== */
 document.addEventListener("click",e=>{
+  const sk=e.target.closest(".pl-bar"); if(sk){ if(PL&&PLK===sk.dataset.seek&&PL.duration){const r=sk.getBoundingClientRect();PL.currentTime=PL.duration*Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));syncPl();} return; }
   const w=e.target.closest(".w");
   if(w){showPop(w.dataset.w,decodeURIComponent(w.dataset.ctx));return;}
   const el=e.target.closest("button,a,.overlay");
@@ -866,7 +877,8 @@ document.addEventListener("click",e=>{
   if(el.dataset.open){openLayer(el.dataset.open);return;}
   if(el.dataset.add){const d=DICT[el.dataset.add];S.dict.push({w:el.dataset.add,ru:d[0],lemma:d[1],ctx:decodeURIComponent(el.dataset.ctx)});save();document.getElementById("layer").innerHTML="";render();return;}
   if(el.dataset.learned!==undefined){S.dict.splice(+el.dataset.learned,1);save();openLayer("dict");render();return;}
-  if(el.dataset.play){playA(el.dataset.play);return;}
+  if(el.dataset.tog){toggleA(el.dataset.tog);return;}
+  if(el.dataset.rate){setRate(+el.dataset.rate);return;}
   if(el.tagName==="A") return;
   const st=STEPS[S.step];
   if(el.dataset.g){S.g=el.dataset.g;C=null;}
