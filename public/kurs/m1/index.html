@@ -187,6 +187,7 @@ tr.yo td{background:var(--theory-soft);font-weight:800}
 .dict-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding:8px 0}
 .dict-item small{color:var(--muted);display:block}
 @media (max-width:420px){h1{font-size:25px}.q{font-size:22px}.examples{font-size:18px}}
+.hint{font-size:17px;background:#fff7df;border:1px dashed var(--theory);border-radius:10px;padding:6px 12px;align-self:flex-start}
 </style>
 </head>
 <body>
@@ -197,59 +198,59 @@ tr.yo td{background:var(--theory-soft);font-weight:800}
 const BOXES = [
  {id:"ser", name:"SER · quién soy", distract:["estoy","eres"],
   theory:{dv:"— ¿Quién eres? — pregunta Don Verbo.",
-    ru:"<b class=\"v\">Soy</b> — это кто я: моя роль, мой характер, откуда я.",
+    ru:"<b class=\"v\">Soy</b> — «я есть»: кто я, какой я по характеру, откуда я.",
     ex:["Soy estudiante.","Soy nuev{a|o}.","Soy tímid{a|o}."],
-    es:"Con «soy» digo quién soy por dentro.",
-    tip:"Дон Вербо спрашивает «¿Eres…?» — это «ты». Ты отвечаешь «Soy…» — это «я»."},
+    es:"Con «soy» digo quién soy.",
+    tip:"Дон Вербо спрашивает: <i>¿Eres…?</i> («ты…?»). Ты отвечаешь: <i>Soy…</i> («я…»). Если ответ «нет», в испанском два «no»: <i>No, no soy…</i>"},
   practice:[
-   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
-    ["¿Eres estudiante de español?","Sí, soy estudiante de español."],
-    ["¿Eres profesor{a|}?","No, no soy profesor{a|}."],
-    ["¿Eres nuev{a|o} aquí?","Sí, soy nuev{a|o} aquí."],
-    ["¿Eres tímid{a|o}?","Sí, soy un poco tímid{a|o}."],
-    ["¿Eres valiente?","No, no soy muy valiente."],
-    ["¿Eres curios{a|o}?","Sí, soy curios{a|o}."],
-    ["¿Eres alumn{a|o} de Don Verbo?","Sí, soy alumn{a|o} de Don Verbo."],
-    ["¿Eres español{a|}?","No, no soy español{a|}."]]},
-   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", items:[
-    ["Eres profesor{a|}, ¿verdad?","No, no soy profesor{a|}. Soy estudiante."],
-    ["Eres muy valiente, ¿verdad?","No, no soy valiente. Soy tímid{a|o}."],
-    ["Eres de aquí, ¿verdad?","No, no soy de aquí. Soy de otra ciudad."],
-    ["Eres expert{a|o} en español, ¿verdad?","No, no soy expert{a|o}. Soy principiante."],
-    ["Eres mud{a|o}, ¿verdad?","No, no soy mud{a|o}. Soy callad{a|o}."],
-    ["Eres aburrid{a|o}, ¿verdad?","No, no soy aburrid{a|o}. Soy curios{a|o}."],
-    ["Eres {la dueña|el dueño} de la cocina, ¿verdad?","No, no soy {la dueña|el dueño}. Soy invitad{a|o}."],
-    ["Eres un verbo, ¿verdad?","No, no soy un verbo. Soy una persona."]]}
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", note:"Ответь про себя: <i>Sí, soy…</i> или <i>No, no soy…</i> Верно и то, и другое.", items:[
+    ["¿Eres estudiante de español?",["Sí, soy estudiante de español.","No, no soy estudiante de español."]],
+    ["¿Eres profesor{a|}?",["Sí, soy profesor{a|}.","No, no soy profesor{a|}."]],
+    ["¿Eres nuev{a|o} aquí?",["Sí, soy nuev{a|o} aquí.","No, no soy nuev{a|o} aquí."]],
+    ["¿Eres tímid{a|o}?",["Sí, soy tímid{a|o}.","No, no soy tímid{a|o}."]],
+    ["¿Eres valiente?",["Sí, soy valiente.","No, no soy valiente."]],
+    ["¿Eres curios{a|o}?",["Sí, soy curios{a|o}.","No, no soy curios{a|o}."]],
+    ["¿Eres alumn{a|o} de Don Verbo?",["Sí, soy alumn{a|o} de Don Verbo.","No, no soy alumn{a|o} de Don Verbo."]],
+    ["¿Eres español{a|}?",["Sí, soy español{a|}.","No, no soy español{a|}."]]]},
+   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", note:"Дон Вербо ошибся. Скажи «нет» и поправь его: правильное слово — в подсказке ✔.", items:[
+    ["Eres profesor{a|}, ¿verdad?","No, no soy profesor{a|}. Soy estudiante.","✔ estudiante"],
+    ["Eres muy valiente, ¿verdad?","No, no soy valiente. Soy tímid{a|o}.","✔ tímid{a|o}"],
+    ["Eres de aquí, ¿verdad?","No, no soy de aquí. Soy de otra ciudad.","✔ de otra ciudad"],
+    ["Eres expert{a|o} en español, ¿verdad?","No, no soy expert{a|o}. Soy principiante.","✔ principiante"],
+    ["Eres mud{a|o}, ¿verdad?","No, no soy mud{a|o}. Soy callad{a|o}.","✔ callad{a|o}"],
+    ["Eres aburrid{a|o}, ¿verdad?","No, no soy aburrid{a|o}. Soy curios{a|o}.","✔ curios{a|o}"],
+    ["Eres {la dueña|el dueño} de la cocina, ¿verdad?","No, no soy {la dueña|el dueño}. Soy invitad{a|o}.","✔ invitad{a|o}"],
+    ["Eres un verbo, ¿verdad?","No, no soy un verbo. Soy una persona.","✔ una persona"]]}
   ]},
  {id:"estar", name:"ESTAR · dónde y cómo estoy", distract:["soy","estás"],
   theory:{dv:"— ¿Dónde estás? ¿Cómo estás? — pregunta Don Verbo.",
-    ru:"<b class=\"v\">Estoy</b> — где я и как я сейчас: место и состояние.",
+    ru:"<b class=\"v\">Estoy</b> — где я сейчас и как я себя сейчас чувствую.",
     ex:["Estoy en la cocina.","Estoy sol{a|o}.","Estoy nervios{a|o}."],
     es:"Con «estoy» digo dónde estoy y cómo me siento ahora.",
-    tip:"Дон Вербо спрашивает «¿Estás…?» — это «ты». Ты отвечаешь «Estoy…» — это «я»."},
+    tip:"Дон Вербо спрашивает: <i>¿Estás…?</i> («ты…?»). Ты отвечаешь: <i>Estoy…</i> («я…»). «Нет» — снова два «no»: <i>No, no estoy…</i>"},
   practice:[
-   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
-    ["¿Estás en el salón?","No, no estoy en el salón."],
-    ["¿Estás en la cocina?","Sí, estoy en la cocina."],
-    ["¿Estás sol{a|o} en casa?","Sí, estoy sol{a|o} en casa."],
-    ["¿Estás nervios{a|o}?","Sí, estoy un poco nervios{a|o}."],
-    ["¿Estás cansad{a|o}?","Sí, estoy cansad{a|o}."],
-    ["¿Estás en el Reino del Caramelo?","Sí, estoy en el Reino del Caramelo."],
-    ["¿Estás perdid{a|o}?","Sí, estoy un poco perdid{a|o}."],
-    ["¿Estás list{a|o} para hablar?","Sí, estoy list{a|o}."]]},
-   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", items:[
-    ["Estás en el baño, ¿verdad?","No, no estoy en el baño. Estoy en la cocina."],
-    ["Estás aburrid{a|o}, ¿verdad?","No, no estoy aburrid{a|o}. Estoy sorprendid{a|o}."],
-    ["Estás muy tranquil{a|o}, ¿verdad?","No, no estoy tranquil{a|o}. Estoy nervios{a|o}."],
-    ["Estás dormid{a|o}, ¿verdad?","No, no estoy dormid{a|o}. Estoy despiert{a|o}."],
-    ["Estás enfadad{a|o}, ¿verdad?","No, no estoy enfadad{a|o}. Estoy asustad{a|o}."],
-    ["Estás lejos de la mesa, ¿verdad?","No, no estoy lejos. Estoy cerca de la mesa."],
-    ["Estás sentad{a|o}, ¿verdad?","No, no estoy sentad{a|o}. Estoy de pie."],
-    ["Estás triste, ¿verdad?","No, no estoy triste. Estoy emocionad{a|o}."]]}
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", note:"Ответь про себя: <i>Sí, estoy…</i> или <i>No, no estoy…</i> Верно и то, и другое.", items:[
+    ["¿Estás en el salón?",["Sí, estoy en el salón.","No, no estoy en el salón."]],
+    ["¿Estás en la cocina?",["Sí, estoy en la cocina.","No, no estoy en la cocina."]],
+    ["¿Estás sol{a|o} en casa?",["Sí, estoy sol{a|o} en casa.","No, no estoy sol{a|o} en casa."]],
+    ["¿Estás nervios{a|o}?",["Sí, estoy nervios{a|o}.","No, no estoy nervios{a|o}."]],
+    ["¿Estás cansad{a|o}?",["Sí, estoy cansad{a|o}.","No, no estoy cansad{a|o}."]],
+    ["¿Estás en el Reino del Caramelo?",["Sí, estoy en el Reino del Caramelo.","No, no estoy en el Reino del Caramelo."]],
+    ["¿Estás perdid{a|o}?",["Sí, estoy perdid{a|o}.","No, no estoy perdid{a|o}."]],
+    ["¿Estás list{a|o} para hablar?",["Sí, estoy list{a|o} para hablar.","No, no estoy list{a|o} para hablar."]]]},
+   {title:"Corrige a Don Verbo", who:"Don Verbo se equivoca", note:"Дон Вербо ошибся. Скажи «нет» и поправь его: правильное слово — в подсказке ✔.", items:[
+    ["Estás en el baño, ¿verdad?","No, no estoy en el baño. Estoy en la cocina.","✔ en la cocina"],
+    ["Estás aburrid{a|o}, ¿verdad?","No, no estoy aburrid{a|o}. Estoy sorprendid{a|o}.","✔ sorprendid{a|o}"],
+    ["Estás muy tranquil{a|o}, ¿verdad?","No, no estoy tranquil{a|o}. Estoy nervios{a|o}.","✔ nervios{a|o}"],
+    ["Estás dormid{a|o}, ¿verdad?","No, no estoy dormid{a|o}. Estoy despiert{a|o}.","✔ despiert{a|o}"],
+    ["Estás enfadad{a|o}, ¿verdad?","No, no estoy enfadad{a|o}. Estoy asustad{a|o}.","✔ asustad{a|o}"],
+    ["Estás lejos de la mesa, ¿verdad?","No, no estoy lejos. Estoy cerca de la mesa.","✔ cerca de la mesa"],
+    ["Estás sentad{a|o}, ¿verdad?","No, no estoy sentad{a|o}. Estoy de pie.","✔ de pie"],
+    ["Estás triste, ¿verdad?","No, no estoy triste. Estoy emocionad{a|o}.","✔ emocionad{a|o}"]]}
   ]},
  {id:"serestar", name:"✖ SER + ESTAR", distract:["es","está"],
   theory:{dv:"— Soy y estoy: dos verbos, dos preguntas — dice Don Verbo.",
-    ru:"<b class=\"v\">Soy</b> — кто я: роль, характер, откуда я. <b class=\"v\">Estoy</b> — где я и как я сейчас.",
+    ru:"<b class=\"v\">Soy</b> — кто я и какой я. <b class=\"v\">Estoy</b> — где я сейчас и как я себя сейчас чувствую.",
     ex:["Soy tranquil{a|o}, pero ahora estoy nervios{a|o}.","Soy de otra ciudad, pero estoy en el Reino del Caramelo."],
     es:"¿Quién soy? → soy. ¿Dónde estoy? ¿Cómo estoy ahora? → estoy.",
     tip:"Проверь себя вопросом. «Это про то, кто я?» → soy. «Где я или как я себя чувствую сейчас?» → estoy. Подробно — в Chuleta."},
@@ -267,7 +268,7 @@ const BOXES = [
     ["___ curios{a|o}.","soy"],
     ["___ un poco perdid{a|o}.","estoy"],
     ["___ principiante.","soy"]]},
-   {title:"Soy así, pero ahora…", type:"tiles", who:"Don Verbo: ¿Cómo eres? ¿Y cómo estás ahora?", items:[
+   {title:"Soy así, pero ahora…", type:"tiles", note:"Две подсказки: первая — какой я (soy), вторая — как я сейчас (estoy). Собери одну фразу.", who:"Don Verbo: ¿Cómo eres? ¿Y cómo estás ahora?", items:[
     [["tranquil{a|o}","nervios{a|o}"],"Soy tranquil{a|o}, pero ahora estoy nervios{a|o}."],
     [["alegre","asustad{a|o}"],"Soy alegre, pero ahora estoy asustad{a|o}."],
     [["de otra ciudad","en el Reino del Caramelo"],"Soy de otra ciudad, pero ahora estoy en el Reino del Caramelo."],
@@ -301,24 +302,24 @@ const BOXES = [
     es:"Después de «hay»: un, una, dos, mucho… — pero no el, la, mi.",
     tip:"Отрицание без артикля: <i>no hay ordenador</i>. Вопрос: <i>¿Hay agua?</i>"},
   practice:[
-   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", items:[
-    ["¿Qué hay en la mesa?","En la mesa hay un cuaderno dorado."],
-    ["¿Hay sillas en la cocina?","Sí, hay dos sillas."],
-    ["¿Hay un ordenador en la mesa?","No, no hay ordenador."],
-    ["¿Qué hay en la pared?","En la pared hay un reloj de caramelo."],
-    ["¿Qué hay al lado del cuaderno?","Al lado del cuaderno hay una tarjeta."],
-    ["¿Hay mucha luz?","No, no hay mucha luz: es de noche."],
-    ["¿Hay gente en la cocina?","No, no hay gente."],
-    ["¿Hay un problema?","Sí, hay un problema: tengo miedo."]]},
-   {title:"Mi texto: mi cocina de caramelo", type:"tiles", story:true, who:"Escribe tu texto, frase a frase", items:[
-    ["","En mi cocina hay una mesa grande."],
-    ["","En la mesa hay un cuaderno dorado."],
-    ["","Al lado del cuaderno hay una tarjeta."],
-    ["","Hay dos sillas de caramelo."],
-    ["","No hay ordenador."],
-    ["","Hay mucho azúcar en el suelo."],
-    ["","Hay un olor dulce."],
-    ["","Y hay una voz detrás de mí."]]}
+   {title:"Responde a Don Verbo", who:"Don Verbo pregunta", note:"Отвечай по главе: что там есть — в подсказке 📖.", items:[
+    ["¿Qué hay en la mesa?","En la mesa hay un cuaderno dorado.","📖 un cuaderno dorado"],
+    ["¿Qué hay en la cocina?","En la cocina hay una mesa.","📖 una mesa"],
+    ["¿Hay sillas en la cocina?","Sí, hay sillas en la cocina.","📖 sí: la mesa, las sillas, la ventana"],
+    ["¿Hay un ordenador en la mesa?","No, no hay ordenador en la mesa.","📖 no: mi ordenador no está"],
+    ["¿Qué hay en la mesa ahora?","En la mesa hay una tarjeta.","📖 una tarjeta: «hablar»"],
+    ["¿Hay mucha luz?","No, no hay mucha luz.","📖 no: es de noche"],
+    ["¿Hay agua en la mesa?","No, no hay agua en la mesa.","📖 no"],
+    ["¿Hay un problema?","Sí, hay un problema.","📖 sí: tengo miedo de hablar"]]},
+   {title:"Mi texto: mi cocina de caramelo", type:"tiles", story:true, who:"Escribe tu texto, frase a frase", note:"Собери фразу по подсказке на русском.", items:[
+    ["На моей кухне есть большой стол.","En mi cocina hay una mesa grande."],
+    ["На столе есть золотой блокнот.","En la mesa hay un cuaderno dorado."],
+    ["Рядом с блокнотом есть карточка.","Al lado del cuaderno hay una tarjeta."],
+    ["Есть два карамельных стула.","Hay dos sillas de caramelo."],
+    ["Компьютера нет.","No hay ordenador."],
+    ["На полу много сахара.","Hay mucho azúcar en el suelo."],
+    ["Здесь сладкий запах.","Hay un olor dulce."],
+    ["И за моей спиной есть голос.","Y hay una voz detrás de mí."]]}
   ]},
  {id:"estarhay", name:"✖ ESTAR + HAY", distract:[],
   theory:{dv:"— ¿Qué hay? ¿Dónde está? — pregunta Don Verbo.",
@@ -330,12 +331,12 @@ const BOXES = [
    {title:"¿Hay, está o estoy?", type:"choice", opts:["hay","está","estoy"], who:"Elige", items:[
     ["En la mesa ___ un cuaderno.","hay"],
     ["El cuaderno ___ en la mesa.","está"],
-    ["___ en la cocina de Don Verbo.","estoy"],
+    ["Yo ___ en la cocina de Don Verbo.","estoy"],
     ["¿Dónde ___ mi ordenador?","está"],
     ["En la cocina ___ dos sillas.","hay"],
     ["La tarjeta ___ al lado del cuaderno.","está"],
     ["No ___ ordenador en la mesa.","hay"],
-    ["___ delante de la ventana.","estoy"],
+    ["Yo ___ delante de la ventana.","estoy"],
     ["Mi ordenador no ___ aquí.","está"],
     ["¿___ agua en la cocina?","hay"],
     ["Don Verbo ___ detrás de mí.","está"],
@@ -365,20 +366,20 @@ const BOXES = [
     tip:"«Es» и «está» — это про предметы и про Дона Вербо, «soy» и «estoy» — про меня. Вся схема — в Chuleta."},
   practice:[
    {title:"¿Soy, estoy, es, está o hay?", type:"choice", opts:["soy","estoy","es","está","hay"], who:"Elige", items:[
-    ["___ estudiante de español.","soy"],
+    ["Yo ___ estudiante de español.","soy"],
     ["En la cocina ___ una mesa grande.","hay"],
-    ["Ahora ___ un poco nervios{a|o}.","estoy"],
+    ["Ahora yo ___ un poco nervios{a|o}.","estoy"],
     ["El cuaderno ___ en la mesa.","está"],
-    ["___ de otra ciudad.","soy"],
+    ["Yo ___ de otra ciudad.","soy"],
     ["No ___ ordenador.","hay"],
     ["Don Verbo ___ delante de mí.","está"],
     ["Todo ___ de caramelo.","es"],
-    ["___ una persona curiosa.","soy"],
+    ["Yo ___ una persona curiosa.","soy"],
     ["¿Qué ___ en la tarjeta?","hay"],
-    ["___ delante de la ventana.","estoy"],
+    ["Yo ___ delante de la ventana.","estoy"],
     ["La mesa ___ grande.","es"]]},
    {title:"Texto: mi diario, la primera noche", type:"gaptext", opts:["soy","estoy","es","está","hay"], who:"Completa el texto",
-    text:"Esta noche ___ en el Reino del Caramelo. ___ estudiante de español y aquí ___ nuev{a|o}. En mi cocina ___ una mesa grande. La mesa ___ de caramelo. Mi cuaderno dorado ___ en la mesa, pero mi ordenador no ___. No ___ ordenador, pero ___ una tarjeta con un verbo. ___ un poco nervios{a|o}, pero no ___ sol{a|o}: Don Verbo ___ conmigo.",
+    text:"Esta noche yo ___ en el Reino del Caramelo. ___ estudiante de español y aquí ___ nuev{a|o}. En mi cocina ___ una mesa grande. La mesa ___ de caramelo. Mi cuaderno dorado ___ en la mesa, pero mi ordenador no ___. No ___ ordenador, pero ___ una tarjeta con un verbo. ___ un poco nervios{a|o}, pero no ___ sol{a|o}: Don Verbo ___ conmigo.",
     items:[["","estoy"],["","soy"],["","soy"],["","hay"],["","es"],["","está"],["","está"],["","hay"],["","hay"],["","estoy"],["","estoy"],["","está"]]},
    {title:"Detective: mi diario", type:"detect2", who:"¿Está bien esta frase?", items:[
     ["Hay estudiante de español.","Soy estudiante de español.","Estoy estudiante de español."],
@@ -522,7 +523,7 @@ const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").r
 function G(s){return s.replace(/\{([^|}]*)\|([^}]*)\}/g,(m,f,ma)=>S.g==="f"?f:ma);}
 function gmark(s){return s.replace(/\{([^|}]*)\|([^}]*)\}/g,(m,f,ma)=>{const x=S.g==="f"?f:ma;return x?x.split(" ").map(w=>"\u0001"+w+"\u0002").join(" "):"";});}
 const strip=w=>w.replace(/[.,:;!¡¿?«»—…]/g,"");
-function tokens(a){return G(a).split(/\s+/).map(strip).filter(Boolean);}
+function tokens(a){return G(a).split(/\s+/).filter(Boolean);}
 /* текст с нажимаемыми словами; род выделен, soy/estoy выделены */
 function tap(s,verbs){
   const ctx=encodeURIComponent(G(s));
@@ -565,7 +566,7 @@ function stats(){
 /* ===== Отрисовка ===== */
 function render(){
   const app=document.getElementById("app");
-  let h='<header><div class="eyebrow">Planta «Yo» · Habitación 1 · Presente</div><h1>Ser, estar, hay</h1>'+
+  let h='<header><div class="eyebrow">Curso de verbos · Módulo 1</div><h1>Ser, estar, hay</h1>'+
     '<p class="sub">Capítulo 1: la cocina de caramelo</p></header>';
   h+='<div class="row between"><div class="seg" role="group" aria-label="Soy"><button data-g="f" aria-pressed="'+(S.g==="f")+'">Soy ella</button><button data-g="m" aria-pressed="'+(S.g==="m")+'">Soy él</button></div>'+
      '<div class="row"><button class="btn ghost small" data-open="chuleta">Chuleta</button><button class="btn ghost small" data-open="dict">Mi diccionario ('+S.dict.length+')</button></div></div>';
@@ -598,7 +599,7 @@ function counts(){
   return {boxes:BOXES.length,pr,ex,tq,steps:STEPS.length};
 }
 function whereHtml(done){
-  return '<div class="where"><span>Planta «Yo»</span><span>›</span><span>Habitación 1 · Presente</span><span>›</span><b>Módulo 1 de 2 · Ser, estar, hay'+(done?' ✓':'')+'</b><span>›</span><span class="meta">Módulo 2 · Mis verbos: -ar, -er, -ir</span></div>';
+  return '<div class="where"><span>Curso de verbos</span><span>›</span><b>Módulo 1 de 2 · Ser, estar, hay'+(done?' ✓':'')+'</b><span>›</span><span class="meta">Módulo 2 · Mis verbos: -ar, -er, -ir</span></div>';
 }
 function introHtml(){
   const K=counts();
@@ -728,6 +729,7 @@ function practiceHtml(st){
   }
   const P=b.practice[C.pi], item=P.items[C.i], type=P.type||"tiles";
   h+='<span class="who">'+esc(P.who)+'</span>';
+  if(P.note) h+='<div class="tip">'+P.note+'</div>';
   if(type==="choice"){
     const parts=item[0].split("___");
     h+='<p class="q">'+tap(parts[0])+'<span class="v">'+(C.checked?(/^¿?___/.test(item[0])?cap(item[1]):item[1]):"_____")+'</span>'+tap(parts[1]||"")+'</p>';
@@ -757,14 +759,15 @@ function practiceHtml(st){
     else { h+=verdict(C.ok,item[2],item[1]?null:"La frase está bien."); }
   } else {
     if(P.story){ const prev=P.items.slice(0,C.i).map(x=>tap(x[1])).join(" ");
-      h+='<div class="story" style="background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:17px">'+(prev||'<span class="meta">Aquí crece tu texto.</span>')+'</div><p class="prompt">Frase '+(C.i+1)+' de '+P.items.length+'</p>'; }
+      h+='<div class="story" style="background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:17px">'+(prev||'<span class="meta">Aquí crece tu texto.</span>')+'</div><p class="prompt">Frase '+(C.i+1)+' de '+P.items.length+'</p>'+(item[0]?'<p class="q" style="font-size:21px">'+esc(item[0])+'</p>':''); }
     else if(Array.isArray(item[0])) h+='<p class="q">'+C.chips.map(c=>'<span class="tile" style="cursor:default">'+tap(c)+'</span>').join(" · ")+'</p>';
     else if(item[0]) h+='<p class="q">'+tap(item[0])+'</p>';
+    if(item[2]&&!P.story) h+='<div class="hint">'+tap(item[2])+'</div>';
     h+='<div class="built'+(C.built.length?'':' empty')+'" aria-label="Tu respuesta">'+C.built.map((ti,k)=>'<button class="tile" data-un="'+k+'">'+esc(C.tiles[ti])+'</button>').join("")+'</div>';
     if(!C.checked){
       h+='<div class="tiles">'+C.tiles.map((w,ti)=>'<button class="tile'+(C.built.includes(ti)?' used':'')+'" data-tile="'+ti+'">'+esc(w)+'</button>').join("")+'</div>';
       h+='<div class="row"><button class="btn" data-act="check"'+(C.built.length?'':' disabled')+'>Comprobar</button><button class="btn ghost" data-act="clear">Borrar</button></div>';
-    } else { h+=verdict(C.ok,item[1]); }
+    } else { h+=verdict(C.ok,Array.isArray(item[1])?(C.ok?item[1][C.match]:item[1].join("  ·  ")):item[1]); }
   }
   if(C.checked) h+='<button class="btn" data-act="next">Siguiente →</button>';
   return h+'</section>';
@@ -780,10 +783,11 @@ function newItem(key,pi,i,b){
   if(type==="choice"||type==="gaptext"){C.opts=P.opts?P.opts.slice():shuffle(["soy","estoy"]);return;}
   if(type==="detect2"){C.opts=item[1]?shuffle([item[1],item[2]]):[];return;}
   if(type==="detect"){C.opts=shuffle(["soy","estoy"]);return;}
-  const ans=tokens(item[1]);
-  const lower=ans.map((w,k)=>(k===0&&w!=="Don")?w.toLowerCase():w);
-  const extra=b.distract.filter(d=>!lower.map(x=>x.toLowerCase()).includes(d));
-  C.ans=lower;C.tiles=shuffle(lower.concat(extra));
+  const V=(Array.isArray(item[1])?item[1]:[item[1]]).map(tokens);
+  const pool=[];V.forEach(v=>{const cnt={};v.forEach(w=>{cnt[w]=(cnt[w]||0)+1;});Object.keys(cnt).forEach(w=>{const have=pool.filter(x=>x===w).length;for(let k=have;k<cnt[w];k++)pool.push(w);});});
+  const low=pool.map(x=>x.toLowerCase().replace(/[.,:;!¡¿?«»]/g,""));
+  const extra=b.distract.filter(d=>!low.includes(d));
+  C.ans=V;C.tiles=shuffle(pool.concat(extra));
   if(Array.isArray(item[0])) C.chips=shuffle(item[0].slice());
 }
 function record(st,b){
@@ -892,8 +896,8 @@ document.addEventListener("click",e=>{
     else if(a==="theorydone"){S.res["t-"+st.box]=1;S.step=Math.min(S.step+1,STEPS.length-1);C=null;}
     else if(a==="clear"){C.built=[];}
     else if(a==="check"){
-      const got=C.built.map(t=>C.tiles[t].toLowerCase()).join(" ");
-      C.ok=got===C.ans.map(x=>x.toLowerCase()).join(" ");C.checked=true;record(st,b);
+      const got=C.built.map(t=>C.tiles[t]).join(" ");
+      C.match=C.ans.findIndex(v=>v.join(" ")===got);C.ok=C.match>=0;C.checked=true;record(st,b);
     }
     else if(a==="next"){C=null;}
     else if(a==="redo"){S.res[st.key]={done:[],ok:[]};C=null;}
