@@ -586,8 +586,9 @@ function CapituloRuso() {
 
 // ---------- каркас с перелистыванием ----------
 
-export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
-  const [n, setN] = useState(0);
+export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario, initialPage = null }) {
+  const [n, setN] = useState(initialPage);
+  const [contents, setContents] = useState(false);
   const touch = useRef(null);
 
   // Historia получает tgId для синка личного словаря — остальные листы
@@ -595,7 +596,7 @@ export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
   const HOJAS = [
     { id: "ruso", label: "🇷🇺", node: <CapituloRuso /> },
     { id: "hoja", label: "📜", node: <HojaJefe /> },
-    { id: "historia", label: "📖", node: <Historia tgId={tgId} onOpenDiccionario={onOpenDiccionario} /> },
+    { id: "historia", label: "📖", node: <Historia tgId={tgId} onOpenDiccionario={onOpenDiccionario ? () => onOpenDiccionario(2) : undefined} /> },
     { id: "pregunta", label: "🕵️", node: <JefePregunta /> },
     { id: "robadas", label: "⏳", node: <Robadas /> },
     { id: "habla", label: "🎭", node: <HablaPorOtro /> },
@@ -611,6 +612,47 @@ export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
 
   const go = (d) => setN(x => Math.max(0, Math.min(total - 1, x + d)));
 
+  const chapterNames = [
+    "Начало истории — на русском", "Записка Шефа", "Читать и слушать историю",
+    "Вопросы Шефа", "Украденные слова", "Скажи за героя", "Загадки-улики",
+    "Досье глаголов", "Узнай сцену по цитате", "Закон королевства",
+  ];
+  const entry = (index, subtitle) => (
+    <button key={index} type="button" className={`ci-entry${index === 2 ? " ci-entry-course" : ""}`}
+      onClick={() => { setContents(false); setN(index); }}>
+      <span className="ci-entry-copy"><strong>{chapterNames[index]}</strong>{subtitle && <small>{subtitle}</small>}</span>
+      <span aria-hidden="true">›</span>
+    </button>
+  );
+
+  if (n === null) return (
+    <main className="ci-panel">
+      <button type="button" className="ci-back" onClick={onBack}>‹ В Город</button>
+      <p className="ci-kicker">Живая книга</p>
+      <h1>Разговорный тренажёр</h1>
+      <h2 className="ci-section-title">Королевство Карамели · Глава 1</h2>
+      {entry(2, "La historia · fragmento 1")}
+      <h2 className="ci-section-title">Задания по истории</h2>
+      <div className="ci-stack">
+        {entry(3, "El Jefe pregunta")}
+        {entry(4, "Palabras robadas")}
+        {entry(5, "Habla por otro")}
+      </div>
+      <h2 className="ci-section-title">Все 10 листов главы</h2>
+      <div className="ci-stack">
+        <button type="button" className="ci-entry" aria-expanded={contents} onClick={() => setContents((visible) => !visible)}>
+          <span className="ci-entry-copy"><strong>Оглавление</strong><small>Записка, загадки, досье и другие листы</small></span>
+          <span aria-hidden="true">{contents ? "−" : "+"}</span>
+        </button>
+        {contents && HOJAS.map((sheet, index) => entry(index))}
+        {onOpenDiccionario && <button type="button" className="ci-entry" onClick={() => onOpenDiccionario(null)}>
+          <span className="ci-entry-copy"><strong>Мой словарь</strong><small>Сохранённые конструкции из истории</small></span>
+          <span aria-hidden="true">›</span>
+        </button>}
+      </div>
+    </main>
+  );
+
   return (
     <div style={wrap}
       onTouchStart={e => { touch.current = e.touches[0].clientX; }}
@@ -621,6 +663,7 @@ export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
         touch.current = null;
       }}>
       <div style={maxw}>
+        <button type="button" className="ci-back" onClick={() => setN(null)}>‹ К оглавлению</button>
         {/* шапка */}
         <div style={{ textAlign: "center", marginBottom: 14 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1.2px", color: C.goldDeep, textTransform: "uppercase" }}>El Reino del Caramelo</div>
@@ -643,8 +686,8 @@ export default function LibroVivo({ onBack, tgId = null, onOpenDiccionario }) {
 
         {/* навигация */}
         <div style={{ display: "flex", gap: 10, justifyContent: "space-between" }}>
-          <button onClick={() => (n === 0 ? onBack && onBack() : go(-1))} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.gold}`, color: C.goldDeep, borderRadius: 12, padding: "13px 10px", fontSize: 15.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>
-            ← {n === 0 ? "Выход" : "Назад"}
+          <button onClick={() => (n === 0 ? setN(null) : go(-1))} style={{ flex: 1, background: C.card, border: `1.5px solid ${C.gold}`, color: C.goldDeep, borderRadius: 12, padding: "13px 10px", fontSize: 15.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>
+            ← {n === 0 ? "К оглавлению" : "Назад"}
           </button>
           {n < total - 1 ? (
             <button onClick={() => go(1)} style={{ flex: 1.4, background: C.raspberry, border: "none", color: "#fff", borderRadius: 12, padding: "13px 10px", fontSize: 15.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, boxShadow: "0 3px 12px rgba(168,27,62,0.25)" }}>

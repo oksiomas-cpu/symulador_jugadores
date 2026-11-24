@@ -4,6 +4,7 @@ import MiDiccionario from "./MiDiccionario.jsx";
 import Gramatica from "./Gramatica.jsx";
 import ActionCapsules, { ActionCapsulesTrainer } from "./ActionCapsules.jsx";
 import "./rumbos.css";
+import "./ciudad-interface.css";
 import "./libro-vivo-entry.css";
 import {
   QUESTIONS3, CATS3, TARGETS3, verbByKey3, fullAnswer3, BANK_NOTES3,
@@ -684,6 +685,12 @@ const CHANNEL_URL = "https://t.me/es_consabor";        // бесплатный �
 const CLUB_URL = "https://t.me/oksanamaikova_spanish"; // посадочная клуба
 const BOT_URL = "https://t.me/DonVerbobot";
 const MISSION_TICKET_API = "https://don-verbo.vercel.app/api/mission-ticket";
+
+const GAME_ENTRIES = [
+  { pack: PACKS.cap1, art: "cata", title: "La Cata a Ciegas", subtitle: "Глаголы на -AR" },
+  { pack: PACKS.cap2, art: "perfecto", title: "Pretérito Perfecto Compuesto", subtitle: "Уровень 2 · A1–A2" },
+  { pack: PACKS.cap3, art: "huellas", title: "El Caso de las Tres Huellas", subtitle: "Три прошедших времени" },
+];
 
 const DOMINO_MISSIONS = [
   {
@@ -1925,8 +1932,10 @@ function LiveGame({ onHome }) {
   // --- Экран входа в комнату ---
   if (!conn && !skipConn) {
     return (
-      <div style={wrap}>
-        <Header subtitle="🎮 Живая игра · вход" />
+      <div className="ci-panel">
+        <button type="button" className="ci-back" onClick={onHome}>‹ В Город</button>
+        <p className="ci-kicker">Живая игра</p>
+        <h1>Пульт игрока</h1>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ background: C.card, borderRadius: 14, border: `1px solid ${C.line}`, boxShadow: "0 2px 10px rgba(61,43,31,0.08)", padding: "18px 18px 16px" }}>
             <div style={{ fontSize: 17, fontWeight: 800, color: C.raspberry, marginBottom: 6 }}>Код игры</div>
@@ -2166,22 +2175,8 @@ function RumbosBook() {
   const s = RUMBOS_SLIDES[slide];
   if (!open) {
     return (
-      <section className="rumbos-book-wrap" aria-label="Книга Архитектура живой речи">
-        <div className="rumbos-book-shadow" />
-        <button className="rumbos-book-cover" onClick={() => setOpen(true)}>
-          <span className="rumbos-book-spine" aria-hidden="true" />
-          <span className="rumbos-book-filigree rumbos-book-filigree-top" aria-hidden="true" />
-          <span className="rumbos-book-filigree rumbos-book-filigree-bottom" aria-hidden="true" />
-          <span className="rumbos-book-network" aria-hidden="true" />
-          <span className="rumbos-book-kicker">Авторский метод</span>
-          <span className="rumbos-book-title">Архитектура<br/>живой речи</span>
-          <span className="rumbos-book-subtitle">Campo de acción</span>
-          <span className="rumbos-book-rule" aria-hidden="true" />
-          <span className="rumbos-book-description">От внутреннего импульса — к действию, участникам и результату</span>
-          <span className="rumbos-book-motto">Un impulso. Ocho rumbos.</span>
-          <span className="rumbos-book-open">Открыть книгу</span>
-        </button>
-      </section>
+      <CompactEntry title="Книга метода" subtitle={`Открыть оглавление · ${n} страниц`}
+        action="›" onClick={() => setOpen(true)} course />
     );
   }
   return (
@@ -2233,49 +2228,22 @@ const RUMBOS_FRAMES = RUMBOS_LESSONS.flatMap((l) => [
   { key: `${l.id}-hw`, number: l.number, title: l.title, src: l.homeworkSrc, label: `Урок ${l.number} · Домашняя работа` },
 ]);
 
-function LessonsCarousel({ onOpen }) {
-  const trackRef = useRef(null);
-  const [active, setActive] = useState(0);
-  const go = (i) => {
-    const el = trackRef.current; if (!el) return;
-    const n = Math.max(0, Math.min(RUMBOS_LESSONS.length - 1, i));
-    el.scrollTo({ left: n * el.clientWidth, behavior: "smooth" });
-  };
-  const onScroll = () => {
-    const el = trackRef.current; if (!el || !el.clientWidth) return;
-    setActive(Math.round(el.scrollLeft / el.clientWidth));
-  };
+function RumbosLessonList({ onOpen }) {
   return (
-    <section className="rumbos-practice rumbos-lessons" aria-label="Уроки архитектуры живой речи" aria-roledescription="карусель">
-      <div className="rumbos-section-kicker">Уроки</div>
-      <div className="rumbos-lessons-track" ref={trackRef} onScroll={onScroll}>
-        {RUMBOS_LESSONS.map((lesson, i) => (
-          <div key={lesson.id} className="rumbos-lessons-slide" role="group" aria-roledescription="слайд" aria-label={`${lesson.ordinal}, ${i + 1} из ${RUMBOS_LESSONS.length}`}>
-            <h2>{lesson.ordinal}</h2>
-            <p>Слушай, повторяй и собирай речь шаг за шагом.</p>
-            <button className="rumbos-practice-card is-primary" aria-label={`Урок ${lesson.number}. ${lesson.title}`} onClick={() => onOpen(lesson.id)}>
-              <span className="rumbos-practice-number">{String(lesson.number).padStart(2, "0")}</span>
-              <span><strong>{lesson.title}</strong><small>{lesson.subtitle}</small></span>
-              <b>›</b>
-            </button>
-            <button className="rumbos-practice-card" aria-label={`Домашняя работа к уроку ${lesson.number}`} onClick={() => onOpen(`${lesson.id}-hw`)}>
-              <span className="rumbos-practice-number">ДЗ</span>
-              <span><strong>Домашняя работа</strong><small>Монолог для повторения вслух</small></span>
-              <b>›</b>
-            </button>
+    <details className="ci-lesson-list">
+      <summary>
+        <strong>Уроки и домашние задания</strong>
+        <small>{RUMBOS_LESSONS.map(({ title }) => title).join(" · ")}</small>
+      </summary>
+      <div className="ci-stack">
+        {RUMBOS_LESSONS.map(({ id, number, title, subtitle }) => (
+          <div key={id} className="ci-stack">
+            <CompactEntry title={title} subtitle={subtitle} action="›" onClick={() => onOpen(id)} />
+            <CompactEntry title={`Домашняя работа · урок ${number}`} action="›" onClick={() => onOpen(`${id}-hw`)} />
           </div>
         ))}
       </div>
-      {RUMBOS_LESSONS.length > 1 && (
-        <div className="rumbos-lessons-nav">
-          <button type="button" aria-label="Предыдущий урок" disabled={active === 0} onClick={() => go(active - 1)}>‹</button>
-          <div className="rumbos-lessons-dots" aria-hidden="true">
-            {RUMBOS_LESSONS.map((l, i) => <span key={l.id} className={i === active ? "is-active" : ""} />)}
-          </div>
-          <button type="button" aria-label="Следующий урок" disabled={active === RUMBOS_LESSONS.length - 1} onClick={() => go(active + 1)}>›</button>
-        </div>
-      )}
-    </section>
+    </details>
   );
 }
 
@@ -2286,11 +2254,6 @@ function LessonsCarousel({ onOpen }) {
 // следующие модули — только клуб. Прогресс и словарь модуля — за телеграм-аккаунтом
 // (api/course.js); localStorage рамки — кэш на устройстве. Домой ничего не задаётся.
 // ============================================================
-const KURS_TILE = {
-  background: `linear-gradient(135deg, #FFFDF8 0%, ${C.cream} 60%, ${C.goldSoft} 100%)`,
-  border: `2px solid ${C.gold}`, borderRadius: 18, padding: "18px 18px 16px", marginBottom: 18,
-  boxShadow: "0 6px 20px rgba(61,43,31,0.10)", cursor: "pointer", fontFamily: SERIF,
-};
 const KURS_MODULES = [
   { id: "m1", number: "1", title: "Ser, estar, hay", subtitle: "Кто я, где я и что вокруг", src: "/kurs/m1/index.html", storageKey: "kv_r1_ser_estar_v1", gate: "verbos1" },
   { id: "m2", number: "2", title: "Mis verbos: -ar, -er, -ir", subtitle: "Что я делаю: форма «я» у любого глагола", gate: "verbosAll", soon: true },
@@ -2387,66 +2350,54 @@ const KURS_FLOORS = [
   { n: 2, windows: [null, null, null, null] },
   { n: 1, windows: ["m1", "m2", null, null] },
 ];
-function KursWindow({ num, mod, isOpen, onClick }) {
-  const lit = !!(mod && isOpen && !mod.soon);
-  return (
-    <button type="button" onClick={onClick} aria-label={lit ? `Модуль ${num}. ${mod.title}. Открыть.` : `Модуль ${num}. Закрыт.`}
-      style={{ position: "relative", flex: 1, minWidth: 0, aspectRatio: "3 / 4", borderRadius: "40% 40% 6px 6px / 22% 22% 6px 6px", cursor: "pointer", padding: 4,
-        border: `2px solid ${lit ? C.gold : "#CDBB97"}`,
-        background: lit ? `radial-gradient(circle at 50% 35%, #FFF6D8 0%, ${C.goldSoft} 55%, ${C.gold} 100%)` : "linear-gradient(180deg, #5B4A3C 0%, #3D2B1F 100%)",
-        boxShadow: lit ? "0 0 18px rgba(201,162,75,0.75), inset 0 0 10px rgba(255,255,255,0.7)" : "inset 0 2px 6px rgba(0,0,0,0.35)",
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, fontFamily: SERIF }}>
-      <span style={{ fontSize: 20, fontWeight: 800, color: lit ? C.raspberryDeep : "#BFAE8E", lineHeight: 1 }}>{num}</span>
-      <span style={{ fontSize: 10.5, color: lit ? C.ink : "#BFAE8E", lineHeight: 1.15, textAlign: "center" }}>{lit ? mod.title : "🔒"}</span>
-    </button>
-  );
-}
 function CursoVerbos({ acc, status, tgId, onBack }) {
   const [open, setOpen] = useState(null);
   const [locked, setLocked] = useState(false);
   const [note, setNote] = useState("");
   if (locked) return <LockedScreen status={status} onBack={() => setLocked(false)} />;
   if (open) return <KursModuleFrame mod={open} tgId={tgId} onClose={() => setOpen(null)} />;
-  let num = 0;
-  const numbered = KURS_FLOORS.slice().reverse().map((f) => f.windows.map(() => ++num)).reverse();
-  return (<div style={wrap}><div style={maxw}>
-    <Header title="Curso de verbos" />
-    <section aria-label="Здание курса глаголов" style={{ margin: "6px auto 0", maxWidth: 420, fontFamily: SERIF }}>
-      {/* крыша */}
-      <div aria-hidden="true" style={{ height: 52, margin: "0 -6px", background: `linear-gradient(180deg, ${C.goldSoft} 0%, ${C.gold} 100%)`, clipPath: "polygon(50% 0, 100% 100%, 0 100%)" }} />
-      <div style={{ background: `linear-gradient(180deg, ${C.cream} 0%, ${C.creamDeep} 100%)`, border: `2px solid ${C.gold}`, borderRadius: "6px 6px 0 0", padding: "12px 14px 6px", boxShadow: "0 8px 24px rgba(61,43,31,0.12)" }}>
-        <div style={{ textAlign: "center", fontSize: 11.5, letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Дон Вербо</div>
-        <div style={{ textAlign: "center", fontSize: 22, fontWeight: 800, color: C.ink, margin: "2px 0 10px" }}>Глагольная вселенная</div>
-        {KURS_FLOORS.map((f, fi) => (
-          <div key={f.n} style={{ borderTop: `1px solid ${C.line}`, padding: "10px 0 12px" }}>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 6, letterSpacing: "0.06em" }}>Этаж {f.n}</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              {f.windows.map((id, wi) => {
-                const mod = id ? KURS_MODULES.find((m) => m.id === id) : null;
-                const isOpen = !!(mod && acc[mod.gate]);
-                const n = numbered[fi][wi];
-                const onClick = () => {
-                  if (mod && isOpen && !mod.soon) { setNote(""); setOpen(mod); return; }
-                  if (mod && !isOpen) { setLocked(true); return; }
-                  setNote(`Окно ${n} пока закрыто: модуль готовится.`);
-                };
-                return <KursWindow key={wi} num={n} mod={mod} isOpen={isOpen} onClick={onClick} />;
-              })}
+  const first = KURS_MODULES[0];
+  function openModule(module, number) {
+    if (module && !acc[module.gate]) { setLocked(true); return; }
+    if (module && !module.soon) { setNote(""); setOpen(module); return; }
+    setNote(`Окно ${number} пока закрыто: модуль готовится.`);
+  }
+  return (
+    <main className="ci-panel">
+      <button type="button" className="ci-back" onClick={onBack}>‹ В Город</button>
+      <header className="ci-course-heading"><span>Курс глаголов</span><h1>Глагольная вселенная</h1></header>
+      <div className="ci-module-start">
+        <div><small>Модуль 1</small><h2>{first.title}</h2><small>{first.subtitle}</small></div>
+        <button type="button" className="ci-primary" onClick={() => openModule(first, 1)}>Войти в задание →</button>
+      </div>
+      <section className="ci-facade" aria-label="Здание курса глаголов">
+        <div className="ci-pediment" aria-hidden="true" />
+        <div className="ci-wall">
+          {KURS_FLOORS.map(({ n, windows }) => (
+            <div key={n} className="ci-floor">
+              <div className="ci-floor-label">Этаж {n}</div>
+              <div className="ci-windows">
+                {windows.map((id, index) => {
+                  const number = (n - 1) * 4 + index + 1;
+                  const module = KURS_MODULES.find((item) => item.id === id);
+                  const available = Boolean(module && acc[module.gate] && !module.soon);
+                  return (
+                    <button type="button" className={`ci-window${available ? " is-open" : ""}`} key={number}
+                      aria-label={available ? `Модуль ${number}. ${module.title}. Открыть` : `Модуль ${number}. Закрыт`}
+                      onClick={() => openModule(module, number)}>
+                      <span>{number}</span>
+                      {available ? <small>Открыто</small> : <span className="ci-lock" aria-hidden="true" />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      {/* вход */}
-      <div style={{ background: C.creamDeep, border: `2px solid ${C.gold}`, borderTop: "none", borderRadius: "0 0 8px 8px", display: "flex", justifyContent: "center", padding: "0 0 0" }}>
-        <div style={{ width: 54, height: 40, background: C.raspberryDeep, borderRadius: "27px 27px 0 0", marginTop: -2 }} />
-      </div>
-      <p aria-live="polite" style={{ ...pHint, textAlign: "center", minHeight: 22, marginTop: 12 }}>{note || "Светится открытое окно — нажми на него."}</p>
-    </section>
-    <div style={{ textAlign: "center", marginTop: 6 }}>
-      <button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад в Город</button>
-    </div>
-    <Footer />
-  </div></div>);
+          ))}
+        </div>
+      </section>
+      <p className="ci-note" aria-live="polite">{note || "Остальные модули готовятся"}</p>
+    </main>
+  );
 }
 
 function LessonFrame({ lesson, onClose }) {
@@ -2580,6 +2531,7 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   const isCapOne = pack.id === "cap1";
   const isCapThree = pack.id === "cap3";
   const isCapFour = pack.id === "cap4";
+  const game = GAME_ENTRIES.find(({ pack: entryPack }) => entryPack.id === pack.id);
   const maya = isCapFour ? MAYA4_FULL : pack.id === "cap3" ? MAYA3 : isCapOne ? MAYA : MAYA2;
   const [ru, setRu] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -2602,20 +2554,22 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
   const openLesson = RUMBOS_FRAMES.find((l) => l.key === lessonId) || null;
 
   return (
-    <div style={wrap}><div style={maxw}>
-      <Header subtitle={`${pack.emoji} Capítulo ${pack.num} · ${pack.grammar}`} />
+    <div className="ci-panel"><div>
+      {onBack && <button type="button" className="ci-back" onClick={onBack}>‹ В Город</button>}
+      <p className="ci-kicker">{isCapFour ? "Campo de acción" : `Уровень ${pack.num} · A1–A2`}</p>
+      <h1>{isCapFour ? "Архитектура живой речи" : game.title}</h1>
       {openLesson && <LessonFrame lesson={openLesson} onClose={() => setLessonId(null)} />}
       {isCapFour && intrusoOpen && <IntrusoTrainer onClose={() => setIntrusoOpen(false)} />}
-
-      {onBack && (
-        <div style={{ textAlign: "center", marginBottom: 14 }}>
-          <button onClick={onBack} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontFamily: SERIF }}>← Выбрать другую главу</button>
+      {!isCapFour && <div className="ci-game-intro">
+        <div className="ci-game-art" aria-hidden="true" style={{ backgroundImage: `url(/ui/game-card-${game.art}.webp)` }} />
+        <div>
+          <button type="button" className="ci-primary" onClick={onEnter}>Тренировать роли →</button>
+          <small>Detective · Canon · Fantasía</small>
         </div>
-      )}
-
+      </div>}
       {isCapFour && <RumbosBook />}
 
-      {isCapFour && <LessonsCarousel onOpen={setLessonId} />}
+      {isCapFour && <RumbosLessonList onOpen={setLessonId} />}
 
       {isCapFour && (
         <section className="rumbos-practice" aria-label="Практика архитектуры живой речи">
@@ -2751,11 +2705,6 @@ function ChapterWelcome({ pack, onEnter, onDiario, onPerfecto, onImperfecto, onP
       </div>
       )}
       </div>
-
-      {/* ГЛАВНАЯ КНОПКА */}
-      {!isCapFour && <button onClick={onEnter} style={{ width: "100%", background: C.raspberry, color: "#fff", border: "none", borderRadius: 16, padding: "17px", fontSize: 18, fontWeight: 800, fontFamily: SERIF, cursor: "pointer", boxShadow: `0 4px 16px rgba(168,27,62,.22)`, marginBottom: 16 }}>
-        Тренировать роли →
-      </button>}
 
       <Footer />
 
@@ -2894,6 +2843,8 @@ export default function SimuladorJugador() {
   const [showCapsules, setShowCapsules] = useState(false);
   const [showActionTrainer, setShowActionTrainer] = useState(false);
   const [dominoMission, setDominoMission] = useState(null);
+  const [showMissions, setShowMissions] = useState(false);
+  const [libroPage, setLibroPage] = useState(null);
   const [capsuleGrammar, setCapsuleGrammar] = useState(null);
 
   // Выбранная игра (картридж). null → показываем меню выбора главы.
@@ -2960,8 +2911,9 @@ export default function SimuladorJugador() {
     return <ConjTrainer startVerb={deepVerb} onScore={p => addScore("diario", p)} onBack={() => setDeepVerb(null)} />;
   }
   if (showTour) return <Tour onDone={() => setShowTour(false)} />;
-  if (showLibro) return <LibroVivo tgId={tgId} onBack={() => setShowLibro(false)} onOpenDiccionario={() => { setShowLibro(false); setShowDiccionario(true); }} />;
-  if (showDiccionario) return <MiDiccionario tgId={tgId} onBack={() => setShowDiccionario(false)} />;
+  if (showDiccionario) return <MiDiccionario tgId={tgId} onBack={() => setShowDiccionario(false)} onOpenLibro={() => { setLibroPage(2); setShowDiccionario(false); setShowLibro(true); }} />;
+  if (showLibro) return <LibroVivo tgId={tgId} initialPage={libroPage} onBack={() => setShowLibro(false)}
+    onOpenDiccionario={(page) => { setLibroPage(page); setShowDiccionario(true); }} />;
   if (showKurs) return <CursoVerbos acc={acc} status={access.status} tgId={tgId || kursPreviewId()} onBack={() => setShowKurs(false)} />;
   if (showGramatica) return <Gramatica onBack={() => setShowGramatica(false)} />;
   if (showCapsules) return <ActionCapsules onPracticeGrammar={setCapsuleGrammar} tgId={tg.current?.id || null} onBack={() => setShowCapsules(false)} />;
@@ -2971,11 +2923,11 @@ export default function SimuladorJugador() {
     acc={acc} status={access.status}
     onPick={(p) => { setPack(p); setEntered(true); }}
     onLive={() => { setRole("live"); setEntered(true); }}
-    onLibro={() => setShowLibro(true)}
+    onLibro={() => { setLibroPage(null); setShowLibro(true); }}
     onDiccionario={() => setShowDiccionario(true)}
-    onGramatica={() => setShowGramatica(true)}
     onKurs={() => setShowKurs(true)}
     onDomino={setDominoMission}
+    showMissions={showMissions} onShowMissions={setShowMissions}
     onTour={() => setShowTour(true)}
   />;
   if (role === "live") return <LiveGame onHome={() => { setRole(null); setEntered(false); }} />;
@@ -3020,26 +2972,25 @@ function DominoMission({ mission, onBack }) {
   );
 }
 
-function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGramatica, onKurs, onDomino, onTour }) {
+function CompactEntry({ title, subtitle, action = "ABRIR", symbol, art, course, onClick, disabled }) {
+  return (
+    <button type="button" className={`ci-entry${course ? " ci-entry-course" : ""}`} onClick={onClick} disabled={disabled}>
+      {art || symbol ? <span className="ci-entry-art" aria-hidden="true" style={art ? { backgroundImage: `url(${art})` } : undefined}>{symbol}</span> : null}
+      <span className="ci-entry-copy"><strong>{title}</strong>{subtitle && <small>{subtitle}</small>}</span>
+      <span className="ci-entry-action" >{action}</span>
+    </button>
+  );
+}
+
+function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onKurs, onDomino, onTour, showMissions, onShowMissions }) {
   const [locked, setLocked] = useState(null);
-  const [dominoSlide, setDominoSlide] = useState(0);
   const [dominoLoading, setDominoLoading] = useState(false);
-  const dominoTouchStart = useRef(null);
   const toClub = ["trial1", "trial2", "trialVerbo", "trialCafe"].includes(status);
   const ctaUrl = toClub ? CLUB_URL : CHANNEL_URL;
   const ctaLabel = toClub ? "🏛 Войти в клуб" : "📡 Открытый канал";
 
-  function showDominoSlide(index) {
-    const next = Math.max(0, Math.min(DOMINO_MISSIONS.length - 1, index));
-    setDominoSlide(next);
-  }
-
-  function finishDominoSwipe(event) {
-    if (dominoTouchStart.current === null) return;
-    const distance = event.changedTouches[0].clientX - dominoTouchStart.current;
-    dominoTouchStart.current = null;
-    if (Math.abs(distance) < 45) return;
-    showDominoSlide(dominoSlide + (distance < 0 ? 1 : -1));
+  function gate(open, title, onOpen) {
+    return open ? onOpen : () => setLocked(title);
   }
 
   async function openDomino(mission) {
@@ -3065,188 +3016,57 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
     }
   }
 
-  const activeDominoMission = DOMINO_MISSIONS[dominoSlide];
-  const activeDominoOpen = activeDominoMission.id === "desayunar" ? acc.cafe : status === "club";
-
-  // Обёртка карточки: открыта → свой onClick; закрыта → витрина замка.
-  function Gate({ open, title, onOpen, children }) {
-    if (open) return <div onClick={onOpen}>{children}</div>;
-    return (
-      <div style={{ position: "relative" }} onClick={() => setLocked(title)}>
-        <div style={{ filter: "grayscale(0.9)", opacity: 0.5, pointerEvents: "none" }}>{children}</div>
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-          <div style={{ background: "rgba(255,255,255,0.94)", border: `1.5px solid ${C.gold}`, borderRadius: 12, padding: "9px 15px", fontSize: 13, fontWeight: 800, color: C.goldDeep, fontFamily: SERIF, textAlign: "center", boxShadow: "0 4px 14px rgba(61,43,31,0.18)" }}>
-            🔒 Открывается жителям Города
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  const [breakfast, lunch] = DOMINO_MISSIONS;
   return (
-    <div style={wrap} className="ciudad-home-shell"><div style={maxw} className="ciudad-home-content">
-      <Header subtitle="Bienvenido · добро пожаловать" />
-
-      <p style={{ ...pHint, textAlign: "center", marginBottom: 22 }}>
-        Выбери уровень, который тренируешь, или подключайся к живой игре:
-      </p>
-
-      {/* Libro Vivo — живая книга */}
-      <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
-      <div className="libro-vivo-entry">
-        <img
-          className="libro-vivo-entry-device"
-          src="/ui/libro-vivo-reader.webp"
-          alt=""
-          aria-hidden="true"
-        />
-        <div className="libro-vivo-entry-screen">
-          <div className="libro-vivo-entry-kicker">Живая книга</div>
-          <div className="libro-vivo-entry-title">Разговорный тренажёр</div>
-          <div className="libro-vivo-entry-subtitle">Испанский в контексте живой истории</div>
-          <div className="libro-vivo-entry-actions">Читай · слушай · пересказывай · говори с героями</div>
-          <button
-            type="button"
-            className="libro-vivo-entry-open"
-            onClick={(event) => {
-              event.stopPropagation();
-              onLibro();
-            }}
-          >
-            Войти в историю
-          </button>
-        </div>
-      </div>
-      </Gate>
-
-      {/* Rumbos con Don Verbo — Архитектура живой речи / Campo de acción, отдельно от нумерованных уровней */}
-      <Gate open={acc.cap4} title="Архитектура живой речи" onOpen={() => onPick(PACKS.cap4)}>
-      <div className="rumbos-entry-cover">
-        <span className="rumbos-entry-spine" aria-hidden="true" />
-        <span className="rumbos-entry-network" aria-hidden="true" />
-        <div className="rumbos-entry-kicker">Авторский метод</div>
-        <div className="rumbos-entry-title">Архитектура живой речи</div>
-        <div className="rumbos-entry-subtitle">Campo de acción</div>
-        <div className="rumbos-entry-description">{PACKS.cap4.desc}</div>
-        <div className="rumbos-entry-motto">Un impulso. Ocho rumbos.</div>
-      </div>
-      </Gate>
-
-      {/* Домино живой речи — горизонтальная серия самостоятельных миссий */}
-      <Gate open={acc.cafe} title="Домино живой речи" onOpen={undefined}>
-        <section className="domino-carousel" aria-label="Домино живой речи. Выбор миссии.">
-          <div
-            className="domino-carousel-viewport"
-            onTouchStart={(event) => { dominoTouchStart.current = event.changedTouches[0].clientX; }}
-            onTouchEnd={finishDominoSwipe}
-          >
-            <article
-              key={activeDominoMission.id}
-              className={`cafe-domino-entry domino-carousel-card${activeDominoOpen ? "" : " is-locked"}`}
-              role="button"
-              aria-label={`Домино живой речи. Миссия ${activeDominoMission.number}. ${activeDominoMission.roomLabel}. ${activeDominoOpen ? "Открыть игру." : "Открывается участникам клуба."}`}
-              onClick={() => openDomino(activeDominoMission)}
-            >
-              <span className={`cafe-domino-entry-image cafe-domino-entry-image--${activeDominoMission.art}`} aria-hidden="true" />
-              <span className="cafe-domino-entry-copy">
-                <span className="cafe-domino-entry-kicker">МИССИЯ {activeDominoMission.number} · {activeDominoMission.label}</span>
-                <span className="cafe-domino-entry-title">Домино живой речи</span>
-                <span className="cafe-domino-entry-subtitle">{activeDominoMission.subtitle}</span>
-              </span>
-              <button
-                type="button"
-                className="cafe-domino-entry-open"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  openDomino(activeDominoMission);
-                }}
-              >
-                {activeDominoOpen ? "Войти в миссию" : "Только для клуба"}
-              </button>
-            </article>
+    <main className="ci-panel">
+      {showMissions ? (
+        <>
+          <button type="button" className="ci-back" onClick={() => onShowMissions(false)}>‹ В Город</button>
+          <h1>Домино живой речи</h1>
+          <img className="ci-domino-art" src="/ui/domino-breakfast.jpg" alt="" />
+          <div className="ci-stack">
+            <CompactEntry title={breakfast.roomLabel} subtitle={breakfast.subtitle}
+              action={!acc.cafe ? "Закрыто" : dominoLoading ? "Загрузка…" : "Начать миссию"}
+              onClick={() => openDomino(breakfast)} disabled={dominoLoading} course />
+            <CompactEntry title={lunch.roomLabel} subtitle={lunch.subtitle}
+              action={status === "club" ? "Начать миссию" : "Закрыто"}
+              onClick={() => openDomino(lunch)} disabled={dominoLoading} />
           </div>
-          <nav className="domino-carousel-nav" aria-label="Переключить миссию">
-            <button type="button" aria-label="Предыдущая миссия" onClick={() => showDominoSlide(dominoSlide - 1)} disabled={dominoSlide === 0}>‹</button>
-            <span className="domino-carousel-dots">
-              {DOMINO_MISSIONS.map((mission, index) => (
-                <button
-                  key={mission.id}
-                  type="button"
-                  className={index === dominoSlide ? "is-active" : ""}
-                  aria-label={`Показать миссию ${mission.number}: ${mission.roomLabel}`}
-                  aria-current={index === dominoSlide ? "true" : undefined}
-                  onClick={() => showDominoSlide(index)}
-                />
-              ))}
-            </span>
-            <span className="domino-carousel-hint">смахни</span>
-            <button type="button" aria-label="Следующая миссия" onClick={() => showDominoSlide(dominoSlide + 1)} disabled={dominoSlide === DOMINO_MISSIONS.length - 1}>›</button>
-          </nav>
-        </section>
-      </Gate>
-
-      <div className="ciudad-home-divider" />
-
-      {/* Пульт игрока — главный вход в живую Zoom-игру */}
-      <Gate open={acc.live} title="Пульт игрока" onOpen={onLive}>
-        <div className="player-control-entry" role="button" aria-label="Пульт игрока. Открыть живую игру.">
-          <span className="player-control-entry-kicker">ЖИВАЯ ИГРА</span>
-          <span className="player-control-entry-title">ПУЛЬТ ИГРОКА</span>
-        </div>
-      </Gate>
-
-      {/* Игровые карты — утверждённая горизонтальная серия Ciudad */}
-      {[
-        { pack: PACKS.cap1, art: "cata", label: "La Cata a Ciegas", level: "УРОВЕНЬ 1 · A1–A2", descriptor: "ГЛАГОЛЫ НА -AR" },
-        { pack: PACKS.cap2, art: "perfecto", label: "Pretérito Perfecto Compuesto", level: "УРОВЕНЬ 2 · A1–A2", descriptor: "" },
-        { pack: PACKS.cap3, art: "huellas", label: "El Caso de las Tres Huellas", level: "УРОВЕНЬ 3 · A1–A2", descriptor: "ТРИ ПРОШЕДШИХ ВРЕМЕНИ" },
-      ].map(({ pack: gamePack, art, label, level, descriptor }) => (
-        <Gate key={gamePack.id} open={acc[gamePack.id]} title={`Nivel ${gamePack.num}`} onOpen={() => onPick(gamePack)}>
-          <div
-            className={`ciudad-game-card ciudad-game-card--${art}`}
-            role="button"
-            aria-label={`${level}. ${label}. ${descriptor || ""} Открыть игру.`}
-          >
-            <span className="ciudad-game-card-sr">{level}. {label}. {descriptor}. Открыть игру.</span>
-            <span className="ciudad-game-card-level" aria-hidden="true">{level}</span>
-            {descriptor && <span className="ciudad-game-card-descriptor" aria-hidden="true">{descriptor}</span>}
-            <span className="ciudad-game-card-action" aria-hidden="true">ABRIR</span>
+        </>
+      ) : (
+        <>
+          <header className="ci-home-top">
+            <h1>La Ciudad de los Sentidos</h1>
+            <button type="button" className="ci-quiet" onClick={gate(acc.libro, "Мой словарь", onDiccionario)}>{!acc.libro && "🔒 "}Мой словарь</button>
+          </header>
+          <h2 className="ci-section-title">Тренировки</h2>
+          <div className="ci-stack">
+            <CompactEntry title="Разговорный тренажёр" subtitle="Живая книга" symbol="▤" action={acc.libro ? "ABRIR" : "Закрыто"}
+              onClick={gate(acc.libro, "Живая книга", onLibro)} />
+            <CompactEntry title="Архитектура живой речи" subtitle="Речевые действия" symbol="◈" action={acc.cap4 ? "ABRIR" : "Закрыто"}
+              onClick={gate(acc.cap4, "Архитектура живой речи", () => onPick(PACKS.cap4))} />
+            <CompactEntry title="Домино живой речи" subtitle="Разговорные миссии" symbol="⠿" action={acc.cafe ? "ABRIR" : "Закрыто"}
+              onClick={gate(acc.cafe, "Домино живой речи", () => onShowMissions(true))} />
+            <CompactEntry title="Глагольная вселенная" subtitle="Курс глаголов" symbol="Ⅴ" course action={acc.verbos1 || acc.verbosAll ? "Войти в курс" : "Закрыто"}
+              onClick={gate(acc.verbos1 || acc.verbosAll, "Курс глаголов", onKurs)} />
           </div>
-        </Gate>
-      ))}
-
-      {/* Курс глаголов (Оксана 24.11.2026): стоит на месте «Грамматики глаголов», грамматика с главной убрана.
-          Пока открыт только клубу; для новых подписчиков (Пропуск) решим отдельно. */}
-      <Gate open={acc.verbos1 || acc.verbosAll} title="Курс глаголов" onOpen={onKurs}>
-        <div role="button" aria-label="Курс глаголов. Войти в здание." style={KURS_TILE}>
-          <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Курс глаголов · Дон Вербо</div>
-          <div style={{ fontSize: 23, fontWeight: 800, color: C.ink, margin: "6px 0 4px", lineHeight: 1.2 }}>Глагольная вселенная</div>
-          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Войти в здание ›</div>
-        </div>
-      </Gate>
-
-      {/* Мой словарь — компактный вход в общий личный словарь игрока.
-          Гейт acc.libro и логика словаря остаются прежними. */}
-      <Gate open={acc.libro} title="Мой словарь" onOpen={onDiccionario}>
-        <div className="diccionario-entry-plaque" role="button" aria-label="Мой словарь. Открыть личный список слов.">
-          <span className="diccionario-entry-plaque-title">Мой словарь</span>
-          <span className="diccionario-entry-plaque-arrow" aria-hidden="true">›</span>
-        </div>
-      </Gate>
-      <div className="ciudad-rules-link-wrap" style={{ textAlign: "center", marginTop: 18 }}>
-        <button className="ciudad-rules-link" onClick={onTour} style={{ background: "none", border: "none", color: C.goldDeep, fontSize: 13.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF, textDecoration: "underline" }}>
-          Правила игры — посмотреть снова
-        </button>
-      </div>
-
-      <Footer />
-
-      {/* CTA замка */}
+          <h2 className="ci-section-title">Игры</h2>
+          <div className="ci-stack">
+            <CompactEntry title="Пульт игрока" subtitle="Живая игра" symbol="▷" action={acc.live ? "ABRIR" : "Закрыто"}
+              onClick={gate(acc.live, "Пульт игрока", onLive)} />
+            {GAME_ENTRIES.map(({ pack, art, title, subtitle }) => (
+              <CompactEntry key={pack.id} title={title} subtitle={subtitle} art={`/ui/game-card-${art}.webp`}
+                action={acc[pack.id] ? "ABRIR" : "Закрыто"} onClick={gate(acc[pack.id], `Nivel ${pack.num}`, () => onPick(pack))} />
+            ))}
+          </div>
+          <div className="ci-home-rules"><button type="button" className="ci-back" onClick={onTour}>Правила игры</button></div>
+        </>
+      )}
       <Sheet open={!!locked} onClose={() => setLocked(null)} title={locked ? `🔒 ${locked}` : ""}>
-        <p style={{ fontSize: 15, lineHeight: 1.7, margin: "0 0 16px" }}>{toClub ? "Эта часть Города открыта участникам клуба — там весь уровень, книга целиком и живые игры." : "Эта часть Города открывается жителям. Начни с Пропуска: осмотрись и попробуй, дальше двери откроются сами."}</p>
+        <p>{toClub ? "Эта часть Города открыта участникам клуба — там весь уровень, книга целиком и живые игры." : "Эта часть Города открывается жителям. Начни с Пропуска: осмотрись и попробуй, дальше двери откроются сами."}</p>
         <button onClick={() => openTg(ctaUrl)} style={CTA_BTN}>{ctaLabel}</button>
       </Sheet>
-    </div></div>
+    </main>
   );
 }
 
