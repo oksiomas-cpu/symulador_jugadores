@@ -2366,7 +2366,7 @@ function KursModuleFrame({ mod, tgId, onClose }) {
     <div role="dialog" aria-label={`Курс глаголов · Модуль ${mod.number}`} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", flexDirection: "column", background: "#fbf8f1" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
         <button type="button" onClick={onClose} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>
-          ← К модулям
+          ← К зданию
         </button>
         <div style={{ fontSize: 13.5, color: C.inkSoft, fontFamily: SERIF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           Модуль {mod.number} · {mod.title}
@@ -2379,32 +2379,70 @@ function KursModuleFrame({ mod, tgId, onClose }) {
   );
 }
 
+// Здание курса (Оксана 24.11.2026): на главной только вход «Глагольная вселенная»; внутри — здание:
+// этажи снизу вверх, на этаже окна-модули 1, 2, 3, 4. Открыт модуль 1 (пробный), остальные окна закрыты до выхода.
+// Названия этажей Оксана даст позже, поэтому пока «Этаж 1, 2, 3».
+const KURS_FLOORS = [
+  { n: 3, windows: [null, null, null, null] },
+  { n: 2, windows: [null, null, null, null] },
+  { n: 1, windows: ["m1", "m2", null, null] },
+];
+function KursWindow({ num, mod, isOpen, onClick }) {
+  const lit = !!(mod && isOpen && !mod.soon);
+  return (
+    <button type="button" onClick={onClick} aria-label={lit ? `Модуль ${num}. ${mod.title}. Открыть.` : `Модуль ${num}. Закрыт.`}
+      style={{ position: "relative", flex: 1, minWidth: 0, aspectRatio: "3 / 4", borderRadius: "40% 40% 6px 6px / 22% 22% 6px 6px", cursor: "pointer", padding: 4,
+        border: `2px solid ${lit ? C.gold : "#CDBB97"}`,
+        background: lit ? `radial-gradient(circle at 50% 35%, #FFF6D8 0%, ${C.goldSoft} 55%, ${C.gold} 100%)` : "linear-gradient(180deg, #5B4A3C 0%, #3D2B1F 100%)",
+        boxShadow: lit ? "0 0 18px rgba(201,162,75,0.75), inset 0 0 10px rgba(255,255,255,0.7)" : "inset 0 2px 6px rgba(0,0,0,0.35)",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, fontFamily: SERIF }}>
+      <span style={{ fontSize: 20, fontWeight: 800, color: lit ? C.raspberryDeep : "#BFAE8E", lineHeight: 1 }}>{num}</span>
+      <span style={{ fontSize: 10.5, color: lit ? C.ink : "#BFAE8E", lineHeight: 1.15, textAlign: "center" }}>{lit ? mod.title : "🔒"}</span>
+    </button>
+  );
+}
 function CursoVerbos({ acc, status, tgId, onBack }) {
   const [open, setOpen] = useState(null);
   const [locked, setLocked] = useState(false);
+  const [note, setNote] = useState("");
   if (locked) return <LockedScreen status={status} onBack={() => setLocked(false)} />;
   if (open) return <KursModuleFrame mod={open} tgId={tgId} onClose={() => setOpen(null)} />;
+  let num = 0;
+  const numbered = KURS_FLOORS.slice().reverse().map((f) => f.windows.map(() => ++num)).reverse();
   return (<div style={wrap}><div style={maxw}>
     <Header title="Curso de verbos" />
-    {KURS_MODULES.map((m) => {
-      const isOpen = !!acc[m.gate];
-      const onClick = () => { if (!isOpen) setLocked(true); else if (!m.soon) setOpen(m); };
-      return (
-        <div key={m.id} role="button" onClick={onClick} aria-label={`Модуль ${m.number}. ${m.title}.`}
-          style={{ position: "relative", background: C.card, border: `2px solid ${isOpen && !m.soon ? C.gold : C.line}`, borderRadius: 16, padding: "16px 16px 14px", marginBottom: 12, cursor: m.soon && isOpen ? "default" : "pointer", fontFamily: SERIF }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, filter: isOpen ? "none" : "grayscale(0.9)", opacity: isOpen ? 1 : 0.55 }}>
-            <div style={{ flex: "none", width: 44, height: 44, borderRadius: "50%", background: C.goldSoft, color: C.goldDeep, fontSize: 20, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{m.number}</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: C.ink }}>{m.title}</div>
-              <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.45 }}>{m.subtitle}</div>
+    <section aria-label="Здание курса глаголов" style={{ margin: "6px auto 0", maxWidth: 420, fontFamily: SERIF }}>
+      {/* крыша */}
+      <div aria-hidden="true" style={{ height: 52, margin: "0 -6px", background: `linear-gradient(180deg, ${C.goldSoft} 0%, ${C.gold} 100%)`, clipPath: "polygon(50% 0, 100% 100%, 0 100%)" }} />
+      <div style={{ background: `linear-gradient(180deg, ${C.cream} 0%, ${C.creamDeep} 100%)`, border: `2px solid ${C.gold}`, borderRadius: "6px 6px 0 0", padding: "12px 14px 6px", boxShadow: "0 8px 24px rgba(61,43,31,0.12)" }}>
+        <div style={{ textAlign: "center", fontSize: 11.5, letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Дон Вербо</div>
+        <div style={{ textAlign: "center", fontSize: 22, fontWeight: 800, color: C.ink, margin: "2px 0 10px" }}>Глагольная вселенная</div>
+        {KURS_FLOORS.map((f, fi) => (
+          <div key={f.n} style={{ borderTop: `1px solid ${C.line}`, padding: "10px 0 12px" }}>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 6, letterSpacing: "0.06em" }}>Этаж {f.n}</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              {f.windows.map((id, wi) => {
+                const mod = id ? KURS_MODULES.find((m) => m.id === id) : null;
+                const isOpen = !!(mod && acc[mod.gate]);
+                const n = numbered[fi][wi];
+                const onClick = () => {
+                  if (mod && isOpen && !mod.soon) { setNote(""); setOpen(mod); return; }
+                  if (mod && !isOpen) { setLocked(true); return; }
+                  setNote(`Окно ${n} пока закрыто: модуль готовится.`);
+                };
+                return <KursWindow key={wi} num={n} mod={mod} isOpen={isOpen} onClick={onClick} />;
+              })}
             </div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: isOpen ? C.raspberry : C.inkSoft, whiteSpace: "nowrap" }}>{!isOpen ? "🔒" : m.soon ? "Скоро" : "›"}</div>
           </div>
-          {!isOpen && <div style={{ marginTop: 10, fontSize: 13, fontWeight: 800, color: C.goldDeep, textAlign: "center" }}>🔒 Открывается жителям Города</div>}
-        </div>
-      );
-    })}
-    <div style={{ textAlign: "center", marginTop: 14 }}>
+        ))}
+      </div>
+      {/* вход */}
+      <div style={{ background: C.creamDeep, border: `2px solid ${C.gold}`, borderTop: "none", borderRadius: "0 0 8px 8px", display: "flex", justifyContent: "center", padding: "0 0 0" }}>
+        <div style={{ width: 54, height: 40, background: C.raspberryDeep, borderRadius: "27px 27px 0 0", marginTop: -2 }} />
+      </div>
+      <p aria-live="polite" style={{ ...pHint, textAlign: "center", minHeight: 22, marginTop: 12 }}>{note || "Светится открытое окно — нажми на него."}</p>
+    </section>
+    <div style={{ textAlign: "center", marginTop: 6 }}>
       <button onClick={onBack} style={{ background: "none", border: "none", color: C.inkSoft, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: SERIF }}>← Назад в Город</button>
     </div>
     <Footer />
@@ -3180,11 +3218,10 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
       {/* Курс глаголов (Оксана 24.11.2026): стоит на месте «Грамматики глаголов», грамматика с главной убрана.
           Пока открыт только клубу; для новых подписчиков (Пропуск) решим отдельно. */}
       <Gate open={acc.verbos1 || acc.verbosAll} title="Курс глаголов" onOpen={onKurs}>
-        <div role="button" aria-label="Курс глаголов. Открыть модули." style={KURS_TILE}>
+        <div role="button" aria-label="Курс глаголов. Войти в здание." style={KURS_TILE}>
           <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Курс глаголов · Дон Вербо</div>
           <div style={{ fontSize: 23, fontWeight: 800, color: C.ink, margin: "6px 0 4px", lineHeight: 1.2 }}>Глагольная вселенная</div>
-          <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5 }}>Модуль 1 · Ser, estar, hay — кто я, где я и что вокруг</div>
-          <div style={{ marginTop: 12, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Открыть ›</div>
+          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Войти в здание ›</div>
         </div>
       </Gate>
 
