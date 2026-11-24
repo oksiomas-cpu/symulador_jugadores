@@ -17,10 +17,8 @@ const C = {
   raspberry: "#A81B3E", line: "#E6D6B8",
 };
 const SERIF = "Georgia, 'Iowan Old Style', 'Times New Roman', serif";
-const wrap = { minHeight: "100vh", background: `radial-gradient(120% 80% at 50% 0%, ${C.cream} 0%, ${C.creamDeep} 100%)`, fontFamily: SERIF, color: C.ink, padding: "18px 14px 40px", boxSizing: "border-box" };
-const maxw = { maxWidth: 560, margin: "0 auto" };
 
-export default function MiDiccionario({ onBack, tgId = null }) {
+export default function MiDiccionario({ onBack, onOpenLibro, tgId = null }) {
   const [items, setItems] = useState(() => readDictionaryLocal());
   const [loading, setLoading] = useState(!!tgId);
 
@@ -53,17 +51,16 @@ export default function MiDiccionario({ onBack, tgId = null }) {
   const sorted = [...items].sort((a, b) => (b.addedAt || "").localeCompare(a.addedAt || ""));
 
   return (
-    <div style={wrap}>
-      <div style={maxw}>
+    <main className="ci-panel">
+      <div>
+        <button type="button" className="ci-back" onClick={onBack}>‹ Назад</button>
         <div style={{ textAlign: "center", marginBottom: 18 }}>
           <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1.2px", color: C.goldDeep, textTransform: "uppercase" }}>Libro Vivo</div>
           <div style={{ fontSize: 24, fontWeight: 800, fontFamily: SERIF, color: C.raspberry }}>📓 Мой словарь</div>
           <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 2 }}>
             {sorted.length ? `${sorted.length} ${sorted.length === 1 ? "конструкция" : "конструкций"}` : "пока пусто"}
           </div>
-          <button type="button" disabled style={{ display: "inline-block", marginTop: 12, background: C.creamDeep, border: `1.5px solid ${C.line}`, color: C.inkSoft, borderRadius: 12, padding: "10px 16px", fontSize: 13.5, fontWeight: 700, fontFamily: SERIF, cursor: "not-allowed", opacity: 0.75 }}>
-            🎮 Тренировка слов (скоро)
-          </button>
+
         </div>
 
         {loading && (
@@ -98,10 +95,8 @@ export default function MiDiccionario({ onBack, tgId = null }) {
           </div>
         )}
 
-        <button onClick={onBack} style={{ display: "block", width: "100%", marginTop: 22, background: C.card, border: `1.5px solid ${C.gold}`, color: C.goldDeep, borderRadius: 12, padding: "13px 10px", fontSize: 15.5, fontWeight: 700, cursor: "pointer", fontFamily: SERIF }}>
-          ← Назад
-        </button>
+        {onOpenLibro && <button type="button" className="ci-quiet ci-dictionary-link" onClick={onOpenLibro}>К истории в Libro Vivo →</button>}
       </div>
-    </div>
+    </main>
   );
 }
