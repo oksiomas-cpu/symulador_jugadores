@@ -2279,6 +2279,7 @@ async function courseCall(payload) {
 
 function KursModuleFrame({ mod, tgId, onClose }) {
   const [ready, setReady] = useState(false);
+  const moduleFrame = useRef(null);
   const pending = useRef(null);
   const timer = useRef(null);
 
@@ -2305,6 +2306,15 @@ function KursModuleFrame({ mod, tgId, onClose }) {
     return () => { clearTimeout(guard); };
   }, [mod.id, tgId]);
 
+  useEffect(() => {
+    function onModuleClose(event) {
+      if (event.origin !== window.location.origin || event.source !== moduleFrame.current?.contentWindow) return;
+      if (event.data?.kurs === mod.id && event.data.action === "close") onClose();
+    }
+    window.addEventListener("message", onModuleClose);
+    return () => window.removeEventListener("message", onModuleClose);
+  }, [mod.id, onClose]);
+
   // Каждое сохранение в модуле → в облако (с задержкой, чтобы не слать на каждый клик).
   useEffect(() => {
     if (!tgId) return undefined;
@@ -2327,16 +2337,16 @@ function KursModuleFrame({ mod, tgId, onClose }) {
 
   return (
     <div role="dialog" aria-label={`Курс глаголов · Модуль ${mod.number}`} style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", flexDirection: "column", background: "#fbf8f1" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
+      {!ready && <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: `1px solid ${C.line}`, background: C.card, flex: "none" }}>
         <button type="button" onClick={onClose} style={{ background: "none", border: `1.5px solid ${C.gold}`, color: C.goldDeep, fontSize: 13.5, fontWeight: 600, borderRadius: 10, padding: "7px 14px", cursor: "pointer", fontFamily: SERIF }}>
           ← К зданию
         </button>
         <div style={{ fontSize: 13.5, color: C.inkSoft, fontFamily: SERIF, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           Модуль {mod.number} · {mod.title}
         </div>
-      </div>
+      </div>}
       {ready
-        ? <iframe title={`Модуль ${mod.number} · ${mod.title}`} src={mod.src} allow="autoplay" style={{ flex: 1, width: "100%", border: "none", background: "#fbf8f1" }} />
+        ? <iframe ref={moduleFrame} title={`Модуль ${mod.number} · ${mod.title}`} src={mod.src} allow="autoplay" style={{ flex: 1, minHeight: 0, width: "100%", border: "none", background: "#fbf8f1" }} />
         : <p style={{ ...pHint, textAlign: "center", marginTop: 40 }}>Открываю твой блокнот…</p>}
     </div>
   );
