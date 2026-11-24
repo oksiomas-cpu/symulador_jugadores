@@ -730,7 +730,7 @@ async function fetchAccess(tgId) {
 //   libro — Живая книга;
 //   gramatica — раздел «Грамматика» (меню); live — Пульт живой игры;
 //   presente/perfecto — дрилл темы по deep-link из капсул Дона;
-//   verbos1 — модуль 1 курса глаголов (клуб и Пропуск, решение Оксаны 23.11.2026);
+//   verbos1 — модуль 1 курса глаголов (24.11.2026: пока только клуб; Пропуск — позже, решение Оксаны);
 //   verbosAll — все модули курса глаголов (только клуб: курс продаётся подпиской клуба).
 //   Пропуск «глагол» и «Кафе» курс пока не открывают (видно с замком).
 function accessMap(status) {
@@ -738,9 +738,9 @@ function accessMap(status) {
     case "club":
       return { cap1: true, cap2: true, cap3: true, cap4: true, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: true, verbos1: true, verbosAll: true };
     case "trial2":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false, verbos1: true, verbosAll: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: true, live: true, presente: true, perfecto: false, verbos1: false, verbosAll: false };
     case "trial1":
-      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false, verbos1: true, verbosAll: false };
+      return { cap1: true, cap2: false, cap3: false, cap4: false, cafe: true, libro: true, gramatica: false, live: false, presente: true, perfecto: false, verbos1: false, verbosAll: false };
     case "trialVerbo":
       // Триал «глагол» (задача 3d34c9eb6e0081e7974fdf6777591492): ТОЛЬКО Архитектура
       // живой речи (капсулы операторов) + Пульт игрока — без игр и без остальных разделов.
@@ -3053,16 +3053,6 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
         Выбери уровень, который тренируешь, или подключайся к живой игре:
       </p>
 
-      {/* Курс глаголов — вход с эфира TikTok: Пропуск → модуль 1; остальные модули — клубу */}
-      <Gate open={acc.verbos1 || acc.verbosAll} title="Курс глаголов" onOpen={onKurs}>
-        <div role="button" aria-label="Курс глаголов. Открыть модули." style={KURS_TILE}>
-          <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Курс глаголов · Дон Вербо</div>
-          <div style={{ fontSize: 23, fontWeight: 800, color: C.ink, margin: "6px 0 4px", lineHeight: 1.2 }}>Глагольная вселенная</div>
-          <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5 }}>Модуль 1 · Ser, estar, hay — кто я, где я и что вокруг</div>
-          <div style={{ marginTop: 12, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Открыть ›</div>
-        </div>
-      </Gate>
-
       {/* Libro Vivo — живая книга */}
       <Gate open={acc.libro} title="Живая книга" onOpen={onLibro}>
       <div className="libro-vivo-entry">
@@ -3187,13 +3177,14 @@ function LevelPicker({ acc, status, onPick, onLive, onLibro, onDiccionario, onGr
         </Gate>
       ))}
 
-      {/* Gramática — плоская книга-справочник */}
-      <Gate open={acc.gramatica} title="Грамматика глаголов" onOpen={onGramatica}>
-        <div className="gramatica-entry-cover" role="button" aria-label="Грамматика глаголов. Открыть справочник.">
-          <span className="gramatica-entry-jewel" aria-hidden="true" />
-          <span className="gramatica-entry-clasp gramatica-entry-clasp--top" aria-hidden="true" />
-          <span className="gramatica-entry-clasp gramatica-entry-clasp--bottom" aria-hidden="true" />
-          <div className="gramatica-entry-title">ГРАММАТИКА<br />ГЛАГОЛОВ</div>
+      {/* Курс глаголов (Оксана 24.11.2026): стоит на месте «Грамматики глаголов», грамматика с главной убрана.
+          Пока открыт только клубу; для новых подписчиков (Пропуск) решим отдельно. */}
+      <Gate open={acc.verbos1 || acc.verbosAll} title="Курс глаголов" onOpen={onKurs}>
+        <div role="button" aria-label="Курс глаголов. Открыть модули." style={KURS_TILE}>
+          <div style={{ fontSize: 12, letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDeep, fontWeight: 700 }}>Курс глаголов · Дон Вербо</div>
+          <div style={{ fontSize: 23, fontWeight: 800, color: C.ink, margin: "6px 0 4px", lineHeight: 1.2 }}>Глагольная вселенная</div>
+          <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.5 }}>Модуль 1 · Ser, estar, hay — кто я, где я и что вокруг</div>
+          <div style={{ marginTop: 12, fontSize: 14, fontWeight: 700, color: C.raspberry }}>Открыть ›</div>
         </div>
       </Gate>
 
