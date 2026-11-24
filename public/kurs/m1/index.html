@@ -210,6 +210,11 @@ tr.yo td{background:var(--theory-soft);font-weight:800}
 .pl-bar i{display:block;height:100%;width:0;background:var(--talk)}
 .pl-r{border:0;background:transparent;color:var(--muted);font:700 12px var(--body);padding:4px 6px;border-radius:999px;cursor:pointer}
 .pl-r[aria-pressed="true"]{background:var(--lilac-soft);color:var(--ink)}
+/* Entry screen shared with the palette of the City. */
+.course-intro { border-color: #cdb688; background: linear-gradient(125deg,#fffdf3,#f2f4e7); }
+.course-intro .btn.gold { background: #275948; border-color: #275948; color: #fffdf5; }
+.course-intro .steps-list { margin-bottom: 14px; }
+.course-intro details > summary { cursor: pointer; color: #386151; margin-top: 12px; }
 </style>
 </head>
 <body>
@@ -598,8 +603,8 @@ function render(){
      '<div class="row"><button class="btn ghost small" data-open="toc">Содержание</button><button class="btn ghost small" data-open="chuleta">Chuleta</button><button class="btn ghost small" data-open="dict">Mi diccionario ('+S.dict.length+')</button></div></div>';
   const X=stats();
   h+='<div class="stats"><span class="stat" title="Puntos: respuestas correctas a la primera">✦ <b>'+X.pts+'</b> puntos</span><span class="stat" title="Pasos de práctica terminados">★ <b>'+X.stars+'</b> estrellas</span><button class="stat" data-open="cuaderno" style="cursor:pointer" title="Sellos de Don Verbo">◉ <b>'+X.seals+'</b> de '+BOXES.length+' sellos · Mi cuaderno dorado</button></div>';
-  h+=pathHtml();
   const st=STEPS[S.step];
+  if(st.type!=="i")h+=pathHtml();
   h+= st.type==="i"?introHtml(): st.type==="r"?resultsHtml(): st.type==="x"?chapterHtml(): st.type==="h"?talkHtml(st): st.type==="t"?theoryHtml(st): practiceHtml(st);
   h+=navHtml();
   app.innerHTML=h; window.scrollTo(0,_y); syncPl();
@@ -639,22 +644,21 @@ function whereHtml(done){
 }
 function introHtml(){
   const K=counts();
-  let h='<section class="card theory showcase">';
-  h+=whereHtml(false);
-  h+='<span class="kicker">Curso de verbos · Módulo 1</span>';
-  h+='<h2 class="cover">Ser, estar, hay</h2>';
+  let h='<section class="card theory showcase course-intro">';
   h+='<p class="lede">Кто я, где я и что вокруг. Первые фразы о себе — внутри истории, а не в учебнике.</p>';
+  h+='<button class="btn gold" data-act="introdone">Empezamos →</button>';
+  h+='<details><summary>Об истории и заданиях</summary>';
   h+='<hr class="rule">';
   h+='<p>Ночью, на своей кухне, ты начинаешь учить испанский — и кухня становится карамельной. Дон Вербо, хранитель глаголов, задаёт тебе вопросы. Ты отвечаешь о себе — сначала робко, потом свободно.</p>';
   h+='<div class="numbers">'+[[K.steps,'шагов'],[K.pr,'тренажёров'],[K.ex,'заданий'],[K.tq,'вопросов в разговоре']].map(f=>'<div><b>'+f[0]+'</b><span>'+f[1]+'</span></div>').join('')+'</div>';
-  h+='<h3>Как устроен модуль</h3><ol class="steps-list">'+
+  h+='</details><h3>Содержание модуля</h3><ol class="steps-list">'+
     ['<b>Глава истории.</b> Читаешь, нажимаешь на незнакомые слова и собираешь свой словарь.',
      '<b>Отработка.</b> Soy — кто я. Estoy — где я и как я. Hay — что есть вокруг. Потом всё вместе: в фразах, в цельных текстах и в поиске ошибок.',
      '<b>Разговор с Доном Вербо.</b> Та же история, абзац за абзацем: он спрашивает, ты отвечаешь вслух.',
      '<b>Итоги.</b> Твои результаты и подсказка, что стоит повторить.'].map(x=>'<li><span>'+x+'</span></li>').join('')+'</ol>';
   h+='<h3>После модуля</h3><p class="quote">Ты говоришь, кто ты и какой ты, где ты и как себя чувствуешь, что вокруг — и больше не путаешь soy, estoy и hay.</p>';
   h+='<p class="note">Объяснения на русском, история и задания на испанском. Вверху выбери «Soy ella» или «Soy él» — окончания подстроятся под тебя. Шпаргалка и словарь открываются с любого шага. За ответы — баллы, звёзды и печати Дона Вербо в твоём золотом блокноте.</p>';
-  h+='<button class="btn gold" data-act="introdone">Empezamos →</button></section>';
+  h+='</section>';
   return h;
 }
 function resultsHtml(){
