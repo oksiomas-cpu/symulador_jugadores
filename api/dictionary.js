@@ -107,6 +107,27 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, items: await readItems(tgId) });
     }
 
+    // Игры словаря (решение Оксаны 25.11.2026): состояние слова в играх — новое / учу / знаю.
+    // Ключ dictstats:{tgId} — HASH, поле = слово (как показано в словаре), значение = JSON {st, g, bad, due}.
+    if (action === "stats") {
+      const flat = await cmd(["HGETALL", `dictstats:${tgId}`]);
+      const stats = {};
+      if (Array.isArray(flat)) for (let i = 0; i < flat.length; i += 2) { try { stats[flat[i]] = JSON.parse(flat[i + 1]); } catch (_) {} }
+      return res.status(200).json({ ok: true, stats });
+    }
+    if (action === "stat") {
+      const list = Array.isArray(body.items) ? body.items.slice(0, 64) : [];
+      const args = ["HSET", `dictstats:${tgId}`];
+      for (const it of list) {
+        const k = String(it && it.k || "").slice(0, 60);
+        if (!k || !it.v || typeof it.v !== "object") continue;
+        const v = { st: ["new", "learning", "known"].includes(it.v.st) ? it.v.st : "learning", g: it.v.g && typeof it.v.g === "object" ? it.v.g : {}, bad: Number(it.v.bad) || 0, due: it.v.due || null };
+        args.push(k, JSON.stringify(v));
+      }
+      if (args.length > 2) await cmd(args);
+      return res.status(200).json({ ok: true });
+    }
+
     return res.status(400).json({ error: "Неизвестное действие" });
   } catch (e) {
     return res.status(500).json({ error: String(e.message || e) });
